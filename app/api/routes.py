@@ -235,24 +235,24 @@ def add_profile(rdf_2_ins):
 user_datastore = datastore_cheat
 #security = Security(current_app, user_datastore)
 
-def authorize_user(request):
-    """ Checks if a api key is provided to authorize a user 
+# def authorize_user(request):
+#     """ Checks if a api key is provided to authorize a user 
 
-        param: request is a Flask Request object
-    """
+#         param: request is a Flask Request object
+#     """
     
-    api_key = request.headers.get("X-API-KEY")
+#     api_key = request.headers.get("X-API-KEY")
     
-    if api_key:
+#     if api_key:
         
-        user_id = User.decode_auth_token(api_key)
+#         user_id = User.decode_auth_token(api_key)
         
-        user = User.query.get(int(user_id))
+#         user = User.query.get(int(user_id))
         
-        if user:
-            return user
+#         if user:
+#             return user
     
-    return {"messge" : "No valid token provided"}, 401
+#     return {"messge" : "No valid token provided"}, 401
 
 
 # Create roles, user, SPECIES ETC
@@ -277,7 +277,12 @@ def create_role():
         new_user_url = current_app.config['BASE_URL'] + "users/" + str(u.id)
         newUserRole = "Admin"
         sparql_query = 'PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> INSERT DATA IN GRAPH <' + current_app.config['DEFAULTHGRAPH'] + '> { <' + new_user_url + '> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "' + newUserRole + '"^^xsd:string}'
-        result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], 
+        #                        current_app.config['VIRTUOSO_USER'], 
+        #                        current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(sparql_query, current_app.config['LOCAL_SPARQL'], 
+                        current_app.config['VIRTUOSO_USER'], 
+                        current_app.config['VIRTUOSO_PASS'])
 
     except:
         db.session.rollback()
@@ -2312,9 +2317,9 @@ class SpeciesListAPItypon(Resource):
         # return {"msg": data2send,
         #          "msg2": name}
 
-        result = aux.send_data(data2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        #result = aux.send_data(data2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
         #result = aux.send_data(data2send, 'http://172.19.1.3:8890/DAV/test_folder/data', current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        #result = aux.send_data(data2send, current_app.config['LOCAL_SPARQL'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(data2send, current_app.config['LOCAL_SPARQL'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
 
         # if result.status_code in [200, 201]:
         #     return {"message" : "Species created"}, 201
