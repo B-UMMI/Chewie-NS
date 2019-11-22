@@ -5,7 +5,7 @@
 Docker-compose for the [Nomenclature Server](https://github.com/B-UMMI/Nomenclature_Server) webapp.
 It uses the following docker images: 
 * postgres: `postgres:10`
-* virtuoso: `openlink/virtuoso-opensource-7:7.2.6-r2-gf5e32aa`
+* virtuoso: `openlink/virtuoso-opensource-7:7.2`
 * redis: `redis:5.0.6`  
 * nginx: `nginx:1.17`
 * NS webapp: [this dockerfile](https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/Dockerfile)
