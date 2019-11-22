@@ -1,0 +1,9 @@
+{% extends "security/base.html" %}
+
+{% block content %}
+    <h1>Welcome to the Nomenclature Server, {{ current_user.email }}!</h1>
+    
+    <li><a href="{{ url_for_security('logout') }}">{{ _('Logout') }}</a></li>
+    <li><a href="http://127.0.0.1:5000/NS/api/docs">{{ _('API') }}</a></li>
+{% endblock %}
+
