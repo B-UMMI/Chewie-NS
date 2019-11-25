@@ -9,4 +9,5 @@ __pycache__/
 *~
 .idea/* 
 .directory
-
+virtuoso.*
+virtuoso-temp.*
