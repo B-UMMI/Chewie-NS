@@ -48,18 +48,16 @@ jwt._set_error_handler_callbacks(api)
 def add_locus_schema(new_schema_url, new_locus_url):	
     
     #get number of loci on schema and build the uri based on that number+1
-    result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])),
+    result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                          ('select (COUNT(?parts) as ?count) '
                           'from <{0}>'
                           'where {{ <{1}> typon:hasSchemaPart ?parts. }}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
     
     number_schema_parts = int(result["results"]["bindings"][0]['count']['value'])
     
-    # new_schema_part_url = new_schema_url + "/loci/" + str(number_schema_parts + 1)
     new_schema_part_url = "{0}/loci/{1}".format(new_schema_url, str(number_schema_parts + 1))
     
     #send data to graph
-    
     query2send = ('INSERT DATA IN GRAPH <{0}> '
                   '{{ <{1}> a typon:SchemaPart ; '
                   'typon:index "{2}"^^xsd:int ; '
@@ -71,9 +69,13 @@ def add_locus_schema(new_schema_url, new_locus_url):
                                                               new_schema_url, 
                                                               new_schema_part_url))
     
-    result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+    #result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+    result = aux.send_data(query2send, 
+                           current_app.config['LOCAL_SPARQL'], 
+                           current_app.config['VIRTUOSO_USER'], 
+                           current_app.config['VIRTUOSO_PASS'])
     
-    if result.status_code == 201 :
+    if result.status_code in [200, 201] :
         return {"message" : "Locus sucessfully added to schema"}, 201		
     else:
         return {"message" : "Sum Thing Wong"}, result.status_code
@@ -90,11 +92,10 @@ def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isN
              '?seq a typon:Sequence; typon:nucleotideSequence "{2}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, sequence))
     
     if len(sequence) > 9000:
-        result = aux.send_big_query(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), query)
+        result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
     else:
-        result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), query)
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
 
-    #print(result)
     
     #if sequence exists return the allele uri, if not create new sequence
     try:
@@ -106,18 +107,14 @@ def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isN
     
 
     #get number of alleles for locus
-    result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), 
+    result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                          ('select (COUNT(?alleles) as ?count)'
                          'from <{0}>'
                          'where '
                           '{{ ?alleles typon:isOfLocus <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
     
-    #print(result)
     number_alleles_loci = int(result["results"]["bindings"][0]['count']['value'])
-    #print(number_alleles_loci)
-    # new_allele_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id) + "/alleles/" + str(number_alleles_loci + 1)
     new_allele_url = "{0}loci/{1}/alleles/{2}".format(current_app.config['BASE_URL'], str(loci_id), str(number_alleles_loci + 1))
-    #print(new_allele_url)
     
     #add allele to virtuoso
     if isNewSeq:
@@ -143,8 +140,12 @@ def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isN
                                                                      str(number_alleles_loci+1)
                                                                      ))
 
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-    
+        # result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
+
     #add new link from allele to sequence
     else:
         query2send = ('INSERT DATA IN GRAPH <{0}> '
@@ -165,12 +166,16 @@ def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isN
                                                                     new_seq_url
                                                                     ))
         
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        
+        # result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
+
         #return {"message" : "Sequence was already attributed to a loci/allele"}, 418
 
     #print(result)
-    if result.status_code > 201 :
+    if result.status_code not in [200, 201] :
         return {"message" : "Sum Thing Wong creating sequence 1"}, result.status_code
     else:
         return {"message" : "A new allele has been added to " + new_allele_url}, result.status_code
@@ -180,19 +185,28 @@ def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isN
 @celery.task(time_limit=20)
 def add_profile(rdf_2_ins):
     
-    result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+    # result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+    result = aux.send_data(rdf_2_ins, 
+                           current_app.config['LOCAL_SPARQL'], 
+                           current_app.config['VIRTUOSO_USER'], 
+                           current_app.config['VIRTUOSO_PASS'])
     
     #try to send it a few times if error
     try:
         if result.status_code > 201 :
             time.sleep(2)
-            result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-            if result.status_code > 201 :
-                #print (result)
+            # result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+            result = aux.send_data(rdf_2_ins, 
+                                   current_app.config['LOCAL_SPARQL'], 
+                                   current_app.config['VIRTUOSO_USER'], 
+                                   current_app.config['VIRTUOSO_PASS'])
+
+            if result.status_code not in [200, 201] :
                 return {"message" : "Sum Thing Wong creating profile"}, result.status_code
+            
             else:
                 return True, result.status_code
-                #print(result)
+        
         else:
             return True, result.status_code
     
@@ -200,13 +214,17 @@ def add_profile(rdf_2_ins):
         try:
             if result.status_code > 201 :
                 time.sleep(2)
-                result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-                if result.status_code > 201 :
-                    #print (result)
+                # result = aux.send_data(rdf_2_ins, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+                result = aux.send_data(rdf_2_ins, 
+                                       current_app.config['LOCAL_SPARQL'], 
+                                       current_app.config['VIRTUOSO_USER'], 
+                                       current_app.config['VIRTUOSO_PASS'])
+                
+                if result.status_code not in [200, 201] :
                     return {"message" : "Sum Thing Wong creating profile"}, result.status_code
                 else:
                     return True, result.status_code
-                    #print (result)
+                    
             else:
                 return True, result.status_code
         except Exception as e:
@@ -215,47 +233,12 @@ def add_profile(rdf_2_ins):
         return e, 400
     
 
-
-# Get Virtuoso config
-#current_app.config['BASE_URL'] = current_app.config['BASE_URL']
-
-#current_app.config['DEFAULTHGRAPH'] = current_app.config['DEFAULTHGRAPH']
-#current_app.config['VIRTUOSO_USER'] = current_app.config['VIRTUOSO_USER']
-#current_app.config['VIRTUOSO_PASS'] = current_app.config['VIRTUOSO_PASS']
-#SPARQLWrapper(current_app.config['LOCAL_SPARQL']) = SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL']))
-#current_app.config['URL_SEND_LOCAL_VIRTUOSO'] = current_app.config['URL_SEND_LOCAL_VIRTUOSO']
-
-#current_app.config['UNIPROT_SPARQL'] = SPARQLWrapper(current_app.config['UNIPROT_SPARQL'])
-#current_app.config['DBPEDIA_SPARQL'] = SPARQLWrapper(current_app.config['DBPEDIA_SPARQL'])
-
-#download_folder = current_app.config['DOWNLOAD_FOLDER']
-
-# Setup Flask-Security
-#user_datastore = SQLAlchemyUserDatastore(db, User, Role) 
+# Get datastore from init. 
+# This is cheating and extremely inelegant!!
+# TODO
 user_datastore = datastore_cheat
-#security = Security(current_app, user_datastore)
 
-# def authorize_user(request):
-#     """ Checks if a api key is provided to authorize a user 
-
-#         param: request is a Flask Request object
-#     """
-    
-#     api_key = request.headers.get("X-API-KEY")
-    
-#     if api_key:
-        
-#         user_id = User.decode_auth_token(api_key)
-        
-#         user = User.query.get(int(user_id))
-        
-#         if user:
-#             return user
-    
-#     return {"messge" : "No valid token provided"}, 401
-
-
-# Create roles, user, SPECIES ETC
+# Create a default admin user on Postgres and Virtuoso
 @blueprint.before_app_first_request
 def create_role():
     try:
@@ -265,7 +248,6 @@ def create_role():
         user_datastore.create_role(name="Admin")
         user_datastore.create_role(name="Contributor")
         user_datastore.create_role(name="User")
-        #db.session.commit()
 
         u = user_datastore.create_user(email="test@refns.com", password=hash_password("mega_secret"))
         user_datastore.add_role_to_user(u, "Admin")
@@ -274,67 +256,26 @@ def create_role():
         # user_datastore.add_role_to_user(user, role)
         
         # Send user to Virtuoso
-        new_user_url = current_app.config['BASE_URL'] + "users/" + str(u.id)
+        new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(u.id))
         newUserRole = "Admin"
-        sparql_query = 'PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> INSERT DATA IN GRAPH <' + current_app.config['DEFAULTHGRAPH'] + '> { <' + new_user_url + '> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "' + newUserRole + '"^^xsd:string}'
+        sparql_query = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
+                       'INSERT DATA IN GRAPH <{0}> '
+                       '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "{2}"^^xsd:string}}'.format(current_app.config['DEFAULTHGRAPH'],
+                                                                                                             new_user_url,
+                                                                                                             newUserRole))
+        
         # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], 
         #                        current_app.config['VIRTUOSO_USER'], 
         #                        current_app.config['VIRTUOSO_PASS'])
-        result = aux.send_data(sparql_query, current_app.config['LOCAL_SPARQL'], 
-                        current_app.config['VIRTUOSO_USER'], 
-                        current_app.config['VIRTUOSO_PASS'])
+        
+        result = aux.send_data(sparql_query, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
 
     except:
         db.session.rollback()
         print("Role created already...")
-
-# @user_registered.connect_via(current_app)
-# def user_registered_sighandler(app, user, confirm_token, **extra):
-#     print("User created successfully ")
-#     default_role = user_datastore.find_role("User")
-#     user_datastore.add_role_to_user(user, default_role)
-#     db.session.commit()
-
-    # Send user to Virtuoso
-    # userid = user_datastore.get_user(user.email).id
-    # new_user_url = current_app.config['BASE_URL']+"users/"+str(userid)
-    # newUserRole = "User"
-    # sparql_query = 'INSERT DATA IN GRAPH <' + current_app.config['DEFAULTHGRAPH'] + '> { <'+new_user_url+'> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "' + newUserRole + '"^^xsd:string}'
-    # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-
-    # print(user.id)
-    # userid = user_datastore.get_user(user).id
-    # print(str(userid))
-
-################################################################ Views (html) #####################################################################
-
-# @security.route('/')
-# @security.route('/index')
-# @login_required
-# def index():
-#     return render_template('index.html', title='Home')
-
-# # @app.route('/login')
-# # def login():
-# #     return render_template('security/login.html')
-
-# @security.route('/logout')
-# def logout():
-#     logout_user()
-#     return redirect(url_for('index'))
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if current_user.is_authenticated:
-#         return redirect(url_for('index'))
-#     form = ExtendedRegisterForm()
-#     if form.validate_on_submit():
-#         form_data = form.to_dict()
-#         print(form_data)
-#         flash('Congratulations, you are now a registered user!')
-#         return redirect(url_for('login'))
-#     return render_template('security/register.html', form=form)
-
 
 ######## API ROUTES ##########################################################################
 
@@ -373,16 +314,10 @@ class UserLoginAPI(Resource):
 
         # get the post data
         post_data = request.get_json()
-        #print(post_data)
 
         try:
             # fetch the user data
             user = User.query.filter_by(email=post_data.get('email')).first()
-            #user_role = str(user_roles_t[user.roles[0]])
-            #print(type(str(user.roles[0])))
-            #print(user_roles_dict[str(user.roles[0])])
-            #print(user.email)
-            
             
             if user and verify_password(post_data.get('password'), user.password):
                 # Log user in
@@ -393,18 +328,16 @@ class UserLoginAPI(Resource):
                 security.datastore.commit()
 
                 # Generate token
-                # auth_token = create_access_token(identity=post_data.get('email'))
-                # auth_refresh_token = create_refresh_token(identity=post_data.get('email'))
                 auth_token = create_access_token(identity=user)
                 auth_refresh_token = create_refresh_token(identity=user)
                 if auth_token and auth_refresh_token:
-                    #print(decode_token(auth_token))
                     response_object = {
                         'status': 'success',
                         'message': 'Successfully logged in.',
                         'access_token': auth_token,
                         'refresh_token': auth_refresh_token
                     }
+                    ## Front-end communicating with back-end?
                     #set_access_cookies(jsonify(response_object), auth_token)
                     #set_refresh_cookies(jsonify(response_object), auth_refresh_token)
                     return response_object, 200
@@ -429,17 +362,10 @@ class RefreshToken(Resource):
     """ 
     Refresh token resource 
     """
-    
-    # parser = api.parser()
-    # parser.add_argument('jwt', 
-    #                     type=str,
-    #                     help="Refresh token")
-    
+
     @api.doc(responses={ 200 : "Success"},
              security=["refresh_token"])
-    #@api.expect(refresh_model, validate=True)
     @jwt_refresh_token_required
-    #@w.use_kwargs(api, parser)
     def post(self, **kwargs):
         """ Generates a new access token with a provided and valid refresh token.
         """
@@ -451,8 +377,10 @@ class RefreshToken(Resource):
         # Set the access JWT and CSRF double submit protection cookies
         # in this response
         resp = {'access_token': access_token}
+        
         #resp = {'refresh': True}
         #set_access_cookies(resp, access_token)
+        
         return resp, 200
 
 
@@ -462,7 +390,7 @@ class LogoutAPI(Resource):
     
     @api.doc(responses={ 201: 'OK',
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=['access_token'])
@@ -494,129 +422,8 @@ class LogoutAPI(Resource):
             }
             return response_object, 403
 
-# Login route
-
-# @auth_conf.route("/login")
-# class UserLoginAPI(Resource):
-#     """ 
-#     User login resource 
-#     """
-
-#     @api.doc(responses={ 200 : "Success"})
-#     @api.expect(auth_model, validate=True)
-#     @login_manager.request_loader
-#     def post(self):
-#         """
-#         Log users in and generate token
-#         """
-
-#         # get the post data
-#         post_data = request.get_json()
-
-       
-#         try:
-#             # fetch the user data
-#             user = User.query.filter_by(email=post_data.get('email')).first()
-            
-#             if user and verify_password(post_data.get('password'), user.password):
-#                 # Log user in
-#                 login_user(user)
-                
-#                 # Commit changes because SECURITY_TRACKABLE is True
-#                 #db.session.commit() 
-#                 security.datastore.commit()
-
-#                 # Generate token
-#                 auth_token = user.encode_auth_token(user_id=user.id)
-#                 if auth_token:
-#                     response_object = {
-#                         'status': 'success',
-#                         'message': 'Successfully logged in.',
-#                         'X-API-KEY': auth_token.decode()
-#                     }
-#                     return response_object, 200
-#             else:
-#                 response_object = {
-#                     'status': 'fail',
-#                     'message': 'email or password does not match.'
-#                 }
-#                 return response_object, 401
-
-#         except Exception as e:
-#             print(e)
-#             response_object = {
-#                 'status': 'fail',
-#                 'message': 'Try again'
-#             }
-#             return response_object, 500
-
-
-    # @api.doc('user login')
-    # @api.expect(auth_model, validate=True)
-    # def post(self):
-    #     """Log in a user"""
-        
-    #     # get the post data
-    #     post_data = request.get_json()
-        
-    #     return Auth.login_user(data=post_data)
-
-
-
-    
-# @auth_conf.route("/logout")
-# class LogoutAPI(Resource):
-#     """ Logout resource """
-    
-#     @api.doc(responses={ 201: 'OK',
-#                          400: 'Invalid Argument', 
-#                          500: 'Mapping Key Error', 
-#                          403: 'Unauthorized', 
-#                          401: 'Unauthenticated' },
-#              security=['access_token'])
-#     @jwt_required
-#     def post(self):
-#         """Log out a user"""
-
-#         # get the post data
-#         auth_header = request.headers.get('X-API-KEY')
-
-#         if auth_header:
-#             auth_token = auth_header
-#         else:
-#             auth_token = ''
-#         if auth_token:
-#             resp = User.decode_auth_token(auth_token)
-#             if not isinstance(resp, str):
-#                 # mark the token as blacklisted
-#                 logout_user()
-#                 return save_token(token=auth_token)
-                
-#                 # response_object = {
-#                 #     'status': 'Success',
-#                 #     'message': 'Succesfully logged out'
-#                 # }
-
-#             else:
-#                 response_object = {
-#                     'status': 'fail',
-#                     'message': resp
-#                 }
-#                 return response_object, 401
-#         else:
-#             response_object = {
-#                 'status': 'fail',
-#                 'message': 'Provide a valid auth token.'
-#             }
-#             return response_object, 403
-
-
-
-
-
 # Namespace for User operations
 user_conf = api.namespace('user', description='user related operations')
-
 
 # User models
 user_model = api.model("UserModel", {
@@ -651,45 +458,32 @@ class AllUsers(Resource):
 
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=['access_token'])
     @api.marshal_with(user_model)
-    #@w.token_required
     @w.admin_required
-    #@jwt_required
     def get(self):
         """ Returns a list of users """
-
-        #c_user = authorize_user(request)
-        
-        #if c_user.roles[0].name == "Admin":
         
         users = db.session.query(User).all()
         
         return users, 200
-        
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
 
 
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=['access_token'])
     @api.expect(create_user_model, validate=True)
-    #@w.token_required
     @w.admin_required
     def post(self):
         """ Creates a user (Admin only) """
 
-        ### NEED TO ADD SPARQL QUERY
-        #print(current_user)
-
-        #c_user = authorize_user(request)
+        ### TODO: ADD SPARQL QUERY
 
         # Get post data
         data = request.get_json()
@@ -699,8 +493,6 @@ class AllUsers(Resource):
 
         # Check if user already exists
         us = user_datastore.get_user(email)
-
-        #if c_user.roles[0].name == "Admin":
 
         if us == None:
 
@@ -719,9 +511,6 @@ class AllUsers(Resource):
         else:
             return {"message" : "User already exists, please login."}, 403
         
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
 
 @user_conf.route("/register_user")
 class RegisterUser(Resource):
@@ -729,7 +518,7 @@ class RegisterUser(Resource):
 
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=[])
@@ -737,7 +526,7 @@ class RegisterUser(Resource):
     def post(self):
         """ Registers a user """
 
-        ### NEED TO ADD SPARQL QUERY
+        ### TODO: ADD SPARQL QUERY
        
         # Get post data
         data = request.get_json()
@@ -767,20 +556,25 @@ class RegisterUser(Resource):
             new_user_role = "User"
 
             # Build the new user url
-            #new_user_url = current_app.config['BASE_URL'] + "users/" + str(new_user_id)
             new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(new_user_id))
 
             # Insert new user on Virtuoso
-            #sparql_query = 'INSERT DATA IN GRAPH ' + current_app.config['DEFAULTHGRAPH'] + ' { <' + new_user_url + '> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "' + new_user_role + '"^^xsd:string}'
             sparql_query = ('INSERT DATA IN GRAPH <{0}> '
-                           '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "{2}"^^xsd:string }}'.format(current_app.config['DEFAULTHGRAPH'], new_user_url, new_user_role))
+                           '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "{2}"^^xsd:string }}'.format(current_app.config['DEFAULTHGRAPH'], 
+                                                                                                                  new_user_url, 
+                                                                                                                  new_user_role))
             
-            result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-
-            return {"message" : "User created successfully",
-                    "test": new_user_url,
-                    "test2": current_app.config['BASE_URL'],
-                    "result": result.text}, 201
+            # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+            result = aux.send_data(sparql_query, 
+                                   current_app.config['LOCAL_SPARQL'], 
+                                   current_app.config['VIRTUOSO_USER'], 
+                                   current_app.config['VIRTUOSO_PASS'])
+            
+            if result.status_code in [200, 201]:
+                return {"message" : "User created successfully",}, 201
+            
+            else:
+                return {"message": "Sum Thing Wong"}, 500
 
         else:
             return {"message" : "User already exists, please login."}, 403
@@ -795,39 +589,20 @@ class CurrentUser(Resource):
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=['access_token'])
-    #@api.expect(current_user_model)
     @api.marshal_with(current_user_model)
-    #@w.token_required
-    #@login_required
-    #@w.auth_required(one_of=["Admin", "Contributor", "User"])
     @jwt_required
     def get(self):
         """Returns the current user"""
 
-        #print(current_user)
-
-        #c_user = authorize_user(request)
-
-        #if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        
-            # users = db.session.query(User)\
-            #     .filter(User.id == user.id).first()
-
         current_user = get_jwt_identity()
-        #print(current_user)
-        #print(User.query.get_or_404(current_user))
-
+        
         user = User.query.get_or_404(current_user)
 
         return user, 200
-        
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
 
 
 @user_conf.route("/<int:id>")
@@ -838,47 +613,34 @@ class Users(Resource):
 
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated', 
                          404: 'Not Found' }, 
              params={ 'id': 'Specify the ID associated with the user' },
              security=['access_token'])
     @api.marshal_with(user_model)
-    #@w.token_required
     @w.admin_required
     def get(self, id):
         """Returns the user with the provided id"""
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name == "Admin":
         
         user = User.query.get_or_404(id)
 
         return user, 200
         
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
 
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated', 
                          404: 'Not Found' }, 
              params={ 'id': 'ID of the user to promote' },
              security=['access_token'])
-    # @w.token_required
     @w.admin_required
     def put(self, id):
         """ Promote User """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name == "Admin":
 
         # Get user data
         user = User.query.get_or_404(id)
@@ -894,29 +656,19 @@ class Users(Resource):
         # Commit changes to the database
         db.session.commit()
 
-        #return {"message" : "The user " + str(user.email) + " has been promoted to " + str(promote_to_this_role)}, 200
         return {"message" : "The user {0} has been promoted to {1}".format(str(user.email), str(promote_to_this_role))}, 200
-
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated', 
                          404: 'Not Found' }, 
-             params={ 'id': 'ID of the user to delete' },
+             params={'id': 'ID of the user to delete' },
              security=['access_token'])
-    # @w.token_required
     @w.admin_required
     def delete(self, id):
         """ Delete user """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name == "Admin":
 
         # Get user data
         user = User.query.get_or_404(id)
@@ -928,9 +680,6 @@ class Users(Resource):
         db.session.commit()
 
         return {"message" : "The user {0} has been deleted".format(str(user.email))}, 200
-        
-        # return {"message" : "Unauthorized"}, 403
-
 
 
 ############################################## Loci Routes ##############################################
@@ -979,45 +728,26 @@ class LociList(Resource):
     
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=["access_token"])
     @w.use_kwargs(api, parser)
-    #@jwt_required
     @w.admin_contributor_required
     def get(self, **kwargs):
         """ Get a list of all loci on NS """
 
-        # c_user = authorize_user(request)
-
-        # # get the request data
-        # request_data = request.args
-
-        # # get user and check role
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-        #     #get all loci
-        #     result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])),'select ?locus where { ?locus a typon:Locus .}')
-
-        #     return (result["results"]["bindings"])
-        
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-    
+        # Get list of loci that contain the provided DNA sequence
         try: 
             
+            # Get sequence from request
             sequence = str(request_data["sequence"]).upper()
             
+            # Generate hash
             new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
 
-            #new_seq_url = current_app.config['BASE_URL'] + "sequences/" + str(new_id)
+            # Query virtuoso
             new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1028,7 +758,6 @@ class LociList(Resource):
                                    ' ?locus a typon:Locus; typon:name ?name .}}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url)))
 
             try:
-                #print("return 1")
                 return (result["results"]["bindings"])
             
             except:
@@ -1058,8 +787,6 @@ class LociList(Resource):
 
                             resp = []
 
-                            #print(result)
-
                             for item in result["results"]["bindings"]:
                                 #print(item)
                                 
@@ -1067,7 +794,6 @@ class LociList(Resource):
                                     resp.append(json.dumps(item))
 
                             resp = ','.join(resp)
-                            #print(resp)
 
                             yield '{ "Loci": ['
                             yield resp
@@ -1106,24 +832,16 @@ class LociList(Resource):
     
     @api.doc(responses={201: 'OK', 
                         400: 'Invalid Argument', 
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not found',
                         409: 'Conflict' },
             security=["access_token"])
     @api.expect(new_loci_model)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self):
         """ Add a new locus """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
 
         # get user data
         c_user = get_jwt_identity()
@@ -1140,8 +858,8 @@ class LociList(Resource):
         
         #only admin can do this
         try:
-            #new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
+            
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                   'ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "Admin"^^xsd:string}}'.format(new_user_url))
             
@@ -1154,22 +872,22 @@ class LociList(Resource):
 
         
         #check if already exists locus with that aliases
-        #result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), 'SELECT (str(?name) as ?name) where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
-        #result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), 'ASK where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
+        #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 'SELECT (str(?name) as ?name) where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
+        #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 'ASK where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
         #print(result)
         
         #count number of loci already created for that species, build the new locus uri and send to server
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               ('select (COUNT(?locus) as ?count) '
-                               'from <{0}>'
-                               ' where '
+                               'from <{0}> '
+                               'where '
                                '{{ ?locus a typon:Locus . }}'.format(current_app.config['DEFAULTHGRAPH'])))
 
         number_loci_spec = int(result["results"]["bindings"][0]['count']['value'])
         
         newLocusId = number_loci_spec + 1
         
-        #name will be something like prefix000001.fasta
+        #name will be something like prefix-000001.fasta
         aliases = post_data['prefix'] + "-" + "%06d" % (newLocusId,) + ""
 
         #check if already exists locus with that aliases
@@ -1180,7 +898,6 @@ class LociList(Resource):
         if result['boolean']:
             return {"message" : "Locus already exists"}, 409
 
-        #new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(newLocusId)
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(newLocusId))
         
         #if locus_ori_name then also save the original fasta name
@@ -1188,7 +905,6 @@ class LociList(Resource):
             
             locus_ori_name = post_data["locus_ori_name"]
             
-            # query2send = 'INSERT DATA IN GRAPH ' + current_app.config['DEFAULTHGRAPH'] + ' { <' + new_locus_url + '> a typon:Locus; typon:name "' + aliases + '"^^xsd:string; typon:originalName "' + locus_ori_name + '"^^xsd:string.}'
             query2send = ('INSERT DATA IN GRAPH <{0}> '
                          '{{ <{1}> a typon:Locus; typon:name "{2}"^^xsd:string; typon:originalName "{3}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'],
                                                                                                                                 new_locus_url, 
@@ -1196,20 +912,24 @@ class LociList(Resource):
                                                                                                                                 locus_ori_name))
             
             result = aux.send_data(query2send, 
-                                   current_app.config['URL_SEND_LOCAL_VIRTUOSO'], 
+                                   current_app.config['LOCAL_SPARQL'], 
                                    current_app.config['VIRTUOSO_USER'], 
                                    current_app.config['VIRTUOSO_PASS'])
             
         except:
-            # query2send = 'INSERT DATA IN GRAPH ' + current_app.config['DEFAULTHGRAPH'] + ' { <' + new_locus_url + '> a typon:Locus; typon:name "' + aliases + '"^^xsd:string .}'
             query2send = ('INSERT DATA IN GRAPH <{0}> '
-                          '{{ <{1}> a typon:Locus; typon:name "{2}"^^xsd:string .}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, aliases))
+                          '{{ <{1}> a typon:Locus; typon:name "{2}"^^xsd:string .}}'.format(current_app.config['DEFAULTHGRAPH'], 
+                                                                                            new_locus_url, 
+                                                                                            aliases))
 
-            result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+            result = aux.send_data(query2send, 
+                                   current_app.config['LOCAL_SPARQL'], 
+                                   current_app.config['VIRTUOSO_USER'], 
+                                   current_app.config['VIRTUOSO_PASS'])
         
         # "New locus added at " + new_locus_url + " with the alias: " + aliases
         # "New locus added at {0} with the alias {1}".format(new_locus_url, aliases)
-        if result.status_code == 201 :
+        if result.status_code in [200, 201] :
             return {"message" : "New locus added at {0} with the alias {1}".format(new_locus_url, aliases), 
                     "url" : new_locus_url,
                     "id" : str(newLocusId)}, 201
@@ -1222,29 +942,17 @@ class LociNS(Resource):
     """ Gets a particular locus ID """
 
 
-    @api.doc(responses={ 200: 'OK', 
+    @api.doc(responses={200: 'OK', 
                         400: 'Invalid Argument',
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self, loci_id, **kwargs):
         """ Get a particular locus """
-
-        # c_user = authorize_user(request)
-
-        # # get user and check role
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
         
-        # loci url
-        #new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id)
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
 
         try:
@@ -1275,30 +983,15 @@ class LociNSFastaAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK', 
                         400: 'Invalid Argument', 
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not found' },
             security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self, loci_id):
         """ Gets the FASTA sequence of the alleles from a particular loci from a particular species """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
-        # spec_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
-        # result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])),'ASK where { <' + spec_url + '> a <http://purl.uniprot.org/core/Taxon>}')
-        
-        # if not result['boolean']:
-        #     return {"message" : "Species not found"}, 404
-            
-        # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id)
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
         
         # find all alleles from the locus and return the sequence and id sorted by id
@@ -1312,13 +1005,13 @@ class LociNSFastaAPItypon(Resource):
                               '?sequence typon:nucleotideSequence ?nucSeq. }} '
                               'order by ASC(?allele_id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
         
-        #print(result)
-
         if result["results"]["bindings"] == []:
             return {"message": "No alleles found with the provided loci id."}, 404
         
-        #sometimes virtuoso returns an error "Max row length is exceeded when trying to store a string of" due to the sequences being too
-        #large, if it happens there is a way around
+        # sometimes virtuoso returns an error 
+        # "Max row length is exceeded when trying to store a string of"
+        # due to the sequences being too large,
+        # if it happens there is a way around
         try:
             result["results"]["bindings"]
         
@@ -1338,18 +1031,14 @@ class LociNSFastaAPItypon(Resource):
                 
                 i = 0
                 for seq in result["results"]["bindings"]:
-                    
-                    #~ print(seq)
-                     
+                                         
                     result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                           ('select (str(?nucSeq) as ?nucSeq) '
                                            'from <{0}>'
                                            'where '
                                            '{{<{1}> typon:nucleotideSequence ?nucSeq. }}'.format(current_app.config['DEFAULTHGRAPH'], seq['sequence']['value'])))
-                    
-                    #print(result2)
-                     
-                    realsequence=result2["results"]["bindings"][0]['nucSeq']['value']
+                                         
+                    realsequence = result2["results"]["bindings"][0]['nucSeq']['value']
                     
                     seq['nucSeq']={'value' : str(realsequence)}
                     #seq['nucSeq']['value']=str(realsequence)
@@ -1377,7 +1066,6 @@ class LociNSFastaAPItypon(Resource):
                         yield json.dumps(prev_item) + ']}'
                     
                     r = Response(stream_with_context(generate()), content_type='application/json')
-                    #print(r.data)
                         
                     return Response(stream_with_context(generate()), content_type='application/json')
                     
@@ -1396,9 +1084,7 @@ class LociNSFastaAPItypon(Resource):
                                  '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .'
                                  '?sequence typon:nucleotideSequence ?nucSeq. }} '
                                  'order by ASC(?allele_id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))            
-            
-        #~ return result["results"]["bindings"]
-         
+                     
         try:
             def generate():
                 yield '{"Fasta": ['
@@ -1430,30 +1116,15 @@ class LociNSUniprotAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not found' },
         security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self, loci_id):
         """ Gets Uniprot annotations for a particular loci from a particular species """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
-        # spec_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
-        # result = aux.get_data(SPARQLWrapper(SPARQLWrapper(current_app.config['LOCAL_SPARQL'])), 'ASK where { <' + spec_url + '> a <http://purl.uniprot.org/core/Taxon>}')
-        
-        # if not result['boolean'] :
-        #     return {"message" : "Species not found on Uniprot"}, 404
-            
-        # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id)
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
         
         #get all uniprot labels and URI from all alleles of the selected locus
@@ -1508,28 +1179,19 @@ class LociNSAlleles(Resource):
 
     @api.doc(responses={ 200: 'OK', 
                         400: 'Invalid Argument',
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, loci_id, **kwargs):
         """ Gets all alleles from a particular locus ID """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-        #
+        # Get request data
         request_data = request.args
 
-        # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id)
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
 
         #### ADD SPECIES NAME CHECK WITH UNIPROT QUERY!!!
@@ -1544,6 +1206,7 @@ class LociNSAlleles(Resource):
                      'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
                      'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
                      '{{ ?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(request_data["species_name"]))
+            
             print("searching on uniprot..")
             
             # Check if species exists on uniprot 
@@ -1566,7 +1229,6 @@ class LociNSAlleles(Resource):
             
             if not result_loci['boolean']:
                 return {"message" : "Locus not found"}, 404
-
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                  ('select ?alleles '
@@ -1623,24 +1285,16 @@ class LociNSAlleles(Resource):
 
     @api.doc(responses={ 201: 'OK', 
                         400: 'Invalid Argument', 
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not found',
                         409: 'Conflict' },
             security=["access_token"])
     @api.expect(allele_list_model)
-    #@w.token_required
     @w.admin_required
     def post(self, loci_id):
         """ Add alleles to a loci of a species """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name == "Admin":
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
 
         # get user data
         c_user = get_jwt_identity()   
@@ -1663,7 +1317,6 @@ class LociNSAlleles(Resource):
         print("Enforce a cds: " + str(enforceCDS))
         
         #this is the user uri
-        #new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         # get the taxon id from uniprot, if not found return 404
@@ -1679,12 +1332,12 @@ class LociNSAlleles(Resource):
                      'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
                      'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
                      '{{?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(species_name))
-            #print(query)
+            
             print("searching on uniprot if species exists...")
             
             # Check if species exists on uniprot 
             result_species = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
-            #print(result_species)
+            
             try:
                 url = result_species["results"]["bindings"][0]['taxon']['value']
             except:
@@ -1692,7 +1345,6 @@ class LociNSAlleles(Resource):
 
         
         #check if locus exist (needs to be created before, hence the check)
-        #new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id)
         new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(loci_id))
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                               ('ASK where {{ <{0}> a typon:Locus .}}'.format(new_locus_url)))
@@ -1719,24 +1371,27 @@ class LociNSAlleles(Resource):
                                                                   str(number_alleles_loci + 1))
 
                 query2send = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> a typon:Allele; '
-                      'typon:name "{2}"; '
-                      'typon:sentBy  <{3}> ;'
-                      'typon:isOfLocus <{4}>; '
-                      'typon:dateEntered "{5}"^^xsd:dateTime; '
-                      'typon:id "{6}"^^xsd:integer ; '
-                      'typon:hasSequence <{7}>. '
-                      '<{4}> typon:hasDefinedAllele <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                    new_allele_url,
-                                                                    species_name,
-                                                                    new_user_url,
-                                                                    new_locus_url,
-                                                                    str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
-                                                                    str(number_alleles_loci+1),
-                                                                    sequence_uri
-                                                                    ))
+                              '{{ <{1}> a typon:Allele; '
+                              'typon:name "{2}"; '
+                              'typon:sentBy  <{3}> ;'
+                              'typon:isOfLocus <{4}>; '
+                              'typon:dateEntered "{5}"^^xsd:dateTime; '
+                              'typon:id "{6}"^^xsd:integer ; '
+                              'typon:hasSequence <{7}>. '
+                              '<{4}> typon:hasDefinedAllele <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'],
+                                                                              new_allele_url,
+                                                                              species_name,
+                                                                              new_user_url,
+                                                                              new_locus_url,
+                                                                              str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
+                                                                              str(number_alleles_loci+1),
+                                                                              sequence_uri
+                                                                              ))
         
-                result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+                result = aux.send_data(query2send, 
+                                       current_app.config['LOCAL_SPARQL'], 
+                                       current_app.config['VIRTUOSO_USER'], 
+                                       current_app.config['VIRTUOSO_PASS'])
                 
                 return {"message" : "New allele created with existing sequence"}, 201
 
@@ -1774,7 +1429,9 @@ class LociNSAlleles(Resource):
                  'from <{0}> '
                  'where '
                  '{{ ?alleles typon:isOfLocus <{1}>; typon:hasSequence ?seq. '
-                 '?seq a typon:Sequence; typon:nucleotideSequence "{2}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, sequence))
+                 '?seq a typon:Sequence; typon:nucleotideSequence "{2}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'], 
+                                                                                               new_locus_url, 
+                                                                                               sequence))
         
         if len(sequence) > 9000:
             result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
@@ -1841,8 +1498,6 @@ class LociNSAlleles(Resource):
 
                 add2send2graph = ''
 
-                # if post_data["uniprot_url"] or post_data["uniprot_label"] or post_data["uniprot_sname"]:
-
                 try:
                     uniprot_url = post_data["uniprot_url"]
                     add2send2graph += '; typon:hasUniprotSequence <{0}>'.format(uniprot_url)
@@ -1863,16 +1518,12 @@ class LociNSAlleles(Resource):
                         pass
                 #the sequence is not on uniprot, something went wrong
                 except:
-                    add2send2graph = ''
-            # else:
-            #     add2send2graph = ''
-                
+                    add2send2graph = ''                
                         
             #build the id of the sequence hashing it
             new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
             
             # build the remaining new seq uri
-            #new_seq_url = current_app.config['BASE_URL'] + "sequences/" + str(new_id)
             new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
 
             
@@ -1881,8 +1532,6 @@ class LociNSAlleles(Resource):
                                   ('ASK where {{ <{0}> typon:nucleotideSequence ?seq.}}'.format(new_seq_url)))
             
             print("check if hash is attributed")
-            #print(result)
-            #print(add2send2graph)
 
             if result['boolean']:
                 
@@ -1890,7 +1539,6 @@ class LociNSAlleles(Resource):
                 result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                       ('ASK where {{ <{0}> a typon:Sequence; '
                                        'typon:nucleotideSequence "{1}"^^xsd:string.}}'.format(new_seq_url, sequence)))
-                #print(result)
                 
                 #sequence was already attributed to the exact same sequence, reusing it
                 if result['boolean']:
@@ -1933,18 +1581,9 @@ class LociNSAlleles(Resource):
             
             #the hash is not yet attributed
             else:
-                #print(add2send2graph)
                 # celery task
                 task = add_allele.apply(args=[new_locus_url, species_name, loci_id, new_user_url, new_seq_url, True, add2send2graph, sequence])
-                
-                #result = send_data('INSERT DATA IN GRAPH '+current_app.config['DEFAULTHGRAPH']+' '
-                # '{ <'+new_seq_url+'> a typon:Sequence '+add2send2graph+' ; '
-                # 'typon:nucleotideSequence "'+args['sequence']+'"^^xsd:string.'
-                # '<'+new_allele_url+'> a typon:Allele; typon:sentBy  <'+new_user_url+'> ;'
-                # 'typon:isOfLocus <'+new_locus_url+'>; typon:dateEntered "'+str(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))+'"^^xsd:dateTime; '
-                # 'typon:id "'+str(number_alleles_loci+1)+'"^^xsd:integer ; typon:hasSequence <'+new_seq_url+'>. '
-                # '<'+new_locus_url+'> typon:hasDefinedAllele <'+new_allele_url+'>.}')
-                 
+                                 
                 process_ran = task.ready()
                 process_sucess = task.status
                 
@@ -1979,24 +1618,15 @@ class AlleleNSAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK', 
                     400: 'Invalid Argument', 
-                    500: 'Mapping Key Error', 
+                    500: 'Internal Server Error', 
                     403: 'Unauthorized', 
                     401: 'Unauthenticated',
                     404: 'Not found' },
             security=["access_token"])
-    # @w.token_required
     @jwt_required
     def get(self, loci_id, allele_id):
         """ Gets a particular allele from a particular loci """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
         
-        #new_allele_url = current_app.config['BASE_URL'] + "loci/" + str(loci_id) + "/alleles/" + str(allele_id)
         new_allele_url = "{0}loci/{1}/alleles/{2}".format(current_app.config['BASE_URL'], str(loci_id), str(allele_id))
 
         # check if provided loci id exists
@@ -2031,8 +1661,6 @@ class AlleleNSAPItypon(Resource):
 
 # Namespace
 species_conf = api.namespace('species', description = 'species related operations')
-
-#schema_conf = api.namespace('schemas', description="schema related operations")
 
 sequences_conf = api.namespace('sequences', description = "sequence related operations")
 
@@ -2090,26 +1718,13 @@ class StatsTypon(Resource):
     
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=[])
     def get(self):	
         """ Count the number of items in Typon """
-        
-        # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-        #                         ('select * '
-        #                         'from <{0}>'
-        #                         'where {{ '
-        #                         '{{ select (COUNT(?seq) as ?sequences) where {{?seq a typon:Sequence }} }} '
-        #                         '{{ select (COUNT(?spec) as ?species) where {{?spec a <http://purl.uniprot.org/core/Taxon>}} }} '
-        #                         '{{ select (COUNT(?loc) as ?loci) where {{?loc a typon:Locus }} }} '
-        #                         '{{ select (COUNT(?user) as ?users) where {{?user a <http://xmlns.com/foaf/0.1/Agent>. }} }} '
-        #                         '{{ select (COUNT(?schema) as ?schemas) where {{?schema a typon:Schema. }} }} '
-        #                         '{{ select (COUNT(?isol) as ?isolates) where {{?isol a typon:Isolate. }} }} '
-        #                         '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
-                                
     
         #count stuff from on virtuoso
         try:
@@ -2125,17 +1740,6 @@ class StatsTypon(Resource):
                                   '{{ select (COUNT(?isol) as ?isolates) where {{?isol a typon:Isolate. }} }} '
                                   '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
             
-                                #          ('select * from <http://localhost:8890/test2>'
-                                #  'where { {select (COUNT(?seq) as ?sequences) where {?seq a typon:Sequence }} '
-                                #  '{ select (COUNT(?spec) as ?species) where {?spec a <http://purl.uniprot.org/core/Taxon>}} '
-                                #  '{ select (COUNT(?loc) as ?loci) where {?loc a typon:Locus }} '
-                                #  '{ select (COUNT(?user) as ?users) where {?user a <http://xmlns.com/foaf/0.1/Agent>. }} '
-                                #  '{ select (COUNT(?schema) as ?schemas) where {?schema a typon:Schema. }} '
-                                #  '{ select (COUNT(?isol) as ?isolates) where {?isol a typon:Isolate. }} '
-                                #  '{ select (COUNT(?all) as ?alleles) where {?all a typon:Allele. }}}'))
-            
-            #print(result)
-
             return {"message" : result["results"]["bindings"]}, 200
         
         except:
@@ -2156,25 +1760,16 @@ class SpeciesListAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, **kwargs):
         """ Get a list of all species on Typon """
 
-        # c_user = authorize_user(request)
-
-        # # get request_data
-        # request_data = request.args
-
-        # # get user and check role
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-            
         try:
             request_data["species_name"]
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2202,22 +1797,16 @@ class SpeciesListAPItypon(Resource):
                                     '{{ ?species owl:sameAs ?species2; '
                                     'a <http://purl.uniprot.org/core/Taxon>; typon:name ?name. }}'.format(current_app.config['DEFAULTHGRAPH'])))
 
-            #print(result)
-
             if result["results"]["bindings"] == []:
                 return {"message": "No species have been added yet"}, 404
 
             else:
                 return (result["results"]["bindings"])
     
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-    
     
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error',
+                         500: 'Internal Server Error',
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          409: 'Species already exists',
@@ -2225,46 +1814,28 @@ class SpeciesListAPItypon(Resource):
                          },
              security=["access_token"])
     @api.expect(species_model, validate=True)
-    #@w.token_required
     @w.admin_required
     def post(self):
         """ Add a new species to Typon """
 
         # get user data
         c_user = get_jwt_identity()
-        #print(c_user)
 
         # get post data
         post_data = request.get_json()
 
         # get species name from the post data
         name = str(post_data["name"])
-
-        # get the user trying to create the species
-        # user = db.session.query(User)\
-        #     .filter(User.id == c_user.id).first()
-            
-
-        # check user on DB
-
-        # if c_user.roles[0].name == "Admin":
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
             
         try:
             
             # Check user role in Typon
-            #new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
             
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                  ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
                                   'ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; '
                                   'typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-
-            #print(result)
-
 
             if not result['boolean']:
                 return {"message" : "not authorized, admin only"}, 403
@@ -2307,7 +1878,6 @@ class SpeciesListAPItypon(Resource):
             return {"message" : "Species already exists"}, 409
         
         # species exists on uniprot, everything ok to create new species
-        #new_spec_url = current_app.config['BASE_URL'] + "species/" + str(number_taxon + 1)
         new_spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(number_taxon + 1))
         
         data2send = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
@@ -2319,12 +1889,14 @@ class SpeciesListAPItypon(Resource):
 
         #result = aux.send_data(data2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
         #result = aux.send_data(data2send, 'http://172.19.1.3:8890/DAV/test_folder/data', current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        result = aux.send_data(data2send, current_app.config['LOCAL_SPARQL'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(data2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
 
-        # if result.status_code in [200, 201]:
-        #     return {"message" : "Species created"}, 201
-        if result.status_code == 201:
-            return {"message" : "Species created"}, 201			
+        if result.status_code in [200, 201]:
+            return {"message" : "Species created"}, 201
+
         else:
             return {"message" :"Sum Thing Wong",
                     "msg": result.text}, result.status_code
@@ -2337,24 +1909,17 @@ class SpeciesAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self, species_id):
         """ Returns the species corresponding to the given id """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-            
-        # url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
-        #result = get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?species ?name where { <'+url+'> owl:sameAs ?species; typon:name ?name. } ')
 
         #get species name and its schemas
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -2384,14 +1949,13 @@ class SpeciesProfiles(Resource):
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found',
                          409: 'Conflict' },
             security=["access_token"])
     @api.expect(profile_model)
-    #@w.token_required
     @jwt_required
     def post(self, species_id):
         """ Add a an allele call profile
@@ -2399,17 +1963,8 @@ class SpeciesProfiles(Resource):
         
         # get user data
         c_user = get_jwt_identity()
-        
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-        
+                
         try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2431,7 +1986,6 @@ class SpeciesProfiles(Resource):
         profile_dict = post_data["profile"]
         headers = post_data["headers"]
 
-        #species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
         dict_genes = {}
@@ -2447,8 +2001,6 @@ class SpeciesProfiles(Resource):
         for gene in result["results"]["bindings"]:
             dict_genes[str(gene['originalName']['value'])] = str(gene['locus']['value'])
 
-        # for genome_name in profile_dict.keys():
-
         genome_name = next(iter(profile_dict))
 
         #create the new isolate id for the uri
@@ -2457,7 +2009,6 @@ class SpeciesProfiles(Resource):
         
         rdf_2_ins = ('PREFIX typon: <http://purl.phyloviz.net/ontology/typon#> \nINSERT DATA IN GRAPH <{0}> {{\n'.format(current_app.config['DEFAULTHGRAPH']))
 
-        # isolateUri = species_url + '/isolates/' + str(new_isolate_id)
         isolateUri = "{0}/isolates/{1}".format(species_url, str(new_isolate_id))
 
         # Check if isolate already exists
@@ -2493,11 +2044,9 @@ class SpeciesProfiles(Resource):
             try:
                 loci_uri = dict_genes[headers[i+1]]
             except:
-                #~ print ("locus is not on db")
                 return {"message" : ("{0} locus was not found, profile not uploaded".format(str(headers[i+1])))}, 404
                                 
             #check if allele exists
-            #allele_uri = loci_uri + "/alleles/" + str(allele)
             allele_uri = "{0}/alleles/{1}".format(loci_uri, str(allele))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2532,7 +2081,6 @@ class SpeciesProfiles(Resource):
             
             process_result=task.result
             print(process_result)
-            #new_allele_url=process_result[0]
             process_result_status_code=int(process_result[-1])
                             
             print (genome_name, str(process_result_status_code))
@@ -2543,12 +2091,7 @@ class SpeciesProfiles(Resource):
                 return {"message": "Profile successfully uploaded at " + isolateUri} , process_result_status_code
             
         else:
-            #num_isolates-=1    
             return {"message" : "Profile not uploaded, no alleles to send at {0}".format(isolateUri)}, 200
-
-
-
-
 
 
 @species_conf.route('/<int:species_id>/schemas') 
@@ -2557,21 +2100,15 @@ class SchemaListAPItypon(Resource):
         
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self, species_id):
         """ Get the schemas for a particular species ID """
 
-        # c_user = authorize_user(request)
-        
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-
-        # species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2581,7 +2118,6 @@ class SchemaListAPItypon(Resource):
                                 '{{ ?schemas a typon:Schema; typon:isFromTaxon <{1}>; typon:schemaName ?name. '
                                 'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }}'.format(current_app.config['DEFAULTHGRAPH'], species_url)))
         try:
-            #return result["results"]["bindings"]
 
             if result["results"]["bindings"] == []:
                 return {"message" : "No schemas added yet for this species"}, 200
@@ -2592,22 +2128,17 @@ class SchemaListAPItypon(Resource):
         except:
             return {"message" : "It's empty man...."}, 404
 
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-
 
 
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found',
                          406: 'Not acceptable' },
             security=["access_token"])
     @api.expect(schema_model, validate=True)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self, species_id):
         """ Adds a new to schema for a particular species ID """
@@ -2633,19 +2164,7 @@ class SchemaListAPItypon(Resource):
         if "" in (name, bsr, ptf, translation_table, min_locus_len, chewie_version):
             return {"message": "No schema parameters specified."}, 406
 
-        # get the user trying to create the species
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-
-        # print(user)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # check if species exists
-        #species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -2655,7 +2174,6 @@ class SchemaListAPItypon(Resource):
             return {"message" : "Species doesn't exist"}, 404
         
         # check if a schema already exists with this description for this species
-        #species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                              ('ASK where {{ ?schema a typon:Schema; typon:isFromTaxon <{0}>; typon:schemaName "{1}"^^xsd:string .}}'.format(species_url, name)))
         if result['boolean']:
@@ -2669,8 +2187,8 @@ class SchemaListAPItypon(Resource):
             
             return {"message" : "schema with that description already exists {0}".format(schema_url)}, 409
         
-        #only users with role Admin or Contributor can do this
-        # need to change SPARQL query to include Contributor role
+        # only users with role Admin or Contributor can do this
+        # TODO: need to change SPARQL query to include Contributor role
         try:
             # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
@@ -2686,14 +2204,8 @@ class SchemaListAPItypon(Resource):
 
         
         # only user 1 can add schemas, change at your discretion
-        # Add SPARQL query to check if the user is modifying their schemas
-
-        #~ userid=g.identity.user.id
-        #~ if userid>1:
-            #~ return "not authorized, admin only", 405
-            # 
+        # TODO: Add SPARQL query to check if the user is modifying their schemas
         
-        # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         # count number of schemas on the server for the uri build and send data to server
@@ -2706,7 +2218,6 @@ class SchemaListAPItypon(Resource):
         number_schemas = int(result["results"]["bindings"][0]['count']['value'])
         
         # Create the uri for the new schema
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(number_schemas + 1)
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(number_schemas + 1))
 
         # The SPARQL query to send to Typon
@@ -2726,9 +2237,12 @@ class SchemaListAPItypon(Resource):
                                                                                translation_table,
                                                                                min_locus_len))
     
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
         
-        if result.status_code == 201:
+        if result.status_code in [200, 201]:
             return {"message" : "A new schema for {0} was created sucessfully".format(species_url),
                     "url" : new_schema_url}, 201
         
@@ -2743,21 +2257,16 @@ class SchemaAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
-            security=["access_token"])
-    # @w.token_required
+             security=["access_token"])
     @jwt_required
     def get(self, species_id, schema_id):
         """ Return a particular schema for a particular species """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
         
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], 
                                                                 str(species_id), 
                                                                 str(schema_id))
@@ -2784,44 +2293,25 @@ class SchemaAPItypon(Resource):
         else:
             finalresult = result["results"]["bindings"]
             return (finalresult)
-                
-            # except:
-            #     return {"message" : "Schema exists but does not have loci yet"}
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
-    
-    #it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, 
+                    
+    # it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, 
     # the locus is just "removed" for the specific schema!!!11
-    # 
     
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
             security=["access_token"])
-    #@api.expect(schema_model, validate=True)
-    # @w.token_required
     @w.admin_required
     def delete(self, species_id, schema_id):
         """ Deletes a particular schema for a particular species """
 
         c_user = get_jwt_identity()
-        
-        # get the user trying to delete the schema
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-
-        # if c_user.roles[0].name == "Admin":
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
+                
         #only admin can do this
         try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2836,7 +2326,6 @@ class SchemaAPItypon(Resource):
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         #check if schema exists
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
         
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2850,22 +2339,26 @@ class SchemaAPItypon(Resource):
         query2send = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:deprecated "true"^^xsd:boolean.}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url))
         
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
         
-        if result.status_code == 201 :
+        if result.status_code in [200, 201] :
             return {"message" : "Schema sucessfully removed."}, 201	
         
         else:
             return {"message" : "Sum Thing Wong"}, result.status_code
 
 
+### DOWNLOAD SCHEMA ENDPOINT (WIP)
 # @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/compressed') 
 # class SchemaZipAPItypon(Resource):
 #     """ Schema Zip Resource """
     
 #     @api.doc(responses={ 200: 'OK',
 #                          400: 'Invalid Argument', 
-#                          500: 'Mapping Key Error', 
+#                          500: 'Internal Server Error', 
 #                          403: 'Unauthorized', 
 #                          401: 'Unauthenticated' },
 #             security="apikey")
@@ -2901,8 +2394,6 @@ class SchemaAPItypon(Resource):
 #         fasta_r = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?allele_id (str(?nucSeq) as ?nucSeq) where { <' + new_locus_url + '> a typon:Locus; typon:name ?name. ?alleles typon:isOfLocus <' + new_locus_url + '> .?alleles typon:hasSequence ?sequence; typon:id ?allele_id .?sequence typon:nucleotideSequence ?nucSeq. } order by ASC(?allele_id)')
 
 #         print(fasta_r["results"]["bindings"][0]["nucSeq"]["value"])
-
-
 
 
 #         #for loci in range(1, nr_loci + 1):
@@ -2949,29 +2440,20 @@ class SchemaLociAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, schema_id, **kwargs):
         """ Returns the loci of a particular schema from a particular species """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
         
         # get request data
         request_data = request.args
         
         #check if schema exists or deprecated
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
         
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -3003,7 +2485,6 @@ class SchemaLociAPItypon(Resource):
                                  'order by ASC(?date)}} }} LIMIT 50000'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, request_data["date"])))
             
             if len(result["results"]["bindings"])<1:
-                #~ return {"newAlleles":[{'date':str(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}],}
                 
                 def generate():
                     yield '{"newAlleles": []}'
@@ -3028,9 +2509,6 @@ class SchemaLociAPItypon(Resource):
                 
                 def generate():
                     yield '{"newAlleles": ['
-                    #~ for item in result["results"]["bindings"]:
-                        #~ yield json.dumps(item)+','
-                    #~ yield json.dumps({'date':latestDatetime})+']}'
                     
                     try:
                         prev_item = result["results"]["bindings"].pop(0)
@@ -3109,25 +2587,19 @@ class SchemaLociAPItypon(Resource):
 
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not found',
                          409: 'Locus already on schema' },
              security=["access_token"])
     @api.expect(schema_loci_model)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
         """ Add loci to a particular schema of a particular species """
 
         c_user = get_jwt_identity()
 
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get post data
         request_data = request.get_json()
 
@@ -3137,15 +2609,9 @@ class SchemaLociAPItypon(Resource):
         except:
             return {"message" : "No valid id for loci provided"}, 404
 
-        # get the user trying to create the species
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-
-        # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         #check if schema exists
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3165,7 +2631,6 @@ class SchemaLociAPItypon(Resource):
         # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(request_data["loci_id"])
         new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(request_data["loci_id"]))
 
-        #print(new_locus_url)
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                              ('ASK where {{ <{0}> a typon:Locus}}'.format(new_locus_url)))
         
@@ -3173,7 +2638,6 @@ class SchemaLociAPItypon(Resource):
             return {"message" : "Locus not found"}, 404
         
         #check if locus already exists on schema
-        #new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/" + str(request_data["loci_id"])
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                              ('ASK where {{ <{0}> typon:hasSchemaPart ?part. '
                               '?part typon:hasLocus <{1}>.}}'.format(new_schema_url, new_locus_url)))
@@ -3212,24 +2676,20 @@ class SchemaLociAPItypon(Resource):
 
     @api.doc(responses={ 201: 'OK', 
                         400: 'Invalid Argument', 
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not found' },
             security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @w.admin_required
     def delete(self, species_id, schema_id):
         """ Delete loci to a particular schema of a particular species """
-        #it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, the locus is just "removed" for the specific schema!!!11
+        
+        # it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, 
+        # the locus is just "removed" for the specific schema!!!11
 
         c_user = get_jwt_identity()
-
-        # if c_user.roles[0].name == "Admin":
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
 
         # get post data
         request_data = request.args
@@ -3239,13 +2699,8 @@ class SchemaLociAPItypon(Resource):
 
         except:
             return {"message" : "No valid id for loci provided"}, 404	
-        
-        # get the user trying to delete the schema
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-            
+                    
         try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -3260,8 +2715,7 @@ class SchemaLociAPItypon(Resource):
         
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
-        #check if schema exists
-        # new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
+        # check if schema exists
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -3271,8 +2725,7 @@ class SchemaLociAPItypon(Resource):
         if not result['boolean']:
             return {"message" : "Schema not found or schema is not yours"}, 404
         
-        #check if locus exists
-        # new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/" + str(request_data["loci_id"])
+        # check if locus exists
         new_locus_url = "{0}species/{1}/loci/{2}".format(current_app.config['BASE_URL'], str(species_id), str(request_data["loci_id"]))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3281,9 +2734,7 @@ class SchemaLociAPItypon(Resource):
         if not result['boolean']:
             return {"message" : "Locus not found"}, 404
         
-        #check if locus exists on schema
-        # new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/" + str(request_data["loci_id"])
-
+        # check if locus exists on schema
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                              ('ASK where {{ <{0}> typon:hasSchemaPart ?part. '
                               '?part typon:hasLocus <{1}>. '
@@ -3306,9 +2757,12 @@ class SchemaLociAPItypon(Resource):
         query2send = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:deprecated "true"^^xsd:boolean.}}'.format(current_app.config['DEFAULTHGRAPH'], schema_link))
         
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
         
-        if result.status_code == 201:
+        if result.status_code in [200, 201]:
             return {"message" : "Locus sucessfully removed from schema"}, 201
             
         else:
@@ -3338,29 +2792,20 @@ class LociListAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK', 
                     400: 'Invalid Argument', 
-                    500: 'Mapping Key Error', 
+                    500: 'Internal Server Error', 
                     403: 'Unauthorized', 
                     401: 'Unauthenticated',
                     404: 'Not found' },
         security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, **kwargs):
         """ Lists the loci of a particular species """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get the request data
         request_data = request.args
         
         # build the species uri
-        # spec_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
         
         #sequence was provided, return the locus uri found that has the sequence, else give all locus from that species
@@ -3370,7 +2815,6 @@ class LociListAPItypon(Resource):
             
             new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
 
-            # new_seq_url = current_app.config['BASE_URL'] + "sequences/" + str(new_id)
             new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -3381,7 +2825,6 @@ class LociListAPItypon(Resource):
                                   '?locus typon:isOfTaxon <{2}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url, spec_url)))
 
             try:
-                #print("return 1")
                 return (result["results"]["bindings"])
             
             except:
@@ -3395,7 +2838,6 @@ class LociListAPItypon(Resource):
                                   'where '
                                   '{{ ?locus a typon:Locus; typon:isOfTaxon <{1}>; typon:name ?name. '
                                   'OPTIONAL{{?locus typon:originalName ?original_name.}} }}'.format(current_app.config['DEFAULTHGRAPH'], spec_url)))
-            #print(result)
 
             # Return records containing prefix only
             try:
@@ -3427,7 +2869,6 @@ class LociListAPItypon(Resource):
                     return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
                     
                 except:
-                    #print("return 400")
                     return {"message" : "Bad argument"}, 400
             
             # return all records
@@ -3447,54 +2888,31 @@ class LociListAPItypon(Resource):
                         yield resp
                         yield '] }'
 
-                    #print("return stream")    
                     return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
                     
                 except:
-                    #print("return 400")
                     return {"message" : "Bad argument"}, 400
-        
-
-# curl -i http://localhost:5000/NS/species/1/loci -d 'aliases=macarena'
 
 
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not found' },
              security=["access_token"])
     @api.expect(loci_list_model)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self, species_id):
         """ Add a new locus for a particular species """
 
         c_user = get_jwt_identity()
 
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get post data
         post_data = request.get_json()
- 
-        # try:
-        #     post_data["prefix"]
-        #     aux.check_len(post_data['prefix'])
-        # except:
-        #     return {"message" : "Provide prefix"}, 400
-        
-        
+         
         #only admin can do this
-        
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-        
         try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
             result_user = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3507,8 +2925,6 @@ class LociListAPItypon(Resource):
         except:
             return {"message" : "Not authorized, admin only"}, 403
         
-
-        # spec_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
         spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
         result_spec = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                   ('ASK where {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}'.format(spec_url)))
@@ -3521,7 +2937,6 @@ class LociListAPItypon(Resource):
         # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select (COUNT(?locus) as ?count) where { ?locus a typon:Locus; typon:isOfTaxon <' + spec_url + '>. }')
         # number_loci_spec = int(result["results"]["bindings"][0]['count']['value'])
 
-        # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(post_data["locus_id"])
         new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(post_data["locus_id"]))
         
         result_locus = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3534,10 +2949,12 @@ class LociListAPItypon(Resource):
         query2send = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> a typon:Locus; typon:isOfTaxon <{2}> .}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, spec_url))
         
-        result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        #print(result.json())
+        result = aux.send_data(query2send, 
+                               current_app.config['LOCAL_SPARQL'], 
+                               current_app.config['VIRTUOSO_USER'], 
+                               current_app.config['VIRTUOSO_PASS'])
             
-        if result.status_code == 201:
+        if result.status_code in [200, 201]:
             return {"message" : "New locus added to species " + str(species_id)}, 201
         else:
             return {"message" : "Sum Thing Wong"}, result.status_code
@@ -3546,8 +2963,6 @@ class LociListAPItypon(Resource):
 @species_conf.route('/<int:species_id>/isolates')
 class IsolatesListAPItypon(Resource):
     """ Isolates Resource """
-
-    # curl -i  http://localhost:5000/NS/species/1/isolates
 
     parser = api.parser()
     
@@ -3572,24 +2987,16 @@ class IsolatesListAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK',
                     400: 'Invalid Argument',
-                    500: 'Mapping Key Error', 
+                    500: 'Internal Server Error', 
                     403: 'Unauthorized', 
                     401: 'Unauthenticated',
                     404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, **kwargs):
         """ Get the isolates of a species """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get request data
         request_data = request.args
         
@@ -3697,9 +3104,6 @@ class IsolatesListAPItypon(Resource):
             
             def generate():
                 yield '{"Isolates": ['
-                #~ for item in result["results"]["bindings"]:
-                    #~ yield json.dumps(item)+','
-                #~ yield json.dumps({'date':latestDatetime})+']}'
                 
                 try:
                     prev_item = result["results"]["bindings"].pop(0)
@@ -3731,8 +3135,6 @@ class IsolatesListAPItypon(Resource):
 class IsolatesUserListAPItypon(Resource):
     """ Isolates User Resource """
 
-    # curl -i  http://localhost:5000/NS/species/1/isolates/user
-
     parser = api.parser()
     
     parser.add_argument('isolName',
@@ -3756,12 +3158,11 @@ class IsolatesUserListAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK',
                     400: 'Invalid Argument',
-                    500: 'Mapping Key Error', 
+                    500: 'Internal Server Error', 
                     403: 'Unauthorized', 
                     401: 'Unauthenticated',
                     404: 'Not Found' },
             security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, **kwargs):
@@ -3769,11 +3170,6 @@ class IsolatesUserListAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get request data
         request_data = request.args
         
@@ -3796,11 +3192,7 @@ class IsolatesUserListAPItypon(Resource):
         except:
             pass
         
-        
-        # user = db.session.query(User)\
-        #     .filter(User.id == current_user.id).first()
-        
-        #user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
+                
         user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
 
         #if isolate name is provided return that isolate, else return all isolates
@@ -3894,9 +3286,6 @@ class IsolatesUserListAPItypon(Resource):
             
             def generate():
                 yield '{"Isolates": ['
-                #~ for item in result["results"]["bindings"]:
-                    #~ yield json.dumps(item)+','
-                #~ yield json.dumps({'date':latestDatetime})+']}'
                 
                 try:
                     prev_item = result["results"]["bindings"].pop(0)
@@ -3927,30 +3316,18 @@ class IsolatesAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error',
+                         500: 'Internal Server Error',
                          403: 'Unauthorized',
                          401: 'Unauthenticated',
                          404: 'Not Found',
                          409: 'Conflict'},
             security=["access_token"])
-    #@w.token_required
-    # @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, isolate_id, **kwargs):
         """ Get a particular isolate
         """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
-        #new_isol_url=current_app.config['BASE_URL']+"isolates/"+str(isol_id)
-        # new_isol_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/isolates/" + str(isolate_id)
         new_isol_url = "{0}species/{1}/isolates/{2}".format(current_app.config['BASE_URL'], str(species_id), str(isolate_id))
-        #print(new_isol_url)
         
         #get information on the isolate, metadata are optional
         query = ('select ?name ?country ?country_name ?accession ?st ?date_entered ?strainID ?col_date ?host ?host_disease ?lat ?long ?isol_source '
@@ -3978,14 +3355,13 @@ class IsolatesAPItypon(Resource):
 
     @api.doc(responses={ 201: 'OK', 
                     400: 'Invalid Argument', 
-                    500: 'Mapping Key Error', 
+                    500: 'Internal Server Error', 
                     403: 'Unauthorized', 
                     401: 'Unauthenticated',
                     404: 'Not found',
                     409: 'Conflict' },
         security=["access_token"])
     @api.expect(isolate_model)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self, species_id, isolate_id):
         """ Adds/updates the metadata of an existing 
@@ -3993,17 +3369,11 @@ class IsolatesAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get post data
         post_data = request.get_json()
          
         #only admin can do this
         try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
             new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -4026,28 +3396,6 @@ class IsolatesAPItypon(Resource):
 
         # new_isol_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/isolates/" + str(isolate_id)
         new_isol_url = "{0}species/{1}/isolates/{2}".format(current_app.config['BASE_URL'], str(species_id), str(isolate_id))
-        # print(new_isol_url)
-
-        # species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
-
-        # result_meta = []
-
-        # # check if an id was provided to query existing data
-        # if not post_data["id"] == "":
-            
-        #get metadata already existing
-        
-        # query = ('select ?name ?country ?country_name ?accession ?st ?date_entered ?strainID ?col_date ?host ?host_disease ?lat ?long ?isol_source where '
-        # '{ <'+new_isol_url+'''> a typon:Isolate; typon:name ?name; typon:dateEntered ?date_entered .
-        # OPTIONAL{<'''+new_isol_url+'''> typon:isolatedAt ?country. ?country rdfs:label ?country_name}
-        # OPTIONAL{<'''+new_isol_url+'''> typon:accession ?accession.}
-        # OPTIONAL{<'''+new_isol_url+'''> typon:ST ?st.} 
-        # OPTIONAL{<'''+new_isol_url+'''> typon:sampleCollectionDate ?col_date.}
-        # OPTIONAL{<'''+new_isol_url+'''> typon:host ?host.}
-        # OPTIONAL{<'''+new_isol_url+'''> typon:hostDisease ?host_disease.}
-        # OPTIONAL{<'''+new_isol_url+'''> <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?lat.}
-        # OPTIONAL{<'''+new_isol_url+'''> <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?long.} 
-        # OPTIONAL{<'''+new_isol_url+'> typon:isolationSource ?isol_source.} }'.format())
 
         query = ('select ?name ?country ?country_name ?accession ?st ?date_entered ?strainID ?col_date ?host ?host_disease ?lat ?long ?isol_source '
                  'from <{0}> '
@@ -4066,8 +3414,6 @@ class IsolatesAPItypon(Resource):
 
         
         result_meta = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),query)
-        #print("printing result_meta")
-        #print(result_meta)
     
         result_meta = result_meta["results"]["bindings"][0]
 
@@ -4076,18 +3422,6 @@ class IsolatesAPItypon(Resource):
         metadataUploadable = 0
 
         data2sendlist = []
-
-        # try:
-        #     auxi_isol_name = result_meta["name"]
-        # except:
-        #     try:
-        #         isol_name = post_data["name"]
-        #         data2sendlist.append(' typon:name "' + isol_name + '"^^xsd:string')
-        #         metadataUploadable += 1
-        #     except:
-        #         pass
-
-
         
         country_name = False
         try:
@@ -4100,20 +3434,20 @@ class IsolatesAPItypon(Resource):
                 pass
         
         #########
-        #if metadata already on database, skip the new one
-        #if metadata provided, insert in RDF
+        # if metadata already on database, skip the new one
+        # if metadata provided, insert in RDF
         
-        #accession check
+        # accession check
         try:
             auxi = result_meta['accession']['value']
         except:
             try:
 
-                #check if accession exists in ENA
+                # check if accession exists in ENA
                 print("checking accession...")
                 accession = post_data['accession']
                 
-                #accessionTooSmall
+                # accessionTooSmall
                 if len(accession) < 5:
                     metadataNotUploadable['accession'] = accession
                     
@@ -4135,7 +3469,7 @@ class IsolatesAPItypon(Resource):
             except :
                 pass
         
-        #st check
+        # ST check
         try:
             auxi = result_meta['st']['value']
         except:
@@ -4284,11 +3618,11 @@ class IsolatesAPItypon(Resource):
             try:
                 latitude = post_data['lat']
                 try:
-                    latitude=float(latitude)
+                    latitude = float(latitude)
                     data2sendlist.append(' <http://www.w3.org/2003/01/geo/wgs84_pos#lat> "' + str(latitude) + '"^^xsd:long')
-                    metadataUploadable+=1
+                    metadataUploadable += 1
                 except:
-                    metadataNotUploadable['lat']=latitude
+                    metadataNotUploadable['lat'] = latitude
             except Exception as e:
                 print(e)
                 pass
@@ -4338,57 +3672,46 @@ class IsolatesAPItypon(Resource):
             #if there is metadata to add, build the rdf and send to virtuoso	
             if len(data2sendlist)>0:
                 
-                # # update isolate information
-                # if not post_data["id"] == "":
-
-                #     rdf2send=";".join(data2sendlist)
-
-                #     query2send = 'INSERT DATA IN GRAPH '+current_app.config['DEFAULTHGRAPH']+' { <'+existing_isol_url+'> a typon:Isolate; ' + rdf2send + '.}'
-                #     print(query2send)
-                #     result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-
-                #     if result.status_code > 201 :
-                #         return {"message" : "Sum Thing Wong uploading metadata to isolate"}, result.status_code
-
-                
-                # else:
                 # Insert new information
-                rdf2send=";".join(data2sendlist)
+                rdf2send = ";".join(data2sendlist)
 
                 query2send = ('INSERT DATA IN GRAPH <{0}> {{ <{1}>{2}.}}'.format(current_app.config['DEFAULTHGRAPH'], new_isol_url, rdf2send))
                 print(query2send)
-                result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+                result = aux.send_data(query2send, 
+                                       current_app.config['LOCAL_SPARQL'], 
+                                       current_app.config['VIRTUOSO_USER'], 
+                                       current_app.config['VIRTUOSO_PASS'])
 
-                if result.status_code > 201 :
+                if result.status_code not in [200, 201] :
                     return {"message" : "Sum Thing Wong uploading metadata to isolate"}, result.status_code
                     
             def generate():
 
-                yield '{"Uploaded_total": ['+str(metadataUploadable)+'],'
+                yield '{"Uploaded_total": [' + str(metadataUploadable) + '],'
 
                 
                 yield '"Not_uploaded": ['
                 
-                auxkeys=list(metadataNotUploadable.keys())
-                if len(auxkeys)<1:
+                auxkeys = list(metadataNotUploadable.keys())
+                if len(auxkeys) < 1:
                     yield ']}'
                 else:
                     
-                    prev_item={}
+                    prev_item = {}
                     try:
-                        auxi=auxkeys.pop(0)
-                        prev_item[auxi]=metadataNotUploadable[auxi]
+                        auxi = auxkeys.pop(0)
+                        prev_item[auxi] = metadataNotUploadable[auxi]
                     except Exception as e:
                         print(e)
                         yield ']}'
                         
                     for k in auxkeys:
-                        yield json.dumps(prev_item)+','
-                        prev_item={k:metadataNotUploadable[k]}
-                    yield json.dumps(prev_item)+']}'
+                        yield json.dumps(prev_item) + ','
+                        prev_item = {k:metadataNotUploadable[k]}
+                    yield json.dumps(prev_item) + ']}'
             r = Response(stream_with_context(generate()), content_type='application/json')
             
-            if metadataUploadable>0:
+            if metadataUploadable > 0:
                 r.headers.set('Metadata-Uploaded',True)
             else:
                 r.headers.set('Metadata-Uploaded',False)
@@ -4407,7 +3730,7 @@ class IsolatesAlleles(Resource):
     
     @api.doc(responses={ 200: 'OK',
                         400: 'Invalid Argument',
-                        500: 'Mapping Key Error',
+                        500: 'Internal Server Error',
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found',
@@ -4419,15 +3742,7 @@ class IsolatesAlleles(Resource):
         """ Get all alleles from the isolate, independent of schema
         """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         #return all alleles from the isolate
-        # new_isol_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/isolates/" + str(isolate_id)
         new_isol_url = "{0}species/{1}/isolates/{2}".format(current_app.config['BASE_URL'], str(species_id), str(isolate_id))
         
         #get all alleles from the isolate, independent of schema
@@ -4446,36 +3761,26 @@ class IsolatesAlleles(Resource):
     @api.doc(responses={ 200: 'OK',
                     201: 'Success',
                     400: 'Invalid Argument',
-                    500: 'Mapping Key Error',
+                    500: 'Internal Server Error',
                     403: 'Unauthorized',
                     401: 'Unauthenticated',
                     404: 'Not Found',
                     409: 'Conflict'},
             security=["access_token"])
     @api.expect(allele_model)
-    #@w.token_required
     @w.admin_contributor_required
     def post(self, species_id, isolate_id):
         """ Link an allele to an isolate
         """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
         
         # get post data
         post_data = request.get_json()
 
         # build urls for checks
-        # isolate_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/isolates/" + str(isolate_id)
         isolate_url = "{0}species/{1}/isolates/{2}".format(current_app.config['BASE_URL'], str(species_id), str(isolate_id))
 
-        # locus_url = current_app.config['BASE_URL'] + "loci/" + str(post_data["locus_id"])
         locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(post_data["locus_id"]))
-        # allele_url = locus_url + "/alleles/" + str(post_data["allele_id"])
+
         allele_url = "{0}/alleles/{1}".format(locus_url, str(post_data["allele_id"]))
 
         # check if isolate exists
@@ -4509,9 +3814,12 @@ class IsolatesAlleles(Resource):
 
         query2send = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:hasAllele <{2}>.}}'.format(current_app.config['DEFAULTHGRAPH'], isolate_url, allele_url))
-        result_post = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
+        result_post = aux.send_data(query2send, 
+                                    current_app.config['LOCAL_SPARQL'], 
+                                    current_app.config['VIRTUOSO_USER'], 
+                                    current_app.config['VIRTUOSO_PASS'])
 
-        if result_post.status_code == 201 :
+        if result_post.status_code in [200, 201] :
             return {"message" : "Allele and respective locus sucessfully added to isolate"}, 201	
         else:
             return {"message" : "Sum Thing Wong"}, result_post.status_code
@@ -4532,26 +3840,18 @@ class IsolatesSchema(Resource):
 
     @api.doc(responses={ 200: 'OK',
                         400: 'Invalid Argument',
-                        500: 'Mapping Key Error',
+                        500: 'Internal Server Error',
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found',
                         409: 'Conflict'},
         security=["access_token"])
-    #@w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, species_id, isolate_id, **kwargs):
         """ Get the schemas that are linked to a particular isolate
         """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-        
         # get request data
         request_data = request.args        
 
@@ -4559,11 +3859,9 @@ class IsolatesSchema(Resource):
         if request_data:
 
             # build urls for checks
-            # species_url = current_app.config['BASE_URL'] + "species/" + str(species_id)
             species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
             # check if schema exists for that species
-            # schema_uri = species_url + "/schemas/" + str(request_data["schema_id"])
             schema_uri = "{0}/schemas/{1}".format(species_url, str(request_data["schema_id"]))
 
             result_schema = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -4574,7 +3872,6 @@ class IsolatesSchema(Resource):
                 return {"message" : ("Schema {0} not found or deprecated".format(schema_uri))} , 404
 
             # check if isolate exists
-            # isolate_url = species_url + "/isolates/" + str(isolate_id)
             isolate_url = "{0}/isolates/{1}".format(species_url, str(isolate_id))
 
             result_isolate = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -4605,7 +3902,6 @@ class IsolatesSchema(Resource):
         else:
 
             # check if isolate exists
-            # isolate_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/isolates/" + str(isolate_id)
             isolate_url = "{0}species/{1}/isolates/{2}".format(current_app.config['BASE_URL'], str(species_id), str(isolate_id))
             
             result_isolate = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
@@ -4642,22 +3938,14 @@ class SequencesListAPItypon(Resource):
     
     @api.doc(responses={ 200: 'OK',
                         400: 'Invalid Argument',
-                        500: 'Mapping Key Error', 
+                        500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not Found' },
         security=["access_token"])
-    #@w.token_required
     @jwt_required
     def get(self):
         """ Gets the total number of sequences """
-
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
         
         #query number of sequences on database
         try:
@@ -4701,7 +3989,7 @@ class SequencesAPItypon(Resource):
 
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
-                         500: 'Mapping Key Error', 
+                         500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
@@ -4712,32 +4000,19 @@ class SequencesAPItypon(Resource):
     def get(self, **kwargs):
         """ Get information on sequence, DNA string, uniprot URI and uniprot label """
 
-        # c_user = authorize_user(request)
-
-        # if c_user.roles[0].name in ["Admin", "Contributor", "User"]:
-        #     pass
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
         # get request data
         request_data = request.args
         
         if len(request_data) == 0:
             return {"message" : "No DNA sequence or hash provided"}, 400
 
-        #spec_url = current_app.config['BASE_URL'] + "species/" + "2" # debug only
-
-
         # if sequence is provided, hash it and send request to virtuoso
         try:
-
-            #spec_url = current_app.config['BASE_URL'] + "species/" + request_data["species_id"]
 
             sequence = request_data["sequence"]
 
             new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
 
-            # new_seq_url = current_app.config['BASE_URL'] + "sequences/" + str(new_id)
             new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
 
             #check if the sequence exists
@@ -4746,11 +4021,6 @@ class SequencesAPItypon(Resource):
 
             if not result_existence['boolean']:
                 return {"message" : "Sequence not found"}, 404
-
-            #get information on sequence, schema, locus, alleles, uniprot URI and uniprot label
-            #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?locus ?alleles ?uniprot ?label where '
-            # '{ ?alleles typon:hasSequence <' + new_seq_url + '>; typon:isOfLocus ?locus.?locus typon:isOfTaxon <' + spec_url + '>. '
-            # 'OPTIONAL { <' + new_seq_url + '> typon:hasUniprotSequence ?uniprot.}. OPTIONAL{ <' + new_seq_url + '> typon:hasUniprotLabel ?label.}}')
             
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                  ('select ?schemas ?locus ?alleles ?uniprot ?label '
@@ -4770,15 +4040,8 @@ class SequencesAPItypon(Resource):
                 return {"result": result["results"]["bindings"], 
                         "sequence_uri": new_seq_url}, 200
 
-
-            # try:
-            #     return {"result": result["results"]["bindings"],
-            #             "sequence_uri": new_seq_url}, 200
-            # except:
-            #     return {"message" : "Empty man..."}, 404
-
         except:
-            # new_seq_url = current_app.config['BASE_URL'] + "sequences/" + str(request_data["seq_id"])
+            
             new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(request_data["seq_id"]))
 
             #get information on sequence, DNA string, uniprot URI and uniprot label
