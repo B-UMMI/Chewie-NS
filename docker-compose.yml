@@ -65,7 +65,7 @@ services:
       #- SPARQL_UPDATE=true
       - VIRTUOSO_DB_USER=demo
       - VIRTUOSO_DB_PASSWORD=chewiens
-      - DEFAULT_GRAPH=http://localhost:8890/test2
+      - DEFAULT_GRAPH=http://localhost:8890/test
       - DBA_PASSWORD=ummi
       - DAV_PASSWORD=ummi
       #- LOG_FILE_LOCATION=/var/lib/virtuoso-opensource-6.1/db/
