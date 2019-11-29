@@ -11,4 +11,5 @@ __pycache__/
 .directory
 virtuoso.*
 virtuoso-temp.*
+virtuoso_data/
 *.sh
