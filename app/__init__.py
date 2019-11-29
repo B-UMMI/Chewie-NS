@@ -13,8 +13,8 @@ from flask_cors import CORS
 # from flask_talisman import Talisman
 #from flask_seasurf import SeaSurf
 from flask_jwt_extended import JWTManager
-from celery import Celery
 from config import Config
+from celery import Celery
 
 
 
@@ -25,9 +25,11 @@ migrate = Migrate()
 login_manager = LoginManager()
 # mail = Mail()
 bootstrap = Bootstrap()
-celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
 security = Security()
 #csrf = SeaSurf()
+
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
+
 
 
 ####### Config jwt ##############################################################
@@ -67,11 +69,11 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     # mail.init_app(app)
     bootstrap.init_app(app)
-    celery.conf.update(app.config)
     datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
     security.init_app(app, datastore=datastore)
     #csrf.init_app(app)
     jwt.init_app(app)
+    celery.conf.update(app.config)
 
     from app.api import blueprint as api_bp
     app.register_blueprint(api_bp)
@@ -81,6 +83,8 @@ def create_app(config_class=Config):
 
 from app import models
 datastore_cheat = SQLAlchemyUserDatastore(db, models.User, models.Role)
+
+
 
 # celery.conf.update(app.config)
 
