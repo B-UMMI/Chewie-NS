@@ -79,10 +79,10 @@ class Config(object):
     #DOWNLOAD_FOLDER='/home/pcerqueira/Lab_Software/refactored_ns/ns_security/schema_zip'
 
     # CELERY CONFIG
-    # CELERY_BROKER_URL= 'redis://localhost:6379/0'
-    # CELERY_RESULT_BACKEND= 'redis://localhost:6379/0'
-    CELERY_BROKER_URL= os.environ.get('CELERY_BROKER_URL')
-    CELERY_RESULT_BACKEND= os.environ.get('CELERY_RESULT_BACKEND')
+    CELERY_BROKER_URL= 'redis://172.19.1.4:6379/0'
+    CELERY_RESULT_BACKEND= 'redis://172.19.1.4:6379/0'
+    # CELERY_BROKER_URL= os.environ.get('CELERY_BROKER_URL')
+    # CELERY_RESULT_BACKEND= os.environ.get('CELERY_RESULT_BACKEND')
     
     # FLASK-RESTPLUS CONFIG
     SWAGGER_UI_JSON_EDITOR = True
