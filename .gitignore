@@ -13,3 +13,4 @@ virtuoso.*
 virtuoso-temp.*
 virtuoso_data/
 *.sh
+*.rdb
