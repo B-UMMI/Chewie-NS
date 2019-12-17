@@ -272,6 +272,7 @@ def create_role():
                                current_app.config['LOCAL_SPARQL'], 
                                current_app.config['VIRTUOSO_USER'], 
                                current_app.config['VIRTUOSO_PASS'])
+        #print("NICE")
 
     except:
         db.session.rollback()
