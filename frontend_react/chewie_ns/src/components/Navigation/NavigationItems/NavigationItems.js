@@ -2,7 +2,9 @@ import React from "react";
 
 import classes from "./NavigationItems.module.css";
 import NavigationItem from "./NavigationItem/NavigationItem";
-// import GithubButton from "../../UI/GithubButton/GithubButton";
+import IconButton from "@material-ui/core/IconButton";
+import GitHubIcon from '@material-ui/icons/GitHub';
+
 
 const navigationItems = props => (
   <ul className={classes.NavigationItems}>
@@ -13,14 +15,18 @@ const navigationItems = props => (
       <NavigationItem link="/auth">Authenticate</NavigationItem>
     ) : (
       <NavigationItem link="/logout">Logout</NavigationItem>
-      
     )}
     {props.isAuthenticated ? (
       <NavigationItem link="/species">Species</NavigationItem>
-    ) : null
-    }
-    {/* <NavigationItem link="https://github.com/B-UMMI/Nomenclature_Server_docker_compose">Github</NavigationItem> */}
+    ) : null}
     <NavigationItem link="/stats">Stats</NavigationItem>
+    <IconButton
+      href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
+      target={"_blank"}
+      rel="noreferrer"
+    >
+      <GitHubIcon fontSize="large" color="action"/>
+    </IconButton>
   </ul>
 );
 
