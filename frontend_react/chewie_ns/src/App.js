@@ -30,6 +30,7 @@ class App extends Component {
       routes = (
         <Switch>
           <Route path="/logout" component={Logout} />
+          <Route path="/stats" component={Stats} />
           <Route path="/species" component={Species} />
           <Route path="/" exact component={Chewie} />
           <Redirect to="/" />
