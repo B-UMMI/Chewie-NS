@@ -682,6 +682,199 @@ class Users(Resource):
 
         return {"message" : "The user {0} has been deleted".format(str(user.email))}, 200
 
+############################################## Stats Routes ##############################################
+
+stats_conf = api.namespace('stats', description = 'statistics of the database.')
+
+# new_loci_model = api.model("NewLociModel", {
+#     'prefix' : fields.String(required=True, description="Alias for the loci"),
+#     'locus_ori_name' : fields.String(description="Original name of the locus")    
+# })
+
+# allele_list_model = api.model("AlleleListModel", {
+#     'sequence' : fields.String(required=False, description="Allele DNA sequence"),
+#     'species_name' : fields.String(required=True, description="Name of the species (assumes it exists already)"),
+#     'uniprot_url': fields.String(required=False, default=False, description="Url to the Uniprot result of the allele"), 
+#     'uniprot_label': fields.String(required=False, default=False, description="Uniprot label of the allele"),
+#     'uniprot_sname': fields.String(required=False, default=False, description="Uniprot sname of the allele"),
+#     'sequence_uri': fields.String(required=False, default=False, description="URI of an existing sequence"),
+#     'enforceCDS' : fields.Boolean(required=False, default=False, description="Enforce CDS"),
+#     'input': fields.String(required=False, enum=["manual, auto, link"],
+#                            description="Type of input. Options are manual, auto, link." 
+#                                        "Manual presumes that only one allele will be inserted."
+#                                        "Auto presumes that a whole schema is being loaded."
+#                                        "Link is useful to add an existing sequence to a new allele and locus.")
+# })
+
+##########################################################################################################
+
+
+@stats_conf.route("/summary")
+class StatsSummary(Resource):
+    """ Summary of the data. """
+    
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self):	
+        """ Count the number of items in Typon """
+    
+        #count stuff from on virtuoso
+        try:
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                        ('select * '
+                        'from <{0}>'
+                        'where {{ '
+                        '{{ select (COUNT(?seq) as ?sequences) where {{?seq a typon:Sequence }} }} '
+                        '{{ select (COUNT(?spec) as ?species) where {{?spec a <http://purl.uniprot.org/core/Taxon>}} }} '
+                        '{{ select (COUNT(?loc) as ?loci) where {{?loc a typon:Locus }} }} '
+                        '{{ select (COUNT(?user) as ?users) where {{?user a <http://xmlns.com/foaf/0.1/Agent>. }} }} '
+                        '{{ select (COUNT(?schema) as ?schemas) where {{?schema a typon:Schema. }} }} '
+                        '{{ select (COUNT(?isol) as ?isolates) where {{?isol a typon:Isolate. }} }} '
+                        '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
+
+            
+            return {"message" : result["results"]["bindings"]}, 200
+        
+        except:
+            return {"message" : "Sum thing wong"}, 404
+
+@stats_conf.route("/species")
+class StatsSpecies(Resource):
+    """ Summary of all species data. """
+    
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self):	
+        """ Count the number of schemas for each species. """
+    
+        #count stuff from on virtuoso
+        try:
+
+            # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            #     ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#>'
+            #         'select ?species ?name ?schemas '    # HURR-DURR with a space after the end it works...
+            #         'from <{0}> '
+            #         'where '
+            #             '{{ ?species owl:sameAs ?species2; '
+            #             'a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . '
+            #             '   {{select (COUNT(distinct ?schema) as ?schemas) where {{ '
+            #             '      ?schema a typon:Schema; typon:isFromTaxon ?species. }}'
+            #             '      GROUP BY ?species }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
+            
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                ('select ?species ?name (COUNT(?sch) AS ?schemas) '    # HURR-DURR with a space after the end it works...
+                    'from <{0}> '
+                    'where '
+                    '{{ ?sch a typon:Schema; typon:isFromTaxon ?species . '
+                    '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'.format(current_app.config['DEFAULTHGRAPH'])))
+
+            
+            return {"message" : result["results"]["bindings"]}, 200
+        
+        except:
+            return {"message" : "Sum thing wong"}, 404
+
+
+@stats_conf.route("/species/<int:species_id>")
+class StatsSpeciesId(Resource):
+    """ Summary of one species' data. """
+    
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self, species_id):	
+        """ Get the loci and count the alleles for each schema of a particular species. """
+
+        new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+    
+        #count stuff from on virtuoso
+        try:
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                ('select ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen (COUNT(DISTINCT ?locus) as ?nr_loci) (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
+                    'from <{0}> '
+                    'where '
+                    '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                    'typon:schemaName ?name; typon:administratedBy ?user; '
+                    'typon:chewBBACA_version ?chewie; typon:bsr ?bsr; '
+                    'typon:ptf ?ptf; typon:translation_table ?tl_table; '
+                    'typon:minimum_locus_length ?minLen; '
+                    'typon:hasSchemaPart ?part . '
+                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+
+
+                        
+            return {"message" : result["results"]["bindings"]}, 200
+        
+        except:
+            return {"message" : "Sum thing wong"}, 404
+
+
+@stats_conf.route("/species/<int:species_id>/schema")
+class StatsSpeciesSchemas(Resource):
+    """ Summary of one species' data. """
+    
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self, species_id):	
+        """ Get the loci and count the alleles for each schema of a particular species. """
+
+        new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+    
+        #count stuff from on virtuoso
+        try:
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
+                    'from <{0}> '
+                    'where '
+                    '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                    'typon:hasSchemaPart ?part . '
+                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                    '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                    '?allele typon:hasSequence ?sequence . '
+                    'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
+                    'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
+                    'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+
+
+                    # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                    #          ('select distinct (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
+                    #           'from <{0}>'
+                    #           'where '
+                    #           '{{ <{1}> a typon:Locus; typon:name ?name. '
+                    #           '?alleles typon:isOfLocus <{1}> .'
+                    #           '?alleles typon:hasSequence ?sequence. '
+                    #           'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
+                    #           'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}}'
+                    #           'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
+
+
+                        
+            return {"message" : result["results"]["bindings"]}, 200
+        
+        except:
+            return {"message" : "Sum thing wong"}, 404
 
 ############################################## Loci Routes ##############################################
 
@@ -877,7 +1070,7 @@ class LociList(Resource):
         #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 'ASK where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
         #print(result)
         
-        #count number of loci already created for that species, build the new locus uri and send to server
+        #count number of loci already created, build the new locus uri and send to server
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               ('select (COUNT(?locus) as ?count) '
                                'from <{0}> '
@@ -1713,40 +1906,6 @@ profile_model = api.model("ProfileModel", {
 })
 
 ############################################################
-@species_conf.route("/stats")
-class StatsTypon(Resource):
-    """ Typon Stats """
-    
-    @api.doc(responses={ 200: 'OK',
-                         400: 'Invalid Argument', 
-                         500: 'Internal Server Error', 
-                         403: 'Unauthorized', 
-                         401: 'Unauthenticated',
-                         404: 'Not Found' },
-             security=[])
-    def get(self):	
-        """ Count the number of items in Typon """
-    
-        #count stuff from on virtuoso
-        try:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 ('select * '
-                                  'from <{0}>'
-                                  'where {{ '
-                                  '{{ select (COUNT(?seq) as ?sequences) where {{?seq a typon:Sequence }} }} '
-                                  '{{ select (COUNT(?spec) as ?species) where {{?spec a <http://purl.uniprot.org/core/Taxon>}} }} '
-                                  '{{ select (COUNT(?loc) as ?loci) where {{?loc a typon:Locus }} }} '
-                                  '{{ select (COUNT(?user) as ?users) where {{?user a <http://xmlns.com/foaf/0.1/Agent>. }} }} '
-                                  '{{ select (COUNT(?schema) as ?schemas) where {{?schema a typon:Schema. }} }} '
-                                  '{{ select (COUNT(?isol) as ?isolates) where {{?isol a typon:Isolate. }} }} '
-                                  '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
-            
-            return {"message" : result["results"]["bindings"]}, 200
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
-
-
 
 @species_conf.route('/list') 
 class SpeciesListAPItypon(Resource):
@@ -1922,7 +2081,7 @@ class SpeciesAPItypon(Resource):
         url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
 
 
-        #get species name and its schemas
+        # get species name and its schemas
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                 ('select ?species ?name ?schemas ?schemaName '
                                 'from <{0}> '
@@ -1930,7 +2089,6 @@ class SpeciesAPItypon(Resource):
                                 '{{ {{<{1}> owl:sameAs ?species; typon:name ?name.}} '
                                 'UNION {{ ?schemas typon:isFromTaxon <{1}>; a typon:Schema; typon:schemaName ?schemaName. '
                                 'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }} }}'.format(current_app.config['DEFAULTHGRAPH'], url)))
-        
 
         if result["results"]["bindings"] == []:
             return {"message": "No species found with the provided id."}, 404
