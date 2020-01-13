@@ -729,12 +729,9 @@ class StatsSummary(Resource):
                         ('select * '
                         'from <{0}>'
                         'where {{ '
-                        '{{ select (COUNT(?seq) as ?sequences) where {{?seq a typon:Sequence }} }} '
                         '{{ select (COUNT(?spec) as ?species) where {{?spec a <http://purl.uniprot.org/core/Taxon>}} }} '
                         '{{ select (COUNT(?loc) as ?loci) where {{?loc a typon:Locus }} }} '
-                        '{{ select (COUNT(?user) as ?users) where {{?user a <http://xmlns.com/foaf/0.1/Agent>. }} }} '
                         '{{ select (COUNT(?schema) as ?schemas) where {{?schema a typon:Schema. }} }} '
-                        '{{ select (COUNT(?isol) as ?isolates) where {{?isol a typon:Isolate. }} }} '
                         '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
 
             
@@ -759,24 +756,14 @@ class StatsSpecies(Resource):
     
         #count stuff from on virtuoso
         try:
-
-            # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-            #     ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#>'
-            #         'select ?species ?name ?schemas '    # HURR-DURR with a space after the end it works...
-            #         'from <{0}> '
-            #         'where '
-            #             '{{ ?species owl:sameAs ?species2; '
-            #             'a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . '
-            #             '   {{select (COUNT(distinct ?schema) as ?schemas) where {{ '
-            #             '      ?schema a typon:Schema; typon:isFromTaxon ?species. }}'
-            #             '      GROUP BY ?species }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
             
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                 ('select ?species ?name (COUNT(?sch) AS ?schemas) '    # HURR-DURR with a space after the end it works...
                     'from <{0}> '
                     'where '
                     '{{ ?sch a typon:Schema; typon:isFromTaxon ?species . '
-                    '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'.format(current_app.config['DEFAULTHGRAPH'])))
+                    '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'
+                    'ORDER BY ?species'.format(current_app.config['DEFAULTHGRAPH'])))
 
             
             return {"message" : result["results"]["bindings"]}, 200
@@ -815,7 +802,8 @@ class StatsSpeciesId(Resource):
                     'typon:minimum_locus_length ?minLen; '
                     'typon:hasSchemaPart ?part . '
                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
+                    'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
 
                         
@@ -855,7 +843,8 @@ class StatsSpeciesSchemas(Resource):
                     '?allele typon:hasSequence ?sequence . '
                     'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
                     'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
-                    'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                    'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'
+                    'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
 
                     # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
