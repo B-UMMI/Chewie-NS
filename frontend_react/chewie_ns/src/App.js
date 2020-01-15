@@ -22,6 +22,7 @@ class App extends Component {
         <Route path="/auth" component={Auth} />
         <Route path="/" exact component={Chewie} />
         <Route path="/stats" component={Stats} />
+        <Route path="/species/:species_id" component={Species} />
         <Redirect to="/" />
       </Switch>
     );
@@ -31,7 +32,6 @@ class App extends Component {
         <Switch>
           <Route path="/logout" component={Logout} />
           <Route path="/stats" component={Stats} />
-          <Route path="/species" component={Species} />
           <Route path="/" exact component={Chewie} />
           <Redirect to="/" />
         </Switch>

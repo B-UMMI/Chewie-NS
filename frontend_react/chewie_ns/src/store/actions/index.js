@@ -5,8 +5,10 @@ export {
     authCheckState
 } from './auth';
 export {
-    fetchStats
+    fetchStats,
+    fetchStatsSpecies
 } from './stats';
 export {
-    fetchSpecies
+    fetchSpecies,
+    fetchSpeciesAnnot
 } from './species';
