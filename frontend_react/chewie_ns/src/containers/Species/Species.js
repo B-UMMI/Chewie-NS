@@ -270,7 +270,8 @@ class Species extends Component {
             },
             autosize: true,
             xaxis: {
-              title: {text: 'Loci'}
+              title: {text: 'Loci'},
+              range: [0, 500]
             },
             yaxis: {
               title: {text: 'Nr alleles'}

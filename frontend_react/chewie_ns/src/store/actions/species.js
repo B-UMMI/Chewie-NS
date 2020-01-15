@@ -93,35 +93,122 @@ export const fetchSpeciesAnnot = spec_id => {
         // console.log(res.data.message)
         // const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
         const fetchedSpeciesAnnot = [];
-        // const x = [];
-        // const y = [];
+        const fetchedSpeciesAnnot2 = [];
+        let x_arr = [];
+        let x_val = 0;
+        let y_val = 0;
+        let y_arr = [];
         let ola = {};
+        let ola2 = {};
+        let ola3 = {};
+        // let test = {};
+        let curSchemaId = 0;
         for (let key in res.data.message) {
-          // console.log("[KEY]")
-          // console.log(key)
-          // x.push(
+
+          curSchemaId = res.data.message[key].schema.value.substring(
+            res.data.message[key].schema.value.lastIndexOf("/") + 1
+          );
+
+          // x_val = res.data.message[key].locus.value.substring(
+          //   res.data.message[key].locus.value.lastIndexOf("/") + 1
+          // );
+          x_val += 1;
+
+          y_val = res.data.message[key].nr_allele.value;
+
+          if (curSchemaId in ola2) {
+            // console.log("works")
+            // console.log(ola2[curSchemaId])
+            // fetchedSpeciesAnnot2.push({
+            //   x: Object.keys(ola),
+            //   y: Object.values(ola),
+            //   type: "scatter",
+            //   line: {
+            //     width: 1
+            //   }
+            // });
+            // console.log("works")
+            ola2[curSchemaId][[x_val]] = y_val
+  
+          } else if (!(curSchemaId in ola2)) {
+            // console.log("works2")
+            // console.log(curSchemaId)
+            ola2[curSchemaId] = {
+              [x_val]: y_val
+            }
+            x_val = 0
+          }
+
+          // ola2[curSchemaId] = [
+            // x_arr.push(res.data.message[key].locus.value.substring(
+            //   res.data.message[key].locus.value.lastIndexOf("/") + 1
+            // )),
+            // y_arr.push(res.data.message[key].nr_allele.value)
+            // ola3[res.data.message[key].locus.value.substring(
+            //   res.data.message[key].locus.value.lastIndexOf("/") + 1
+            // )] = res.data.message[key].nr_allele.value
+          // ];
+
+          // ola[
           //   res.data.message[key].locus.value.substring(
           //     res.data.message[key].locus.value.lastIndexOf("/") + 1
           //   )
+          // ] = res.data.message[key].nr_allele.value;
+
+          // curSchemaId = res.data.message[key].schema.value.substring(
+          //   res.data.message[key].schema.value.lastIndexOf("/") + 1
           // );
-          // y.push(res.data.message[key].nr_allele.value);
-          ola[res.data.message[key].locus.value.substring(
-                res.data.message[key].locus.value.lastIndexOf("/") + 1)] = res.data.message[key].nr_allele.value
-        }
-        // console.log(ola);
-        // console.log(Object.keys(ola));
-        // console.log(Object.values(ola));
-        // console.log(y);
-        fetchedSpeciesAnnot.push({
-          x: Object.keys(ola),
-          y: Object.values(ola),
-          type: "scatter",
-          line: {
-            width: 1
+
+          // if (
+          //   res.data.message[key].schema.value.substring(
+          //     res.data.message[key].schema.value.lastIndexOf("/") + 1
+          //   ) === curSchemaId
+          // ) {
+          //   ola2[
+          //     res.data.message[key].locus.value.substring(
+          //       res.data.message[key].locus.value.lastIndexOf("/") + 1
+          //     )
+          //   ] = res.data.message[key].nr_allele.value;
+
+          // } else {
+          //   console.log("[else]")
+          //   fetchedSpeciesAnnot2.push({
+          //     x: Object.keys(ola2),
+          //     y: Object.values(ola2),
+          //     type: "scatter",
+          //     line: {
+          //       width: 1
+          //     }
+          //   });
+          //   console.log(fetchedSpeciesAnnot2)
+          // }
+
           }
-        });
-        console.log(fetchedSpeciesAnnot)
-        dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot));
+        console.log("[OLA2]")
+        // console.log(ola2)
+        
+        for (let idx in ola2) {
+          fetchedSpeciesAnnot2.push({
+            x: Object.keys(ola2[idx]),
+            y: Object.values(ola2[idx]),
+            type: "scatter",
+            name: "Schema " + idx,
+            line: {
+              width: 1
+            }
+          });
+        }
+
+        // fetchedSpeciesAnnot.push({
+        //   x: Object.keys(ola),
+        //   y: Object.values(ola),
+        //   type: "scatter",
+        //   line: {
+        //     width: 1
+        //   }
+        // });
+        // console.log(fetchedSpeciesAnnot2);
+        dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot2));
       })
       .catch(err => {
         dispatch(fetchSpeciesAnnotFail(err));
