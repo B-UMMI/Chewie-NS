@@ -23,7 +23,7 @@ const navigationItems = props => (
     <IconButton
       href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
       target={"_blank"}
-      rel="noreferrer"
+      rel="noreferrer" // Check --> https://material-ui.com/components/links/#security
     >
       <GitHubIcon fontSize="large" color="action"/>
     </IconButton>
