@@ -844,7 +844,7 @@ class StatsSpeciesSchemas(Resource):
                     'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
                     'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
                     'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'
-                    'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                    'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
 
                     # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
