@@ -7,6 +7,9 @@ import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
+
+import CircularProgress from "@material-ui/core/CircularProgress";
+
 // import Table from "@material-ui/core/Table";
 // import TableBody from "@material-ui/core/TableBody";
 // import TableCell from "@material-ui/core/TableCell";
@@ -35,8 +38,13 @@ class Species extends Component {
     );
   }
 
+  clickPlotHandler = (event) => {
+    console.log(event)
+  }
+
   render() {
     let species = <Spinner />;
+    let species_plot = <CircularProgress />;
     // if (!this.props.loading) {
     //     // console.log(this.props.species)
     //     species = this.props.species.map(sp => {
@@ -257,10 +265,8 @@ class Species extends Component {
           options={options}
         />
       );
-    }
-    return (
-      <div>
-        <div>{species}</div>
+
+      species_plot = (
         <Plot
           data={this.props.species_annot}
           layout={{
@@ -270,19 +276,27 @@ class Species extends Component {
             },
             autosize: true,
             xaxis: {
-              title: {text: 'Loci'},
+              title: { text: "Loci" },
               range: [0, 500]
             },
             yaxis: {
-              title: {text: 'Nr alleles'}
-            }
+              title: { text: "Nr alleles" }
+            },
+            hovermode: 'closest'
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
             width: 1
           }}
+          onClick={(e) => console.log(e.points)}
         />
+      );
+    }
+    return (
+      <div>
+        <div>{species}</div>
+        {species_plot}
       </div>
     );
   }

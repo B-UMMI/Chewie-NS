@@ -91,17 +91,13 @@ export const fetchSpeciesAnnot = spec_id => {
       .then(res => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
-        // const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
-        const fetchedSpeciesAnnot = [];
+        const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
         const fetchedSpeciesAnnot2 = [];
-        let x_arr = [];
         let x_val = 0;
         let y_val = 0;
-        let y_arr = [];
-        let ola = {};
+        let locus_id = 0;
         let ola2 = {};
-        let ola3 = {};
-        // let test = {};
+        let olaLocus = {};
         let curSchemaId = 0;
         for (let key in res.data.message) {
 
@@ -109,105 +105,46 @@ export const fetchSpeciesAnnot = spec_id => {
             res.data.message[key].schema.value.lastIndexOf("/") + 1
           );
 
-          // x_val = res.data.message[key].locus.value.substring(
-          //   res.data.message[key].locus.value.lastIndexOf("/") + 1
-          // );
+          locus_id = res.data.message[key].locus.value.substring(
+            res.data.message[key].locus.value.lastIndexOf("/") + 1
+          );
+
           x_val += 1;
 
           y_val = res.data.message[key].nr_allele.value;
 
           if (curSchemaId in ola2) {
-            // console.log("works")
-            // console.log(ola2[curSchemaId])
-            // fetchedSpeciesAnnot2.push({
-            //   x: Object.keys(ola),
-            //   y: Object.values(ola),
-            //   type: "scatter",
-            //   line: {
-            //     width: 1
-            //   }
-            // });
-            // console.log("works")
             ola2[curSchemaId][[x_val]] = y_val
+            olaLocus[curSchemaId][[x_val]] = locus_id
   
           } else if (!(curSchemaId in ola2)) {
             // console.log("works2")
             // console.log(curSchemaId)
             ola2[curSchemaId] = {
-              [x_val]: y_val
+              [x_val]: y_val,
+            }
+            olaLocus[curSchemaId] = {
+              [x_val]: locus_id
             }
             x_val = 0
+            locus_id = 0
           }
-
-          // ola2[curSchemaId] = [
-            // x_arr.push(res.data.message[key].locus.value.substring(
-            //   res.data.message[key].locus.value.lastIndexOf("/") + 1
-            // )),
-            // y_arr.push(res.data.message[key].nr_allele.value)
-            // ola3[res.data.message[key].locus.value.substring(
-            //   res.data.message[key].locus.value.lastIndexOf("/") + 1
-            // )] = res.data.message[key].nr_allele.value
-          // ];
-
-          // ola[
-          //   res.data.message[key].locus.value.substring(
-          //     res.data.message[key].locus.value.lastIndexOf("/") + 1
-          //   )
-          // ] = res.data.message[key].nr_allele.value;
-
-          // curSchemaId = res.data.message[key].schema.value.substring(
-          //   res.data.message[key].schema.value.lastIndexOf("/") + 1
-          // );
-
-          // if (
-          //   res.data.message[key].schema.value.substring(
-          //     res.data.message[key].schema.value.lastIndexOf("/") + 1
-          //   ) === curSchemaId
-          // ) {
-          //   ola2[
-          //     res.data.message[key].locus.value.substring(
-          //       res.data.message[key].locus.value.lastIndexOf("/") + 1
-          //     )
-          //   ] = res.data.message[key].nr_allele.value;
-
-          // } else {
-          //   console.log("[else]")
-          //   fetchedSpeciesAnnot2.push({
-          //     x: Object.keys(ola2),
-          //     y: Object.values(ola2),
-          //     type: "scatter",
-          //     line: {
-          //       width: 1
-          //     }
-          //   });
-          //   console.log(fetchedSpeciesAnnot2)
-          // }
-
           }
-        console.log("[OLA2]")
+        // console.log("[OLA2]")
         // console.log(ola2)
         
         for (let idx in ola2) {
           fetchedSpeciesAnnot2.push({
             x: Object.keys(ola2[idx]),
-            y: Object.values(ola2[idx]),
-            type: "scatter",
+            y: Object.values(ola2[idx]).sort(collator.compare).reverse(collator.compare),
+            type: "bar",
             name: "Schema " + idx,
-            line: {
-              width: 1
-            }
+            // hovertext: Object.values(olaLocus[idx])
+            // line: {
+            //   width: 1
+            // }
           });
         }
-
-        // fetchedSpeciesAnnot.push({
-        //   x: Object.keys(ola),
-        //   y: Object.values(ola),
-        //   type: "scatter",
-        //   line: {
-        //     width: 1
-        //   }
-        // });
-        // console.log(fetchedSpeciesAnnot2);
         dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot2));
       })
       .catch(err => {
