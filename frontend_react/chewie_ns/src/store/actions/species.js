@@ -1,5 +1,6 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
+import _ from 'lodash';
 
 export const fetchSpeciesSuccess = species => {
   return {
@@ -97,6 +98,9 @@ export const fetchSpeciesAnnot = spec_id => {
         let y_val = 0;
         let locus_id = 0;
         let ola2 = {};
+        let ola3 = {};
+        let ola4 = {};
+        let ola22 = [];
         let olaLocus = {};
         let curSchemaId = 0;
         for (let key in res.data.message) {
@@ -116,24 +120,52 @@ export const fetchSpeciesAnnot = spec_id => {
           if (curSchemaId in ola2) {
             ola2[curSchemaId][[x_val]] = y_val
             olaLocus[curSchemaId][[x_val]] = locus_id
+            ola3[curSchemaId].push(y_val)
+            ola4[curSchemaId][[locus_id]] = y_val
   
           } else if (!(curSchemaId in ola2)) {
             // console.log("works2")
             // console.log(curSchemaId)
             ola2[curSchemaId] = {
-              [x_val]: y_val,
+              [x_val]: y_val
             }
+
+            ola22.push(y_val)
+
+            ola3[curSchemaId] = ola22
+
+            ola4[curSchemaId] = {
+              [locus_id]: y_val
+            }
+
+            // ola22.push(
+            //   {[x_val]: y_val}
+            // )
             olaLocus[curSchemaId] = {
               [x_val]: locus_id
+              // [locus_id]: y_val
             }
             x_val = 0
             locus_id = 0
+            ola22 = []
           }
           }
-        // console.log("[OLA2]")
-        // console.log(ola2)
+        console.log("[OLA2]")
+        console.log(ola4)
+        // console.log(_.fromPairs(_.sortBy(_.toPairs(ola4), 1).reverse()))
+        // let test = [ola2, olaLocus];
+        // console.log(test)
+        // console.log(Object.entries(ola2))
+        // console.log(ola22)
         
         for (let idx in ola2) {
+          console.log(_.fromPairs(_.sortBy(_.toPairs(ola4[idx]), 1).reverse()))
+          // const sorted = Object.entries(ola4[idx]).sort(([c1, v1], [c2, v2]) => {
+          //   return v1 - v2;
+          // }).reduce((o, [k, v]) => (o[k] = v, o), {});
+          // console.log(sorted)
+          // console.log(sortTest(test.idx))
+          // console.log(Object.values(olaLocus[idx]).sort(collator.compare).reverse(collator.compare))
           fetchedSpeciesAnnot2.push({
             x: Object.keys(ola2[idx]),
             y: Object.values(ola2[idx]).sort(collator.compare).reverse(collator.compare),
