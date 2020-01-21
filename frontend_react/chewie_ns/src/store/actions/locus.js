@@ -27,8 +27,23 @@ export const fetchLocusFasta = locus_id => {
     axios
       .get("loci/" + locus_id + "/fasta")
       .then(res => {
-        console.log(res);
-        dispatch(fetchLocusFastaSuccess());
+        // console.log(res.data.Fasta);
+        let allele_ids = [];
+        let nucSeqLen = [];
+        let plot_data = [];
+        for (let key in res.data.Fasta) {
+          allele_ids.push(res.data.Fasta[key].allele_id.value)
+          nucSeqLen.push((res.data.Fasta[key].nucSeq.value).length)
+        }
+        // console.log(allele_ids);
+        // console.log(nucSeqLen);
+        plot_data.push({
+          x: nucSeqLen,
+          y: allele_ids,
+          type: "histogram",
+          name: "Locus Details"
+        })
+        dispatch(fetchLocusFastaSuccess(plot_data));
       })
       .catch(fastaErr => {
         dispatch(fetchLocusFastaFail(fastaErr));
@@ -62,8 +77,14 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
       axios
         .get("loci/" + locus_id + "/uniprot")
         .then(res => {
-          console.log(res);
-          dispatch(fetchLocusUniprotSuccess(res));
+          console.log(res.data);
+          let uniprot_annot = [];
+          uniprot_annot.push({
+            uniprot_label: res.data.UniprotInfo[0].UniprotLabel.value,
+            uniprot_submitted_name: res.data.UniprotInfo[0].UniprotSName.value,
+            uniprot_uri: res.data.UniprotInfo[0].UniprotURI.value
+          })
+          dispatch(fetchLocusUniprotSuccess(uniprot_annot));
         })
         .catch(uniprotErr => {
           dispatch(fetchLocusUniprotFail(uniprotErr));
