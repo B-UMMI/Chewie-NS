@@ -12,3 +12,7 @@ export {
     fetchSpecies,
     fetchSpeciesAnnot
 } from './species';
+export {
+    fetchLocusFasta,
+    fetchLocusUniprot
+} from './locus';

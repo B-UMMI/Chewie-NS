@@ -8,6 +8,7 @@ import Auth from './containers/Auth/Auth';
 import Logout from './containers/Auth/Logout/Logout';
 import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
+import Locus from "./containers/Locus/Locus";
 import * as actions from './store/actions/index';
 
 class App extends Component {
@@ -23,6 +24,7 @@ class App extends Component {
         <Route path="/" exact component={Chewie} />
         <Route path="/stats" component={Stats} />
         <Route path="/species/:species_id" component={Species} />
+        <Route path="/schema/:schema_id/locus/:locus_id" component={Locus} />
         <Redirect to="/" />
       </Switch>
     );

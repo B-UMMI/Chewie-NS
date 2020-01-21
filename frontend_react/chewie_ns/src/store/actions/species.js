@@ -92,7 +92,7 @@ export const fetchSpeciesAnnot = spec_id => {
       .then(res => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
-        const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
+        // const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
         const fetchedSpeciesAnnot2 = [];
         let x_val = 0;
         let y_val = 0;
@@ -122,7 +122,7 @@ export const fetchSpeciesAnnot = spec_id => {
             olaLocus[curSchemaId][[x_val]] = locus_id
             ola3[curSchemaId].push(y_val)
             ola4[curSchemaId][[locus_id]] = y_val
-  
+
           } else if (!(curSchemaId in ola2)) {
             // console.log("works2")
             // console.log(curSchemaId)
@@ -150,28 +150,29 @@ export const fetchSpeciesAnnot = spec_id => {
             ola22 = []
           }
           }
-        console.log("[OLA2]")
-        console.log(ola4)
-        // console.log(_.fromPairs(_.sortBy(_.toPairs(ola4), 1).reverse()))
-        // let test = [ola2, olaLocus];
-        // console.log(test)
-        // console.log(Object.entries(ola2))
-        // console.log(ola22)
-        
-        for (let idx in ola2) {
-          console.log(_.fromPairs(_.sortBy(_.toPairs(ola4[idx]), 1).reverse()))
-          // const sorted = Object.entries(ola4[idx]).sort(([c1, v1], [c2, v2]) => {
-          //   return v1 - v2;
-          // }).reduce((o, [k, v]) => (o[k] = v, o), {});
-          // console.log(sorted)
-          // console.log(sortTest(test.idx))
-          // console.log(Object.values(olaLocus[idx]).sort(collator.compare).reverse(collator.compare))
+        // console.log("[OLA2]")
+        // console.log(ola4)
+
+        for (let idx in ola4) {
+
+          // console.log(ola4[idx])
+
+          let sorted = _(ola4[idx]).toPairs().value().sort((a,b) => b[1] - a[1]);
+
+          let s_loci_id = sorted.map(arr2 => arr2[0]);
+
+          let s_nr_alleles = sorted.map(arr2 => arr2[1]);
+
+          // console.log(s_loci_id)
+          // console.log(s_nr_alleles)
+
+
           fetchedSpeciesAnnot2.push({
             x: Object.keys(ola2[idx]),
-            y: Object.values(ola2[idx]).sort(collator.compare).reverse(collator.compare),
+            y: s_nr_alleles,
             type: "bar",
             name: "Schema " + idx,
-            // hovertext: Object.values(olaLocus[idx])
+            hovertext: s_loci_id
             // line: {
             //   width: 1
             // }
