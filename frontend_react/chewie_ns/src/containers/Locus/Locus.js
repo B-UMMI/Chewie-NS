@@ -7,8 +7,14 @@ import * as actions from "../../store/actions/index";
 // import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
-
 import CircularProgress from "@material-ui/core/CircularProgress";
+
+// Material-UI Datatables
+import MUIDataTable from "mui-datatables";
+
+// Plotly.js
+import Plot from "react-plotly.js";
+
 
 class Locus extends Component {
   componentDidMount() {
@@ -22,10 +28,119 @@ class Locus extends Component {
   }
 
   render() {
+    let uniprot_data = <CircularProgress />;
     let fasta_data = <CircularProgress />;
-    // if (!this.props.loading) {
-    // }
-    return <div>{fasta_data}</div>;
+    // console.log(this.props.locus_fasta)
+    if (!this.props.loading) {
+
+      const columns = [
+        {
+          name: "uniprot_label",
+          label: "Uniprot Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "uniprot_submitted_name",
+          label: "Uniprot Submitted Name",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "uniprot_uri",
+          label: "Uniprot URI",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
+              )
+            }
+          }
+        }
+      ]
+
+      const options = {
+        responsive: "scrollMaxHeight",
+        selectableRowsHeader: false,
+        selectableRows: "none",
+        selectableRowsOnClick: true,
+        print: false,
+        download: false,
+        filter: false,
+        search: false,
+        viewColumns: true,
+        pagination: false
+      };
+
+      uniprot_data = (
+        <MUIDataTable
+          title={"Uniprot Annotation"}
+          data={this.props.locus_uniprot}
+          columns={columns}
+          options={options}
+        />
+      );
+
+
+      fasta_data = (
+        <Plot
+          data={this.props.locus_fasta}
+          layout={{
+            // height: 500,
+            title: {
+              text: "Locus Details"
+            },
+            xaxis: {
+              title: { text: "Sequence size (bp)" },
+            },
+            yaxis: {
+              title: { text: "# Alleles" }
+            },
+
+          }}
+          useResizeHandler={true}
+          style={{ width: "100%", height: "100%" }}
+          line={{
+            width: 1
+          }}
+          onClick={e => this.clickPlotHandler(e)}
+        />
+      )
+    }
+    return <div>
+      {fasta_data}
+      {uniprot_data}
+    </div>;
   }
 }
 

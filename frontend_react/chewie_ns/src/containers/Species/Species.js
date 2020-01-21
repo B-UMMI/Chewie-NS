@@ -288,7 +288,7 @@ class Species extends Component {
           layout={{
             // height: 500,
             title: {
-              text: "A Fancy Plot"
+              text: "Schemas Overview"
             },
             autosize: true,
             xaxis: {
