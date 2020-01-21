@@ -38,9 +38,25 @@ class Species extends Component {
     );
   }
 
-  clickPlotHandler = (event) => {
-    console.log(event)
-  }
+  clickPlotHandler = event => {
+    console.log(event.points[0]);
+    // console.log("[Schema ID]");
+    // console.log(event.points[0].data.name.slice(-1));
+    // console.log("[Locus ID]");
+    // console.log(event.points[0].hovertext);
+
+    // const species_id = this.props.location.pathname[
+    //   this.props.location.pathname.length - 1
+    // ];
+
+    const schema_id = event.points[0].data.name.slice(-1);
+
+    const locus_id = event.points[0].hovertext;
+
+    this.props.history.push(
+      "/schema/" + schema_id + "/locus/" + locus_id
+    );
+  };
 
   render() {
     let species = <Spinner />;
@@ -56,9 +72,9 @@ class Species extends Component {
     //     })
     // }
     if (!this.props.loading) {
-      console.log("[before table]");
+      // console.log("[before table]");
       // console.log(this.props.species);
-      console.log(this.props.species_annot);
+      // console.log(this.props.species_annot);
       // console.log(this.props.species)
       // species =
       //     <TableContainer component={Paper}>
@@ -282,14 +298,14 @@ class Species extends Component {
             yaxis: {
               title: { text: "Nr alleles" }
             },
-            hovermode: 'closest'
+            hovermode: "closest"
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
             width: 1
           }}
-          onClick={(e) => console.log(e.points)}
+          onClick={e => this.clickPlotHandler(e)}
         />
       );
     }
