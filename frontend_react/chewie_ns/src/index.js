@@ -13,6 +13,7 @@ import authReducer from './store/reducers/auth';
 import statsReducer from './store/reducers/stats';
 import speciesReducer from './store/reducers/species';
 import locusReducer from './store/reducers/locus';
+import annotationsReducer from './store/reducers/annotations';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -20,7 +21,8 @@ const rootReducer = combineReducers({
     auth: authReducer,
     stats: statsReducer,
     species: speciesReducer,
-    locus: locusReducer
+    locus: locusReducer,
+    annotations: annotationsReducer
 });
 
 const store = createStore(rootReducer, composeEnhancers(

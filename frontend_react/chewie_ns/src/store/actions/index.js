@@ -16,3 +16,6 @@ export {
     fetchLocusFasta,
     fetchLocusUniprot
 } from './locus';
+export {
+    fetchAnnotations
+} from './annotations';
