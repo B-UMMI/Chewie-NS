@@ -870,73 +870,59 @@ class StatsSpeciesSchemas(Resource):
 
 
                         
-            return {"message" : result["results"]["bindings"]}, 200
+            return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
         
         except:
             return {"message" : "Sum thing wong"}, 404
 
 
-# @stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/locus/<int:locus_id>")
-# class StatsSpeciesSchemas(Resource):
-#     """ Summary of one locus' data. """
+@stats_conf.route("/annotations")
+class StatsAnnotations(Resource):
+    """ Summary of all annotations in NS. """
     
-#     @api.doc(responses={ 200: 'OK',
-#                          400: 'Invalid Argument', 
-#                          500: 'Internal Server Error', 
-#                          403: 'Unauthorized', 
-#                          401: 'Unauthenticated',
-#                          404: 'Not Found' },
-#              security=[])
-#     def get(self, species_id, schema_id, locus_id):	
-#         """ Get the locus info for a particular schema of a particular species. """
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self):	
+        """ Get all the annotations in NS. """
 
-#         new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
-    
-#         #count stuff from on virtuoso
-#         try:
+        try:
 
-#             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-#                 ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
-#                     'from <{0}> '
-#                     'where '
-#                     '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
-#                     'typon:hasSchemaPart ?part . '
-#                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-#                     '?allele a typon:Allele; typon:isOfLocus ?locus . '
-#                     '?allele typon:hasSequence ?sequence . }}'
-#                     'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                ('select DISTINCT ?species ?schema ?locus (str(?UniprotLabel) as ?UniprotLabel) '
+                    '(str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
+                    'from <{0}> '
+                    'where '
+                    '{{ ?schema a typon:Schema; typon:isFromTaxon ?taxon; typon:hasSchemaPart ?part . '
+                    '?taxon a <http://purl.uniprot.org/core/Taxon>; typon:name ?species . '
+                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                    '?locus a typon:Locus .'
+                    '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                    '?allele typon:hasSequence ?sequence . '
+                    'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
+                    'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
+                    'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }} '
+                    'ORDER BY ?schema '.format(current_app.config['DEFAULTHGRAPH'])))
+            
+            # sch a typon:Schema; typon:isFromTaxon ?species . '
+            #         '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name
+            # print(result)
 
-#                     # ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
-#                     # 'from <{0}> '
-#                     # 'where '
-#                     # '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
-#                     # 'typon:hasSchemaPart ?part . '
-#                     # '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-#                     # '?allele a typon:Allele; typon:isOfLocus ?locus . '
-#                     # '?allele typon:hasSequence ?sequence . '
-#                     # 'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-#                     # 'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
-#                     # 'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'
-#                     # 'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
-
-
-#                     # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-#                     #          ('select distinct (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
-#                     #           'from <{0}>'
-#                     #           'where '
-#                     #           '{{ <{1}> a typon:Locus; typon:name ?name. '
-#                     #           '?alleles typon:isOfLocus <{1}> .'
-#                     #           '?alleles typon:hasSequence ?sequence. '
-#                     #           'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-#                     #           'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}}'
-#                     #           'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-
-
-                        
-#             return {"message" : result["results"]["bindings"]}, 200
+            # r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
+            
+            return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
         
-#         except:
-#             return {"message" : "Sum thing wong"}, 404
+        except:
+            return {"message" : "Sum thing wong"}, 404
+
+
+
+
+
 
 ############################################## Loci Routes ##############################################
 
@@ -1322,8 +1308,9 @@ class LociNSFastaAPItypon(Resource):
                         yield json.dumps(prev_item) + ']}'
                     
                     r = Response(stream_with_context(generate()), content_type='application/json')
+                    r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
                         
-                    return Response(stream_with_context(generate()), content_type='application/json')
+                    return r
                     
                 except:
                     return {"message" : "Empty man..."}
@@ -1358,6 +1345,7 @@ class LociNSFastaAPItypon(Resource):
                 yield json.dumps(prev_item) + ']}'
             
             r = Response(stream_with_context(generate()), content_type='application/json')
+            r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
                 
             return r
             
