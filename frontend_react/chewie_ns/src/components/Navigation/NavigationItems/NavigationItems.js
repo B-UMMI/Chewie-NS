@@ -20,6 +20,7 @@ const navigationItems = props => (
       <NavigationItem link="/species">Species</NavigationItem>
     ) : null}
     <NavigationItem link="/stats">Stats</NavigationItem>
+    <NavigationItem link="/annotations">Annotations</NavigationItem>
     <IconButton
       href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
       target={"_blank"}

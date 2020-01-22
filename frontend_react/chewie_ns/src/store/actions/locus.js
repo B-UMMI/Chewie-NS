@@ -27,7 +27,7 @@ export const fetchLocusFasta = locus_id => {
     axios
       .get("loci/" + locus_id + "/fasta")
       .then(res => {
-        // console.log(res.data.Fasta);
+        // console.log(res);
         let allele_ids = [];
         let nucSeqLen = [];
         let plot_data = [];
@@ -77,7 +77,7 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
       axios
         .get("loci/" + locus_id + "/uniprot")
         .then(res => {
-          console.log(res.data);
+          // console.log(res.data);
           let uniprot_annot = [];
           uniprot_annot.push({
             uniprot_label: res.data.UniprotInfo[0].UniprotLabel.value,
