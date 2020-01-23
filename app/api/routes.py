@@ -904,7 +904,7 @@ class StatsAnnotations(Resource):
                     '?allele a typon:Allele; typon:isOfLocus ?locus . '
                     '?allele typon:hasSequence ?sequence . '
                     'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-                    'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
+                    # 'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
                     'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }} '
                     'ORDER BY ?schema '.format(current_app.config['DEFAULTHGRAPH'])))
             
@@ -913,6 +913,8 @@ class StatsAnnotations(Resource):
             # print(result)
 
             # r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
+
+            # print()
             
             return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
         
@@ -1238,7 +1240,7 @@ class LociNSFastaAPItypon(Resource):
         
         # find all alleles from the locus and return the sequence and id sorted by id
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select ?allele_id (str(?nucSeq) as ?nucSeq) '
+                             ('select ?name ?allele_id (str(?nucSeq) as ?nucSeq) '
                               'from <{0}> '
                               'where '
                               '{{ <{1}> a typon:Locus; typon:name ?name. '
