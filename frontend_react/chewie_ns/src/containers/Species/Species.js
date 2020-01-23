@@ -61,42 +61,8 @@ class Species extends Component {
   render() {
     let species = <Spinner />;
     let species_plot = <CircularProgress />;
-    // if (!this.props.loading) {
-    //     // console.log(this.props.species)
-    //     species = this.props.species.map(sp => {
-    //         return (
-    //             <ul key={sp.id}>
-    //                 <li>{sp.species_name} {sp.species_id}</li>
-    //             </ul>
-    //         )
-    //     })
-    // }
+
     if (!this.props.loading) {
-      // console.log("[before table]");
-      // console.log(this.props.species);
-      // console.log(this.props.species_annot);
-      // console.log(this.props.species)
-      // species =
-      //     <TableContainer component={Paper}>
-      //       <Table style={{minWidth: 650}} aria-label="simple table">
-      //         <TableHead>
-      //           <TableRow>
-      //             <TableCell style={{fontWeight: "bold"}}>Species</TableCell>
-      //             <TableCell style={{fontWeight: "bold"}}>Species ID</TableCell>
-      //           </TableRow>
-      //         </TableHead>
-      //         <TableBody>
-      //           {this.props.species.map(sp => (
-      //             <TableRow key={sp.id}>
-      //               <TableCell component="th" scope="row">
-      //                 {sp.species_name}
-      //               </TableCell>
-      //               <TableCell>{sp.species_id}</TableCell>
-      //             </TableRow>
-      //           ))}
-      //         </TableBody>
-      //       </Table>
-      //     </TableContainer>
 
       const columns = [
         {
@@ -254,25 +220,19 @@ class Species extends Component {
       ];
 
       const options = {
+        textLabels: {
+          body: {
+            noMatch: <CircularProgress />
+          }
+        },
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
         selectableRows: "none",
         print: false,
         viewColumns: true,
         pagination: false
-        // onRowClick: (rowData) => this.rowClickHandler(rowData[rowData.length - 1])
       };
 
-      // species = this.props.species.map(schema => (
-      //   <div key={schema.id}>
-      //     <MUIDataTable
-      //     title={"Overview"}
-      //     data={this.props.species[schema]}
-      //     columns={columns}
-      //     options={options}
-      //     />
-      //   </div>
-      // ))
       species = (
         <MUIDataTable
           title={"Schema Details"}
@@ -286,7 +246,6 @@ class Species extends Component {
         <Plot
           data={this.props.species_annot}
           layout={{
-            // height: 500,
             title: {
               text: "Schemas Overview"
             },
@@ -311,7 +270,7 @@ class Species extends Component {
     }
     return (
       <div>
-        <div>{species}</div>
+        {species}
         {species_plot}
       </div>
     );
@@ -324,7 +283,6 @@ const mapStateToProps = state => {
     species_annot: state.species.species_annot,
     loading: state.species.loading,
     error: state.species.error
-    // token: state.auth.token
   };
 };
 

@@ -29,6 +29,11 @@ export const fetchAnnotations = () => {
       .then(res => {
         // console.log(res);
         let annotTableData = [];
+        // let annotTableData2 = [];
+        // let curLabel = "";
+        // let schemaIds = [];
+        // let locusIds = [];
+        // let speciesNames = [];
         for (let key in res.data.message) {
           annotTableData.push({
             uniprot_label: res.data.message[key].UniprotLabel.value,
@@ -42,7 +47,7 @@ export const fetchAnnotations = () => {
             )
           });
         }
-        // console.log(annotTableData)
+        // console.log(annotTableData2)
         dispatch(fetchAnnotationsSuccess(annotTableData));
       })
       .catch(annotErr => {

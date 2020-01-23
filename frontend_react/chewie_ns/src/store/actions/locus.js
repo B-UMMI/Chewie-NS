@@ -1,10 +1,11 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchLocusFastaSuccess = locus_fasta => {
+export const fetchLocusFastaSuccess = (locus_fasta, fasta_data) => {
   return {
     type: actionTypes.FECTH_LOCUS_FASTA_SUCCESS,
-    locus_fasta: locus_fasta
+    locus_fasta: locus_fasta,
+    fasta_data: fasta_data
   };
 };
 
@@ -31,10 +32,15 @@ export const fetchLocusFasta = locus_id => {
         let allele_ids = [];
         let nucSeqLen = [];
         let plot_data = [];
+        let fastaData = [];
+        const locusName = res.data.Fasta[0].name.value;
         for (let key in res.data.Fasta) {
           allele_ids.push(res.data.Fasta[key].allele_id.value)
           nucSeqLen.push((res.data.Fasta[key].nucSeq.value).length)
+
+          fastaData.push(locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value + "\n")
         }
+        // console.log(fastaData.join("\n"));
         // console.log(allele_ids);
         // console.log(nucSeqLen);
         plot_data.push({
@@ -43,7 +49,7 @@ export const fetchLocusFasta = locus_id => {
           type: "histogram",
           name: "Locus Details"
         })
-        dispatch(fetchLocusFastaSuccess(plot_data));
+        dispatch(fetchLocusFastaSuccess(plot_data, fastaData));
       })
       .catch(fastaErr => {
         dispatch(fetchLocusFastaFail(fastaErr));

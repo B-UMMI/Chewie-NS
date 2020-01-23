@@ -4,6 +4,7 @@ import { updateObject } from "../utility";
 const initialState = {
     locus_fasta: [],
     locus_uniprot: [], 
+    fasta_data: [],
     loading: false, 
     error: false
 };
@@ -11,6 +12,7 @@ const initialState = {
 const fetchLocusFastaSuccess = (state, action) => {
     return updateObject(state, {
         locus_fasta: action.locus_fasta,
+        fasta_data: action.fasta_data,
         loading: false
     })
 };
