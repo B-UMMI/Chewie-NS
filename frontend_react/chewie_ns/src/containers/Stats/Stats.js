@@ -4,16 +4,10 @@ import { connect } from "react-redux";
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/index";
-import Spinner from "../../components/UI/Spinner/Spinner";
+// import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
-// import Table from "@material-ui/core/Table";
-// import TableBody from "@material-ui/core/TableBody";
-// import TableCell from "@material-ui/core/TableCell";
-// import TableContainer from "@material-ui/core/TableContainer";
-// import TableHead from "@material-ui/core/TableHead";
-// import TableRow from "@material-ui/core/TableRow";
-// import Paper from "@material-ui/core/Paper";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 // Material Table
 // import MaterialTable from 'material-table';
@@ -37,53 +31,9 @@ class Stats extends Component {
   }
   
   render() {
-    // console.log("[props loading]")
-    // console.log(this.props.loading)
-    let stats = <Spinner />;
-    // if (!this.props.loading) {
-    //   stats = this.props.stats.map(stat => {
-    //     return (
-    //       <span
-    //         style={{
-    //           textTransform: "capitalize",
-    //           display: "inline-block",
-    //           margin: "0 8px",
-    //           border: "1px solid #ccc",
-    //           padding: "5px"
-    //         }}
-    //         key={stat.id}
-    //       >
-    //         {stat.data}
-    //       </span>
-    //     );
-    //   });
-    // }
+    let stats = <CircularProgress />;
+
     if (!this.props.loading) {
-      console.log("[before table]");
-      console.log(this.props.stats);
-
-
-      // stats =
-      //     <TableContainer component={Paper}>
-      //       <Table style={{minWidth: 650}} aria-label="simple table">
-      //         <TableHead>
-      //           <TableRow>
-      //             <TableCell style={{fontWeight: "bold"}}>Species</TableCell>
-      //             <TableCell style={{fontWeight: "bold"}}>Schemas Available</TableCell>
-      //           </TableRow>
-      //         </TableHead>
-      //         <TableBody>
-      //           {this.props.stats.map(stat => (
-      //             <TableRow hover key={stat.id} onClick={this.clickHandler(stat.id, stat.species_name)}>
-      //               <TableCell component="th" scope="row">
-      //                 {stat.species_name}
-      //               </TableCell>
-      //               <TableCell>{stat.nr_schemas}</TableCell>
-      //             </TableRow>
-      //           ))}
-      //         </TableBody>
-      //       </Table>
-      //     </TableContainer>
 
       const columns = [
         {
@@ -133,6 +83,11 @@ class Stats extends Component {
       ];
 
       const options = {
+        textLabels: {
+          body: {
+            noMatch: <CircularProgress />
+          }
+        },
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
         selectableRows: "none",

@@ -8,6 +8,9 @@ import * as actions from "../../store/actions/index";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Button from "@material-ui/core/Button";
+import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
+import Box from '@material-ui/core/Box';
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -15,24 +18,47 @@ import MUIDataTable from "mui-datatables";
 // Plotly.js
 import Plot from "react-plotly.js";
 
+// Download function
+import { saveAs } from 'file-saver';
 
 class Locus extends Component {
   componentDidMount() {
-    const locusId = this.props.location.pathname.substring(this.props.location.pathname.lastIndexOf("/") + 1);
+    const locusId = this.props.location.pathname.substring(
+      this.props.location.pathname.lastIndexOf("/") + 1
+    );
 
-    console.log(["componentDidMount"])
-    console.log(locusId)
+    console.log(["componentDidMount"]);
+    console.log(locusId);
 
     this.props.onFetchLocusFasta(locusId);
     this.props.onFetchLocusUniprot(locusId);
   }
 
+  downloadFastaHandler = () => {
+    // console.log(this.props.fasta_data)
+    const fastaJoin = this.props.fasta_data.join("\n")
+
+    const blob = new Blob([fastaJoin], {type: "text/plain;charset=utf-8"});
+
+    saveAs(blob, "test.txt")
+
+  }
+
   render() {
     let uniprot_data = <CircularProgress />;
     let fasta_data = <CircularProgress />;
+    let downloadFasta = (
+      <Button
+        variant="contained"
+        color="default"
+        startIcon={<GetAppSharpIcon />}
+        onClick={() => this.downloadFastaHandler()}
+      >
+        Download FASTA
+      </Button>
+    );
     // console.log(this.props.locus_fasta)
     if (!this.props.loading) {
-
       const columns = [
         {
           name: "uniprot_label",
@@ -82,18 +108,20 @@ class Locus extends Component {
             },
             customBodyRender: (value, tableMeta, updateValue) => {
               return (
-                <a href={value} target="_blank" rel="noopener noreferrer">{value}</a>
-              )
+                <a href={value} target="_blank" rel="noopener noreferrer">
+                  {value}
+                </a>
+              );
             }
           }
         }
-      ]
+      ];
 
       const options = {
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
         selectableRows: "none",
-        selectableRowsOnClick: true,
+        selectableRowsOnClick: false,
         print: false,
         download: false,
         filter: false,
@@ -111,7 +139,6 @@ class Locus extends Component {
         />
       );
 
-
       fasta_data = (
         <Plot
           data={this.props.locus_fasta}
@@ -121,12 +148,11 @@ class Locus extends Component {
               text: "Locus Details"
             },
             xaxis: {
-              title: { text: "Sequence size (bp)" },
+              title: { text: "Sequence size (bp)" }
             },
             yaxis: {
               title: { text: "# Alleles" }
-            },
-
+            }
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
@@ -135,12 +161,15 @@ class Locus extends Component {
           }}
           onClick={e => this.clickPlotHandler(e)}
         />
-      )
+      );
     }
-    return <div>
-      {fasta_data}
-      {uniprot_data}
-    </div>;
+    return (
+      <div>
+        {fasta_data}
+        {uniprot_data}
+        <Box style={{height: 80, display: "flex", justifyContent: 'center', alignItems: 'center'}}>{downloadFasta}</Box>
+      </div>
+    );
   }
 }
 
@@ -148,6 +177,7 @@ const mapStateToProps = state => {
   return {
     locus_fasta: state.locus.locus_fasta,
     locus_uniprot: state.locus.locus_uniprot,
+    fasta_data: state.locus.fasta_data,
     loading: state.locus.loading,
     error: state.locus.error
     // token: state.auth.token
