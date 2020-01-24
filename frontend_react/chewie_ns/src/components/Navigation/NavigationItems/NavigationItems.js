@@ -19,7 +19,7 @@ const navigationItems = props => (
     {props.isAuthenticated ? (
       <NavigationItem link="/species">Species</NavigationItem>
     ) : null}
-    <NavigationItem link="/stats">Stats</NavigationItem>
+    <NavigationItem link="/stats">Schemas</NavigationItem>
     <NavigationItem link="/annotations">Annotations</NavigationItem>
     <IconButton
       href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}

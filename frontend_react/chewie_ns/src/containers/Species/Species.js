@@ -235,7 +235,7 @@ class Species extends Component {
 
       species = (
         <MUIDataTable
-          title={"Schema Details"}
+          // title={"Schema Details"}
           data={this.props.species}
           columns={columns}
           options={options}

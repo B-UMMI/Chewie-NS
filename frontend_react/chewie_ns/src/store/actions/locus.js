@@ -83,9 +83,10 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
       axios
         .get("loci/" + locus_id + "/uniprot")
         .then(res => {
-          // console.log(res.data);
+          console.log(res.data);
           let uniprot_annot = [];
           uniprot_annot.push({
+            locus_label: res.data.UniprotInfo[0].name.value,
             uniprot_label: res.data.UniprotInfo[0].UniprotLabel.value,
             uniprot_submitted_name: res.data.UniprotInfo[0].UniprotSName.value,
             uniprot_uri: res.data.UniprotInfo[0].UniprotURI.value
