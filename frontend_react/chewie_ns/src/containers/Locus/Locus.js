@@ -40,7 +40,13 @@ class Locus extends Component {
 
     const blob = new Blob([fastaJoin], {type: "text/plain;charset=utf-8"});
 
-    saveAs(blob, "test.txt")
+    const locusIdDown = this.props.location.pathname.substring(
+      this.props.location.pathname.lastIndexOf("/") + 1
+    );
+
+    console.log(locusIdDown)
+
+    saveAs(blob, "locus_" + locusIdDown + ".fasta")
 
   }
 
