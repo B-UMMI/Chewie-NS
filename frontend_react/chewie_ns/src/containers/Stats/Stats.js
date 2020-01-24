@@ -9,9 +9,6 @@ import * as actions from "../../store/actions/index";
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-// Material Table
-// import MaterialTable from 'material-table';
-
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
 

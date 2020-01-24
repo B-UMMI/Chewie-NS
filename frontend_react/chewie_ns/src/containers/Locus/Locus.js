@@ -27,8 +27,8 @@ class Locus extends Component {
       this.props.location.pathname.lastIndexOf("/") + 1
     );
 
-    console.log(["componentDidMount"]);
-    console.log(locusId);
+    // console.log(["componentDidMount"]);
+    // console.log(locusId);
 
     this.props.onFetchLocusFasta(locusId);
     this.props.onFetchLocusUniprot(locusId);
@@ -66,6 +66,22 @@ class Locus extends Component {
     // console.log(this.props.locus_fasta)
     if (!this.props.loading) {
       const columns = [
+        {
+          name: "locus_label",
+          label: "Locus Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              }
+            }
+          }
+        },
         {
           name: "uniprot_label",
           label: "Uniprot Label",
@@ -149,7 +165,6 @@ class Locus extends Component {
         <Plot
           data={this.props.locus_fasta}
           layout={{
-            // height: 500,
             title: {
               text: "Locus Details"
             },

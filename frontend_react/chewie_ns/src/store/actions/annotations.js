@@ -44,7 +44,8 @@ export const fetchAnnotations = () => {
             ),
             locus: res.data.message[key].locus.value.substring(
               res.data.message[key].locus.value.lastIndexOf("/") + 1
-            )
+            ),
+            locus_name: res.data.message[key].name.value
           });
         }
         // console.log(annotTableData2)

@@ -106,6 +106,22 @@ class Annotations extends Component {
               };
             }
           }
+        },
+        {
+          name: "locus_name",
+          label: "Locus Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              }
+            }
+          }
         }
       ];
 
