@@ -893,14 +893,14 @@ class StatsAnnotations(Resource):
         try:
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select DISTINCT ?species ?schema ?locus (str(?UniprotLabel) as ?UniprotLabel) '
+                ('select DISTINCT ?species ?schema ?locus ?name (str(?UniprotLabel) as ?UniprotLabel) '
                     '(str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
                     'from <{0}> '
                     'where '
                     '{{ ?schema a typon:Schema; typon:isFromTaxon ?taxon; typon:hasSchemaPart ?part . '
                     '?taxon a <http://purl.uniprot.org/core/Taxon>; typon:name ?species . '
                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    '?locus a typon:Locus .'
+                    '?locus a typon:Locus; typon:name ?name .'
                     '?allele a typon:Allele; typon:isOfLocus ?locus . '
                     '?allele typon:hasSequence ?sequence . '
                     'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
@@ -1375,7 +1375,7 @@ class LociNSUniprotAPItypon(Resource):
         
         #get all uniprot labels and URI from all alleles of the selected locus
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select distinct (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
+                             ('select distinct ?name (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
                               'from <{0}>'
                               'where '
                               '{{ <{1}> a typon:Locus; typon:name ?name. '
