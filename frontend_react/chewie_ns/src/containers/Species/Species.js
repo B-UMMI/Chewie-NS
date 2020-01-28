@@ -49,14 +49,29 @@ class Species extends Component {
     //   this.props.location.pathname.length - 1
     // ];
 
+    // console.log(this.props.location.pathname)
+
+    // const species_id = this.props.location.pathname;
+
     const schema_id = event.points[0].data.name.slice(-1);
 
     const locus_id = event.points[0].hovertext;
 
+    // console.log(this.props.match);
+
     this.props.history.push(
-      "/schema/" + schema_id + "/locus/" + locus_id
+      this.props.match.params.species_id + "/schemas/" + schema_id + "/locus/" + locus_id
     );
   };
+
+  rowClickHandler = (schema_id) => {
+    console.log("[RowClick]");
+    console.log("schema_id: ", schema_id);
+    // console.log(this.props.match)
+    // this.setState({ schema: schema_id})
+    // console.log(this.props.match);
+    this.props.history.push(`${this.props.match.params.species_id}/schemas/${schema_id}`);
+  }
 
   render() {
     let species = <Spinner />;
@@ -230,7 +245,8 @@ class Species extends Component {
         selectableRows: "none",
         print: false,
         viewColumns: true,
-        pagination: false
+        pagination: false,
+        onRowClick: (rowData) => this.rowClickHandler(rowData[0])
       };
 
       species = (
@@ -251,8 +267,8 @@ class Species extends Component {
             },
             autosize: true,
             xaxis: {
-              title: { text: "Loci" },
-              range: [0, 500]
+              title: { text: "Loci" }
+              // range: [0, 500]
             },
             yaxis: {
               title: { text: "Nr alleles" }

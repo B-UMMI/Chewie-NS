@@ -23,7 +23,7 @@ class Stats extends Component {
   rowClickHandler = (species_id) => {
     console.log("[RowClick]");
     console.log("species_id: ", species_id);
-    // console.log("rowMeta: ", rowMeta);
+    // console.log(this.props.match);
     this.props.history.push('/species/' + species_id);
   }
   

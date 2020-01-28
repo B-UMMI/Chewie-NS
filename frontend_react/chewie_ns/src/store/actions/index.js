@@ -13,6 +13,9 @@ export {
     fetchSpeciesAnnot
 } from './species';
 export {
+    fetchSchemaAlleleMode
+} from './schema'
+export {
     fetchLocusFasta,
     fetchLocusUniprot
 } from './locus';

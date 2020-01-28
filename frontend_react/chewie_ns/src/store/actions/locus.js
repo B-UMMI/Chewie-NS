@@ -36,7 +36,7 @@ export const fetchLocusFasta = locus_id => {
         const locusName = res.data.Fasta[0].name.value;
         for (let key in res.data.Fasta) {
           allele_ids.push(res.data.Fasta[key].allele_id.value)
-          nucSeqLen.push((res.data.Fasta[key].nucSeq.value).length)
+          nucSeqLen.push(res.data.Fasta[key].nucSeqLen.value)
 
           fastaData.push(locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value + "\n")
         }

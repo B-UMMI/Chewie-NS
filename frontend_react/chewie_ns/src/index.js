@@ -12,6 +12,7 @@ import * as serviceWorker from './serviceWorker';
 import authReducer from './store/reducers/auth';
 import statsReducer from './store/reducers/stats';
 import speciesReducer from './store/reducers/species';
+import schemaReducer from './store/reducers/schema';
 import locusReducer from './store/reducers/locus';
 import annotationsReducer from './store/reducers/annotations';
 
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
     auth: authReducer,
     stats: statsReducer,
     species: speciesReducer,
+    schema: schemaReducer,
     locus: locusReducer,
     annotations: annotationsReducer
 });
