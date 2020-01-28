@@ -6,6 +6,7 @@ import time
 import hashlib
 import datetime as dt
 import requests, json
+from collections import Counter
 
 # Flask imports 
 from flask_login import login_required
@@ -876,6 +877,87 @@ class StatsSpeciesSchemas(Resource):
             return {"message" : "Sum thing wong"}, 404
 
 
+@stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/loci")
+class StatsSpeciesSchemasMode(Resource):
+    """ Returns the allele mode sizes per gene. """
+    
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=[])
+    def get(self, species_id, schema_id):	
+        """ Get the all the loci and calculate the allele mode for a particular schema of a particular species. """
+
+        new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
+    
+        try:
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                        ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
+                         ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
+                        'from <{0}> '
+                        'where '
+                        '{{ <{1}> typon:hasSchemaPart ?part. '
+                        '?part typon:hasLocus ?locus.'
+                        '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                        '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                        '?allele typon:hasSequence ?sequence .'
+                        '?sequence typon:nucleotideSequence ?nucSeq .'
+                        'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
+                        'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+
+            # print(result)
+
+
+            loci_data = {}
+
+            for i in result["results"]["bindings"]:
+
+                locus_name = i["name"]["value"]
+                alleles_len = []
+                # nr_alleles = i["nr_allele"]["value"]
+
+                if locus_name not in loci_data:
+
+                    alleles_len.append(i["nucSeqLen"]["value"])
+
+                    loci_data[locus_name] = alleles_len
+
+                else:
+                    loci_data[locus_name].append(i["nucSeqLen"]["value"])
+
+            print(len(loci_data["GBS_CC1_2-007569"]))
+
+            mode_res = []
+            total_al_res = []
+
+            for k,v in loci_data.items():
+                t = Counter(v)
+                # print(str(k) + ": " + t.most_common(1)[0][0])
+
+                mode_res.append({
+                    "locus_name": str(k),
+                    "alleles_mode": t.most_common(1)[0][0]
+                })
+
+                total_al_res.append({
+                    "locus_name": str(k),
+                    "nr_alleles": len(v)
+                })
+            
+            # print(mode_res)
+                        
+            return {"mode": mode_res,
+                    "total_alleles": total_al_res}, 200
+        
+        except:
+            return {"message" : "Sum thing wong"}, 404
+
+
+
 @stats_conf.route("/annotations")
 class StatsAnnotations(Resource):
     """ Summary of all annotations in NS. """
@@ -920,9 +1002,6 @@ class StatsAnnotations(Resource):
         
         except:
             return {"message" : "Sum thing wong"}, 404
-
-
-
 
 
 
@@ -1240,7 +1319,7 @@ class LociNSFastaAPItypon(Resource):
         
         # find all alleles from the locus and return the sequence and id sorted by id
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select ?name ?allele_id (str(?nucSeq) as ?nucSeq) '
+                             ('select ?name ?allele_id (str(?nucSeq) as ?nucSeq) (strlen(?nucSeq) as ?nucSeqLen) '
                               'from <{0}> '
                               'where '
                               '{{ <{1}> a typon:Locus; typon:name ?name. '
@@ -2655,9 +2734,9 @@ class SchemaLociAPItypon(Resource):
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not Found' },
-            security=["access_token"])
+            security=[])
     @w.use_kwargs(api, parser)
-    @jwt_required
+    # @jwt_required
     def get(self, species_id, schema_id, **kwargs):
         """ Returns the loci of a particular schema from a particular species """
         
@@ -2752,12 +2831,15 @@ class SchemaLociAPItypon(Resource):
         #if no date provided, query for all loci for the schema
         except:
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name)'
+                                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) (strlen(?nucSeq) as ?nucSeqLen) '
                                   'from <{0}> '
                                   'where '
                                   '{{ <{1}> typon:hasSchemaPart ?part. '
                                   '?part typon:hasLocus ?locus.'
-                                  '?locus typon:name ?name ; typon:originalName ?original_name. '
+                                  '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                                  '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                                  '?allele typon:hasSequence ?sequence .'
+                                  '?sequence typon:nucleotideSequence ?nucSeq .'
                                   'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
                                   'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
 
@@ -2771,7 +2853,7 @@ class SchemaLociAPItypon(Resource):
             try:
                 
                 latestDatetime = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-                
+
                 def generate():
                     yield '{"Loci": ['
                     
