@@ -1,0 +1,7 @@
+:local(.mainPaper) {
+    flex-grow: 1;
+}
+
+:local(.tabButton){
+    border-bottom: 2px solid #5c6bc0!important;
+}
