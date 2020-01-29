@@ -12,6 +12,7 @@ const fetchSchemaAlleleModeSuccess = (state, action) => {
     return updateObject(state, {
         mode_data: action.mode_data,
         total_allele_data: action.total_allele_data,
+        scatter_data: action.scatter_data,
         loading: false
     })
 };

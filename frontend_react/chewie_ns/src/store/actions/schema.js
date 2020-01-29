@@ -1,11 +1,12 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchSchemaAlleleModeSuccess = (mode_data, total_allele_data) => {
+export const fetchSchemaAlleleModeSuccess = (mode_data, total_allele_data, scatter_data) => {
   return {
     type: actionTypes.FETCH_SCHEMA_ALLELE_MODE_SUCCESS,
     mode_data: mode_data,
-    total_allele_data: total_allele_data
+    total_allele_data: total_allele_data,
+    scatter_data: scatter_data
   };
 };
 
@@ -59,8 +60,58 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
             type: "histogram",
             name: "Total alleles"
         })
+        
+        let locus_id = [];
+        let nr_alleles_scatter = [];
+        let scatter_data = [];
+        let scatter_data_mean = [];
+        let scatter_data_median = [];
+        let scatter_data_mode = [];
+        for (let key in res.data.scatter_data) {
+          locus_id.push(res.data.scatter_data[key].locus_id)
+          nr_alleles_scatter.push(res.data.scatter_data[key].nr_alleles);
+          scatter_data_mean.push(res.data.scatter_data[key].alleles_mean);
+          scatter_data_median.push(res.data.scatter_data[key].alleles_median);
+          scatter_data_mode.push(res.data.scatter_data[key].alleles_mode);
+        }
+        scatter_data.push({
+          x: scatter_data_mode,
+          y: nr_alleles_scatter,
+          type: "scatter",
+          name: "Mode",
+          mode: "markers",
+          marker: {
+            opacity: 0.7,
+            size: 4
+          },
+          hovertext: locus_id
+        },
+        {
+          x: scatter_data_mean,
+          y: nr_alleles_scatter,
+          type: "scatter",
+          name: "Mean",
+          mode: "markers",
+          marker: {
+            opacity: 0.7,
+            size: 4
+          },
+          hovertext: locus_id
+        },
+        {
+          x: scatter_data_median,
+          y: nr_alleles_scatter,
+          type: "scatter",
+          name: "Median",
+          mode: "markers",
+          marker: {
+            opacity: 0.7,
+            size: 4
+          },
+          hovertext: locus_id
+        })
         // console.log(plot_data)
-        dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data));
+        dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data, scatter_data));
       })
       .catch(modeErr => {
         dispatch(fetchSchemaAlleleModeFail(modeErr));
