@@ -4,6 +4,7 @@ import jwt
 import sys
 import time
 import hashlib
+import statistics
 import datetime as dt
 import requests, json
 from collections import Counter
@@ -909,7 +910,7 @@ class StatsSpeciesSchemasMode(Resource):
                         'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
                         'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
 
-            # print(result)
+            # print(result["results"]["bindings"][0])
 
 
             loci_data = {}
@@ -929,15 +930,19 @@ class StatsSpeciesSchemasMode(Resource):
                 else:
                     loci_data[locus_name].append(i["nucSeqLen"]["value"])
 
-            print(len(loci_data["GBS_CC1_2-007569"]))
+            # print(len(loci_data["GBS_CC1_2-007569"]))
 
             mode_res = []
             total_al_res = []
+            scatter_res = []
 
             for k,v in loci_data.items():
                 t = Counter(v)
                 # print(str(k) + ": " + t.most_common(1)[0][0])
+                # print(str(k).split("-")[1])
 
+                allele_sizes = [int(size) for size in v]
+                
                 mode_res.append({
                     "locus_name": str(k),
                     "alleles_mode": t.most_common(1)[0][0]
@@ -947,11 +952,21 @@ class StatsSpeciesSchemasMode(Resource):
                     "locus_name": str(k),
                     "nr_alleles": len(v)
                 })
+
+                scatter_res.append({
+                    "locus_name": str(k),
+                    "locus_id": str(k).split("-")[1],
+                    "nr_alleles": len(v),
+                    "alleles_mean": round(sum(allele_sizes) / len(allele_sizes)),
+                    "alleles_median": round(statistics.median(allele_sizes)),
+                    "alleles_mode": t.most_common(1)[0][0]
+                })
             
-            # print(mode_res)
+            # print(scatter_res[0])
                         
             return {"mode": mode_res,
-                    "total_alleles": total_al_res}, 200
+                    "total_alleles": total_al_res,
+                    "scatter_data": scatter_res}, 200
         
         except:
             return {"message" : "Sum thing wong"}, 404
