@@ -103,7 +103,11 @@ class Stats extends Component {
       );
 
     }
-    return <div>{stats}</div>;
+    return (
+      <div>
+        <div>{stats}</div>
+      </div>
+    )
   }
 }
 

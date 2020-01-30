@@ -7,16 +7,7 @@ import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
-
 import CircularProgress from "@material-ui/core/CircularProgress";
-
-// import Table from "@material-ui/core/Table";
-// import TableBody from "@material-ui/core/TableBody";
-// import TableCell from "@material-ui/core/TableCell";
-// import TableContainer from "@material-ui/core/TableContainer";
-// import TableHead from "@material-ui/core/TableHead";
-// import TableRow from "@material-ui/core/TableRow";
-// import Paper from "@material-ui/core/Paper";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -27,7 +18,7 @@ import Plot from "react-plotly.js";
 class Species extends Component {
   componentDidMount() {
     // console.log("[this.props Stats]")
-    // console.log(this.props)
+    // console.log(this.props.history)
     // console.log("[PATH NAME]")
     // console.log(this.props.location.pathname[this.props.location.pathname.length - 1])
     this.props.onFetchSpecies(
