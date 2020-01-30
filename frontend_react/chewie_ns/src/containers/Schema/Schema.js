@@ -29,7 +29,8 @@ class Schema extends Component {
   }
 
   componentDidMount() {
-    // console.log(this.props.match);
+    console.log(this.props.match);
+    console.log(this.props.location);
 
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;
@@ -83,14 +84,14 @@ class Schema extends Component {
           data={this.props.mode_data}
           layout={{
             title: {
-              text: "Distribution of allele mode sizes per gene"
+              text: "Distribution of allele mode sizes"
             },
             xaxis: {
-              title: { text: "Allele Size" },
+              title: { text: "Allele Mode Size" },
               showgrid: true
             },
             yaxis: {
-              title: { text: "Number of occurrences" }
+              title: { text: "Number of Loci" }
             }
           }}
           useResizeHandler={true}
@@ -107,7 +108,7 @@ class Schema extends Component {
           data={this.props.total_allele_data}
           layout={{
             title: {
-              text: "Alleles per locus"
+              text: "Number of Loci with given Number of Alleles"
             },
             xaxis: {
               title: { text: "Number of Different Alleles" },
@@ -131,7 +132,7 @@ class Schema extends Component {
           data={this.props.scatter_data}
           layout={{
             title: {
-              text: "Allele Statistics"
+              text: "Locus Statistics"
             },
             xaxis: {
               title: { text: "Allele size in bp" },
@@ -166,14 +167,14 @@ class Schema extends Component {
       <div>
         <ExpansionPanel defaultExpanded>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography variant="h5" color="primary">Schema Statistics</Typography>
+            <Typography variant="h5" color="primary">Schema Evaluation</Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <div className={classes.mainPaper} style={{"width": "100%", "height": "100%"}}>
               <div style={style.buttonBar}>
-                <Button style={style.button} className={classNames(this.state.tabValue === 0 && classes.tabButton)} onClick={() => {this.plotChangeHandler(0)}}>Alleles per locus</Button>
-                <Button style={style.button} className={classNames(this.state.tabValue === 1 && classes.tabButton)} onClick={() => {this.plotChangeHandler(1)}}>Distribution of allele mode sizes per gene</Button>
-                <Button style={style.button} className={classNames(this.state.tabValue === 2 && classes.tabButton)} onClick={() => {this.plotChangeHandler(2)}}>Allele Statistics</Button>
+                <Button style={style.button} className={classNames(this.state.tabValue === 0 && classes.tabButton)} onClick={() => {this.plotChangeHandler(0)}}>Allele Numbers Analysis</Button>
+                <Button style={style.button} className={classNames(this.state.tabValue === 1 && classes.tabButton)} onClick={() => {this.plotChangeHandler(1)}}>Allele Length Analysis</Button>
+                <Button style={style.button} className={classNames(this.state.tabValue === 2 && classes.tabButton)} onClick={() => {this.plotChangeHandler(2)}}>Locus Statistics</Button>
               </div>
               {this.state.tabValue === 0 && total_allele_plot}
               {this.state.tabValue === 1 && mode_plot}

@@ -104,7 +104,7 @@ class Locus extends Component {
           options: {
             filter: true,
             sort: true,
-            display: true,
+            display: false,
             setCellHeaderProps: value => {
               return {
                 style: {
@@ -169,10 +169,10 @@ class Locus extends Component {
               text: "Locus Details"
             },
             xaxis: {
-              title: { text: "Sequence size (bp)" }
+              title: { text: "Sequence size in bp" }
             },
             yaxis: {
-              title: { text: "# Alleles" }
+              title: { text: "Number of Alleles" }
             }
           }}
           useResizeHandler={true}
