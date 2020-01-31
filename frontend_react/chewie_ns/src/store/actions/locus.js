@@ -1,11 +1,13 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchLocusFastaSuccess = (locus_fasta, fasta_data) => {
+export const fetchLocusFastaSuccess = (locus_fasta, fasta_data, scatter_data, basic_stats) => {
   return {
     type: actionTypes.FECTH_LOCUS_FASTA_SUCCESS,
     locus_fasta: locus_fasta,
-    fasta_data: fasta_data
+    fasta_data: fasta_data,
+    scatter_data: scatter_data,
+    basic_stats: basic_stats
   };
 };
 
@@ -29,9 +31,18 @@ export const fetchLocusFasta = locus_id => {
       .get("loci/" + locus_id + "/fasta")
       .then(res => {
         // console.log(res);
+
+        const median = arr => {
+          const mid = Math.floor(arr.length / 2),
+            nums = [...arr].sort((a, b) => a - b);
+          return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+        };
+
         let allele_ids = [];
         let nucSeqLen = [];
-        let plot_data = [];
+        let histogram_data = [];
+        let scatter_data = [];
+        let basic_stats = [];
         let fastaData = [];
         const locusName = res.data.Fasta[0].name.value;
         for (let key in res.data.Fasta) {
@@ -40,16 +51,39 @@ export const fetchLocusFasta = locus_id => {
 
           fastaData.push(locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value + "\n")
         }
-        // console.log(fastaData.join("\n"));
+        // console.log(fastaData[0]);
         // console.log(allele_ids);
-        // console.log(nucSeqLen);
-        plot_data.push({
+        // console.log(Math.min(...nucSeqLen.map(Number)));
+        // console.log(Math.max(...nucSeqLen.map(Number)));
+        // console.log(median(nucSeqLen.map(Number)));
+        // console.log(nucSeqLen.length)
+
+        const min_len = Math.min(...nucSeqLen.map(Number));
+        const max_len = Math.max(...nucSeqLen.map(Number))
+        const median_len = median(nucSeqLen.map(Number))
+        
+        basic_stats.push({
+          num_alleles: nucSeqLen.length,
+          size_range: min_len.toString() + "-" + max_len.toString(),
+          median: median_len
+        })
+
+        // console.log(basic_stats)
+
+        histogram_data.push({
           x: nucSeqLen,
           y: allele_ids,
           type: "histogram",
           name: "Locus Details"
         })
-        dispatch(fetchLocusFastaSuccess(plot_data, fastaData));
+        scatter_data.push({
+          x: nucSeqLen,
+          y: allele_ids,
+          type: "scatter",
+          name: "Locus Details",
+          mode: "markers"
+        })
+        dispatch(fetchLocusFastaSuccess(histogram_data, fastaData, scatter_data, basic_stats));
       })
       .catch(fastaErr => {
         dispatch(fetchLocusFastaFail(fastaErr));
@@ -83,7 +117,7 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
       axios
         .get("loci/" + locus_id + "/uniprot")
         .then(res => {
-          console.log(res.data);
+          // console.log(res.data);
           let uniprot_annot = [];
           uniprot_annot.push({
             locus_label: res.data.UniprotInfo[0].name.value,
@@ -91,6 +125,7 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
             uniprot_submitted_name: res.data.UniprotInfo[0].UniprotSName.value,
             uniprot_uri: res.data.UniprotInfo[0].UniprotURI.value
           })
+          // console.log(uniprot_annot)
           dispatch(fetchLocusUniprotSuccess(uniprot_annot));
         })
         .catch(uniprotErr => {
