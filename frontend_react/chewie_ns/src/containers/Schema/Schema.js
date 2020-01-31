@@ -29,8 +29,8 @@ class Schema extends Component {
   }
 
   componentDidMount() {
-    console.log(this.props.match);
-    console.log(this.props.location);
+    // console.log(this.props.match);
+    // console.log(this.props.location);
 
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;

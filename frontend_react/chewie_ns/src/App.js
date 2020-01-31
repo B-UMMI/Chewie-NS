@@ -4,7 +4,6 @@ import {
   Switch,
   withRouter,
   Redirect,
-  MemoryRouter,
   Link,
   useRouteMatch
 } from "react-router-dom";
@@ -25,7 +24,7 @@ import * as actions from "./store/actions/index";
 
 // Material Ui Components
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Typography from "@material-ui/core/Typography";
+// import Typography from "@material-ui/core/Typography";
 // import Link from "@material-ui/core/Link";
 import MuiLink from '@material-ui/core/Link';
 
