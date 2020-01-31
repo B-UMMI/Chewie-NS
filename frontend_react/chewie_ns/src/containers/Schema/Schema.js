@@ -45,15 +45,15 @@ class Schema extends Component {
   clickScatterPlotHandler = event => {
     console.log(event.points[0]);
 
-    const species_id = this.props.match.params.species_id;
+    // const species_id = this.props.match.params.species_id;
 
     const schema_id = this.props.match.params.schema_id;
 
     const locus_id = event.points[0].hovertext;
 
-    console.log(species_id);
-    console.log(schema_id);
-    console.log(locus_id);
+    // console.log(species_id);
+    // console.log(schema_id);
+    // console.log(locus_id);
 
     this.props.history.push(schema_id + "/locus/" + locus_id);
   };
@@ -123,7 +123,7 @@ class Schema extends Component {
           line={{
             width: 1
           }}
-          onClick={e => console.log(e)}
+          // onClick={e => console.log(e)}
         />
       );
 

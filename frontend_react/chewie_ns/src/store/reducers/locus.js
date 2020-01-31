@@ -5,6 +5,8 @@ const initialState = {
     locus_fasta: [],
     locus_uniprot: [], 
     fasta_data: [],
+    scatter_data: [],
+    basic_stats: [],
     loading: false, 
     error: false
 };
@@ -13,6 +15,8 @@ const fetchLocusFastaSuccess = (state, action) => {
     return updateObject(state, {
         locus_fasta: action.locus_fasta,
         fasta_data: action.fasta_data,
+        scatter_data: action.scatter_data,
+        basic_stats: action.basic_stats,
         loading: false
     })
 };

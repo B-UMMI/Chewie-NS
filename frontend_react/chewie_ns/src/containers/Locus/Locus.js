@@ -4,13 +4,20 @@ import { connect } from "react-redux";
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/index";
-// import Spinner from "../../components/UI/Spinner/Spinner";
+import classes from "./Locus.module.css";
+
+import classNames from "classnames";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
 import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
-import Box from '@material-ui/core/Box';
+import Box from "@material-ui/core/Box";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Typography from "@material-ui/core/Typography";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -19,9 +26,13 @@ import MUIDataTable from "mui-datatables";
 import Plot from "react-plotly.js";
 
 // Download function
-import { saveAs } from 'file-saver';
+import { saveAs } from "file-saver";
 
 class Locus extends Component {
+  state = {
+    tabValue: 0
+  };
+
   componentDidMount() {
     const locusId = this.props.location.pathname.substring(
       this.props.location.pathname.lastIndexOf("/") + 1
@@ -36,23 +47,41 @@ class Locus extends Component {
 
   downloadFastaHandler = () => {
     // console.log(this.props.fasta_data)
-    const fastaJoin = this.props.fasta_data.join("\n")
+    const fastaJoin = this.props.fasta_data.join("\n");
 
-    const blob = new Blob([fastaJoin], {type: "text/plain;charset=utf-8"});
+    const blob = new Blob([fastaJoin], { type: "text/plain;charset=utf-8" });
 
     const locusIdDown = this.props.location.pathname.substring(
       this.props.location.pathname.lastIndexOf("/") + 1
     );
 
-    console.log(locusIdDown)
+    console.log(locusIdDown);
 
-    saveAs(blob, "locus_" + locusIdDown + ".fasta")
+    saveAs(blob, "locus_" + locusIdDown + ".fasta");
+  };
 
-  }
+  plotChangeHandler = value => {
+    this.setState({ tabValue: value });
+  };
 
   render() {
+
+    const style = {
+      buttonBar: {
+          "overflowX": "auto",
+          "display": "flex",
+          "justifyContent": "center",
+          "marginBottom": "20px"
+      },
+      button: {
+          minWidth: "150px",
+      }
+    };
+
     let uniprot_data = <CircularProgress />;
     let fasta_data = <CircularProgress />;
+    let scatter_data = <CircularProgress />;
+
     let downloadFasta = (
       <Button
         variant="contained"
@@ -63,6 +92,7 @@ class Locus extends Component {
         Download FASTA
       </Button>
     );
+
     // console.log(this.props.locus_fasta)
     if (!this.props.loading) {
       const columns = [
@@ -78,7 +108,55 @@ class Locus extends Component {
                 style: {
                   fontWeight: "bold"
                 }
-              }
+              };
+            }
+          }
+        },
+        {
+          name: "num_alleles",
+          label: "Number of Alleles",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "size_range",
+          label: "Size Range (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "median",
+          label: "Median Size (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
             }
           }
         },
@@ -152,10 +230,13 @@ class Locus extends Component {
         pagination: false
       };
 
+
+      let table_data = [{...this.props.locus_uniprot[0], ...this.props.basic_stats[0]}]
+
       uniprot_data = (
         <MUIDataTable
-          title={"Uniprot Annotation"}
-          data={this.props.locus_uniprot}
+          title={"Locus Details"}
+          data={table_data}
           columns={columns}
           options={options}
         />
@@ -166,7 +247,7 @@ class Locus extends Component {
           data={this.props.locus_fasta}
           layout={{
             title: {
-              text: "Locus Details"
+              text: ""
             },
             xaxis: {
               title: { text: "Sequence size in bp" }
@@ -180,15 +261,67 @@ class Locus extends Component {
           line={{
             width: 1
           }}
-          onClick={e => this.clickPlotHandler(e)}
+          // onClick={e => this.clickPlotHandler(e)}
+        />
+      );
+
+      scatter_data = (
+        <Plot
+          data={this.props.scatter_data}
+          layout={{
+            title: {
+              text: ""
+            },
+            xaxis: {
+              title: { text: "Sequence size in bp" }
+            },
+            yaxis: {
+              title: { text: "Allele ID" }
+            }
+          }}
+          useResizeHandler={true}
+          style={{ width: "100%", height: "100%" }}
+          line={{
+            width: 1
+          }}
+          // onClick={e => this.clickPlotHandler(e)}
         />
       );
     }
     return (
       <div>
-        {fasta_data}
+
+        <div>
+        <ExpansionPanel defaultExpanded>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+            <Typography variant="h5" color="primary">Locus Details</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails>
+            <div className={classes.mainPaper} style={{"width": "100%", "height": "100%"}}>
+              <div style={style.buttonBar}>
+                <Button style={style.button} className={classNames(this.state.tabValue === 0 && classes.tabButton)} onClick={() => {this.plotChangeHandler(0)}}>Histogram</Button>
+                <Button style={style.button} className={classNames(this.state.tabValue === 1 && classes.tabButton)} onClick={() => {this.plotChangeHandler(1)}}>Scatter</Button>
+              </div>
+              {this.state.tabValue === 0 && fasta_data}
+              {this.state.tabValue === 1 && scatter_data}
+            </div>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+        </div>
+
         {uniprot_data}
-        <Box style={{height: 80, display: "flex", justifyContent: 'center', alignItems: 'center'}}>{downloadFasta}</Box>
+
+        <Box
+          style={{
+            height: 80,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          {downloadFasta}
+        </Box>
+
       </div>
     );
   }
@@ -199,6 +332,8 @@ const mapStateToProps = state => {
     locus_fasta: state.locus.locus_fasta,
     locus_uniprot: state.locus.locus_uniprot,
     fasta_data: state.locus.fasta_data,
+    scatter_data: state.locus.scatter_data,
+    basic_stats: state.locus.basic_stats,
     loading: state.locus.loading,
     error: state.locus.error
     // token: state.auth.token
