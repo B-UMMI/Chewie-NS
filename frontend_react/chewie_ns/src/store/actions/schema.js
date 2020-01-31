@@ -29,7 +29,7 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
     axios
       .get("stats/species/" + species_id + "/schema/" + schema_id + "/loci")
       .then(res => {
-        // console.log(res.data.message);
+        console.log(res.data);
         let allele_mode = [];
         let locus_name = [];
         let mode_data = [];
