@@ -914,10 +914,14 @@ class StatsSpeciesSchemasMode(Resource):
 
 
             loci_data = {}
+            # count = []
 
             for i in result["results"]["bindings"]:
+                # print(i["name"]["value"])
+                # count += 1
 
                 locus_name = i["name"]["value"]
+                # count.append(i["name"]["value"])
                 alleles_len = []
                 # nr_alleles = i["nr_allele"]["value"]
 
@@ -931,6 +935,8 @@ class StatsSpeciesSchemasMode(Resource):
                     loci_data[locus_name].append(i["nucSeqLen"]["value"])
 
             # print(len(loci_data["GBS_CC1_2-007569"]))
+            # print(len(count))
+            # print(len(set(count))
 
             mode_res = []
             total_al_res = []
@@ -962,11 +968,12 @@ class StatsSpeciesSchemasMode(Resource):
                     "alleles_mode": t.most_common(1)[0][0]
                 })
             
-            # print(scatter_res[0])
+            # print(loci_data)
                         
             return {"mode": mode_res,
                     "total_alleles": total_al_res,
                     "scatter_data": scatter_res}, 200
+            # return {"message": result["results"]["bindings"]}, 200
         
         except:
             return {"message" : "Sum thing wong"}, 404
