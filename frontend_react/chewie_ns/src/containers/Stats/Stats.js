@@ -8,6 +8,7 @@ import * as actions from "../../store/actions/index";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -20,18 +21,28 @@ class Stats extends Component {
     this.props.onFetchSpeciesStats();
   }
 
-  rowClickHandler = (species_id) => {
+  rowClickHandler = species_id => {
     console.log("[RowClick]");
     console.log("species_id: ", species_id);
     // console.log(this.props.match);
-    this.props.history.push('/species/' + species_id);
-  }
-  
+    this.props.history.push("/species/" + species_id);
+  };
+
+  getMuiTheme = () =>
+    createMuiTheme({
+      overrides: {
+        MuiTableRow: {
+          root: {
+            cursor: "pointer"
+          }
+        }
+      }
+    });
+
   render() {
     let stats = <CircularProgress />;
 
     if (!this.props.loading) {
-
       const columns = [
         {
           name: "species_name",
@@ -88,26 +99,28 @@ class Stats extends Component {
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
         selectableRows: "none",
+        selectableRowsOnClick: false,
         print: false,
         viewColumns: false,
-        onRowClick: (rowData) => this.rowClickHandler(rowData[rowData.length - 1])
+        onRowClick: rowData => this.rowClickHandler(rowData[rowData.length - 1])
       };
 
       stats = (
-        <MUIDataTable
-          title={"Overview"}
-          data={this.props.stats}
-          columns={columns}
-          options={options}
-        />
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Overview"}
+            data={this.props.stats}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
       );
-
     }
     return (
       <div>
         <div>{stats}</div>
       </div>
-    )
+    );
   }
 }
 

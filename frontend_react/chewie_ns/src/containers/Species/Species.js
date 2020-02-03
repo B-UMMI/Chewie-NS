@@ -8,6 +8,7 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -51,25 +52,41 @@ class Species extends Component {
     // console.log(this.props.match);
 
     this.props.history.push(
-      this.props.match.params.species_id + "/schemas/" + schema_id + "/locus/" + locus_id
+      this.props.match.params.species_id +
+        "/schemas/" +
+        schema_id +
+        "/locus/" +
+        locus_id
     );
   };
 
-  rowClickHandler = (schema_id) => {
+  rowClickHandler = schema_id => {
     console.log("[RowClick]");
     console.log("schema_id: ", schema_id);
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
-    this.props.history.push(`${this.props.match.params.species_id}/schemas/${schema_id}`);
-  }
+    this.props.history.push(
+      `${this.props.match.params.species_id}/schemas/${schema_id}`
+    );
+  };
+
+  getMuiTheme = () =>
+    createMuiTheme({
+      overrides: {
+        MuiTableRow: {
+          root: {
+            cursor: "pointer"
+          }
+        }
+      }
+    });
 
   render() {
     let species = <Spinner />;
     let species_plot = <CircularProgress />;
 
     if (!this.props.loading) {
-
       const columns = [
         {
           name: "schema_id",
@@ -237,16 +254,18 @@ class Species extends Component {
         print: false,
         viewColumns: true,
         pagination: false,
-        onRowClick: (rowData) => this.rowClickHandler(rowData[0])
+        onRowClick: rowData => this.rowClickHandler(rowData[0])
       };
 
       species = (
-        <MUIDataTable
-          // title={"Schema Details"}
-          data={this.props.species}
-          columns={columns}
-          options={options}
-        />
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Schema Details"}
+            data={this.props.species}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
       );
 
       species_plot = (
