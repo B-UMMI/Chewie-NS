@@ -277,7 +277,8 @@ class Locus extends Component {
             },
             yaxis: {
               title: { text: "Allele ID" }
-            }
+            },
+            hovermode: "closest"
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
