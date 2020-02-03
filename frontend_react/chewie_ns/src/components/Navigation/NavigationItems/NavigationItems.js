@@ -2,8 +2,12 @@ import React from "react";
 
 import classes from "./NavigationItems.module.css";
 import NavigationItem from "./NavigationItem/NavigationItem";
+
+// Material UI components
 import IconButton from "@material-ui/core/IconButton";
 import GitHubIcon from '@material-ui/icons/GitHub';
+import SvgIcon from '@material-ui/core/SvgIcon';
+import { mdiApi } from '@mdi/js'; 
 
 
 const navigationItems = props => (
@@ -22,11 +26,18 @@ const navigationItems = props => (
     <NavigationItem link="/stats">Schemas</NavigationItem>
     <NavigationItem link="/annotations">Annotations</NavigationItem>
     <IconButton
-      href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
+      href={"http://127.0.0.1:5000/NS/api/docs"}
       target={"_blank"}
       rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
     >
-      <GitHubIcon fontSize="large" color="action"/>
+      <SvgIcon fontSize="large" htmlColor="white"> <path d={mdiApi} /> </SvgIcon>
+    </IconButton>
+    <IconButton
+      href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
+      target={"_blank"}
+      rel="noopener noreferrer"
+    >
+      <GitHubIcon fontSize="large" color="action" />
     </IconButton>
   </ul>
 );
