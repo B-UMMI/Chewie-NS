@@ -5,9 +5,10 @@ import NavigationItem from "./NavigationItem/NavigationItem";
 
 // Material UI components
 import IconButton from "@material-ui/core/IconButton";
-import GitHubIcon from '@material-ui/icons/GitHub';
+// import GitHubIcon from '@material-ui/icons/GitHub';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import { mdiApi } from '@mdi/js'; 
+import { mdiGithubCircle } from '@mdi/js'; 
 
 
 const navigationItems = props => (
@@ -30,14 +31,15 @@ const navigationItems = props => (
       target={"_blank"}
       rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
     >
-      <SvgIcon fontSize="large" htmlColor="white"> <path d={mdiApi} /> </SvgIcon>
+      <SvgIcon fontSize="large" htmlColor="#EEEEEE"> <path d={mdiApi} /> </SvgIcon>
     </IconButton>
     <IconButton
       href={"https://github.com/B-UMMI/Nomenclature_Server_docker_compose"}
       target={"_blank"}
       rel="noopener noreferrer"
     >
-      <GitHubIcon fontSize="large" color="action" />
+      {/* <GitHubIcon fontSize="large" color="action" /> */}
+      <SvgIcon fontSize="large" htmlColor="#EEEEEE"> <path d={mdiGithubCircle} /> </SvgIcon>
     </IconButton>
   </ul>
 );
