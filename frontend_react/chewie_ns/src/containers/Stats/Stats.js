@@ -3,11 +3,14 @@ import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import Aux from "../../hoc/Aux/Aux"
 import * as actions from "../../store/actions/index";
 // import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -55,7 +58,20 @@ class Stats extends Component {
                   fontWeight: "bold"
                 }
               };
-            }
+            },
+            customBodyRender: (value, tableMeta, updateValue) => (
+              <Aux>
+                <Typography component="div">
+                  <Box
+                    display="inline"
+                    fontStyle="italic"
+                    m={1}
+                  >
+                    {value}
+                  </Box>
+                </Typography>
+              </Aux>
+            )
           }
         },
         {
