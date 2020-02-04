@@ -38,15 +38,11 @@ class Locus extends Component {
       this.props.location.pathname.lastIndexOf("/") + 1
     );
 
-    // console.log(["componentDidMount"]);
-    // console.log(locusId);
-
     this.props.onFetchLocusFasta(locusId);
     this.props.onFetchLocusUniprot(locusId);
   }
 
   downloadFastaHandler = () => {
-    // console.log(this.props.fasta_data)
     const fastaJoin = this.props.fasta_data.join("\n");
 
     const blob = new Blob([fastaJoin], { type: "text/plain;charset=utf-8" });
@@ -65,16 +61,15 @@ class Locus extends Component {
   };
 
   render() {
-
     const style = {
       buttonBar: {
-          "overflowX": "auto",
-          "display": "flex",
-          "justifyContent": "center",
-          "marginBottom": "20px"
+        overflowX: "auto",
+        display: "flex",
+        justifyContent: "center",
+        marginBottom: "20px"
       },
       button: {
-          minWidth: "150px",
+        minWidth: "150px"
       }
     };
 
@@ -230,8 +225,9 @@ class Locus extends Component {
         pagination: false
       };
 
-
-      let table_data = [{...this.props.locus_uniprot[0], ...this.props.basic_stats[0]}]
+      let table_data = [
+        { ...this.props.locus_uniprot[0], ...this.props.basic_stats[0] }
+      ];
 
       uniprot_data = (
         <MUIDataTable
@@ -247,7 +243,7 @@ class Locus extends Component {
           data={this.props.locus_fasta}
           layout={{
             title: {
-              text: ""
+              text: table_data[0].locus_label
             },
             xaxis: {
               title: { text: "Sequence size in bp" }
@@ -261,7 +257,6 @@ class Locus extends Component {
           line={{
             width: 1
           }}
-          // onClick={e => this.clickPlotHandler(e)}
         />
       );
 
@@ -270,7 +265,7 @@ class Locus extends Component {
           data={this.props.scatter_data}
           layout={{
             title: {
-              text: ""
+              text: table_data[0].locus_label
             },
             xaxis: {
               title: { text: "Sequence size in bp" }
@@ -285,29 +280,52 @@ class Locus extends Component {
           line={{
             width: 1
           }}
-          // onClick={e => this.clickPlotHandler(e)}
         />
       );
     }
     return (
       <div>
-
         <div>
-        <ExpansionPanel defaultExpanded>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography variant="h5" color="primary">Locus Details</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-            <div className={classes.mainPaper} style={{"width": "100%", "height": "100%"}}>
-              <div style={style.buttonBar}>
-                <Button style={style.button} className={classNames(this.state.tabValue === 0 && classes.tabButton)} onClick={() => {this.plotChangeHandler(0)}}>Histogram</Button>
-                <Button style={style.button} className={classNames(this.state.tabValue === 1 && classes.tabButton)} onClick={() => {this.plotChangeHandler(1)}}>Scatter</Button>
+          <ExpansionPanel defaultExpanded>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h5" color="primary">
+                Locus Details
+              </Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <div
+                className={classes.mainPaper}
+                style={{ width: "100%", height: "100%" }}
+              >
+                <div style={style.buttonBar}>
+                  <Button
+                    style={style.button}
+                    className={classNames(
+                      this.state.tabValue === 0 && classes.tabButton
+                    )}
+                    onClick={() => {
+                      this.plotChangeHandler(0);
+                    }}
+                  >
+                    Histogram
+                  </Button>
+                  <Button
+                    style={style.button}
+                    className={classNames(
+                      this.state.tabValue === 1 && classes.tabButton
+                    )}
+                    onClick={() => {
+                      this.plotChangeHandler(1);
+                    }}
+                  >
+                    Scatter
+                  </Button>
+                </div>
+                {this.state.tabValue === 0 && fasta_data}
+                {this.state.tabValue === 1 && scatter_data}
               </div>
-              {this.state.tabValue === 0 && fasta_data}
-              {this.state.tabValue === 1 && scatter_data}
-            </div>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </div>
 
         {uniprot_data}
@@ -322,7 +340,6 @@ class Locus extends Component {
         >
           {downloadFasta}
         </Box>
-
       </div>
     );
   }
