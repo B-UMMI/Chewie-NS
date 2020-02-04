@@ -30,7 +30,6 @@ export const fetchLocusFasta = locus_id => {
     axios
       .get("loci/" + locus_id + "/fasta")
       .then(res => {
-        // console.log(res);
 
         const median = arr => {
           const mid = Math.floor(arr.length / 2),
@@ -49,14 +48,8 @@ export const fetchLocusFasta = locus_id => {
           allele_ids.push(res.data.Fasta[key].allele_id.value)
           nucSeqLen.push(res.data.Fasta[key].nucSeqLen.value)
 
-          fastaData.push(locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value + "\n")
+          fastaData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value)
         }
-        // console.log(fastaData[0]);
-        // console.log(allele_ids);
-        // console.log(Math.min(...nucSeqLen.map(Number)));
-        // console.log(Math.max(...nucSeqLen.map(Number)));
-        // console.log(median(nucSeqLen.map(Number)));
-        // console.log(nucSeqLen.length)
 
         const min_len = Math.min(...nucSeqLen.map(Number));
         const max_len = Math.max(...nucSeqLen.map(Number))
@@ -68,7 +61,6 @@ export const fetchLocusFasta = locus_id => {
           median: median_len
         })
 
-        // console.log(basic_stats)
 
         histogram_data.push({
           x: nucSeqLen,
