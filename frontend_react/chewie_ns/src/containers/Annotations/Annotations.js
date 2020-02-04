@@ -3,10 +3,13 @@ import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import Aux from "../../hoc/Aux/Aux"
 import * as actions from "../../store/actions/index";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -72,7 +75,20 @@ class Annotations extends Component {
                   fontWeight: "bold"
                 }
               };
-            }
+            },
+            customBodyRender: (value, tableMeta, updateValue) => (
+              <Aux>
+                <Typography component="div">
+                  <Box
+                    display="inline"
+                    fontStyle="italic"
+                    m={1}
+                  >
+                    {value}
+                  </Box>
+                </Typography>
+              </Aux>
+            )
           }
         },
         {
