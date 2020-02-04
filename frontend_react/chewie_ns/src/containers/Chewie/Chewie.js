@@ -10,7 +10,7 @@ class Chewie extends Component {
     render() {
         return (
             <div>
-                CHEWIE SAYS PEW-PEW!!!!!!
+                <h1>WELCOME TO CHEWIE-NS!!</h1>
                 <Spinner />
             </div>
         );
