@@ -3,5 +3,9 @@
 }
 
 :local(.tabButton){
-    border-bottom: 2px solid #5c6bc0!important;
+    border-bottom: 2px solid #bb7944!important;
+}
+
+:local(.title){
+    color: #bb7944;
 }
