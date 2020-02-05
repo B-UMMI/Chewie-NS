@@ -26,7 +26,7 @@ import Plot from "react-plotly.js";
 class Schema extends Component {
   state = {
     tabValue: 0
-  }
+  };
 
   componentDidMount() {
     // console.log(this.props.match);
@@ -38,8 +38,8 @@ class Schema extends Component {
     this.props.onFetchSchemaAlleleMode(species_id, schema_id);
   }
 
-  plotChangeHandler = (value) => {
-    this.setState({tabValue: value})
+  plotChangeHandler = value => {
+    this.setState({ tabValue: value });
   };
 
   clickScatterPlotHandler = event => {
@@ -59,16 +59,15 @@ class Schema extends Component {
   };
 
   render() {
-
     const style = {
       buttonBar: {
-          "overflowX": "auto",
-          "display": "flex",
-          "justifyContent": "center",
-          "marginBottom": "20px"
+        overflowX: "auto",
+        display: "flex",
+        justifyContent: "center",
+        marginBottom: "20px"
       },
       button: {
-          minWidth: "150px",
+        minWidth: "150px"
       }
     };
 
@@ -166,15 +165,50 @@ class Schema extends Component {
       // </div>
       <div>
         <ExpansionPanel defaultExpanded>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography variant="h5" color="primary">Schema Evaluation</Typography>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="h5" className={classes.title}>
+              Schema Evaluation
+            </Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
-            <div className={classes.mainPaper} style={{"width": "100%", "height": "100%"}}>
+            <div
+              className={classes.mainPaper}
+              style={{ width: "100%", height: "100%" }}
+            >
               <div style={style.buttonBar}>
-                <Button style={style.button} className={classNames(this.state.tabValue === 0 && classes.tabButton)} onClick={() => {this.plotChangeHandler(0)}}>Allele Numbers Analysis</Button>
-                <Button style={style.button} className={classNames(this.state.tabValue === 1 && classes.tabButton)} onClick={() => {this.plotChangeHandler(1)}}>Allele Length Analysis</Button>
-                <Button style={style.button} className={classNames(this.state.tabValue === 2 && classes.tabButton)} onClick={() => {this.plotChangeHandler(2)}}>Locus Statistics</Button>
+                <Button
+                  style={style.button}
+                  className={classNames(
+                    this.state.tabValue === 0 && classes.tabButton
+                  )}
+                  onClick={() => {
+                    this.plotChangeHandler(0);
+                  }}
+                >
+                  Allele Numbers Analysis
+                </Button>
+                <Button
+                  style={style.button}
+                  className={classNames(
+                    this.state.tabValue === 1 && classes.tabButton
+                  )}
+                  onClick={() => {
+                    this.plotChangeHandler(1);
+                  }}
+                >
+                  Allele Length Analysis
+                </Button>
+                <Button
+                  style={style.button}
+                  className={classNames(
+                    this.state.tabValue === 2 && classes.tabButton
+                  )}
+                  onClick={() => {
+                    this.plotChangeHandler(2);
+                  }}
+                >
+                  Locus Statistics
+                </Button>
               </div>
               {this.state.tabValue === 0 && total_allele_plot}
               {this.state.tabValue === 1 && mode_plot}
@@ -183,7 +217,6 @@ class Schema extends Component {
           </ExpansionPanelDetails>
         </ExpansionPanel>
       </div>
-      
     );
   }
 }

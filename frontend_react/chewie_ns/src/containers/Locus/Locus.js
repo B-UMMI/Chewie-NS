@@ -288,7 +288,7 @@ class Locus extends Component {
         <div>
           <ExpansionPanel defaultExpanded>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h5" color="primary">
+              <Typography variant="h5" className={classes.title}>
                 Locus Details
               </Typography>
             </ExpansionPanelSummary>

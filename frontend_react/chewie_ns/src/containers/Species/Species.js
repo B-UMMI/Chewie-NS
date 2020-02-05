@@ -281,7 +281,7 @@ class Species extends Component {
               // range: [0, 500]
             },
             yaxis: {
-              title: { text: "Nr alleles" }
+              title: { text: "Number of alleles" }
             },
             hovermode: "closest"
           }}
