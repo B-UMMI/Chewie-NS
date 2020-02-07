@@ -21,60 +21,80 @@ import Schema from "./containers/Schema/Schema";
 import Locus from "./containers/Locus/Locus";
 import Annotations from "./containers/Annotations/Annotations";
 import * as actions from "./store/actions/index";
+// import classes from "./Breadcrumbs.module.css"
 
 // Material Ui Components
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 // import Typography from "@material-ui/core/Typography";
 // import Link from "@material-ui/core/Link";
-import MuiLink from '@material-ui/core/Link';
+import MuiLink from "@material-ui/core/Link";
 
 function SimpleBreadcrumbs() {
   const homeMatches = useRouteMatch("/");
   const statsMatches = useRouteMatch("/stats");
   const annotationMatches = useRouteMatch("/annotations");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
-  const schemasIdMatches = useRouteMatch("/species/:species_id/schemas/:schema_id")
-  const locusIdMatches = useRouteMatch("/species/:species_id/schemas/:schema_id/locus/:locus_id");
+  const schemasIdMatches = useRouteMatch(
+    "/species/:species_id/schemas/:schema_id"
+  );
+  const locusIdMatches = useRouteMatch(
+    "/species/:species_id/schemas/:schema_id/locus/:locus_id"
+  );
+
+  const styles = {
+    breadcrumb: {
+      color: "#bb7944"
+    }
+  };
+
   return (
     <>
       <Breadcrumbs>
         {homeMatches && (
-          <MuiLink component={Link} to="/">
+          <MuiLink component={Link} to="/" style={styles.breadcrumb}>
             Home
           </MuiLink>
         )}
         {statsMatches && (
-          <MuiLink component={Link} to="/stats">
+          <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
             Schemas
           </MuiLink>
         )}
         {annotationMatches && (
-          <MuiLink component={Link} to="/annotations">
+          <MuiLink component={Link} to="/annotations" style={styles.breadcrumb}>
             Annotations
           </MuiLink>
         )}
         {speciesIdMatches && (
-          <MuiLink component={Link} to={`/species/${speciesIdMatches.params.species_id}`}>
+          <MuiLink
+            component={Link}
+            to={`/species/${speciesIdMatches.params.species_id}`}
+            style={styles.breadcrumb}
+          >
             Species {speciesIdMatches.params.species_id}
           </MuiLink>
         )}
         {schemasIdMatches && (
-          <MuiLink component={Link} to={`/species/${schemasIdMatches.params.species_id}/schemas/${schemasIdMatches.params.schema_id}`}>
+          <MuiLink
+            component={Link}
+            to={`/species/${schemasIdMatches.params.species_id}/schemas/${schemasIdMatches.params.schema_id}`}
+            style={styles.breadcrumb}
+          >
             Schema {schemasIdMatches.params.schema_id}
           </MuiLink>
         )}
         {locusIdMatches && (
           <MuiLink
             component={Link}
-            to={`/schema/${locusIdMatches.params.schema_id}/${
-              locusIdMatches.params.locus_id}`}
+            to={`/schema/${locusIdMatches.params.schema_id}/${locusIdMatches.params.locus_id}`}
+            style={styles.breadcrumb}
           >
             Locus {locusIdMatches.params.locus_id}
           </MuiLink>
         )}
       </Breadcrumbs>
     </>
-  )
+  );
 }
 
 class App extends Component {
@@ -130,7 +150,6 @@ class App extends Component {
       <Aux>
         <SimpleBreadcrumbs />
         <Switch>
-
           <Route path="/auth" component={Auth} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
