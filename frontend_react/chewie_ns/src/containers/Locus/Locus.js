@@ -18,6 +18,7 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -59,6 +60,17 @@ class Locus extends Component {
   plotChangeHandler = value => {
     this.setState({ tabValue: value });
   };
+
+  getMuiTheme = () =>
+    createMuiTheme({
+      overrides: {
+        MUIDataTableToolbar: {
+          titleText: {
+            color: "#bb7944"
+          }
+        }
+      }
+    });
 
   render() {
     const style = {
@@ -230,12 +242,14 @@ class Locus extends Component {
       ];
 
       uniprot_data = (
-        <MUIDataTable
-          title={"Locus Details"}
-          data={table_data}
-          columns={columns}
-          options={options}
-        />
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Locus Details"}
+            data={table_data}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
       );
 
       fasta_data = (
