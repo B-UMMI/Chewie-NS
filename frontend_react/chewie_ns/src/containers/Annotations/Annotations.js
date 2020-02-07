@@ -10,6 +10,7 @@ import * as actions from "../../store/actions/index";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -18,6 +19,17 @@ class Annotations extends Component {
   componentDidMount() {
     this.props.onFetchAnnotations();
   }
+
+  getMuiTheme = () =>
+    createMuiTheme({
+      overrides: {
+        MUIDataTableToolbar: {
+          titleText: {
+            color: "#bb7944"
+          }
+        }
+      }
+    });
 
   render() {
     let annotations = <CircularProgress />;
@@ -160,12 +172,14 @@ class Annotations extends Component {
       };
 
       annotations = (
-        <MUIDataTable
-          title={"Annotations"}
-          data={this.props.annotations}
-          columns={columns}
-          options={options}
-        />
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Annotations"}
+            data={this.props.annotations}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
       );
     }
     return <div>{annotations}</div>;

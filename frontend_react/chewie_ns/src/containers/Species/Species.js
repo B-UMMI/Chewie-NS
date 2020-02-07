@@ -78,6 +78,11 @@ class Species extends Component {
           root: {
             cursor: "pointer"
           }
+        },
+        MUIDataTableToolbar: {
+          titleText: {
+            color: "#bb7944"
+          }
         }
       }
     });
