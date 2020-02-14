@@ -30,7 +30,7 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import MuiLink from "@material-ui/core/Link";
 
 function SimpleBreadcrumbs() {
-  const homeMatches = useRouteMatch("/");
+  // const homeMatches = useRouteMatch("/");
   const statsMatches = useRouteMatch("/stats");
   const annotationMatches = useRouteMatch("/annotations");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
@@ -50,11 +50,11 @@ function SimpleBreadcrumbs() {
   return (
     <>
       <Breadcrumbs>
-        {homeMatches && (
+        {/* {homeMatches && (
           <MuiLink component={Link} to="/" style={styles.breadcrumb}>
             Home
           </MuiLink>
-        )}
+        )} */}
         {statsMatches && (
           <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
             Schemas
@@ -103,48 +103,6 @@ class App extends Component {
   }
 
   render() {
-    // const breadcrumbNameMap = {
-    //   "/stats": "Schemas",
-    //   "/annotations": "Annotations"
-    //   // "/users/:id": ":id",
-    //   // "/users/:id/detail": "Details"
-    // };
-
-    // const LinkRouter = props => <Link {...props} component={RouterLink} />;
-
-    // const breadcrumbs = () => (
-    //   <MemoryRouter initialEntries={["/stats"]} initialIndex={0}>
-    //     <div style={{display: 'flex', flexDirection: 'column', width: 360}}>
-    //       <Route>
-    //         {({ location }) => {
-    //           const pathnames = location.pathname.split('/').filter(x => x);
-
-    //           return (
-    //             <Breadcrumbs aria-label="breadcrumb">
-    //               <LinkRouter color="inherit" to="/">
-    //                 Home
-    //               </LinkRouter>
-    //               {pathnames.map((value, index) => {
-    //                 const last = index === pathnames.length - 1;
-    //                 const to = `/${pathnames.slice(0, index + 1).join('/')}`;
-
-    //                 return last ? (
-    //                   <Typography color="textPrimary" key={to}>
-    //                     {breadcrumbNameMap[to]}
-    //                   </Typography>
-    //                 ) : (
-    //                   <LinkRouter color="inherit" to={to} key={to}>
-    //                     {breadcrumbNameMap[to]}
-    //                   </LinkRouter>
-    //                 )
-    //               })}
-    //             </Breadcrumbs>
-    //           )
-    //         }}
-    //       </Route>
-    //     </div>
-    //   </MemoryRouter>
-    // )
 
     let routes = (
       <Aux>
