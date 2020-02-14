@@ -1,0 +1,58 @@
+.homeDiv {
+    display: block;
+    margin-top: 5%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 1000px;
+}
+
+.ummiLogoDiv {
+    text-align: right;
+    display: flex;
+    justify-content: right;
+    /* margin-bottom: 30px; */
+    margin-left: 750px;
+    align-items: flex-start;
+    flex-direction: row;
+}
+/* 
+.immLogoDiv {
+    text-align: right;
+    display: flex;
+    justify-content: right;
+    margin-left: 50px;
+    align-items: flex-end;
+    flex-direction: row;
+} */
+
+.titleDiv {
+    display: block;
+    text-align: center;
+    position: relative;
+    min-height: 1px;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.bodyDiv {
+    text-align: center;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.incdDiv {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+    flex-direction: row;
+}
+
+.resourcesText {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
