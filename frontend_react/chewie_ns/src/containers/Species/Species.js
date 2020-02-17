@@ -8,8 +8,6 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Button from "@material-ui/core/Button";
-import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -79,11 +77,6 @@ class Species extends Component {
         MuiTableRow: {
           root: {
             cursor: "pointer"
-          }
-        },
-        MUIDataTableToolbar: {
-          titleText: {
-            color: "#bb7944"
           }
         }
       }
@@ -244,34 +237,6 @@ class Species extends Component {
                   fontWeight: "bold"
                 }
               };
-            }
-          }
-        },
-        {
-          name: "Download ZIP",
-          // label: "Minimum Length (bp)",
-          options: {
-            filter: false,
-            sort: false,
-            empty: true,
-            setCellHeaderProps: value => {
-              return {
-                style: {
-                  fontWeight: "bold"
-                }
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return (
-                <Button
-                  variant="contained"
-                  color="default"
-                  // startIcon={<GetAppSharpIcon />}
-                  onClick={() => console.log("ola")}
-                >
-                  {<GetAppSharpIcon />}
-                </Button>
-              );
             }
           }
         }

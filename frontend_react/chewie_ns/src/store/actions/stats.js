@@ -24,9 +24,10 @@ export const fetchStatsStart = () => {
 export const fetchStats = () => {
     return dispatch => {
         dispatch(fetchStatsStart());
-        axios.get('/stats/summary')
+        axios.get('/stats/species')
+        //fetch('https://192.210.120.209/api/NS/api/stats/species', { method: "GET" })
             .then(res => {
-                // console.log("[action]")
+                console.log("[action]")
                 // console.log(res.data.message[0])
                 // console.log("FOR")
                 const fetchedStats = [];
