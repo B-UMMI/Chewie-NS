@@ -21,80 +21,60 @@ import Schema from "./containers/Schema/Schema";
 import Locus from "./containers/Locus/Locus";
 import Annotations from "./containers/Annotations/Annotations";
 import * as actions from "./store/actions/index";
-// import classes from "./Breadcrumbs.module.css"
 
 // Material Ui Components
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 // import Typography from "@material-ui/core/Typography";
 // import Link from "@material-ui/core/Link";
-import MuiLink from "@material-ui/core/Link";
+import MuiLink from '@material-ui/core/Link';
 
 function SimpleBreadcrumbs() {
-  // const homeMatches = useRouteMatch("/");
+  const homeMatches = useRouteMatch("/");
   const statsMatches = useRouteMatch("/stats");
   const annotationMatches = useRouteMatch("/annotations");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
-  const schemasIdMatches = useRouteMatch(
-    "/species/:species_id/schemas/:schema_id"
-  );
-  const locusIdMatches = useRouteMatch(
-    "/species/:species_id/schemas/:schema_id/locus/:locus_id"
-  );
-
-  const styles = {
-    breadcrumb: {
-      color: "#bb7944"
-    }
-  };
-
+  const schemasIdMatches = useRouteMatch("/species/:species_id/schemas/:schema_id")
+  const locusIdMatches = useRouteMatch("/species/:species_id/schemas/:schema_id/locus/:locus_id");
   return (
     <>
       <Breadcrumbs>
-        {/* {homeMatches && (
-          <MuiLink component={Link} to="/" style={styles.breadcrumb}>
+        {homeMatches && (
+          <MuiLink component={Link} to="/">
             Home
           </MuiLink>
-        )} */}
+        )}
         {statsMatches && (
-          <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/stats">
             Schemas
           </MuiLink>
         )}
         {annotationMatches && (
-          <MuiLink component={Link} to="/annotations" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/annotations">
             Annotations
           </MuiLink>
         )}
         {speciesIdMatches && (
-          <MuiLink
-            component={Link}
-            to={`/species/${speciesIdMatches.params.species_id}`}
-            style={styles.breadcrumb}
-          >
+          <MuiLink component={Link} to={`/species/${speciesIdMatches.params.species_id}`}>
             Species {speciesIdMatches.params.species_id}
           </MuiLink>
         )}
         {schemasIdMatches && (
-          <MuiLink
-            component={Link}
-            to={`/species/${schemasIdMatches.params.species_id}/schemas/${schemasIdMatches.params.schema_id}`}
-            style={styles.breadcrumb}
-          >
+          <MuiLink component={Link} to={`/species/${schemasIdMatches.params.species_id}/schemas/${schemasIdMatches.params.schema_id}`}>
             Schema {schemasIdMatches.params.schema_id}
           </MuiLink>
         )}
         {locusIdMatches && (
           <MuiLink
             component={Link}
-            to={`/schema/${locusIdMatches.params.schema_id}/${locusIdMatches.params.locus_id}`}
-            style={styles.breadcrumb}
+            to={`/schema/${locusIdMatches.params.schema_id}/${
+              locusIdMatches.params.locus_id}`}
           >
             Locus {locusIdMatches.params.locus_id}
           </MuiLink>
         )}
       </Breadcrumbs>
     </>
-  );
+  )
 }
 
 class App extends Component {
@@ -103,11 +83,54 @@ class App extends Component {
   }
 
   render() {
+    // const breadcrumbNameMap = {
+    //   "/stats": "Schemas",
+    //   "/annotations": "Annotations"
+    //   // "/users/:id": ":id",
+    //   // "/users/:id/detail": "Details"
+    // };
+
+    // const LinkRouter = props => <Link {...props} component={RouterLink} />;
+
+    // const breadcrumbs = () => (
+    //   <MemoryRouter initialEntries={["/stats"]} initialIndex={0}>
+    //     <div style={{display: 'flex', flexDirection: 'column', width: 360}}>
+    //       <Route>
+    //         {({ location }) => {
+    //           const pathnames = location.pathname.split('/').filter(x => x);
+
+    //           return (
+    //             <Breadcrumbs aria-label="breadcrumb">
+    //               <LinkRouter color="inherit" to="/">
+    //                 Home
+    //               </LinkRouter>
+    //               {pathnames.map((value, index) => {
+    //                 const last = index === pathnames.length - 1;
+    //                 const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+
+    //                 return last ? (
+    //                   <Typography color="textPrimary" key={to}>
+    //                     {breadcrumbNameMap[to]}
+    //                   </Typography>
+    //                 ) : (
+    //                   <LinkRouter color="inherit" to={to} key={to}>
+    //                     {breadcrumbNameMap[to]}
+    //                   </LinkRouter>
+    //                 )
+    //               })}
+    //             </Breadcrumbs>
+    //           )
+    //         }}
+    //       </Route>
+    //     </div>
+    //   </MemoryRouter>
+    // )
 
     let routes = (
       <Aux>
         <SimpleBreadcrumbs />
         <Switch>
+
           <Route path="/auth" component={Auth} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
