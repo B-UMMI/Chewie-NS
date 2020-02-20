@@ -10,7 +10,8 @@ const instance = axios.create({
    //httpsAgent: new spdy.createAgent(sslOptions),
    //withCredentials: true
    //baseURL: 'http://172.19.1.1:5000/NS/api'
-   baseURL: 'https://localhost/api/NS/api/'
+   //baseURL: 'https://localhost/api/NS/api/'
+   baseURL: 'https://194.210.120.209/api/NS/api'
 });
 
 export default instance;
