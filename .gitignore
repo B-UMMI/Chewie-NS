@@ -7,10 +7,14 @@ dist/
 __pycache__/
 *.so
 *~
-.idea/* 
+.idea/*
 .directory
 virtuoso.*
 virtuoso-temp.*
 virtuoso_data/
 *.sh
 *.rdb
+
+postgres_data/*
+redis_data/dump.rdb
+virtuoso_data/db/virtuoso.db
