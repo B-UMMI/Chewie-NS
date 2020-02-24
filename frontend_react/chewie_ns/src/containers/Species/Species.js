@@ -47,7 +47,7 @@ class Species extends Component {
 
     const schema_id = event.points[0].data.name.slice(-1);
 
-    const locus_id = event.points[0].hovertext;
+    const locus_id = event.points[0].text;
 
     // console.log(this.props.match);
 
@@ -277,7 +277,8 @@ class Species extends Component {
             },
             autosize: true,
             xaxis: {
-              title: { text: "Loci" }
+              title: { text: "Loci" },
+	      showticklabels: false
               // range: [0, 500]
             },
             yaxis: {
