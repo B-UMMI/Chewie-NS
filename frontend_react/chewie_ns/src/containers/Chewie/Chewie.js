@@ -12,7 +12,6 @@ class Chewie extends Component {
             <div>
                 <h1>WELCOME TO CHEWIE-NS!!</h1>
                 <Spinner />
-		<button onClick={() => console.log("hello NS")}>CLICK ME!</button>
             </div>
         );
     }
