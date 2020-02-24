@@ -49,7 +49,7 @@ class Schema extends Component {
 
     const schema_id = this.props.match.params.schema_id;
 
-    const locus_id = event.points[0].hovertext;
+    const locus_id = event.points[0].text;
 
     // console.log(species_id);
     // console.log(schema_id);
