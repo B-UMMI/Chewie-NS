@@ -8,7 +8,6 @@ COPY package-lock.json ./
 
 RUN npm install
 RUN npm install react-scripts@2.0.3 -g
-RUN npm install spdy --save 
 
 COPY . .
 
@@ -22,6 +21,8 @@ COPY --from=node /usr/src/app/build /var/www/my-app
 RUN rm /etc/nginx/conf.d/*
 
 COPY ./mime.types /etc/nginx/
+
+COPY ./cors.conf /etc/nginx/
 
 COPY ./nginx.conf /etc/nginx/
 
