@@ -980,7 +980,7 @@ class StatsSpeciesSchemasMode(Resource):
 
 
 
-@stats_conf.route("/annotations")
+@stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/annotations")
 class StatsAnnotations(Resource):
     """ Summary of all annotations in NS. """
     
@@ -991,17 +991,19 @@ class StatsAnnotations(Resource):
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=[])
-    def get(self):	
+    def get(self, species_id, schema_id):	
         """ Get all the annotations in NS. """
+
+        schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
         try:
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select DISTINCT ?species ?schema ?locus ?name (str(?UniprotLabel) as ?UniprotLabel) '
+                ('select DISTINCT ?species ?locus ?name (str(?UniprotLabel) as ?UniprotLabel) '
                     '(str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
                     'from <{0}> '
                     'where '
-                    '{{ ?schema a typon:Schema; typon:isFromTaxon ?taxon; typon:hasSchemaPart ?part . '
+                    '{{ <{1}> a typon:Schema; typon:isFromTaxon ?taxon; typon:hasSchemaPart ?part . '
                     '?taxon a <http://purl.uniprot.org/core/Taxon>; typon:name ?species . '
                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
                     '?locus a typon:Locus; typon:name ?name .'
@@ -1010,7 +1012,7 @@ class StatsAnnotations(Resource):
                     'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
                     # 'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
                     'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }} '
-                    'ORDER BY ?schema '.format(current_app.config['DEFAULTHGRAPH'])))
+                    'ORDER BY ?UniprotLabel '.format(current_app.config['DEFAULTHGRAPH'], schema_url)))
             
             # sch a typon:Schema; typon:isFromTaxon ?species . '
             #         '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name
@@ -2174,10 +2176,11 @@ class SpeciesListAPItypon(Resource):
                  'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
                  '{{	?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(name))
         
-        print("searching on uniprot..")
+        print("searching on uniprot..", flush=True)
         
         # Check if species exists on uniprot 
         result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
+        print(result2, flush=True)
         try:
             url = result2["results"]["bindings"][0]['taxon']['value']
         except:
