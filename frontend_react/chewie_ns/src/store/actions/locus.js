@@ -69,8 +69,8 @@ export const fetchLocusFasta = locus_id => {
           name: "Locus Details"
         })
         scatter_data.push({
-          x: nucSeqLen,
-          y: allele_ids,
+          x: allele_ids,
+          y: nucSeqLen,
           type: "scatter",
           name: "Locus Details",
           mode: "markers"

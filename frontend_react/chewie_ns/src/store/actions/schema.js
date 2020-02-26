@@ -68,7 +68,7 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
         let scatter_data_median = [];
         let scatter_data_mode = [];
         for (let key in res.data.scatter_data) {
-          locus_id.push(res.data.scatter_data[key].locus_id)
+          locus_id.push(parseInt(res.data.scatter_data[key].locus_id))
           nr_alleles_scatter.push(res.data.scatter_data[key].nr_alleles);
           scatter_data_mean.push(res.data.scatter_data[key].alleles_mean);
           scatter_data_median.push(res.data.scatter_data[key].alleles_median);
@@ -84,7 +84,8 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
             opacity: 0.7,
             size: 4
           },
-          hovertext: locus_id
+          hovertemplate: '<b>ID</b>: %{text}',
+          text: locus_id
         },
         {
           x: scatter_data_mean,
@@ -96,7 +97,8 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
             opacity: 0.7,
             size: 4
           },
-          hovertext: locus_id
+          hovertemplate: '<b>ID</b>: %{text}',
+          text: locus_id
         },
         {
           x: scatter_data_median,
@@ -108,7 +110,8 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
             opacity: 0.7,
             size: 4
           },
-          hovertext: locus_id
+          hovertemplate: '<b>ID</b>: %{text}',
+          text: locus_id
         })
         // console.log(plot_data)
         dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data, scatter_data));
