@@ -19,7 +19,7 @@ import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
 import Schema from "./containers/Schema/Schema";
 import Locus from "./containers/Locus/Locus";
-import Annotations from "./containers/Annotations/Annotations";
+// import Annotations from "./containers/Annotations/Annotations";
 import * as actions from "./store/actions/index";
 // import classes from "./Breadcrumbs.module.css"
 
@@ -30,9 +30,9 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import MuiLink from "@material-ui/core/Link";
 
 function SimpleBreadcrumbs() {
-  // const homeMatches = useRouteMatch("/");
+  const homeMatches = useRouteMatch("/");
   const statsMatches = useRouteMatch("/stats");
-  const annotationMatches = useRouteMatch("/annotations");
+  // const annotationMatches = useRouteMatch("/annotations");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
   const schemasIdMatches = useRouteMatch(
     "/species/:species_id/schemas/:schema_id"
@@ -50,21 +50,21 @@ function SimpleBreadcrumbs() {
   return (
     <>
       <Breadcrumbs>
-        {/* {homeMatches && (
+        {homeMatches && (
           <MuiLink component={Link} to="/" style={styles.breadcrumb}>
             Home
           </MuiLink>
-        )} */}
+        )}
         {statsMatches && (
           <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
             Schemas
           </MuiLink>
         )}
-        {annotationMatches && (
+        {/* {annotationMatches && (
           <MuiLink component={Link} to="/annotations" style={styles.breadcrumb}>
             Annotations
           </MuiLink>
-        )}
+        )} */}
         {speciesIdMatches && (
           <MuiLink
             component={Link}
@@ -111,7 +111,7 @@ class App extends Component {
           <Route path="/auth" component={Auth} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
-          <Route path="/annotations" component={Annotations} />
+          {/* <Route path="/annotations" component={Annotations} /> */}
           <Route
             path="/species/:species_id/schemas/:schema_id/locus/:locus_id"
             component={Locus}
