@@ -8,6 +8,7 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
@@ -30,6 +31,7 @@ class Species extends Component {
     this.props.onFetchSpeciesAnnot(
       this.props.location.pathname[this.props.location.pathname.length - 1]
     );
+
   }
 
   clickPlotHandler = event => {
@@ -49,16 +51,19 @@ class Species extends Component {
 
     const schema_id = event.points[0].data.name.slice(-1);
 
-    const locus_id = event.points[0].hovertext;
+    const locus_id = event.points[0].text;
+
+    // console.log(schema_id)
+    // console.log(locus_id)
 
     // console.log(this.props.match);
 
     this.props.history.push(
-      this.props.match.params.species_id +
-        "/schemas/" +
-        schema_id +
-        "/locus/" +
-        locus_id
+     this.props.match.params.species_id +
+       "/schemas/" +
+       schema_id +
+       "/locus/" +
+       locus_id
     );
   };
 
@@ -68,9 +73,9 @@ class Species extends Component {
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
-    this.props.history.push(
-      `${this.props.match.params.species_id}/schemas/${schema_id}`
-    );
+    this.props.history.push({
+      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`
+    });
   };
 
   getMuiTheme = () =>
@@ -91,7 +96,11 @@ class Species extends Component {
 
   render() {
     let species = <Spinner />;
-    let species_plot = <CircularProgress />;
+    let species_plot = <div style={{ textAlign: "center" }}><CircularProgress /></div>;
+
+    // this.setState({
+    //   species_name: this.props.location.state.species_name
+    // })
 
     if (!this.props.loading) {
       const columns = [
@@ -292,10 +301,18 @@ class Species extends Component {
         onRowClick: rowData => this.rowClickHandler(rowData[0])
       };
 
+      // for (i in this.props.speciesDict) {
+
+      // }
+
+      // const title = this.props.speciesDict[this.props.match.params.species_id];
+
+      // console.log(this.props.speciesDict[this.props.match.params.species_id])
+
       species = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            title={"Schema Details"}
+            title={this.props.speciesDict[this.props.match.params.species_id]}
             data={this.props.species}
             columns={columns}
             options={options}
@@ -308,11 +325,12 @@ class Species extends Component {
           data={this.props.species_annot}
           layout={{
             title: {
-              text: "Schemas Overview"
+              text: this.props.speciesDict[this.props.match.params.species_id]
             },
             autosize: true,
             xaxis: {
-              title: { text: "Loci" }
+              title: { text: "Loci" },
+              showticklabels: false
               // range: [0, 500]
             },
             yaxis: {
@@ -330,9 +348,28 @@ class Species extends Component {
       );
     }
     return (
-      <div>
+      <div style={{marginLeft : "5%", marginRight: "5%"}}>
+        <div><h1 style={{ textAlign: "center" }}>Schemas Overview</h1></div>
         {species}
         {species_plot}
+        <footer
+          style={{
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            backgroundColor: "#ccc",
+            width: "100%",
+            textAlign: "center"
+          }}
+        >
+          <div id="homeFooter" style={{ display: "block" }}>
+            <div
+            >
+              <Typography style={{fontSize: "10"}}>© UMMI 2020</Typography>
+              {/* <p>© UMMI 2020</p> */}
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -343,7 +380,8 @@ const mapStateToProps = state => {
     species: state.species.species,
     species_annot: state.species.species_annot,
     loading: state.species.loading,
-    error: state.species.error
+    error: state.species.error,
+    speciesDict: state.stats.speciesDict
   };
 };
 
