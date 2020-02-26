@@ -25,7 +25,7 @@ const navigationItems = props => (
       <NavigationItem link="/species">Species</NavigationItem>
     ) : null}
     <NavigationItem link="/stats">Schemas</NavigationItem>
-    <NavigationItem link="/annotations">Annotations</NavigationItem>
+    {/* <NavigationItem link="/annotations">Annotations</NavigationItem> */}
     <IconButton
       href={"http://127.0.0.1:5000/NS/api/docs"}
       target={"_blank"}
