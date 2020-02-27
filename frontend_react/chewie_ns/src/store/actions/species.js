@@ -175,6 +175,7 @@ export const fetchSpeciesAnnot = spec_id => {
             hovertemplate: '<b>Number of Alleles</b>: %{y}' +
                            '<br><b>Locus_ID</b>: %{text}</br>',
             text: s_loci_id
+            //hoverinfo: "y+text"
             // line: {
             //   width: 1
             // }

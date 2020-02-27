@@ -29,6 +29,7 @@ const fetchStatsSpeciesSuccess = (state, action) => {
     // console.log(action)
     return updateObject(state, {
         stats: action.stats,
+        speciesDict: action.speciesDict,
         loading: false
     })
 };

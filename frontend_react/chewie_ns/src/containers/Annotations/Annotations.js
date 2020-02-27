@@ -91,22 +91,22 @@ class Annotations extends Component {
             )
           }
         },
-        {
-          name: "schema",
-          label: "Schema ID",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: value => {
-              return {
-                style: {
-                  fontWeight: "bold"
-                }
-              };
-            }
-          }
-        },
+        // {
+        //   name: "schema",
+        //   label: "Schema ID",
+        //   options: {
+        //     filter: true,
+        //     sort: true,
+        //     display: true,
+        //     setCellHeaderProps: value => {
+        //       return {
+        //         style: {
+        //           fontWeight: "bold"
+        //         }
+        //       };
+        //     }
+        //   }
+        // },
         {
           name: "locus",
           label: "Locus ID",
@@ -154,6 +154,7 @@ class Annotations extends Component {
         print: false,
         download: true,
         filter: true,
+        filterType: "multiselect",
         search: true,
         viewColumns: true,
         pagination: true
@@ -175,8 +176,8 @@ class Annotations extends Component {
 const mapStateToProps = state => {
   return {
     annotations: state.annotations.annotations,
-    loading: state.locus.loading,
-    error: state.locus.error
+    loading: state.annotations.loading,
+    error: state.annotations.error
     // token: state.auth.token
   };
 };

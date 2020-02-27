@@ -268,10 +268,10 @@ class Locus extends Component {
               text: table_data[0].locus_label
             },
             xaxis: {
-              title: { text: "Sequence size in bp" }
+              title: { text: "Allele ID", tick0: 0, dtick: 1 }
             },
             yaxis: {
-              title: { text: "Allele ID" }
+              title: { text: "Sequence size in bp", tick0: 0, dtick: 1 }
             },
             hovermode: "closest"
           }}
@@ -340,6 +340,25 @@ class Locus extends Component {
         >
           {downloadFasta}
         </Box>
+        <footer
+          style={{
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            backgroundColor: "#ccc",
+            width: "100%",
+            textAlign: "center"
+          }}
+        >
+          <div id="homeFooter" style={{ display: "block" }}>
+            <div
+            >
+              <Typography style={{fontSize: "10"}}>© UMMI 2020</Typography>
+              {/* <p>© UMMI 2020</p> */}
+            </div>
+          </div>
+        </footer>
+
       </div>
     );
   }

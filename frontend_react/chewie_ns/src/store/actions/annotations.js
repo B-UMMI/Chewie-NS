@@ -21,11 +21,11 @@ export const fetchAnnotationsStart = () => {
   };
 };
 
-export const fetchAnnotations = () => {
+export const fetchAnnotations = (species_id, schema_id) => {
   return dispatch => {
     dispatch(fetchAnnotationsStart());
     axios
-      .get("/stats/annotations")
+      .get("/stats/species/" + species_id + "/schema/" + schema_id + "/annotations")
       .then(res => {
         // console.log(res);
         let annotTableData = [];
@@ -39,9 +39,9 @@ export const fetchAnnotations = () => {
             uniprot_label: res.data.message[key].UniprotLabel.value,
             uniprot_uri: res.data.message[key].UniprotURI.value,
             species: res.data.message[key].species.value,
-            schema: res.data.message[key].schema.value.substring(
-              res.data.message[key].schema.value.lastIndexOf("/") + 1
-            ),
+            // schema: res.data.message[key].schema.value.substring(
+            //   res.data.message[key].schema.value.lastIndexOf("/") + 1
+            // ),
             locus: res.data.message[key].locus.value.substring(
               res.data.message[key].locus.value.lastIndexOf("/") + 1
             ),
