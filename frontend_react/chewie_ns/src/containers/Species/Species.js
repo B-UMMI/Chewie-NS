@@ -278,7 +278,7 @@ class Species extends Component {
       species = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            title={this.props.speciesDict[this.props.match.params.species_id]}
+            title={<i>{this.props.speciesDict[this.props.match.params.species_id]}</i>}
             data={this.props.species}
             columns={columns}
             options={options}
