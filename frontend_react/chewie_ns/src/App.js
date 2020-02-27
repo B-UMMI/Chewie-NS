@@ -39,7 +39,7 @@ function SimpleBreadcrumbs() {
     <>
       <Breadcrumbs>
         {homeMatches && (
-          <MuiLink component={Link} to="/" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/">
             Home
           </MuiLink>
         )}
@@ -49,7 +49,7 @@ function SimpleBreadcrumbs() {
           </MuiLink>
         )}
         {/* {annotationMatches && (
-          <MuiLink component={Link} to="/annotations" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/annotations">
             Annotations
           </MuiLink>
         )} */}
