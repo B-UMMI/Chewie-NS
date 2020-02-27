@@ -52,7 +52,6 @@ class Species extends Component {
     const schema_id = event.points[0].data.name.slice(-1);
 
     const locus_id = event.points[0].text;
-
     // console.log(schema_id)
     // console.log(locus_id)
 
@@ -84,11 +83,6 @@ class Species extends Component {
         MuiTableRow: {
           root: {
             cursor: "pointer"
-          }
-        },
-        MUIDataTableToolbar: {
-          titleText: {
-            color: "#bb7944"
           }
         }
       }
@@ -253,34 +247,6 @@ class Species extends Component {
                   fontWeight: "bold"
                 }
               };
-            }
-          }
-        },
-        {
-          name: "Download ZIP",
-          // label: "Minimum Length (bp)",
-          options: {
-            filter: false,
-            sort: false,
-            empty: true,
-            setCellHeaderProps: value => {
-              return {
-                style: {
-                  fontWeight: "bold"
-                }
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return (
-                <Button
-                  variant="contained"
-                  color="default"
-                  // startIcon={<GetAppSharpIcon />}
-                  onClick={() => console.log("ola")}
-                >
-                  {<GetAppSharpIcon />}
-                </Button>
-              );
             }
           }
         }

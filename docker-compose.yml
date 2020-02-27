@@ -5,8 +5,8 @@ services:
   container_name: flask_app
   ports:
    - "5000:5000"
-  expose:
-   - "80"
+  #expose:
+  # - "8000"
   volumes:
    - .:/app
   environment:
@@ -24,6 +24,7 @@ services:
     - redis
     - postgres_compose
     - virtuoso
+  #restart: always
  
  postgres_compose:
   image: postgres:10
@@ -89,35 +90,67 @@ services:
   networks: 
     - test
  
- # nginx:
- # image: nginx:1.17
- # container_name: nginx
- # volumes:
- #  - /etc/nginx/nginx.conf:/etc/nginx/nginx.conf
- #  - /etc/nginx/conf.d:/etc/nginx/conf.d
- # ports:
- #  - "8888:80"
- #  - "443:443"
- # networks: 
- #   test:
- #     ipv4_address: 172.19.1.5
+### Original 
+# nginx:
+#  build:
+#    context: ./nginx
+#    dockerfile: Dockerfile.dev
+#  container_name: nginx
+#  volumes:
+#   - /home/ubuntu/chewie_ns/self_certs:/etc/nginx/certs
+#  # - ./nginx/error.log:/var/log/nginx/error.log
+#  ports:
+#   - "80:80"
+#   - "443:443"
+  #expose:
+  # - "8888"
+#  depends_on:
+#   - flask_app
+#   - react_app
+#  restart: always
+#  networks: 
+#    test:
+#      ipv4_address: 172.19.1.5
 
- nginx:
+## Production
+ nginx_react:
   build:
-    context: ./nginx
-    dockerfile: Dockerfile
+    context: ./frontend_react/chewie_ns
+    dockerfile: Dockerfile.prod
   container_name: nginx
   volumes:
    - /home/ubuntu/chewie_ns/self_certs:/etc/nginx/certs
   ports:
-   - "80:80"
+   #- "80:80"
    - "443:443"
   depends_on:
    - flask_app
   restart: always
-  networks: 
+  networks:
     test:
       ipv4_address: 172.19.1.5
+
+
+ 
+# react_app:
+#  build:
+#    context: ./frontend_react/chewie_ns
+#    dockerfile: Dockerfile.dev
+#  container_name: react_app
+##  volumes:
+##   - ./frontend_react/chewie_ns/src:/usr/src/react_app/src
+##   - ./frontend_react/chewie_ns/public:/usr/src/react_app/public
+#  ports:
+#   - "3000:3000"
+#  #expose:
+#  # - "3000"
+#  depends_on:
+#   - flask_app
+#  environment:
+#   - NODE_ENV=development
+#  networks:
+#    test:
+#      ipv4_address: 172.19.1.6
  
 
 networks:
@@ -126,3 +159,4 @@ networks:
     driver: default
     config: 
       - subnet: 172.19.0.0/16
+
