@@ -27,7 +27,7 @@ const navigationItems = props => (
     <NavigationItem link="/stats">Schemas</NavigationItem>
     {/* <NavigationItem link="/annotations">Annotations</NavigationItem> */}
     <IconButton
-      href={"https://194.210.120.209/api//NS/api/docs"}
+      href={"https://194.210.120.209/api/NS/api/docs"}
       target={"_blank"}
       rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
     >
