@@ -76,7 +76,7 @@ def create_app(config_class=Config):
     celery.conf.update(app.config)
 
     # https://flask.palletsprojects.com/en/1.1.x/deploying/wsgi-standalone/#proxy-setups
-    from werkzeug.contrib.fixers import ProxyFix
+    from werkzeug.middleware.proxy_fix import ProxyFix
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_for=1, x_host=1)
 
     from app.api import blueprint as api_bp
