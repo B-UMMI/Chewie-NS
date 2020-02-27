@@ -48,10 +48,11 @@ export const fetchStats = () => {
 }
 
 
-export const fetchStatsSpeciesSuccess = (stats) => {
+export const fetchStatsSpeciesSuccess = (stats, speciesDict) => {
     return {
         type: actionTypes.FECTH_STATS_SPECIES_SUCCESS,
-        stats: stats
+        stats: stats,
+        speciesDict: speciesDict
     }
 };
 
@@ -77,6 +78,7 @@ export const fetchStatsSpecies = () => {
                 // console.log(res.data.message)
                 // console.log("FOR")
                 const fetchedSpeciesStats = [];
+                const speciesDict = {};
                 for (let key in res.data.message) {
                     // console.log(res.data.message[key].name.value)
                     fetchedSpeciesStats.push({
@@ -85,13 +87,20 @@ export const fetchStatsSpecies = () => {
                         nr_schemas: res.data.message[key].schemas.value,
                         id: key
                     });
+
+                    let speciesId = res.data.message[key].species.value[res.data.message[key].species.value.length - 1];
+                    let speciesName = res.data.message[key].name.value;
+
+                    speciesDict[speciesId] = speciesName;
                     // fetchedSpeciesStats.push(
                     //     [res.data.message[key].name.value,
                     //     res.data.message[key].schemas.value]
                     // )
                 }
                 // console.log(fetchedSpeciesStats)
-                dispatch(fetchStatsSpeciesSuccess(fetchedSpeciesStats));
+                console.log(fetchedSpeciesStats)
+                console.log(speciesDict)
+                dispatch(fetchStatsSpeciesSuccess(fetchedSpeciesStats, speciesDict));
             })
             .catch(err => {
                 dispatch(fetchStatsSpeciesFail(err));

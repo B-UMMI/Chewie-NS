@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import Aux from "../../hoc/Aux/Aux"
+import Aux from "../../hoc/Aux/Aux";
 import * as actions from "../../store/actions/index";
 // import Spinner from "../../components/UI/Spinner/Spinner";
 
@@ -26,9 +26,16 @@ class Stats extends Component {
 
   rowClickHandler = species_id => {
     console.log("[RowClick]");
-    console.log("species_id: ", species_id);
+
+    console.log(species_id);
+
+    console.log(species_id[0].props.children.props.children);
+
+    // console.log("species_id: ", species_id);
     // console.log(this.props.match);
-    this.props.history.push("/species/" + species_id);
+    this.props.history.push({
+      pathname: "/species/" + species_id[2]
+    });
   };
 
   getMuiTheme = () =>
@@ -37,6 +44,11 @@ class Stats extends Component {
         MuiTableRow: {
           root: {
             cursor: "pointer"
+          }
+        },
+        MUIDataTableHeadCell: {
+          fixedHeaderCommon: {
+            backgroundColor: "#ccc"
           }
         }
       }
@@ -61,15 +73,17 @@ class Stats extends Component {
             },
             customBodyRender: (value, tableMeta, updateValue) => (
               <Aux>
-                <Typography component="div">
+                {/* <Typography component="div">
                   <Box
                     display="inline"
                     fontStyle="italic"
+                    color="#bb7944"
                     m={1}
                   >
                     {value}
                   </Box>
-                </Typography>
+                </Typography> */}
+                <i>{value}</i>
               </Aux>
             )
           }
@@ -117,14 +131,16 @@ class Stats extends Component {
         selectableRows: "none",
         selectableRowsOnClick: false,
         print: false,
+        download: false,
+        search: false,
+        filter: false,
         viewColumns: false,
-        onRowClick: rowData => this.rowClickHandler(rowData[rowData.length - 1])
+        onRowClick: rowData => this.rowClickHandler(rowData)
       };
 
       stats = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            title={"Overview"}
             data={this.props.stats}
             columns={columns}
             options={options}
@@ -132,9 +148,33 @@ class Stats extends Component {
         </MuiThemeProvider>
       );
     }
+    
     return (
-      <div>
+      <div style={{ marginLeft: "5%", marginRight: "5%" }}>
+        <div>
+          <h1 style={{ textAlign: "center" }}>Overview</h1>
+        </div>
+        <div>
+          <p>Lorem Ipsum</p>
+        </div>
         <div>{stats}</div>
+        <footer
+          style={{
+            position: "fixed",
+            bottom: "0",
+            left: "0",
+            backgroundColor: "#ccc",
+            width: "100%",
+            textAlign: "center"
+          }}
+        >
+          <div id="homeFooter" style={{ display: "block" }}>
+            <div>
+              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
+              {/* <p>© UMMI 2020</p> */}
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -143,6 +183,7 @@ class Stats extends Component {
 const mapStateToProps = state => {
   return {
     stats: state.stats.stats,
+    speciesDict: state.stats.speciesDict,
     loading: state.stats.loading,
     error: state.stats.error
   };

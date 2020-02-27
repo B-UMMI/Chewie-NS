@@ -5,7 +5,7 @@ import ChewieGif from '../../../assets/images/chewie.gif'
 
 const spinner = () => (
     // <div className={classes.Loader}>Loading...</div>
-    <div>
+    <div style={{textAlign: "center"}}>
         <img src={ChewieGif} alt="Loading..." />
     </div>
 );
