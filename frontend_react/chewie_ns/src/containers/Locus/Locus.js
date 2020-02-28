@@ -284,7 +284,14 @@ class Locus extends Component {
       );
     }
     return (
-      <div>
+      <div
+        style={{
+          marginLeft: "5%",
+          marginRight: "5%",
+          marginBottom: "2%",
+          marginTop: "2%"
+        }}
+      >
         <div>
           <ExpansionPanel defaultExpanded>
             <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
@@ -351,14 +358,12 @@ class Locus extends Component {
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
-            <div
-            >
-              <Typography style={{fontSize: "10"}}>© UMMI 2020</Typography>
+            <div>
+              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
               {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
         </footer>
-
       </div>
     );
   }
