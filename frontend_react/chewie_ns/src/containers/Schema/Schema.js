@@ -49,7 +49,6 @@ class Schema extends Component {
 
     // fetch schema annotations
     this.props.onFetchAnnotations(species_id, schema_id);
-
   }
 
   getMuiTheme = () =>
@@ -100,6 +99,7 @@ class Schema extends Component {
     let total_allele_plot = <CircularProgress />;
     let scatter_plot = <CircularProgress />;
     let annotations = <CircularProgress />;
+    let schema_table = <CircularProgress />;
 
     if (!this.props.loading) {
       // console.log(this.props.mode_data)
@@ -183,74 +183,180 @@ class Schema extends Component {
       );
     }
 
-    const columns = [
-      {
-        name: "uniprot_label",
-        label: "Uniprot Label",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: value => {
-            return {
-              style: {
-                fontWeight: "bold"
-              }
-            };
-          }
-        }
-      },
-      {
-        name: "uniprot_uri",
-        label: "Uniprot URI",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: value => {
-            return {
-              style: {
-                fontWeight: "bold"
-              }
-            };
-          },
-          customBodyRender: (value, tableMeta, updateValue) => {
-            return (
-              <a href={value} target="_blank" rel="noopener noreferrer">
-                {value}
-              </a>
-            );
-          }
-        }
-      },
-      {
-        name: "species",
-        label: "Species",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: value => {
-            return {
-              style: {
-                fontWeight: "bold"
-              }
-            };
-          },
-          customBodyRender: (value, tableMeta, updateValue) => (
-            <Aux>
-              <Typography component="div">
-                <Box display="inline" fontStyle="italic" m={1}>
-                  {value}
-                </Box>
-              </Typography>
-            </Aux>
+    if (this.props.annotations !== undefined || this.props.annotations !== []) {
+      // let ola = this.mergeByProperty(this.props.annotations, this.props.mode_data2, "locus_name");
+
+      let newAnnotations = [
+        ...this.props.annotations
+          .concat(this.props.mode_data2)
+          .reduce(
+            (m, o) =>
+              m.set(o.locus_name, Object.assign(m.get(o.locus_name) || {}, o)),
+            new Map()
           )
+          .values()
+      ];
+
+      const columns = [
+        {
+          name: "uniprot_label",
+          label: "Uniprot Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "uniprot_uri",
+          label: "Uniprot URI",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <a href={value} target="_blank" rel="noopener noreferrer">
+                  {value}
+                </a>
+              );
+            }
+          }
+        },
+        {
+          name: "species",
+          label: "Species",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => (
+              <Aux>
+                <Typography component="div">
+                  <Box display="inline" fontStyle="italic" m={1}>
+                    {value}
+                  </Box>
+                </Typography>
+              </Aux>
+            )
+          }
+        },
+        {
+          name: "locus",
+          label: "Locus ID",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <a
+                  href={`${this.props.history.location.pathname}/locus/${value}`}
+                >
+                  {value}
+                  {/* href={`/locus/${value}` */}
+                </a>
+              );
+            }
+          }
+        },
+        {
+          name: "locus_name",
+          label: "Locus Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "mode",
+          label: "Alleles Mode",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
         }
-      },
+      ];
+
+      const options = {
+        textLabels: {
+          body: {
+            noMatch: <CircularProgress />
+          }
+        },
+        responsive: "scrollMaxHeight",
+        selectableRowsHeader: false,
+        selectableRows: "none",
+        selectableRowsOnClick: false,
+        print: false,
+        download: true,
+        filter: true,
+        filterType: "multiselect",
+        search: true,
+        viewColumns: true,
+        pagination: true
+      };
+
+      annotations = (
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Annotations"}
+            data={newAnnotations}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
+      );
+    }
+
+    const columns2 = [
       {
-        name: "locus",
-        label: "Locus ID",
+        name: "schema_id",
+        label: "Schema ID",
         options: {
           filter: true,
           sort: true,
@@ -261,26 +367,136 @@ class Schema extends Component {
                 fontWeight: "bold"
               }
             };
-          },
-          customBodyRender: (value, tableMeta, updateValue) => {
-            return (
-              <a
-                href={`${this.props.history.location.pathname}/locus/${value}`}
-              >
-                {value}
-                {/* href={`/locus/${value}` */}
-              </a>
-            );
           }
         }
       },
       {
-        name: "locus_name",
-        label: "Locus Label",
+        name: "schema_name",
+        label: "Schema Name",
         options: {
           filter: true,
+          sort: false,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "user",
+        label: "Created by",
+        options: {
+          filter: false,
+          sort: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "nr_loci",
+        label: "Loci",
+        options: {
+          filter: false,
           sort: true,
           display: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "nr_allele",
+        label: "Alleles",
+        options: {
+          filter: false,
+          sort: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "chewie",
+        label: "chewBBACA version",
+        options: {
+          filter: false,
+          sort: false,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "bsr",
+        label: "Blast Score Ratio",
+        options: {
+          filter: false,
+          sort: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "ptf",
+        label: "Prodigal Training File",
+        options: {
+          filter: false,
+          sort: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "tl_table",
+        label: "Translation Table",
+        options: {
+          filter: false,
+          sort: true,
+          setCellHeaderProps: value => {
+            return {
+              style: {
+                fontWeight: "bold"
+              }
+            };
+          }
+        }
+      },
+      {
+        name: "minLen",
+        label: "Minimum Length (bp)",
+        options: {
+          filter: false,
+          sort: true,
           setCellHeaderProps: value => {
             return {
               style: {
@@ -292,7 +508,7 @@ class Schema extends Component {
       }
     ];
 
-    const options = {
+    const options2 = {
       textLabels: {
         body: {
           noMatch: <CircularProgress />
@@ -301,40 +517,36 @@ class Schema extends Component {
       responsive: "scrollMaxHeight",
       selectableRowsHeader: false,
       selectableRows: "none",
-      selectableRowsOnClick: false,
       print: false,
-      download: true,
-      filter: true,
-      filterType: "multiselect",
-      search: true,
-      viewColumns: true,
-      pagination: true
+      viewColumns: false,
+      pagination: false,
+      download: false,
+      filter: false,
+      search: false
     };
 
-    annotations = (
+    schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
         <MUIDataTable
-          title={"Annotations"}
-          data={this.props.annotations}
-          columns={columns}
-          options={options}
+          title={`${this.props.location.state.tableData[0].schema_name} Overview`}
+          data={this.props.location.state.tableData}
+          columns={columns2}
+          options={options2}
         />
       </MuiThemeProvider>
     );
 
     return (
-      // <div>
-      //   <div>{mode_plot}</div>
-      //   <div>{total_allele_plot}</div>
-      //   <div>{scatter_plot}</div>
-      // </div>
       <div style={{ marginLeft: "5%", marginRight: "5%" }}>
         <div>
           <h1 style={{ textAlign: "center" }}>
             Schema Evaluation and Annotation
           </h1>
-          <p style={{ textAlign: "center" }}>{this.props.speciesDict[this.props.match.params.species_id]}</p>
+          {/* <p style={{ textAlign: "center" }}>
+            {this.props.speciesDict[this.props.match.params.species_id]}
+          </p> */}
         </div>
+        <div style={{ marginBottom: "0.5%" }}>{schema_table}</div>
         <div>
           <div>
             <ExpansionPanel defaultExpanded>
@@ -422,12 +634,14 @@ const mapStateToProps = state => {
     mode_data: state.schema.mode_data,
     total_allele_data: state.schema.total_allele_data,
     scatter_data: state.schema.scatter_data,
+    mode_data2: state.schema.mode_data2,
     loading: state.schema.loading,
     error: state.schema.error,
     annotations: state.annotations.annotations,
     loading_annotations: state.annotations.loading,
     error_annotations: state.annotations.error,
-    speciesDict: state.stats.speciesDict
+    speciesDict: state.stats.speciesDict,
+    species: state.species.species
     // token: state.auth.token
   };
 };
