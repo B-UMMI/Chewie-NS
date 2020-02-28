@@ -1,12 +1,13 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchSchemaAlleleModeSuccess = (mode_data, total_allele_data, scatter_data) => {
+export const fetchSchemaAlleleModeSuccess = (mode_data, total_allele_data, scatter_data, mode_data2) => {
   return {
     type: actionTypes.FETCH_SCHEMA_ALLELE_MODE_SUCCESS,
     mode_data: mode_data,
     total_allele_data: total_allele_data,
-    scatter_data: scatter_data
+    scatter_data: scatter_data,
+    mode_data2: mode_data2
   };
 };
 
@@ -29,13 +30,19 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
     axios
       .get("stats/species/" + species_id + "/schema/" + schema_id + "/loci")
       .then(res => {
-        console.log(res.data);
+        // console.log(res.data);
         let allele_mode = [];
         let locus_name = [];
         let mode_data = [];
+        let mode_data2 = [];
         for (let key in res.data.mode) {
           allele_mode.push(res.data.mode[key].alleles_mode);
           locus_name.push(res.data.mode[key].locus_name);
+
+          mode_data2.push({
+            locus_name: res.data.mode[key].locus_name,
+            mode: res.data.mode[key].alleles_mode
+          })
         }
         // console.log(fastaData.join("\n"));
         // console.log(allele_mode);
@@ -114,7 +121,7 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
           text: locus_id
         })
         // console.log(plot_data)
-        dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data, scatter_data));
+        dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data, scatter_data, mode_data2));
       })
       .catch(modeErr => {
         dispatch(fetchSchemaAlleleModeFail(modeErr));
