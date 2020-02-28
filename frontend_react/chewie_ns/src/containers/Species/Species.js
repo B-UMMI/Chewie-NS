@@ -31,7 +31,6 @@ class Species extends Component {
     this.props.onFetchSpeciesAnnot(
       this.props.location.pathname[this.props.location.pathname.length - 1]
     );
-
   }
 
   clickPlotHandler = event => {
@@ -57,23 +56,43 @@ class Species extends Component {
 
     // console.log(this.props.match);
 
-    this.props.history.push(
-     this.props.match.params.species_id +
-       "/schemas/" +
-       schema_id +
-       "/locus/" +
-       locus_id
-    );
+    this.props.history.push({
+      pathname:
+        this.props.match.params.species_id +
+        "/schemas/" +
+        schema_id +
+        "/locus/" +
+        locus_id
+    });
   };
 
-  rowClickHandler = schema_id => {
+  rowClickHandler = rowData => {
     console.log("[RowClick]");
-    console.log("schema_id: ", schema_id);
+    console.log("rowData: ", rowData.slice(0, -1));
+
+    const schema_id = rowData[0];
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
+
+    const tableData = [];
+
+    tableData.push({
+      schema_id: rowData[0],
+      schema_name: rowData[1],
+      user: rowData[2],
+      nr_loci: rowData[3],
+      nr_allele: rowData[4],
+      chewie: rowData[5],
+      bsr: rowData[6],
+      ptf: rowData[7],
+      tl_table: rowData[8],
+      minLen: rowData[9]
+    });
+
     this.props.history.push({
-      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`
+      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`,
+      state: { tableData: tableData }
     });
   };
 
@@ -90,7 +109,11 @@ class Species extends Component {
 
   render() {
     let species = <Spinner />;
-    let species_plot = <div style={{ textAlign: "center" }}><CircularProgress /></div>;
+    let species_plot = (
+      <div style={{ textAlign: "center" }}>
+        <CircularProgress />
+      </div>
+    );
 
     // this.setState({
     //   species_name: this.props.location.state.species_name
@@ -264,7 +287,7 @@ class Species extends Component {
         print: false,
         viewColumns: true,
         pagination: false,
-        onRowClick: rowData => this.rowClickHandler(rowData[0])
+        onRowClick: rowData => this.rowClickHandler(rowData)
       };
 
       // for (i in this.props.speciesDict) {
@@ -278,7 +301,11 @@ class Species extends Component {
       species = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            title={<i>{this.props.speciesDict[this.props.match.params.species_id]}</i>}
+            // title={
+            //   <i>
+            //     {this.props.speciesDict[this.props.match.params.species_id]}
+            //   </i>
+            // }
             data={this.props.species}
             columns={columns}
             options={options}
@@ -291,7 +318,8 @@ class Species extends Component {
           data={this.props.species_annot}
           layout={{
             title: {
-              text: this.props.speciesDict[this.props.match.params.species_id]
+              text: "species_name"
+              // text: this.props.speciesDict[this.props.match.params.species_id]
             },
             autosize: true,
             xaxis: {
@@ -314,8 +342,10 @@ class Species extends Component {
       );
     }
     return (
-      <div style={{marginLeft : "5%", marginRight: "5%"}}>
-        <div><h1 style={{ textAlign: "center" }}>Schemas Overview</h1></div>
+      <div style={{ marginLeft: "5%", marginRight: "5%" }}>
+        <div>
+          <h1 style={{ textAlign: "center" }}>Schemas Overview</h1>
+        </div>
         {species}
         {species_plot}
         <footer
@@ -329,9 +359,8 @@ class Species extends Component {
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
-            <div
-            >
-              <Typography style={{fontSize: "10"}}>© UMMI 2020</Typography>
+            <div>
+              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
               {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
