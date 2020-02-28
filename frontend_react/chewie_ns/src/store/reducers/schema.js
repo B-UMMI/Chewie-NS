@@ -4,6 +4,8 @@ import { updateObject } from "../utility";
 const initialState = {
     mode_data: [],
     total_allele_data: [],
+    scatter_data: [],
+    mode_data2: [],
     loading: false, 
     error: false
 };
@@ -13,6 +15,7 @@ const fetchSchemaAlleleModeSuccess = (state, action) => {
         mode_data: action.mode_data,
         total_allele_data: action.total_allele_data,
         scatter_data: action.scatter_data,
+        mode_data2: action.mode_data2,
         loading: false
     })
 };
