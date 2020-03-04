@@ -892,31 +892,91 @@ class StatsSpeciesSchemasMode(Resource):
     def get(self, species_id, schema_id):	
         """ Get the all the loci and calculate the allele mode for a particular schema of a particular species. """
 
+        new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
-    
+
+        result1 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            ('select ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
+                'from <{0}> '
+                'where '
+                '{{ <{1}> a typon:Schema; typon:isFromTaxon <{2}>; '
+                'typon:hasSchemaPart ?part . '
+                '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, new_species_url)))
+
+        # print(result1["results"]["bindings"][0]["nr_allele"]["value"], flush=True)
+
+        schema_alleles = 0
+        schema_loci_id = []
+
+        for r in result1["results"]["bindings"]:
+            
+            schema_alleles += int(r["nr_allele"]["value"])
+
+            schema_loci_id.append(r["locus"]["value"])
+
+        # print(sorted(schema_loci_id), flush=True)
+                
         try:
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                        ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                         ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
-                        'from <{0}> '
-                        'where '
-                        '{{ <{1}> typon:hasSchemaPart ?part. '
-                        '?part typon:hasLocus ?locus.'
-                        '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
-                        '?allele a typon:Allele; typon:isOfLocus ?locus .'
-                        '?allele typon:hasSequence ?sequence .'
-                        '?sequence typon:nucleotideSequence ?nucSeq .'
-                        'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                        'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+            result = []
 
-            # print(result["results"]["bindings"][0])
+            # Virtuoso can only return a max of 10k rows...
+            if schema_alleles < 10000:
+
+                data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                            ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
+                            ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
+                            'from <{0}> '
+                            'where '
+                            '{{ <{1}> typon:hasSchemaPart ?part. '
+                            '?part typon:hasLocus ?locus.'
+                            '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                            '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                            '?allele typon:hasSequence ?sequence .'
+                            '?sequence typon:nucleotideSequence ?nucSeq .'
+                            'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
+                            'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+                
+                result = data["results"]["bindings"]
+                
+                # print(result[0], flush=True)
+
+
+            # print(result, flush=True)
+            else:
+
+                # result = []
+
+                for locus_id in sorted(schema_loci_id):
+
+                    data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                                ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
+                                ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
+                                'from <{0}> '
+                                'where '
+                                '{{ <{1}> typon:hasSchemaPart ?part. '
+                                '?part typon:hasLocus <{2}>.'
+                                '<{2}> typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                                '?allele a typon:Allele; typon:isOfLocus <{2}> .'
+                                '?allele typon:hasSequence ?sequence .'
+                                '?sequence typon:nucleotideSequence ?nucSeq .'
+                                'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
+                                'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, locus_id)))
+
+                    # print(data["results"]["bindings"][0], flush=True)
+                    
+                    result.append(data["results"]["bindings"][0])
+            
+            
+            # print(result["results"]["bindings"], flush=True)
 
 
             loci_data = {}
             # count = []
 
-            for i in result["results"]["bindings"]:
+            for i in result:
                 # print(i["name"]["value"])
                 # count += 1
 
