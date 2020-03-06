@@ -8,6 +8,9 @@ import classes from "./Locus.module.css";
 
 import classNames from "classnames";
 
+import SvgIcon from "@material-ui/core/SvgIcon";
+import { mdiOpenInNew } from "@mdi/js";
+
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Button from "@material-ui/core/Button";
@@ -85,6 +88,38 @@ class Locus extends Component {
         onClick={() => this.downloadFastaHandler()}
       >
         Download FASTA
+      </Button>
+    );
+
+    let blastx = (
+      <Button
+        variant="contained"
+        color="default"
+        startIcon={
+          <SvgIcon fontSize="small">
+            <path d={mdiOpenInNew} />
+          </SvgIcon>
+        }
+      >
+        <a href={this.props.blastxQuery} target="_blank" rel="noopener noreferrer">
+          BLASTx
+        </a>
+      </Button>
+    );
+
+    let blastn = (
+      <Button
+        variant="contained"
+        color="default"
+        startIcon={
+          <SvgIcon fontSize="small">
+            <path d={mdiOpenInNew} />
+          </SvgIcon>
+        }
+      >
+        <a href={this.props.blastnQuery} target="_blank" rel="noopener noreferrer">
+          BLASTn
+        </a>
       </Button>
     );
 
@@ -346,6 +381,8 @@ class Locus extends Component {
           }}
         >
           {downloadFasta}
+          {blastx}
+          {blastn}
         </Box>
         <footer
           style={{
@@ -374,6 +411,8 @@ const mapStateToProps = state => {
     locus_fasta: state.locus.locus_fasta,
     locus_uniprot: state.locus.locus_uniprot,
     fasta_data: state.locus.fasta_data,
+    blastxQuery: state.locus.blastxQuery,
+    blastnQuery: state.locus.blastnQuery,
     scatter_data: state.locus.scatter_data,
     basic_stats: state.locus.basic_stats,
     loading: state.locus.loading,

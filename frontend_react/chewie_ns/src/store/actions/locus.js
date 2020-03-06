@@ -1,13 +1,15 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchLocusFastaSuccess = (locus_fasta, fasta_data, scatter_data, basic_stats) => {
+export const fetchLocusFastaSuccess = (locus_fasta, fasta_data, scatter_data, basic_stats, blastxQuery, blastnQuery) => {
   return {
     type: actionTypes.FECTH_LOCUS_FASTA_SUCCESS,
     locus_fasta: locus_fasta,
     fasta_data: fasta_data,
     scatter_data: scatter_data,
-    basic_stats: basic_stats
+    basic_stats: basic_stats,
+    blastxQuery: blastxQuery,
+    blastnQuery: blastnQuery
   };
 };
 
@@ -43,13 +45,20 @@ export const fetchLocusFasta = locus_id => {
         let scatter_data = [];
         let basic_stats = [];
         let fastaData = [];
+        let blastData = [];
         const locusName = res.data.Fasta[0].name.value;
         for (let key in res.data.Fasta) {
           allele_ids.push(res.data.Fasta[key].allele_id.value)
           nucSeqLen.push(res.data.Fasta[key].nucSeqLen.value)
 
           fastaData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value)
+          blastData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "%0A" + res.data.Fasta[key].nucSeq.value)
         }
+
+        let concatBlastDATA = blastData.join("%0A");
+
+        let blastxQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastx&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + concatBlastDATA;
+        let blastnQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + concatBlastDATA;
 
         const min_len = Math.min(...nucSeqLen.map(Number));
         const max_len = Math.max(...nucSeqLen.map(Number))
@@ -75,7 +84,7 @@ export const fetchLocusFasta = locus_id => {
           name: "Locus Details",
           mode: "markers"
         })
-        dispatch(fetchLocusFastaSuccess(histogram_data, fastaData, scatter_data, basic_stats));
+        dispatch(fetchLocusFastaSuccess(histogram_data, fastaData, scatter_data, basic_stats, blastxQuery, blastnQuery));
       })
       .catch(fastaErr => {
         dispatch(fetchLocusFastaFail(fastaErr));

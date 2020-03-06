@@ -17,6 +17,8 @@ const fetchLocusFastaSuccess = (state, action) => {
         fasta_data: action.fasta_data,
         scatter_data: action.scatter_data,
         basic_stats: action.basic_stats,
+        blastxQuery: action.blastxQuery,
+        blastnQuery: action.blastnQuery,
         loading: false
     })
 };
