@@ -14,7 +14,6 @@ from collections import Counter
 from flask_login import login_required
 from flask_restplus import Resource, fields, marshal_with
 from flask_security.utils import verify_password, hash_password
-
 from flask_security import (login_user, logout_user, 
                             current_user, user_registered)
 
@@ -33,6 +32,7 @@ from flask import (current_app, render_template, flash, redirect, url_for, reque
 from app.utils import aux
 from app.models import User, Role
 from app.utils import wrappers as w
+from app.utils import sparql_queries
 from app import (db, celery, login_manager, 
                 datastore_cheat, security, jwt)
 
@@ -46,145 +46,139 @@ from SPARQLWrapper import SPARQLWrapper
 # Get the error handlers to work with restplus
 jwt._set_error_handler_callbacks(api)
 
-#queue to add locus do schema
+# queue to add locus do schema
 @celery.task(time_limit=20)
 def add_locus_schema(new_schema_url, new_locus_url):	
     
-    #get number of loci on schema and build the uri based on that number+1
-    result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                         ('select (COUNT(?parts) as ?count) '
-                          'from <{0}>'
-                          'where {{ <{1}> typon:hasSchemaPart ?parts. }}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+    # count number of loci on schema and build the uri based on that number+1
+    loci_count = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              sparql_queries.COUNT_SCHEMA_LOCI.format(current_app.config['DEFAULTHGRAPH'],
+                                                                      new_schema_url))
     
-    number_schema_parts = int(result["results"]["bindings"][0]['count']['value'])
+    # 0 if schema has no loci
+    number_schema_parts = int(loci_count['results']['bindings'][0]['count']['value'])
     
-    new_schema_part_url = "{0}/loci/{1}".format(new_schema_url, str(number_schema_parts + 1))
+    # create URI for new schema part
+    new_schema_part_url = '{0}/loci/{1}'.format(new_schema_url, str(number_schema_parts+1))
     
-    #send data to graph
-    query2send = ('INSERT DATA IN GRAPH <{0}> '
-                  '{{ <{1}> a typon:SchemaPart ; '
-                  'typon:index "{2}"^^xsd:int ; '
-                  'typon:hasLocus <{3}>.'
-                  '<{4}> typon:hasSchemaPart <{5}>.}}'.format(current_app.config['DEFAULTHGRAPH'], 
-                                                              new_schema_part_url, 
-                                                              str(number_schema_parts + 1), 
-                                                              new_locus_url, 
-                                                              new_schema_url, 
-                                                              new_schema_part_url))
+    # link locus to schema (previous operations determined that schema exists)
+    link_query = (sparql_queries.INSERT_SCHEMA_LOCUS.format(current_app.config['DEFAULTHGRAPH'],
+                                                            new_schema_part_url,
+                                                            str(number_schema_parts+1),
+                                                            new_locus_url,
+                                                            new_schema_url,
+                                                            new_schema_part_url))
     
-    #result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-    result = aux.send_data(query2send, 
-                           current_app.config['LOCAL_SPARQL'], 
-                           current_app.config['VIRTUOSO_USER'], 
-                           current_app.config['VIRTUOSO_PASS'])
+    link_locus = aux.send_data(link_query,
+                               current_app.config['LOCAL_SPARQL'],
+                               current_app.config['VIRTUOSO_USER'],
+                               current_app.config['VIRTUOSO_PASS'])
     
-    if result.status_code in [200, 201] :
-        return {"message" : "Locus sucessfully added to schema"}, 201		
+    if link_locus.status_code in [200, 201]:
+        return {'message': 'Locus successfully added to schema.'}, 201
     else:
-        return {"message" : "Sum Thing Wong"}, result.status_code
+        return {'message': 'Could not add locus to schema.'}, result.status_code
 
 
-#queue to add alleles
+# queue to add alleles
 @celery.task(time_limit=20)
-def add_allele(new_locus_url, spec_name, loci_id, new_user_url, new_seq_url, isNewSeq, add2send2graph, sequence):
+def add_allele(new_locus_url, spec_name, loci_id, new_user_url,
+               new_seq_url, isNewSeq, add2send2graph, sequence, allele_uri):
     
-    query = ('SELECT ?alleles '
-             'FROM <{0}>'
-             'WHERE '
-             '{{ ?alleles typon:isOfLocus <{1}>; typon:hasSequence ?seq. '
-             '?seq a typon:Sequence; typon:nucleotideSequence "{2}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, sequence))
-    
-    if len(sequence) > 9000:
-        result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
-    else:
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
+    max_tries = 3
+    new_allele_url = allele_uri
 
-    
-    #if sequence exists return the allele uri, if not create new sequence
-    try:
-        new_allele_url = result["results"]["bindings"][0]['alleles']['value']
-        return {"message" : "already exists" + new_allele_url}, 409
-    
-    except:
-        pass
-    
-
-    #get number of alleles for locus
-    result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                         ('select (COUNT(?alleles) as ?count)'
-                         'from <{0}>'
-                         'where '
-                          '{{ ?alleles typon:isOfLocus <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-    
-    number_alleles_loci = int(result["results"]["bindings"][0]['count']['value'])
-    new_allele_url = "{0}loci/{1}/alleles/{2}".format(current_app.config['BASE_URL'], str(loci_id), str(number_alleles_loci + 1))
-    
-    #add allele to virtuoso
+    # add allele to virtuoso
     if isNewSeq:
-        query2send = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> a typon:Sequence {2} ; '
-                      'typon:nucleotideSequence "{3}"^^xsd:string . '
-                      '<{4}> a typon:Allele; '
-                      'typon:name "{5}"^^xsd:string; '
-                      'typon:sentBy <{6}>; '
-                      'typon:isOfLocus <{7}>; '
-                      'typon:dateEntered "{8}"^^xsd:dateTime; '
-                      'typon:id "{9}"^^xsd:integer; '
-                      'typon:hasSequence <{1}> . '
-                      '<{7}> typon:hasDefinedAllele <{4}>.}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                     new_seq_url,
-                                                                     add2send2graph,
-                                                                     sequence,
-                                                                     new_allele_url,
-                                                                     spec_name,
-                                                                     new_user_url,
-                                                                     new_locus_url,
-                                                                     str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
-                                                                     str(number_alleles_loci+1)
-                                                                     ))
 
-        # result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        result = aux.send_data(query2send, 
-                               current_app.config['LOCAL_SPARQL'], 
-                               current_app.config['VIRTUOSO_USER'], 
-                               current_app.config['VIRTUOSO_PASS'])
-
-    #add new link from allele to sequence
+        query2send = (sparql_queries.INSERT_ALLELE_NEW_SEQUENCE.format(current_app.config['DEFAULTHGRAPH'],
+                                                                         new_seq_url,
+                                                                         add2send2graph,
+                                                                         sequence,
+                                                                         new_allele_url,
+                                                                         spec_name,
+                                                                         new_user_url,
+                                                                         new_locus_url,
+                                                                         str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
+                                                                         new_allele_url.split('/')[-1]
+                                                                         ))
+        operation = ['ADD', 'add', 'added']
     else:
-        query2send = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> a typon:Allele; '
-                      'typon:name "{2}"; '
-                      'typon:sentBy <{3}> ;'
-                      'typon:isOfLocus <{4}>; '
-                      'typon:dateEntered "{5}"^^xsd:dateTime; '
-                      'typon:id "{6}"^^xsd:integer ; '
-                      'typon:hasSequence <{7}>. '
-                      '<{4}> typon:hasDefinedAllele <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                    new_allele_url,
-                                                                    spec_name,
-                                                                    new_user_url,
-                                                                    new_locus_url,
-                                                                    str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
-                                                                    str(number_alleles_loci+1),
-                                                                    new_seq_url
-                                                                    ))
-        
-        # result = aux.send_data(query2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        result = aux.send_data(query2send, 
-                               current_app.config['LOCAL_SPARQL'], 
-                               current_app.config['VIRTUOSO_USER'], 
+
+        query2send = (sparql_queries.INSERT_ALLELE_LINK_SEQUENCE.format(current_app.config['DEFAULTHGRAPH'],
+                                                                        new_allele_url,
+                                                                        spec_name,
+                                                                        new_user_url,
+                                                                        new_locus_url,
+                                                                        str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
+                                                                        new_allele_url.split('/')[-1],
+                                                                        new_seq_url
+                                                                        ))
+        operation = ['LINK', 'link', 'linked']
+
+    tries = 0
+    insert = False
+    while insert is False:
+
+        # if len(sequence) < 2000:
+        result = aux.send_data(query2send,
+                               current_app.config['LOCAL_SPARQL'],
+                               current_app.config['VIRTUOSO_USER'],
                                current_app.config['VIRTUOSO_PASS'])
+#            else:
+#                result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+#                                            query2send,
+#                                            current_app.config['VIRTUOSO_USER'],
+#                                            current_app.config['VIRTUOSO_PASS'])
 
-        #return {"message" : "Sequence was already attributed to a loci/allele"}, 418
+        tries += 1
 
-    #print(result)
-    if result.status_code not in [200, 201] :
-        return {"message" : "Sum Thing Wong creating sequence 1"}, result.status_code
+        if result.status_code in [200, 201]:
+            insert = True
+        elif tries == max_tries:
+            insert = True
+
+    if result.status_code > 201:
+        return {'FAIL': 'Could not {0} new allele.'.format(operation[1])}, result.status_code
     else:
-        return {"message" : "A new allele has been added to " + new_allele_url}, result.status_code
+        return {operation[0]: 'A new allele has been {0} to {1}'.format(operation[2], new_allele_url)}, result.status_code
 
 
-#queue to add profile		
+def enforce_locking(user_role, user_uri, schema_uri):
+    """
+    """
+
+    allow = [True, user_role]
+    if user_role not in ['Admin', 'Contributor']:
+        allow = [False, {'Not authorized': 'must have Admin or Contributor permissions.'}]
+
+    # if user is a Contributor, check if it administers the schema
+    if user_role == 'Contributor':
+        ownership = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.ASK_SCHEMA_OWNERSHIP.format(schema_uri, user_uri)))
+        user_owns = ownership['boolean']
+        print(user_owns, flush=True)
+        if user_owns is not True:
+            allow = [False, {'Not authorized': 'must have Admin permissions or be the Contributor that manages the schema.'}]
+
+    return allow
+
+
+def generate(header, iterable):
+    """
+    """
+
+    # first '{' has to be escaped
+    yield '{{ "{0}": ['.format(header)
+    if len(iterable) > 0:
+      yield json.dumps(iterable[0])
+      for item in iterable[1:]:
+          yield ',{0}'.format(json.dumps(item))
+
+    yield '] }'
+
+
+# queue to add profile		
 @celery.task(time_limit=20)
 def add_profile(rdf_2_ins):
     
@@ -234,67 +228,82 @@ def add_profile(rdf_2_ins):
             
             return e, 400
         return e, 400
-    
 
-# Get datastore from init. 
-# This is cheating and extremely inelegant!!
-# TODO
+
 user_datastore = datastore_cheat
 
 # Create a default admin user on Postgres and Virtuoso
+# This runs every time this file reloads
 @blueprint.before_app_first_request
 def create_role():
-    try:
-    
-        db.drop_all() #FOR DEBUG ONLY!!
-        db.create_all()
-        user_datastore.create_role(name="Admin")
-        user_datastore.create_role(name="Contributor")
-        user_datastore.create_role(name="User")
 
+    # check if Admin was previously created
+    # during first execution
+    default = user_datastore.get_user(1)
+    # create Admin if it does not exist
+    if default == None:
+        # this will drop db and delete all users
+        # will not delete users from Virtuoso
+        # rollback or the process will hang
+        db.session.rollback()
+        db.drop_all()
+        db.create_all()
+
+        print('Creating Admin account...', flush=True)
+        # add possible roles to database
+        user_datastore.create_role(name='Admin', description='')
+        user_datastore.create_role(name='Contributor', description='')
+        user_datastore.create_role(name='User', description='')
+        # create Admin user
         u = user_datastore.create_user(email="test@refns.com", password=hash_password("mega_secret"))
         user_datastore.add_role_to_user(u, "Admin")
+        
+        # check if Admin was successfully created in Postgres db
+        postgres_admin = user_datastore.get_user(1)
+        postgres_account = False if postgres_admin == None else True
+
         db.session.commit()
-        # role = user_datastore.find_role("User")
-        # user_datastore.add_role_to_user(user, role)
-        
-        # Send user to Virtuoso
-        new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(u.id))
-        newUserRole = "Admin"
-        sparql_query = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
-                       'INSERT DATA IN GRAPH <{0}> '
-                       '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "{2}"^^xsd:string}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                                                             new_user_url,
-                                                                                                             newUserRole))
-        
-        # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], 
-        #                        current_app.config['VIRTUOSO_USER'], 
-        #                        current_app.config['VIRTUOSO_PASS'])
-        
-        result = aux.send_data(sparql_query, 
-                               current_app.config['LOCAL_SPARQL'], 
-                               current_app.config['VIRTUOSO_USER'], 
+
+        # Create Admin in Virtuoso
+        new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(u.id))
+        newUserRole = 'Admin'
+        sparql_query = (sparql_queries.INSERT_USER.format(current_app.config['DEFAULTHGRAPH'],
+                                                          new_user_url,
+                                                          newUserRole))
+
+        result = aux.send_data(sparql_query,
+                               current_app.config['LOCAL_SPARQL'],
+                               current_app.config['VIRTUOSO_USER'],
                                current_app.config['VIRTUOSO_PASS'])
-        #print("NICE")
 
-    except:
-        db.session.rollback()
-        print("Role created already...")
+        # check if Admin was successfully inserted into Virtuoso graph
+        virtuoso_admin = result.status_code
+        virtuoso_account = True if virtuoso_admin in [200, 201] else False
 
-######## API ROUTES ##########################################################################
+        print('Created Postgres Admin: {0}\n'
+              'Created Virtuoso Admin: {1}'.format(postgres_account, virtuoso_account), flush=True)
+
+    # after the first execution we already have Admin
+    else:
+        print('Admin account already exists.', flush=True)
+
+
+# API Routes
+
+# Login/logout Routes
 
 # Namespace for Login
 auth_conf = api.namespace('auth', description='authentication operations')
 
 # Login model
-auth_model = api.model("LoginModel", {
-    'email': fields.String(required=True,
-                           description="user email address", 
-                           example="test@refns.com"),
-    'password': fields.String(required=True, 
-                              description="user password",
-                              example="mega_secret")
-})
+auth_model = api.model('LoginModel',
+                       {'email': fields.String(required=True,
+                                               description='User email address.', 
+                                               example='test@refns.com'),
+                        'password': fields.String(required=True,
+                                                  description='User password.',
+                                                  example='mega_secret')
+                       })
 
 # refresh_model = api.model("RefreshModel", {
 #     'refresh_token': fields.String(required=True,
@@ -426,34 +435,62 @@ class LogoutAPI(Resource):
             }
             return response_object, 403
 
+
+# Users Routes
+
 # Namespace for User operations
 user_conf = api.namespace('user', description='user related operations')
 
 # User models
-user_model = api.model("UserModel", {
-    'id': fields.Integer(description="user ID"),
-    'email': fields.String(required=True, 
-                           description='user email address'),
-    'roles': fields.String(required=True, 
-                           description='role of the user')
-})
+# models ensure that the specified output fields are displayed
+# as long as data provided to model has the right structure and type
+user_model = api.model('UserModel',
+                       {'id': fields.Integer(required=True,
+                                             description='User unique integer identifier.'),
+                        'email': fields.String(required=True,
+                                               description='User email address.'),
+                        'last_login_at': fields.DateTime(required=True,
+                                                                 description='User last login date.'),
+                        'roles': fields.String(required=True,
+                                               description='Role/Permission type of the user.'),
+                        'validated': fields.Boolean(required=True,
+                                                            description='User is valid if it was '
+                                                                        'successfully added to Postgres and to Virtuoso.')
+                       })
 
-current_user_model = api.model("CurrentUserModel", {
-    'id': fields.Integer(description="User ID"),
-    'email': fields.String,
-    'last_login_at': fields.DateTime,
-    "roles": fields.String
-})
+current_user_model = api.model('CurrentUserModel',
+                               {'id': fields.Integer(required=True,
+                                                     description='User unique integer identifier.'),
+                                'email': fields.String(required=True,
+                                                       description='User email address.'),
+                                'last_login_at': fields.DateTime(required=True,
+                                                                 description='User last login date.'),
+                                'roles': fields.String(required=True,
+                                                       description='Role/Permission type of the user.'),
+                                'validated': fields.Boolean(required=True,
+                                                            description='User is valid if it was '
+                                                                        'successfully added to Postgres and to Virtuoso.')
+                               })
 
-create_user_model = api.model("CreateUserModel", {
-    'email': fields.String(required=True,
-                           description="user email address",
-                           example= "user@test.com"),
-    'password': fields.String(required=True,
-                              description="user password",
-                              example="giga_secret",
-                              min_length=6)
-})
+register_user_model = api.model('RegisterUserModel',
+                                {'email': fields.String(required=True,
+                                                      description='User email address.'),
+                                 'password': fields.String(required=True,
+                                                         description='User NS account password.',
+                                                         min_length=8),
+                                })
+
+create_user_model = api.model('CreateUserModel',
+                              {'email': fields.String(required=True,
+                                                      description='User email address.'),
+                               'password': fields.String(required=True,
+                                                         description='User NS account password.',
+                                                         min_length=8),
+                               'role': fields.String(required=False,
+                                                     default='User',
+                                                     description='Role/Permissions for the new user (User or Contributor).')
+                               })
+
 
 # User routes
 @user_conf.route("/users")
@@ -469,13 +506,38 @@ class AllUsers(Resource):
     @api.marshal_with(user_model)
     @w.admin_required
     def get(self):
-        """ Returns a list of users """
+        """Returns the full list of users."""
         
-        users = db.session.query(User).all()
-        
-        return users, 200
+        # returning list of users from Postgres
+        ns_users = db.session.query(User).all()
 
+        users_info = []
+        # get info for each user and append to list
+        for user in ns_users:
 
+            current_user_dict = {}
+
+            # check if user exists in Virtuoso
+            user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], user.id)
+            user_exists_query = sparql_queries.ASK_USER.format(user_uri)
+            ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+            user_exists = ask_result['boolean']
+
+            current_user_dict = {}
+            current_user_dict['id'] = user.id
+            current_user_dict['email'] = user.email
+            # this value will be None/null if user never logged in
+            current_user_dict['last_login_at'] = user.last_login_at
+            current_user_dict['roles'] = str(user.roles[0])
+            current_user_dict['validated'] = user_exists
+
+            users_info.append(current_user_dict)
+
+        # model definition will process list and output correct format
+        return users_info, 200
+
+    # hide class method (hide decorator has to be at start)
+    @api.hide
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
                          500: 'Internal Server Error', 
@@ -485,110 +547,202 @@ class AllUsers(Resource):
     @api.expect(create_user_model, validate=True)
     @w.admin_required
     def post(self):
-        """ Creates a user (Admin only) """
+        """Creates a user (Admin only)."""
 
-        ### TODO: ADD SPARQL QUERY
+        postgres_account = False
+        virtuoso_account = False
 
-        # Get post data
+        # get post data
         data = request.get_json()
 
-        email = data["email"]
-        password = data["password"]
+        email = data['email']
+        password = data['password']
+        # new users are created with User permissions
+        new_user_role = data['role']
 
-        # Check if user already exists
-        us = user_datastore.get_user(email)
-
-        if us == None:
-
-            # Create the new user
-            u = user_datastore.create_user(email=email, password=hash_password(password))
-
-            # Add the default role of "User" to the new user
-            default_role = user_datastore.find_role("User")
-            user_datastore.add_role_to_user(u, default_role)
-
-            # Commit changes to the database
-            db.session.commit()
-
-            return {"message" : "User created successfully"}, 201
-
+        # check if user already exists in Postgres
+        postgres_user = user_datastore.get_user(email)
+        if postgres_user != None:
+            postgres_account = True
+            postgres_message = ('User with provided email already '
+                                'exists in Postgres DB.')
+            new_user_id = postgres_user.id
         else:
-            return {"message" : "User already exists, please login."}, 403
+            # add new user to memory, without synchronising with DB and making it persistent
+            new_user = user_datastore.create_user(email=email, password=hash_password(password))
+            default_role = user_datastore.find_role(new_user_role)
+            user_datastore.add_role_to_user(new_user, default_role)
+            # we can get the new user identifier because session has autoflush
+            new_user_id = new_user.id
+
+            # try to commit and make changes persistent
+            try:
+                db.session.commit()
+                postgres_account = True
+                postgres_message = ('Successfully added new user with '
+                                    'ID={0} to Postgres.'.format(new_user_id))
+            except Exception as e:
+                # could not commit changes
+                # rollback session transactions
+                db.session.rollback()
+                # Postgres auto increment function will increment
+                # user identifiers even if the changes cannot be committed
+                postgres_message = 'Failed to commit changes. Discarded changes.'
+
+        print(postgres_message, flush=True)
+
+        # add user to Virtuoso only if it could be added to Postgres
+        # auto increment function of Postgres should guarantee that we will not
+        # add a user that already exists in Virtuoso
+        if postgres_account is True:
+
+            # create user URI
+            new_user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'],
+                                                 new_user_id)
+
+            # check if user already exists in Virtuoso
+            user_exists_query = sparql_queries.ASK_USER.format(new_user_uri)
+            ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+            user_exists = ask_result['boolean']
+
+            if user_exists is True:
+                virtuoso_account = True
+                virtuoso_message = 'User with provided ID={0} already exists in Virtuoso'.format(new_user_id)
+            elif user_exists is False:
+                # add user to Virtuoso
+                new_user_query = (sparql_queries.INSERT_USER.format(current_app.config['DEFAULTHGRAPH'], 
+                                                                    new_user_uri, 
+                                                                    new_user_role))
+
+                insert_result = aux.send_data(new_user_query,
+                                              current_app.config['LOCAL_SPARQL'],
+                                              current_app.config['VIRTUOSO_USER'],
+                                              current_app.config['VIRTUOSO_PASS'])
+
+                query_status = insert_result.status_code
+                if query_status in [200, 201]:
+                    virtuoso_account = True
+                    virtuoso_message = ('{0}: Successfully added new user with '
+                                        'ID={1} to Virtuoso.'.format(query_status, new_user_id))
+                else:
+                    virtuoso_message = '{0}: Could not add new user to Virtuoso.'.format(query_status)
+
+        elif postgres_account is False:
+            virtuoso_message = ('Cannot add new user to Virtuoso because '
+                                'it could not be added to Postgres DB.')
+
+        print(virtuoso_message, flush=True)
+
+        return {'Postgres': '{0} ({1})'.format(postgres_account, postgres_message),
+                'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
         
 
 @user_conf.route("/register_user")
 class RegisterUser(Resource):
     """ Registers a user """
 
-    @api.doc(responses={ 201: 'OK', 
+    @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
                          500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated' },
              security=[])
-    @api.expect(create_user_model, validate=True)
+    @api.expect(register_user_model, validate=True)
     def post(self):
         """ Registers a user """
 
-        ### TODO: ADD SPARQL QUERY
-       
-        # Get post data
+        postgres_account = False
+        virtuoso_account = False
+
+        # get post data
         data = request.get_json()
 
-        email = data["email"]
-        password = data["password"]
+        email = data['email']
+        password = data['password']
+        # new users are created with User permissions
+        new_user_role = 'User'
 
-        # Check if user already exists
-        us = user_datastore.get_user(email)
-
-        if us == None:
-
-            # Create the new user
-            u = user_datastore.create_user(email=email, password=hash_password(password))
-
-            # Add the default role of "User" to the new user
-            default_role = user_datastore.find_role("User")
-            user_datastore.add_role_to_user(u, default_role)
-
-            # Commit changes to the database
-            db.session.commit()
-
-            # Get the new user id
-            new_user_id = user_datastore.get_user(email).id
-
-            # Get the new user role
-            new_user_role = "User"
-
-            # Build the new user url
-            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(new_user_id))
-
-            # Insert new user on Virtuoso
-            sparql_query = ('INSERT DATA IN GRAPH <{0}> '
-                           '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "{2}"^^xsd:string }}'.format(current_app.config['DEFAULTHGRAPH'], 
-                                                                                                                  new_user_url, 
-                                                                                                                  new_user_role))
-            
-            # result = aux.send_data(sparql_query, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-            result = aux.send_data(sparql_query, 
-                                   current_app.config['LOCAL_SPARQL'], 
-                                   current_app.config['VIRTUOSO_USER'], 
-                                   current_app.config['VIRTUOSO_PASS'])
-            
-            if result.status_code in [200, 201]:
-                return {"message" : "User created successfully",}, 201
-            
-            else:
-                return {"message": "Sum Thing Wong"}, 500
-
+        # check if user already exists in Postgres
+        postgres_user = user_datastore.get_user(email)
+        if postgres_user != None:
+            postgres_account = True
+            postgres_message = ('User with provided email already '
+                                'exists in Postgres DB.')
+            new_user_id = postgres_user.id
         else:
-            return {"message" : "User already exists, please login."}, 403
+            # add new user to memory, without synchronising with DB and making it persistent
+            new_user = user_datastore.create_user(email=email, password=hash_password(password))
+            default_role = user_datastore.find_role(new_user_role)
+            user_datastore.add_role_to_user(new_user, default_role)
+            # we can get the new user identifier because session has autoflush
+            new_user_id = new_user.id
 
+            # try to commit and make changes persistent
+            try:
+                db.session.commit()
+                postgres_account = True
+                postgres_message = ('Successfully added new user with '
+                                    'ID={0} to Postgres.'.format(new_user_id))
+            except Exception as e:
+                # could not commit changes
+                # rollback session transactions
+                db.session.rollback()
+                # Postgres auto increment function will increment
+                # user identifiers even if the changes cannot be committed
+                postgres_message = 'Failed to commit changes. Discarded changes.'
+
+        print(postgres_message, flush=True)
+
+        # add user to Virtuoso only if it could be added to Postgres
+        # auto increment function of Postgres should guarantee that we will not
+        # add a user that already exists in Virtuoso
+        if postgres_account is True:
+
+            # create user URI
+            new_user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'],
+                                                 new_user_id)
+
+            # check if user already exists in Virtuoso
+            user_exists_query = sparql_queries.ASK_USER.format(new_user_uri)
+            ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+            user_exists = ask_result['boolean']
+
+            if user_exists is True:
+                virtuoso_account = True
+                virtuoso_message = 'User with provided ID={0} already exists in Virtuoso'.format(new_user_id)
+            elif user_exists is False:
+                # add user to Virtuoso
+                new_user_query = (sparql_queries.INSERT_USER.format(current_app.config['DEFAULTHGRAPH'], 
+                                                                    new_user_uri, 
+                                                                    new_user_role))
+
+                insert_result = aux.send_data(new_user_query,
+                                              current_app.config['LOCAL_SPARQL'], 
+                                              current_app.config['VIRTUOSO_USER'], 
+                                              current_app.config['VIRTUOSO_PASS'])
+
+                query_status = insert_result.status_code
+                if query_status in [200, 201]:
+                    virtuoso_account = True
+                    virtuoso_message = ('{0}: Successfully added new user with '
+                                        'ID={1} to Virtuoso.'.format(query_status, new_user_id))
+                else:
+                    virtuoso_message = '{0}: Could not add new user to Virtuoso.'.format(query_status)
+
+        elif postgres_account is False:
+            virtuoso_message = ('Cannot add new user to Virtuoso because '
+                                'it could not be added to Postgres DB.')
+
+        print(virtuoso_message, flush=True)
+
+        return {'Postgres': '{0} ({1})'.format(postgres_account, postgres_message),
+                'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
 
 
 @user_conf.route("/current_user")
 class CurrentUser(Resource):
     """
-    returns the current user
+    Class with methods related with the user that is currently logged in.
     """
 
     @api.doc(responses={ 200: 'OK', 
@@ -600,39 +754,73 @@ class CurrentUser(Resource):
     @api.marshal_with(current_user_model)
     @jwt_required
     def get(self):
-        """Returns the current user"""
+        """Returns information about the current user."""
 
+        # get user from Postgres DB
         current_user = get_jwt_identity()
-        
         user = User.query.get_or_404(current_user)
 
-        return user, 200
+        # check if user exists in Virtuoso
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], current_user)
+        user_exists_query = sparql_queries.ASK_USER.format(user_uri)
+        ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+        user_exists = ask_result['boolean']
+
+        current_user_dict = {}
+        current_user_dict['id'] = user.id
+        current_user_dict['email'] = user.email
+        current_user_dict['last_login_at'] = user.last_login_at
+        current_user_dict['roles'] = str(user.roles[0])
+        current_user_dict['validated'] = user_exists
+
+        return current_user_dict, 200
 
 
 @user_conf.route("/<int:id>")
 class Users(Resource):
     """
-    Returns the user with the provided id
+    Class with methods to obtain information about or modify users accounts.
     """
 
     @api.doc(responses={ 200: 'OK',
-                         400: 'Invalid Argument', 
-                         500: 'Internal Server Error', 
-                         403: 'Unauthorized', 
-                         401: 'Unauthenticated', 
-                         404: 'Not Found' }, 
+                         400: 'Invalid Argument',
+                         500: 'Internal Server Error',
+                         403: 'Unauthorized',
+                         401: 'Unauthenticated',
+                         404: 'Not Found'},
              params={ 'id': 'Specify the ID associated with the user' },
              security=['access_token'])
     @api.marshal_with(user_model)
     @w.admin_required
     def get(self, id):
-        """Returns the user with the provided id"""
+        """Returns information about the user with the provided id."""
         
-        user = User.query.get_or_404(id)
+        # Gets users from Postgres DB
+        try:
+            user = User.query.get_or_404(id)
+        except Exception:
+            print('There is no user with provided ID.', flush=True)
+            # return empty dict to get every value as 'null'
+            return {}
 
-        return user, 200
+        # check if user exists in Virtuoso
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], user.id)
+        user_exists_query = sparql_queries.ASK_USER.format(user_uri)
+        ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+        user_exists = ask_result['boolean']
+
+        current_user_dict = {}
+        current_user_dict['id'] = user.id
+        current_user_dict['email'] = user.email
+        # this value will be None/null if user never logged in
+        current_user_dict['last_login_at'] = user.last_login_at
+        current_user_dict['roles'] = str(user.roles[0])
+        current_user_dict['validated'] = user_exists
+        # add other relevant info to recover
+        # can we recover number of schemas inserted by user and etc?
+
+        return current_user_dict, 200
         
-
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
@@ -644,23 +832,78 @@ class Users(Resource):
              security=['access_token'])
     @w.admin_required
     def put(self, id):
-        """ Promote User """
+        """Promote from User to Contributor"""
 
         # Get user data
-        user = User.query.get_or_404(id)
+        try:
+            user = User.query.get_or_404(id)
+        except Exception:
+            return {'message': 'There is no user with provided ID.'}
+
         remove_this_role = user.roles[0]
-        promote_to_this_role = user_datastore.find_role("Contributor")
-        
-        # Remove User's current role
-        user_datastore.remove_role_from_user(user, remove_this_role) 
 
-        # Add new role to the User (Promotion) 
-        user_datastore.add_role_to_user(user, promote_to_this_role)
-        
-        # Commit changes to the database
-        db.session.commit()
+        promote_to_this_role = user_datastore.find_role('Contributor')
 
-        return {"message" : "The user {0} has been promoted to {1}".format(str(user.email), str(promote_to_this_role))}, 200
+        postgres_change = False
+        if remove_this_role == promote_to_this_role:
+            postgres_message = 'User with provided ID is already a Contributor in Postgres DB.'
+            print(postgres_message, flush=True)
+        elif remove_this_role == 'User':
+            print('Promoting user to Contributor in Postgres DB...', end='', flush=True)
+            # Remove User's current role
+            user_datastore.remove_role_from_user(user, remove_this_role)
+            # Add new role to the User (Promotion)
+            user_datastore.add_role_to_user(user, promote_to_this_role)
+            # Commit changes to the database
+            db.session.commit()
+            print('done.', flush=True)
+            postgres_change = True
+            postgres_message = 'Promoted user to Contributor in Postgres DB.'
+        elif remove_this_role == 'Admin':
+            postgres_message = 'Cannot change role of Admin in Postgres DB.'
+            print(postgres_message, flush=True)
+
+        # promote user in Virtuoso
+        # delete current role
+        # select info from single user
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], id)
+
+        role_query = (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              role_query)
+
+        user_role = result['results']['bindings'][0]['role']['value']
+
+        # delete User role and insert Contributor role
+        virtuoso_change = False
+        if user_role == 'User':
+            # delete role
+            print('Promoting user to Contributor in Virtuoso graph...', end='', flush=True)
+            delete_role_query = (sparql_queries.DELETE_ROLE.format(current_app.config['DEFAULTHGRAPH'], user_uri))
+            delrole_result = aux.send_data(delete_role_query,
+                                           current_app.config['LOCAL_SPARQL'],
+                                           current_app.config['VIRTUOSO_USER'],
+                                           current_app.config['VIRTUOSO_PASS'])
+            # insert role
+            insert_role_query = (sparql_queries.INSERT_ROLE.format(current_app.config['DEFAULTHGRAPH'], user_uri))
+            insrole_result = aux.send_data(insert_role_query,
+                                           current_app.config['LOCAL_SPARQL'],
+                                           current_app.config['VIRTUOSO_USER'],
+                                           current_app.config['VIRTUOSO_PASS'])
+            print('done.', flush=True)
+            virtuoso_change = True
+            virtuoso_message = 'Promoted user to Contributor in Virtuoso graph.'
+        elif user_role == 'Contributor':
+            virtuoso_message = 'User with provided ID is already a Contributor in Virtuoso graph.'
+            print(virtuoso_message, flush=True)
+        elif user_role == 'Admin':
+            virtuoso_message = 'Cannot change role of Admin in Virtuoso graph.'
+            print(virtuoso_message, flush=True)
+
+        return {'Postgres': '{0} ({1})'.format(postgres_change, postgres_message),
+                'Virtuoso': '{0} ({1})'.format(virtuoso_change, virtuoso_message)}, 200
+
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
@@ -672,44 +915,47 @@ class Users(Resource):
              security=['access_token'])
     @w.admin_required
     def delete(self, id):
-        """ Delete user """
+        """Delete user."""
 
-        # Get user data
-        user = User.query.get_or_404(id)
+        # try to get user data
+        try:
+            user = User.query.get_or_404(id)
+        # if there is no user with provided identifier
+        except Exception:
+            not_found = 'Cannot delete unexistent user with provided ID={0}.'.format(id)
+            print(not_found, flush=True)
+            return {'message': not_found}, 404
 
-        # Remove user
+        user_id = user.id
+        user_role = user.roles
+        # ensure that Admins cannot be deleted
+        if user_id == 1 or 'Admin' in str(user_role):
+            return {'message': 'Insufficient permissions to delete specified user.'}
+
+        # delete user from Postgres
         user_datastore.delete_user(user)
-
-        # Commit changes to the database
+        # commit changes to the database
         db.session.commit()
 
-        return {"message" : "The user {0} has been deleted".format(str(user.email))}, 200
+        # delete user from Virtuoso
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], user_id)
+        user_exists_query = sparql_queries.ASK_USER.format(user_uri)
+        ask_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), user_exists_query)
+        user_exists = ask_result['boolean']
 
-############################################## Stats Routes ##############################################
+        if user_exists is True:
+            user_delete_query = (sparql_queries.DELETE_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri))
+            delete_result = aux.send_data(user_delete_query,
+                                          current_app.config['LOCAL_SPARQL'],
+                                          current_app.config['VIRTUOSO_USER'],
+                                          current_app.config['VIRTUOSO_PASS'])
 
+        return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
+
+
+# NS statistics Routes
+# Namespace for NS statistics operations
 stats_conf = api.namespace('stats', description = 'statistics of the database.')
-
-# new_loci_model = api.model("NewLociModel", {
-#     'prefix' : fields.String(required=True, description="Alias for the loci"),
-#     'locus_ori_name' : fields.String(description="Original name of the locus")    
-# })
-
-# allele_list_model = api.model("AlleleListModel", {
-#     'sequence' : fields.String(required=False, description="Allele DNA sequence"),
-#     'species_name' : fields.String(required=True, description="Name of the species (assumes it exists already)"),
-#     'uniprot_url': fields.String(required=False, default=False, description="Url to the Uniprot result of the allele"), 
-#     'uniprot_label': fields.String(required=False, default=False, description="Uniprot label of the allele"),
-#     'uniprot_sname': fields.String(required=False, default=False, description="Uniprot sname of the allele"),
-#     'sequence_uri': fields.String(required=False, default=False, description="URI of an existing sequence"),
-#     'enforceCDS' : fields.Boolean(required=False, default=False, description="Enforce CDS"),
-#     'input': fields.String(required=False, enum=["manual, auto, link"],
-#                            description="Type of input. Options are manual, auto, link." 
-#                                        "Manual presumes that only one allele will be inserted."
-#                                        "Auto presumes that a whole schema is being loaded."
-#                                        "Link is useful to add an existing sequence to a new allele and locus.")
-# })
-
-##########################################################################################################
 
 
 @stats_conf.route("/summary")
@@ -723,25 +969,19 @@ class StatsSummary(Resource):
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=[])
-    def get(self):	
+    def get(self):
         """ Count the number of items in Typon """
-    
-        #count stuff from on virtuoso
-        try:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                        ('select * '
-                        'from <{0}>'
-                        'where {{ '
-                        '{{ select (COUNT(?spec) as ?species) where {{?spec a <http://purl.uniprot.org/core/Taxon>}} }} '
-                        '{{ select (COUNT(?loc) as ?loci) where {{?loc a typon:Locus }} }} '
-                        '{{ select (COUNT(?schema) as ?schemas) where {{?schema a typon:Schema. }} }} '
-                        '{{ select (COUNT(?all) as ?alleles) where {{?all a typon:Allele. }} }} }}'.format(current_app.config['DEFAULTHGRAPH'])))
 
-            
-            return {"message" : result["results"]["bindings"]}, 200
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
+        # get simple counts for data in the NS
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                             (sparql_queries.NS_STATS.format(current_app.config['DEFAULTHGRAPH'])))
+
+        stats = result['results']['bindings']
+        if stats != []:
+            return stats, 200
+        else:
+            return {'NOT FOUND': 'Could not retrieve summary info from NS.'}, 404
+
 
 @stats_conf.route("/species")
 class StatsSpecies(Resource):
@@ -1111,32 +1351,45 @@ class StatsAnnotations(Resource):
             return {"message" : "Sum thing wong"}, 404
 
 
+# Loci Routes
 
-############################################## Loci Routes ##############################################
-
+# Namespace for Loci operations
 loci_conf = api.namespace('loci', description = 'loci related operations')
 
-new_loci_model = api.model("NewLociModel", {
-    'prefix' : fields.String(required=True, description="Alias for the loci"),
-    'locus_ori_name' : fields.String(description="Original name of the locus")    
-})
+new_loci_model = api.model('NewLociModel',
+                           {'prefix': fields.String(required=True,
+                                                    description="Alias for the loci"),
+                            'locus_ori_name': fields.String(description="Original name of the locus")    
+                            })
 
-allele_list_model = api.model("AlleleListModel", {
-    'sequence' : fields.String(required=False, description="Allele DNA sequence"),
-    'species_name' : fields.String(required=True, description="Name of the species (assumes it exists already)"),
-    'uniprot_url': fields.String(required=False, default=False, description="Url to the Uniprot result of the allele"), 
-    'uniprot_label': fields.String(required=False, default=False, description="Uniprot label of the allele"),
-    'uniprot_sname': fields.String(required=False, default=False, description="Uniprot sname of the allele"),
-    'sequence_uri': fields.String(required=False, default=False, description="URI of an existing sequence"),
-    'enforceCDS' : fields.Boolean(required=False, default=False, description="Enforce CDS"),
-    'input': fields.String(required=False, enum=["manual, auto, link"],
-                           description="Type of input. Options are manual, auto, link." 
-                                       "Manual presumes that only one allele will be inserted."
-                                       "Auto presumes that a whole schema is being loaded."
-                                       "Link is useful to add an existing sequence to a new allele and locus.")
-})
+allele_list_model = api.model('AlleleListModel',
+                              {'sequence': fields.String(required=False,
+                                                         description="Allele DNA sequence"),
+                               'species_name': fields.String(required=True,
+                                                             description="Name of the species (assumes it exists already)"),
+                               'uniprot_url': fields.String(required=False,
+                                                            default=False,
+                                                            description="Url to the Uniprot result of the allele"), 
+                               'uniprot_label': fields.String(required=False,
+                                                              default=False,
+                                                              description="Uniprot label of the allele"),
+                               'uniprot_sname': fields.String(required=False,
+                                                              default=False,
+                                                              description="Uniprot sname of the allele"),
+                               'sequence_uri': fields.String(required=False,
+                                                             default=False,
+                                                             description="URI of an existing sequence"),
+                               'enforceCDS': fields.Boolean(required=False,
+                                                            default=False,
+                                                            description="Enforce CDS"),
+                               'input': fields.String(required=False,
+                                                      enum=["manual, auto"],
+                                                      description="Type of input. Options are manual, auto, link." 
+                                                                  "Manual presumes that only one allele will be inserted."
+                                                                  "Auto presumes that a whole schema is being loaded."
+                                                                  "Link is useful to add an existing sequence to a new allele and locus.")
+                              })
 
-##########################################################################################################
 
 @loci_conf.route("/list")
 class LociList(Resource):
@@ -1168,96 +1421,46 @@ class LociList(Resource):
     def get(self, **kwargs):
         """ Get a list of all loci on NS """
 
+        prefix = kwargs['prefix']
+        sequence = kwargs['sequence']
+        locus_ori_name = kwargs['locus_ori_name']
         # Get list of loci that contain the provided DNA sequence
-        try: 
-            
+        if sequence != None:
+
             # Get sequence from request
-            sequence = str(request_data["sequence"]).upper()
-            
+            sequence = sequence.upper()
+
             # Generate hash
-            new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
+            sequence_hash = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
 
             # Query virtuoso
-            new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
+            sequence_uri = '{0}sequences/{1}'.format(current_app.config['BASE_URL'], str(sequence_hash))
 
+            # get all loci that have the provided sequence
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  ('select ?locus (str(?name) as ?name) '
-                                   'from <{0}>'
-                                   'where '
-                                   '{{?alleles typon:hasSequence <{1}>; typon:isOfLocus ?locus .'
-                                   ' ?locus a typon:Locus; typon:name ?name .}}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url)))
+                                  (sparql_queries.SELECT_SEQUENCE_LOCI.format(current_app.config['DEFAULTHGRAPH'], sequence_uri)))
 
-            try:
-                return (result["results"]["bindings"])
-            
-            except:
-                return {"message" : "Loci not found"}, 404
-                
-        except:
+            res_loci = result['results']['bindings']
 
+        else:
+            # get list of loci, ascending order of locus identifier
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  ('select ?locus (str(?name) as ?name) '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ ?locus a typon:Locus; typon:name ?name .}}'
-                                  'order by ?locus'.format(current_app.config['DEFAULTHGRAPH'])))
+                                  sparql_queries.SELECT_ALL_LOCI.format(current_app.config['DEFAULTHGRAPH']))
 
-            # Return records containing prefix only
-            try:
-            
-                request_data["prefix"]
-                
-                try:
-                    def generate():
+            res_loci = result['results']['bindings']
 
-                        if len(result["results"]["bindings"]) == 0:
-                            yield '{ "Loci": [] }'
-                        
-                        else:
+        if prefix != None:
+            res_loci = [res for res in res_loci if prefix in res['name']['value']]
 
-                            resp = []
+        if locus_ori_name != None:
+            res_loci = [res for res in res_loci if locus_ori_name in res['original_name']['value']]
 
-                            for item in result["results"]["bindings"]:
-                                #print(item)
-                                
-                                if request_data["prefix"] in item["name"]["value"]:
-                                    resp.append(json.dumps(item))
-
-                            resp = ','.join(resp)
-
-                            yield '{ "Loci": ['
-                            yield resp
-                            yield '] }'
-
-                    return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
-                    
-                except:
-                    return {"message" : "Bad argument"}, 400
-            
-            # return all records
-            except:
-                
-                try:
-                    def generate():
-
-                        resp = []
-
-                        for item in result["results"]["bindings"]:
-                            resp.append(json.dumps(item))
-
-                        resp = ','.join(resp)
-
-                        yield '{ "Loci": ['
-                        yield resp
-                        yield '] }'
-
-                    return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
-                    
-                except:
-                    return {"message" : "Bad argument"}, 400
-
-
-
+        # if result is not empty, stream with context
+        if len(res_loci) > 0:
+            return Response(stream_with_context(generate('Loci', res_loci)), content_type='application/json', mimetype='application/json')
+        # if there are loci with the sequence, filter based on other arguments
+        else:
+            return {'message': 'None of the loci in the NS meet the filtering criteria.'}, 404
     
     
     @api.doc(responses={201: 'OK', 
@@ -1271,106 +1474,65 @@ class LociList(Resource):
     @api.expect(new_loci_model)
     @w.admin_contributor_required
     def post(self):
-        """ Add a new locus """
+        """Add a new locus."""
 
-        # get user data
+        # get user ID
         c_user = get_jwt_identity()
 
         # get post data
         post_data = request.get_json()
+        prefix = post_data['prefix']
+        # check if prefix is not invalid
+        if aux.check_prefix(prefix) is False:
+            return {'message': 'Please provide a valid prefix.'}, 400
  
-        try:
-            post_data["prefix"]
-            aux.check_len(post_data['prefix'])
-        except:
-            return {"message" : "Provide prefix"}, 400
-        
-        
-        #only admin can do this
-        try:
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
-            
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  'ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "Admin"^^xsd:string}}'.format(new_user_url))
-            
-            if not result['boolean']:
-                return {"message" : "Not authorized, admin only"}, 403
-        
-        except:
-            return {"message" : "Not authorized, admin only"}, 403
-        
-
-        
-        #check if already exists locus with that aliases
-        #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 'SELECT (str(?name) as ?name) where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
-        #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 'ASK where { ?locus a typon:Locus; typon:name ?name . FILTER CONTAINS(str(?name), "' + post_data["prefix"] + '")}')
-        #print(result)
-        
-        #count number of loci already created, build the new locus uri and send to server
+        # count total number of loci in the NS
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                              ('select (COUNT(?locus) as ?count) '
-                               'from <{0}> '
-                               'where '
-                               '{{ ?locus a typon:Locus . }}'.format(current_app.config['DEFAULTHGRAPH'])))
+                              (sparql_queries.COUNT_TOTAL_LOCI.format(current_app.config['DEFAULTHGRAPH'])))
 
         number_loci_spec = int(result["results"]["bindings"][0]['count']['value'])
         
         newLocusId = number_loci_spec + 1
         
-        #name will be something like prefix-000001.fasta
-        aliases = post_data['prefix'] + "-" + "%06d" % (newLocusId,) + ""
+        # name will be something like prefix-000001.fasta
+        aliases = '{0}-{1}'.format(prefix, '%06d' % (newLocusId,))
 
-        #check if already exists locus with that aliases
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                              ('ASK where {{ ?locus a typon:Locus; typon:name ?name . '
-                               'FILTER CONTAINS(str(?name), "{0}")}}'.format(aliases)))
+        # check if already exists locus with that aliases
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.ASK_LOCUS_PREFIX.format(aliases)))
 
         if result['boolean']:
-            return {"message" : "Locus already exists"}, 409
+            return {'message': 'Locus with that prefix already exists.'}, 409
 
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(newLocusId))
-        
-        #if locus_ori_name then also save the original fasta name
-        try:
-            
-            locus_ori_name = post_data["locus_ori_name"]
-            
-            query2send = ('INSERT DATA IN GRAPH <{0}> '
-                         '{{ <{1}> a typon:Locus; typon:name "{2}"^^xsd:string; typon:originalName "{3}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                                                                                new_locus_url, 
-                                                                                                                                aliases, 
-                                                                                                                                locus_ori_name))
-            
-            result = aux.send_data(query2send, 
-                                   current_app.config['LOCAL_SPARQL'], 
-                                   current_app.config['VIRTUOSO_USER'], 
-                                   current_app.config['VIRTUOSO_PASS'])
-            
-        except:
-            query2send = ('INSERT DATA IN GRAPH <{0}> '
-                          '{{ <{1}> a typon:Locus; typon:name "{2}"^^xsd:string .}}'.format(current_app.config['DEFAULTHGRAPH'], 
-                                                                                            new_locus_url, 
-                                                                                            aliases))
 
-            result = aux.send_data(query2send, 
-                                   current_app.config['LOCAL_SPARQL'], 
-                                   current_app.config['VIRTUOSO_USER'], 
-                                   current_app.config['VIRTUOSO_PASS'])
+        # try to get locus original FASTA file name
+        locus_ori_name = post_data.get('locus_ori_name', False)
+
+        ns_locus_ori_name = '; typon:originalName "{0}"^^xsd:string.'.format(locus_ori_name) if locus_ori_name not in ['', 'string', False] else ' .'
+
+        # if locus_ori_name then also save the original fasta name
+        query2send = (sparql_queries.INSERT_LOCUS.format(current_app.config['DEFAULTHGRAPH'],
+                                                         new_locus_url,
+                                                         aliases,
+                                                         ns_locus_ori_name))
         
-        # "New locus added at " + new_locus_url + " with the alias: " + aliases
-        # "New locus added at {0} with the alias {1}".format(new_locus_url, aliases)
+        result = aux.send_data(query2send,
+                               current_app.config['LOCAL_SPARQL'],
+                               current_app.config['VIRTUOSO_USER'],
+                               current_app.config['VIRTUOSO_PASS'])
+            
         if result.status_code in [200, 201] :
-            return {"message" : "New locus added at {0} with the alias {1}".format(new_locus_url, aliases), 
-                    "url" : new_locus_url,
-                    "id" : str(newLocusId)}, 201
+            return {'message': 'New locus added at {0} with the alias {1}'.format(new_locus_url, aliases), 
+                    'uri': new_locus_url,
+                    'id': str(newLocusId)}, 201
         else:
-            return {"message" : "Sum Thing Wong"}, result.status_code
+            return {'message': 'Could not create locus.'}, result.status_code
 
 
 @loci_conf.route("/<int:loci_id>")
 class LociNS(Resource):
     """ Gets a particular locus ID """
-
 
     @api.doc(responses={200: 'OK', 
                         400: 'Invalid Argument',
@@ -1381,170 +1543,106 @@ class LociNS(Resource):
             security=["access_token"])
     @jwt_required
     def get(self, loci_id, **kwargs):
-        """ Get a particular locus """
+        """Get a particular locus."""
         
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
 
-        try:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 ('select (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                                  'from <{0}>'
-                                  ' where '
-                                  '{{ <{1}> a typon:Locus; typon:name ?name . '
-                                  'OPTIONAL{{<{1}> typon:originalName ?original_name.}} '
-                                  'OPTIONAL{{<{1}> typon:isOfTaxon ?taxon}} }}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-            
-            response = result["results"]["bindings"]
-        
-            if response == []:
-                return {"message": "No loci found with the provided id."}, 404
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                             (sparql_queries.SELECT_LOCUS.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
 
-            else:
-                return (response)
-            
-        except:
-            return {"message" : "Empty man..."}, 404
+        locus = result['results']['bindings']
+
+        if locus == []:
+            return {'message': 'There is no locus with the provided ID.'}, 404
+        else:
+            return locus
 
 
 @loci_conf.route('/<int:loci_id>/fasta')
 class LociNSFastaAPItypon(Resource):
-    """ Loci NS Fasta Resource """
-
+    """Loci NS Fasta Resource."""
 
     @api.doc(responses={ 200: 'OK', 
                         400: 'Invalid Argument', 
                         500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
-                        404: 'Not found' },
+                        404: 'Not found'},
             security=[])
-    # @jwt_required
     def get(self, loci_id):
-        """ Gets the FASTA sequence of the alleles from a particular loci from a particular species """
+        """Gets the FASTA sequence of the alleles from a particular loci from a particular species."""
 
-        new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
+        c_user = get_jwt_identity()
+
+        locus_uri = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
         
+        # check if locus exists
+        locus_exists = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                    sparql_queries.ASK_LOCUS.format(locus_uri))
+        locus_exists = locus_exists['boolean']
+        if locus_exists is False:
+            return {'message': 'There is no locus with provided ID.'}
+
+        # get schema that the locus is associated with
+        locus_schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                          (sparql_queries.SELECT_LOCUS_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
+
+        # get schema URI from response
+        has_schema = False if locus_schema_query['results']['bindings'] == [] else True
+        if has_schema is False:
+            return {'message': 'Locus is not associated with any schema.'}
+
+        locus_schema = locus_schema_query['results']['bindings'][0]['schema']['value']
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                           (sparql_queries.ASK_SCHEMA_LOCK.format(locus_schema)))
+
+        locking_status = locking_status_query['boolean']
+
+        # if schema is locked, enforce condition that only the Admin
+        # or the Contributor that administers the schema may get the FASTA sequences
+        if locking_status is False:
+            # check the role of the user that is trying to access
+            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'],
+                                                                     new_user_url)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
+
+            allow = enforce_locking(user_role, new_user_url, locus_schema)
+            if allow[0] == False:
+                return allow[1], 403
+
         # find all alleles from the locus and return the sequence and id sorted by id
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select ?name ?allele_id (str(?nucSeq) as ?nucSeq) (strlen(?nucSeq) as ?nucSeqLen) '
-                              'from <{0}> '
-                              'where '
-                              '{{ <{1}> a typon:Locus; typon:name ?name. '
-                              '?alleles typon:isOfLocus <{1}> .'
-                              '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .'
-                              '?sequence typon:nucleotideSequence ?nucSeq. }} '
-                              'order by ASC(?allele_id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-        
-        if result["results"]["bindings"] == []:
-            return {"message": "No alleles found with the provided loci id."}, 404
-        
-        # sometimes virtuoso returns an error 
-        # "Max row length is exceeded when trying to store a string of"
-        # due to the sequences being too large,
-        # if it happens there is a way around
-        try:
-            result["results"]["bindings"]
-        
-        except:
-            #virtuoso returned an error, if it excedeed length request each allele one at a time
-            if "Max row length is exceeded when trying to store a string of" in str(result):
-                
-                print ("sequence too long")
-                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                     ('select ?allele_id ?sequence '
-                                      'from <{0}>'
-                                      'where '
-                                      '{{ <{1}> a typon:Locus; typon:name ?name. '
-                                      '?alleles typon:isOfLocus <{1}> .'
-                                      '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .}} '
-                                      'order by ASC(?allele_id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-                
-                i = 0
-                for seq in result["results"]["bindings"]:
-                                         
-                    result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                          ('select (str(?nucSeq) as ?nucSeq) '
-                                           'from <{0}>'
-                                           'where '
-                                           '{{<{1}> typon:nucleotideSequence ?nucSeq. }}'.format(current_app.config['DEFAULTHGRAPH'], seq['sequence']['value'])))
-                                         
-                    realsequence = result2["results"]["bindings"][0]['nucSeq']['value']
-                    
-                    seq['nucSeq']={'value' : str(realsequence)}
-                    #seq['nucSeq']['value']=str(realsequence)
-                    
-                    result["results"]["bindings"][i]['nucSeq'] = result2["results"]["bindings"][0]['nucSeq']
-                    i += 1
-                
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                             (sparql_queries.SELECT_LOCUS_FASTA.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
 
-                ## stream way to send data
-                
-                try:
-                    def generate():
-                        yield '{"Fasta": ['
-                        
-                        try:
-                            prev_item = result["results"]["bindings"].pop(0)
-                        
-                        except:
-                            yield ']}'
-                        
-                        for item in result["results"]["bindings"]:
-                            yield json.dumps(prev_item) + ','
-                            prev_item = item
-                        
-                        yield json.dumps(prev_item) + ']}'
-                    
-                    r = Response(stream_with_context(generate()), content_type='application/json')
-                    r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
-                        
-                    return r
-                    
-                except:
-                    return {"message" : "Empty man..."}
-                return result["results"]["bindings"]
-            
-            #the query returned some error, retry it one last time
-            time.sleep(1)
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                ('select ?allele_id (str(?nucSeq) as ?nucSeq) '
-                                 'from <{0}>'
-                                 'where '
-                                 '{{ <{1}> a typon:Locus; typon:name ?name. '
-                                 '?alleles typon:isOfLocus <{1}> .'
-                                 '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .'
-                                 '?sequence typon:nucleotideSequence ?nucSeq. }} '
-                                 'order by ASC(?allele_id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))            
-                     
-        try:
-            def generate():
-                yield '{"Fasta": ['
-                
-                try:
-                    prev_item = result["results"]["bindings"].pop(0)
-                
-                except:
-                    yield ']}'
-                
-                for item in result["results"]["bindings"]:
-                    yield json.dumps(prev_item) + ','
-                    prev_item = item
-                    
-                yield json.dumps(prev_item) + ']}'
-            
-            r = Response(stream_with_context(generate()), content_type='application/json')
-            r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
-                
-            return r
-            
-        except:
-            return {"message" : "Bad request"}, 400
+        # virtuoso returned an error because request length exceeded maximum value
+        # get each allele separately
+        if 'Max row length is exceeded when trying to store a string of' in str(result):
+            # get locus sequences hashes
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_LOCUS_SEQS.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
+
+            seqs_hashes = result['results']['bindings']
+            for s in range(len(seqs_hashes)):
+                # get the sequence corresponding to the hash
+                result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                      (sparql_queries.SELECT_SEQ_FASTA.format(current_app.config['DEFAULTHGRAPH'], seqs_hashes[s]['sequence']['value'])))
+
+                seqs_hashes[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
+        else:
+            seqs_hashes = result['results']['bindings']
+
+        return Response(stream_with_context(generate('Fasta', seqs_hashes)), content_type='application/json')
 
 
 @loci_conf.route('/<int:loci_id>/uniprot')
 class LociNSUniprotAPItypon(Resource):
-    """ Loci Uniprot Resource """
-
+    """Loci Uniprot Resource."""
 
     @api.doc(responses={ 200: 'OK', 
                          400: 'Invalid Argument', 
@@ -1553,51 +1651,21 @@ class LociNSUniprotAPItypon(Resource):
                          401: 'Unauthenticated',
                          404: 'Not found' },
         security=[])
-    # @jwt_required
     def get(self, loci_id):
-        """ Gets Uniprot annotations for a particular loci from a particular species """
+        """Gets Uniprot annotations for a particular loci from a particular species."""
 
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
         
-        #get all uniprot labels and URI from all alleles of the selected locus
+        # get all uniprot labels and URI from all alleles of the selected locus
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select distinct ?name (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
-                              'from <{0}>'
-                              'where '
-                              '{{ <{1}> a typon:Locus; typon:name ?name. '
-                              '?alleles typon:isOfLocus <{1}> .'
-                              '?alleles typon:hasSequence ?sequence. '
-                              'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-                              'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}}'
-                              'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
+                             (sparql_queries.SELECT_LOCUS_UNIPROT.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
 
-        if result["results"]["bindings"] == []:
-            return {"message": "No Uniprot annotations found with the provided loci id."}, 404
+        annotations = result['results']['bindings']
 
-        
-        try:
-            def generate():
-                
-                yield '{"UniprotInfo": ['
-                
-                try:
-                    prev_item = result["results"]["bindings"].pop(0)
-                
-                except:
-                    yield ']}'
-                
-                for item in result["results"]["bindings"]:
-                    if len(prev_item.keys())>0:
-                        yield json.dumps(prev_item) + ','
-                    prev_item = item
-                
-                yield json.dumps(prev_item) + ']}'
-                
-            return Response(stream_with_context(generate()), content_type='application/json')
-            
-        except:
-            return {"message" : "Bad Argument"}, 400
+        if annotations == []:
+            return {'message': 'No Uniprot annotations found for the provided loci ID.'}, 404
 
+        return Response(stream_with_context(generate('UniprotInfo', annotations)), content_type='application/json')
 
 
 @loci_conf.route("/<int:loci_id>/alleles")
@@ -1619,114 +1687,107 @@ class LociNSAlleles(Resource):
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, loci_id, **kwargs):
-        """ Gets all alleles from a particular locus ID """
+        """Gets all alleles from a particular locus ID."""
+
+        c_user = get_jwt_identity()
 
         # Get request data
         request_data = request.args
 
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
 
-        #### ADD SPECIES NAME CHECK WITH UNIPROT QUERY!!!
+        # check if provided loci id exists 
+        result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                                                 (sparql_queries.ASK_LOCUS.format(new_locus_url)))
+
+        if not result_loci['boolean']:
+            return {'message': 'Could not find a locus with provided ID.'}, 404
+
+        # get schema that the locus is associated with
+        locus_schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                          (sparql_queries.SELECT_LOCUS_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
+
+        # get schema URI from response
+        locus_schema = locus_schema_query['results']['bindings'][0]['schema']['value']
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                           (sparql_queries.ASK_SCHEMA_LOCK.format(locus_schema)))
+
+        locking_status = locking_status_query['boolean']
+
+        # if schema is locked, enforce condition that only the Admin
+        # or the Contributor that locked the schema may get the FASTA sequences
+        if locking_status is False:
+            # check the role of the user that is trying to access
+            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'],
+                                                                     new_user_url)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
+
+            allow = enforce_locking(user_role, new_user_url, locus_schema)
+            if allow[0] == False:
+                return allow[1], 403
 
         # if user provided a species name, filter the query to contain only that species
-        try:
-            request_data["species_name"]
+        if 'species_name' in request_data:
+
+            species = request_data['species_name']
 
             # get the taxon id from uniprot, if not found return 404
-            query = ('PREFIX up:<http://purl.uniprot.org/core/> '
-                     'PREFIX taxon:<http://purl.uniprot.org/taxonomy/> '
-                     'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
-                     'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
-                     '{{ ?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(request_data["species_name"]))
-            
-            print("searching on uniprot..")
-            
+            uniprot_query = (sparql_queries.SELECT_UNIPROT_TAXON.format(species))
+
+            print('Searching on uniprot...')
+
             # Check if species exists on uniprot 
-            result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
-            try:
-                url = result2["results"]["bindings"][0]['taxon']['value']
-            except:
-                return {"message" : "species name not found on uniprot, search on http://www.uniprot.org/taxonomy/"}, 404 
-            
+            result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), uniprot_query)
+            print(result2, flush=True)
+
+            uniprot_taxid = result2['results']['bindings']
+            if uniprot_taxid != []:
+                taxon_uri = uniprot_taxid[0]['taxon']['value']
+            else:
+                return {'message': 'Species name not found on uniprot, search on http://www.uniprot.org/taxonomy/'}, 404 
+
             # check if species already exists locally (typon)
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('ASK where {{ ?species owl:sameAs <{0}>}}'.format(url)))
-            
+                                 (sparql_queries.ASK_SPECIES_UNIPROT.format(taxon_uri)))
+
             if not result['boolean']:
-                return {"message" : "Species does not exists in NS"}, 409
+                return {'message': 'Species does not exists in NS.'}, 409
 
-            # check if provided loci id exists 
-            result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                        ('ASK where {{ <{0}> a typon:Locus .}}'.format(new_locus_url)))
-            
-            if not result_loci['boolean']:
-                return {"message" : "Locus not found"}, 404
+            # determine if locus with provided identifier is associated to provided species
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_LOCUS_SPECIES_ALLELES.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, species)))
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?alleles '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ <{1}> a typon:Locus; typon:hasDefinedAllele ?alleles. '
-                                  '?alleles typon:id ?id; typon:name ?name . '
-                                  'FILTER CONTAINS(str(?name), "{2}")}}  '
-                                  'ORDER BY ASC(?id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, request_data["species_name"])))
+        # simply get all alleles for provided locus
+        else:
+            # get list of alleles from that locus
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_LOCUS_ALLELES.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
 
-            try:
-                
-                if result["results"]["bindings"] == []:
-                    return {"message" : "Allele not found or not added yet"}, 404
-
-                else:    
-                    return (result["results"]["bindings"]), 200
-            
-            except:
-                return {"message" : "Allele not found"}, 404
+        locus_info = result['results']['bindings']
+        if locus_info == []:
+            return {'message': 'Locus with provided ID is not associated to the provided species name.'}, 404
+        else:
+            return locus_info, 200
 
 
-        except:
-
-            # check if provided loci id exists 
-            result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                        ('ASK where {{ <{0}> a typon:Locus .}}'.format(new_locus_url)))
-            
-            if not result_loci['boolean']:
-                return {"message" : "Locus not found."}, 404
-
-            #get list of alleles from that locus
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?alleles '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ <{1}> a typon:Locus; typon:hasDefinedAllele ?alleles. '
-                                  '?alleles typon:id ?id }}'
-                                  'ORDER BY ASC(?id)'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-
-            try:
-                
-                if result["results"]["bindings"] == []:
-                    return {"message" : "Allele not found or not added yet."}, 404
-
-                else:    
-                    return (result["results"]["bindings"]), 200
-            
-            except:
-                return {"message" : "Allele not found"}, 404
-
-    
-
-
-    @api.doc(responses={ 201: 'OK', 
+    @api.doc(responses={201: 'OK', 
                         400: 'Invalid Argument', 
                         500: 'Internal Server Error', 
                         403: 'Unauthorized', 
                         401: 'Unauthenticated',
                         404: 'Not found',
-                        409: 'Conflict' },
+                        409: 'Conflict'},
             security=["access_token"])
     @api.expect(allele_list_model)
-    @w.admin_required
+    @w.admin_contributor_required
     def post(self, loci_id):
-        """ Add alleles to a loci of a species """
+        """Add alleles to a locus of a species."""
 
         # get user data
         c_user = get_jwt_identity()   
@@ -1734,314 +1795,188 @@ class LociNSAlleles(Resource):
         # get post data
         post_data = request.get_json()
         
-        try:
-            aux.check_len(post_data['sequence'])
-        except KeyError:
-            pass
-        
-        enforceCDS = True
-        try:
-            if "False" in post_data['enforceCDS']:
-                enforceCDS = False
-        except:
-            pass
-            
-        print("Enforce a cds: " + str(enforceCDS))
-        
-        #this is the user uri
-        new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
-        
-        # get the taxon id from uniprot, if not found return 404
-        species_name = str(post_data["species_name"])
+        # get the species name
+        species_name = post_data['species_name']
 
-        # if input is auto, the url to the Uniprot entry is provided
-        species_name_url = aux.is_url(species_name)
-
-        if post_data["input"] == "manual" and not species_name_url:
-
-            query = ('PREFIX up:<http://purl.uniprot.org/core/> '
-                     'PREFIX taxon:<http://purl.uniprot.org/taxonomy/> '
-                     'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
-                     'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
-                     '{{?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(species_name))
-            
-            print("searching on uniprot if species exists...")
-            
-            # Check if species exists on uniprot 
-            result_species = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
-            
-            try:
-                url = result_species["results"]["bindings"][0]['taxon']['value']
-            except:
-                return {"message" : "species name not found on uniprot, search on http://www.uniprot.org/taxonomy/"}, 404 
-
-        
-        #check if locus exist (needs to be created before, hence the check)
-        new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(loci_id))
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                              ('ASK where {{ <{0}> a typon:Locus .}}'.format(new_locus_url)))
-        
-        if not result['boolean']:
-            return {"message" : "Locus not found"}, 404
-        
-        if post_data["input"] == "link":
-
-            try:
-
-                sequence_uri = post_data["sequence_uri"]
-
-                #get number of alleles for locus
-                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                        ('select (COUNT(?alleles) as ?count) '
-                                         'from <{0}> '
-                                         'where '
-                                         '{{ ?alleles typon:isOfLocus <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-                
-                number_alleles_loci = int(result["results"]["bindings"][0]['count']['value'])
-                new_allele_url = "{0}loci/{1}/alleles/{2}".format(current_app.config['BASE_URL'], 
-                                                                  str(loci_id), 
-                                                                  str(number_alleles_loci + 1))
-
-                query2send = ('INSERT DATA IN GRAPH <{0}> '
-                              '{{ <{1}> a typon:Allele; '
-                              'typon:name "{2}"; '
-                              'typon:sentBy  <{3}> ;'
-                              'typon:isOfLocus <{4}>; '
-                              'typon:dateEntered "{5}"^^xsd:dateTime; '
-                              'typon:id "{6}"^^xsd:integer ; '
-                              'typon:hasSequence <{7}>. '
-                              '<{4}> typon:hasDefinedAllele <{1}>.}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                              new_allele_url,
-                                                                              species_name,
-                                                                              new_user_url,
-                                                                              new_locus_url,
-                                                                              str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')),
-                                                                              str(number_alleles_loci+1),
-                                                                              sequence_uri
-                                                                              ))
-        
-                result = aux.send_data(query2send, 
-                                       current_app.config['LOCAL_SPARQL'], 
-                                       current_app.config['VIRTUOSO_USER'], 
-                                       current_app.config['VIRTUOSO_PASS'])
-                
-                return {"message" : "New allele created with existing sequence"}, 201
-
-            except:
-                return {"message" : "Sequence uri not provided or something wrong"}, 418
-
-        #sequences need to translate, that's the chewie way
+        # get the DNA sequence
         sequence = (str(post_data['sequence'])).upper()
         
-        #sequence may no longer be translatable on user request, sad chewie :(
-        sequenceIstranslatable = False
-        #proteinSequence = ''
-        #~ if enforceCDS:
-        
-        #will attempt to translate even if not enforced CDS
-        #if translatable and enforce, ok
-        #if translatable and not enforce, ok
-        #if not translatable and enforce, error
-        if post_data["input"] == "manual":
-            print("trying to translate")
-            try:
-                proteinSequence = aux.translateSeq(sequence, False, enforceCDS)
-                sequenceIstranslatable = True
-                print(sequenceIstranslatable)
-            except Exception as e:
-                
-                if enforceCDS:
-                    return {"message" : "sequence failed to translate, not a CDS"}, 418
-                else:
-                    sequenceIstranslatable = False
-                
+        new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(loci_id))
 
-        #check if sequence is already present on locus query
-        query = ('select ?alleles '
-                 'from <{0}> '
-                 'where '
-                 '{{ ?alleles typon:isOfLocus <{1}>; typon:hasSequence ?seq. '
-                 '?seq a typon:Sequence; typon:nucleotideSequence "{2}"^^xsd:string.}}'.format(current_app.config['DEFAULTHGRAPH'], 
-                                                                                               new_locus_url, 
-                                                                                               sequence))
-        
-        if len(sequence) > 9000:
-            result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
+        # check if locus exists, must exist to be able to add alleles
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.ASK_LOCUS.format(new_locus_url)))
+
+        # stop execution if locus does not exist
+        if not result['boolean']:
+            return {'UNEXISTENT LOCUS': 'Specified locus does not exist.'}, 404
+
+        # get schema that the locus is associated with
+        locus_schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                          (sparql_queries.SELECT_LOCUS_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
+
+        # get schema URI from response
+        locus_schema = locus_schema_query['results']['bindings']
+        if locus_schema != []:
+            locus_schema = locus_schema[0]['schema']['value']
         else:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
-        
-        #if sequence already exists on locus return the allele uri, if not create new sequence
-        try:
-            new_allele_url = result["results"]["bindings"][0]['alleles']['value']
-            return {"message" : "Allele already exists at " + new_allele_url}, 409
-    
-        
-        #sequence doesnt exist, create new and link to new allele uri. return the new allele uri
-        except IndexError:
+            return {'message': 'Locus with provided ID is not associated to any schema.'}
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                           (sparql_queries.ASK_SCHEMA_LOCK.format(locus_schema)))
+
+        locking_status = locking_status_query['boolean']
+
+        # if schema is locked, enforce condition that only the Admin
+        # or the Contributor that locked the schema may get the FASTA sequences
+        if locking_status is False:
+            # check the role of the user that is trying to access
+            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
             
+            allow = enforce_locking(user_role, new_user_url, locus_schema)
+            if allow[0] == False:
+                return allow[1], 403
+
+        # if the input mode is 'manual' we need to check that the species exists
+        if post_data['input'] == 'manual':
             
-            ##check if sequence exists in uniprot only if the sequence was translatable
-            if post_data["input"] == "manual":
-               
-                if sequenceIstranslatable:
-                    add2send2graph = ''
-                    print("check if in uniprot")
-                    try:
-                        
-                        # query the uniprot sparql endpoint and build the RDF with the info on uniprot
-                        proteinSequence = proteinSequence.replace("*", "")
-                        query = ('PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> '
-                                 'PREFIX up: <http://purl.uniprot.org/core/> '
-                                 'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
-                                 'select ?seq ?label ?sname where '
-                                 '{{ ?b a up:Simple_Sequence; rdf:value "{0}". ?seq up:sequence ?b. '
-                                 'OPTIONAL {{?seq rdfs:label ?label.}} '
-                                 'OPTIONAL {{?seq up:submittedName ?rname2. ?rname2 up:fullName ?sname.}} }}'
-                                 'LIMIT 20'.format(proteinSequence))
-                        
-                        result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
-                        
-                        url = result2["results"]["bindings"][0]['seq']['value']
-                        add2send2graph += '; typon:hasUniprotSequence <{0}>'.format(url)
-                        try:
-                            url2 = result2["results"]["bindings"][0]['label']['value']
-                            url2 = aux.sanitize_input(url2)
-                            add2send2graph += '; typon:hasUniprotLabel "{0}"^^xsd:string'.format(url2)
-                        except:
-                            print ("no label associated")
-                            pass
-                        try:
-                            url3 = result["results"]["bindings"][0]['sname']['value']
-                            url3 = aux.sanitize_input(url3)
-                            add2send2graph += '; typon:hasUniprotSName "{0}"^^xsd:string'.format(url3)
-                        except:
-                            pass
+            # this is the user URI
+            user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
 
-                    #the sequence is not on uniprot or there was an error querying uniprot, just continue
-                    except Exception as e:
-                        add2send2graph = ''
-                        pass
-                        
-                else:
-                    add2send2graph = ''
-            
-            # Get the uniprot info if it's provided
-            elif post_data["input"] == "auto":
+            # check sequence length
+            if not aux.check_len(sequence):
+                return {'INVALID LENGTH': 'Sequence has invalid length value.'}, 400
 
-                add2send2graph = ''
+            query = (sparql_queries.SELECT_UNIPROT_TAXON.format(species_name))
 
-                try:
-                    uniprot_url = post_data["uniprot_url"]
-                    add2send2graph += '; typon:hasUniprotSequence <{0}>'.format(uniprot_url)
+            print('Searching on uniprot if species exists...')
 
-                    try:
-                        uniprot_label = post_data["uniprot_label"]
-                        uniprot_label = aux.sanitize_input(uniprot_label)
-                        add2send2graph += '; typon:hasUniprotLabel "{0}"^^xsd:string'.format(uniprot_label)
-                    except:
-                        print("no label associated")
-                        pass
+            # Check if species exists on uniprot
+            result_species = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
+            try:
+                url = result_species['results']['bindings'][0]['taxon']['value']
+            except:
+                return {'INVALID SPECIES': 'Species name not found on UniProt. Please '
+                        'provide a valid species name or search for one on '
+                        'http://www.uniprot.org/taxonomy/'}, 404 
 
-                    try:
-                        uniprot_sname = post_data["uniprot_sname"]
-                        uniprot_sname = aux.sanitize_input(uniprot_sname)
-                        add2send2graph += '; typon:hasUniprotSName "{0}"^^xsd:string'.format(uniprot_sname)
-                    except:
-                        pass
-                #the sequence is not on uniprot, something went wrong
-                except:
-                    add2send2graph = ''                
-                        
-            #build the id of the sequence hashing it
-            new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
-            
-            # build the remaining new seq uri
-            new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
-
-            
-            #check if the uri with the hash is already attributed
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                  ('ASK where {{ <{0}> typon:nucleotideSequence ?seq.}}'.format(new_seq_url)))
-            
-            print("check if hash is attributed")
-
-            if result['boolean']:
-                
-                #check if the same sequence is attributed or there is a hash collision
-                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                      ('ASK where {{ <{0}> a typon:Sequence; '
-                                       'typon:nucleotideSequence "{1}"^^xsd:string.}}'.format(new_seq_url, sequence)))
-                
-                #sequence was already attributed to the exact same sequence, reusing it
-                if result['boolean']:
-                    
-                    # celery task
-                    task = add_allele.apply(args=[new_locus_url, species_name, loci_id, new_user_url, new_seq_url, False, add2send2graph, sequence])
-                    
-                    process_result = task.result
-                    
-                    process_ran = task.ready()
-                    process_sucess = task.status
-                    
-                    if process_ran and process_sucess == "SUCCESS":
-                        pass
-                    else:
-                        return "status: " + str(process_sucess) + " run:" + str(process_ran), 400
-                    
-                    # celery result
-                    process_result = task.result
-                    print(process_result)
-                    new_allele_url = process_result[0]
-                    process_result_status_code = int(process_result[-1])
-
-                    if process_result_status_code == 418 :
-                        
-                        #check if process was sucessfull
-                        return {"message" : "Sequence was already attributed to a loci/allele"}, 418
-                    
-                    elif process_result_status_code > 201 :
-                        
-                        #check if process was sucessfull
-                        return {"message" : "Sum Thing Wong creating sequence 3"}, process_result_status_code
-                    
-                    else:
-                        return new_allele_url, process_result_status_code
-                    
-                # attention, there was a hash collision!!!!1111111 a different sequence was attributed to the same hash
-                else:
-                    return {"message" : ("URI {0} already has sequence {1} with that hash, contact the admin!".format(new_seq_url, sequence))}, 409
-            
-            #the hash is not yet attributed
+            # after determining that the species exists, check if the sequence is a valid CDS
+            translation_result = aux.translate_dna(sequence, 11)
+            if isinstance(translation_result, list):
+                protein_sequence = str(translation_result[0][0])
             else:
-                # celery task
-                task = add_allele.apply(args=[new_locus_url, species_name, loci_id, new_user_url, new_seq_url, True, add2send2graph, sequence])
-                                 
-                process_ran = task.ready()
-                process_sucess = task.status
-                
-                if process_ran and process_sucess == "SUCCESS":
-                    pass
-                else:
-                    return ("status: {0} run: {1}".format(str(process_sucess), str(process_ran))), 400
+                return {'INVALID CDS': 'Sequence is not a valid CDS.'}, 418
 
-                # celery result
-                process_result = task.result
-                print(process_result)
-                new_allele_url = process_result[0]
-                process_result_status_code = int(process_result[-1])
-                
-                if process_result_status_code > 201 :
-                    
-                    #check if process was sucessfull
-                    return {"message" : "Sum Thing Wong creating sequence 4"}, process_result_status_code
-                else:
-                    return new_allele_url, process_result_status_code
+            # check if sequence already belongs to the locus
+            query = (sparql_queries.SELECT_LOCUS_ALLELE.format(current_app.config['DEFAULTHGRAPH'], new_locus_url, sequence))
 
-        ######?      
-        except Exception as e:
-            print ('Error on line {}'.format(sys.exc_info()[-1].tb_lineno))
-            print (e)
-            return "Sum Thing Wong creating sequence", 400
+            # queries with big sequences need different approach
+            if len(sequence) > 9000:
+                result = aux.send_big_query(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
+            else:
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), query)
+
+            # if sequence already exists on locus return the allele uri, if not create new sequence
+            try:
+                new_allele_url = result["results"]["bindings"][0]['alleles']['value']
+                return {'REPEATED ALLELE': 'Allele already exists at {0}'.format(new_allele_url)}, 409
+            except Exception:
+                pass
+
+            # check if sequence exists in uniprot only if the sequence was translatable               
+            # query the uniprot sparql endpoint and build the RDF with the info on uniprot
+            # should not be necessary if properly translated
+
+            # check if user provided Uniprot info...
+
+            query = aux.uniprot_query(protein_sequence)
+                        
+            result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
+
+            name, url, label = aux.select_name(result2)
+            if name == '':
+                name = 'not_found'
+                url = 'http://not_found.org'
+                label = 'not_found'
+
+            add2send2graph = ('; typon:hasUniprotSequence <{0}>'
+                              '; typon:hasUniprotLabel "{1}"^^xsd:string'
+                              '; typon:hasUniprotSName "{2}"^^xsd:string'.format(url, label, name))
+
+            # in manual, the allele URI is not provided
+            # construct allele URI by counting the total number of alleles in locus
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                                 (sparql_queries.COUNT_LOCUS_ALLELES.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
+
+            number_alleles_loci = int(result["results"]["bindings"][0]['count']['value'])
+
+            allele_uri = '{0}/alleles/{1}'.format(new_locus_url, number_alleles_loci+1)
+
+        # Get the uniprot info if it's provided
+        elif post_data["input"] == "auto":
+
+            # in auto mode the permissions were previously
+            # validated in the load_schema process
+            # get token and construct user URI
+            user_id = request.headers.get('user_id')
+            user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], user_id)
+
+            # I need to give another value that is not '', right?
+            name = post_data.get('uniprot_sname', '')
+            url = post_data.get('uniprot_url', '')
+            label = post_data.get('uniprot_label', '')
+
+            add2send2graph = ('; typon:hasUniprotSequence <{0}>'
+                              '; typon:hasUniprotLabel "{1}"^^xsd:string'
+                              '; typon:hasUniprotSName "{2}"^^xsd:string'.format(url, label, name))
+
+            # in 'auto' mode, alleles URIs are provided by the load schema process
+            allele_uri = post_data['sequence_uri']
+                        
+        # build the id of the sequence by hashing it
+        seq_hash = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
+            
+        # build the endpoint URI for the sequence
+        new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(seq_hash))
+
+        # check if there is a sequence with the same hash
+        hash_presence = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                    (sparql_queries.ASK_SEQUENCE_HASH.format(new_seq_url)))
+
+        # check if the sequence that has the same hash is the same or a different DNA sequence
+        # only enter here if hash is attributed to a sequence that is in the NS
+        if hash_presence['boolean'] == True:
+
+            hashed_sequence = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                          (sparql_queries.ASK_SEQUENCE_HASH_SEQ.format(new_seq_url, sequence)))
+
+            # WARNING: there was a hash collision, two different sequences have the same hash
+            if hashed_sequence['boolean'] == False:
+                return {'HASH COLLISION': ('Found hash collision. New sequence has same hash as sequence at URI {0}.\n{1}'.format(new_seq_url, sequence))}, 409
+        
+        # if the sequence already exists in the NS
+        if hash_presence['boolean']:
+            #print('Creating link')
+            # celery task
+            task = add_allele.apply(args=[new_locus_url, species_name, loci_id, user_url, new_seq_url, False, add2send2graph, sequence, allele_uri])
+
+        # if there is no sequence with that hash
+        else:
+            #print('Creating sequence')
+            # celery task
+            #print(new_locus_url, species_name, loci_id, user_url, new_seq_url, add2send2graph, sequence, allele_uri)
+            task = add_allele.apply(args=[new_locus_url, species_name, loci_id, user_url, new_seq_url, True, add2send2graph, sequence, allele_uri])
+
+        # get POST message
+        process_result = task.result
+
+        return process_result
 
 
 @loci_conf.route("/<int:loci_id>/alleles/<int:allele_id>")
@@ -2059,63 +1994,78 @@ class AlleleNSAPItypon(Resource):
     def get(self, loci_id, allele_id):
         """ Gets a particular allele from a particular loci """
         
-        new_allele_url = "{0}loci/{1}/alleles/{2}".format(current_app.config['BASE_URL'], str(loci_id), str(allele_id))
+        new_allele_url = '{0}loci/{1}/alleles/{2}'.format(current_app.config['BASE_URL'], str(loci_id), str(allele_id))
 
         # check if provided loci id exists
         new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
         result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                  ('ASK where {{ <{0}> a typon:Locus .}}'.format(new_locus_url)))
+                                   sparql_queries.ASK_LOCUS.format(new_locus_url))
             
         if not result_loci['boolean']:
-            return {"message" : "Locus not found."}, 404
+            return {'UNEXISTENT LOCUS': 'Specified locus does not exist.'}, 404
         
-        #get information on allele, sequence, submission date, id and number of isolates with this allele
+        # get information on allele, sequence, submission date, id and number of isolates with this allele
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select ?sequence (str(?name) as ?source) ?date ?id (COUNT(?isolate) as ?isolate_count) '
-                              'from <{0}> '
-                              'where '
-                              '{{ <{1}> a typon:Allele; typon:name ?name; typon:dateEntered ?date; typon:hasSequence ?sequence; typon:id ?id. '
-                              'OPTIONAL {{?isolate a typon:Isolate; typon:hasAllele <{1}>}} }}'.format(current_app.config['DEFAULTHGRAPH'], new_allele_url)))
-        
+                             (sparql_queries.SELECT_ALLELE_INFO.format(current_app.config['DEFAULTHGRAPH'], new_allele_url)))
 
-        if result["results"]["bindings"] == []:
-            return 	{"message" : "No allele found with the provided id."}, 404
-
+        allele_info = result['results']['bindings']
+        if allele_info == []:
+            return 	{'message': 'No allele found with the provided id.'}, 404
         else:
-            return (result["results"]["bindings"])
+            return allele_info
             
             
-
-
-
-
-############################################## Schema Routes
+# Schema Routes
 
 # Namespace
-species_conf = api.namespace('species', description = 'species related operations')
+species_conf = api.namespace('species', description = 'Species related operations.')
 
-sequences_conf = api.namespace('sequences', description = "sequence related operations")
+species_model = api.model('SpeciesModel',
+                          {'name': fields.String(required=True,
+                                                 description='Name of the species to add.')
+                          })
 
-species_model = api.model("SpeciesModel", {
-    'name': fields.String(required=True, description="Name of the species to add.")
-})
+schema_model = api.model('SchemaModel',
+                         {'name': fields.String(required=True,
+                                                description="Name of the schema to add."),
+                          'bsr': fields.String(required=True,
+                                               description="Blast Score Ratio used to create the schema."),
+                          'prodigal_training_file': fields.String(required=True,
+                                                                  description="Link to the Prodigal training file used to create the schema"),
+                          'translation_table': fields.String(required=True,
+                                                             description="Translation table used to create the schema."),
+                          'minimum_locus_length': fields.String(required=True,
+                                                                description="Minimum locus length used to create the schema."),
+                          'chewBBACA_version': fields.String(required=True,
+                                                             description="Version of chewBBACA used to create the schema."),
+                          'word_size': fields.String(required=True,
+                                                     description='Word size used for the clustering process.'),
+                          'cluster_sim': fields.String(required=True,
+                                                       description='Percentage of shared k-mers considered to decide if a sequence should be added to a cluster.'),
+                          'representative_filter': fields.String(required=True,
+                                                                 description='Percentage of k-mers shared with the cluster '
+                                                                              'representative considered to exclude sequences '
+                                                                              'that are very similar to the representative.'),
+                          'intraCluster_filter': fields.String(required=True,
+                                                               description='Percentage of k-mers shared between non-representative sequences in a cluster that'
+                                                                           ' will be considered to exclude sequences that are very similar with other '
+                                                                           'non-representative sequences in the cluster.')
+                         })
 
-schema_model = api.model("SchemaModel", {
-    'name': fields.String(required=True, description="Name of the schema to add."),
-    'bsr': fields.String(required=True, description="Blast Score Ratio used to create the schema."),
-    'ptf': fields.String(required=True, description="Link to the Prodigal training file used to create the schema"),
-    'translation_table': fields.String(required=True, description="Translation table used to create the schema."),
-    'min_locus_len': fields.String(required=True, description="Minimum locus length used to create the schema."),
-    'chewBBACA_version': fields.String(required=True, description="Version of chewBBACA used to create the schema.") 
-})
+schema_lock_model = api.model('SchemaLockModel',
+                              {'action': fields.String(required=True,
+                                                       description='Action to perform (lock or unlock).'),
+                              })
 
-schema_loci_model = api.model("SchemaLociModel", {
-    'loci_id' : fields.String(required = True, description = "Id of the loci")
-})
+schema_loci_model = api.model('SchemaLociModel',
+                              {'loci_id': fields.String(required=True,
+                                                        description="Id of the loci")
+                              })
 
-loci_list_model = api.model("LociListModel", {
-    'locus_id' : fields.String(required = True, description = "ID of the locus")    
-})
+loci_list_model = api.model('LociListModel',
+                            {'locus_id': fields.String(required=True,
+                                                       description="ID of the locus")    
+                            })
 
 isolate_model = api.model("IsolateModel", {
     'ST': fields.String(required=False, description="ST for traditional 7 genes MLST"),
@@ -2133,17 +2083,20 @@ isolate_model = api.model("IsolateModel", {
                                                                  of the biological sample from which the sample was derived.")
 })
 
-allele_model = api.model("AlleleModel", {
-    'locus_id' : fields.String(required = True, description = "ID of the locus"),
-    'allele_id' : fields.String(required = True, description = "The ID of the allele in NS")
-})
+allele_model = api.model('AlleleModel',
+                         {'locus_id': fields.String(required=True,
+                                                    description="ID of the locus"),
+                          'allele_id': fields.String(required=True,
+                                                     description="The ID of the allele in NS")
+                          })
 
-profile_model = api.model("ProfileModel", {
-    'profile' : fields.Raw(required=True, description="AlleleCall profile"),
-    'headers' : fields.Raw(required=True, description="Headers of the profile file")
-})
+profile_model = api.model('ProfileModel',
+                          {'profile': fields.Raw(required=True,
+                                                 description="AlleleCall profile"),
+                           'headers': fields.Raw(required=True,
+                                                 description="Headers of the profile file")
+                          })
 
-############################################################
 
 @species_conf.route('/list') 
 class SpeciesListAPItypon(Resource):
@@ -2168,40 +2121,23 @@ class SpeciesListAPItypon(Resource):
     def get(self, **kwargs):
         """ Get a list of all species on Typon """
 
-        try:
-            request_data["species_name"]
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
-                                    'select ?species ?name '
-                                    'from <{0}> '
-                                    'where '
-                                    '{{ ?species owl:sameAs ?species2; '
-                                    'a <http://purl.uniprot.org/core/Taxon>; typon:name "{1}"^^xsd:string. }}'.format(current_app.config['DEFAULTHGRAPH'], 
-                                                                                                                      request_data["species_name"])))
+        # check if user provided a species name
+        species_name = kwargs['species_name']
 
-            if result["results"]["bindings"] == []:
-                return {"message": "Species not found."}, 404
-            
-            else:
-                return (result["results"]["bindings"])
+        # get single species or full species list
+        # returns empty results if species does not exist in the NS
+        query_end = ' typon:name "{0}"^^xsd:string. '.format(species_name) if species_name != None else ' typon:name ?name. '
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                            (sparql_queries.SELECT_SPECIES.format(current_app.config['DEFAULTHGRAPH'],
+                                                                  query_end)))
 
-        except:
-            #get all species
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#>' 
-                                    'select ?species ?name '
-                                    'from <{0}> '
-                                    'where '
-                                    '{{ ?species owl:sameAs ?species2; '
-                                    'a <http://purl.uniprot.org/core/Taxon>; typon:name ?name. }}'.format(current_app.config['DEFAULTHGRAPH'])))
+        species_list = result['results']['bindings']
+        if species_list == []:
+            return {'NOT FOUND': 'Species does not exists in the NS.'}, 404
+        else:
+            return (result['results']['bindings'])
 
-            if result["results"]["bindings"] == []:
-                return {"message": "No species have been added yet"}, 404
 
-            else:
-                return (result["results"]["bindings"])
-    
-    
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument',
                          500: 'Internal Server Error',
@@ -2214,7 +2150,7 @@ class SpeciesListAPItypon(Resource):
     @api.expect(species_model, validate=True)
     @w.admin_required
     def post(self):
-        """ Add a new species to Typon """
+        """Add a new species to Typon."""
 
         # get user data
         c_user = get_jwt_identity()
@@ -2222,84 +2158,48 @@ class SpeciesListAPItypon(Resource):
         # get post data
         post_data = request.get_json()
 
-        # get species name from the post data
-        name = str(post_data["name"])
-            
-        try:
-            
-            # Check user role in Typon
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
-            
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
-                                  'ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; '
-                                  'typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-
-            if not result['boolean']:
-                return {"message" : "not authorized, admin only"}, 403
-        
-        except:
-            return {"message" : "not authorized, admin only"}, 403
-
-        
-        # get number of taxon already on the graph
+        # get taxon name from the post data
+        taxon_name = str(post_data['name'])
+        # get total number of taxa already on the graph
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select (COUNT(?taxon) as ?count) '
-                              'from <{0}> '
-                              'where '
-                              '{{ ?taxon a <http://purl.uniprot.org/core/Taxon> }}'.format(current_app.config['DEFAULTHGRAPH'])))
+                             (sparql_queries.COUNT_TAXON.format(current_app.config['DEFAULTHGRAPH'])))
 
-        
-        number_taxon = int(result["results"]["bindings"][0]['count']['value'])
+        number_taxa = int(result["results"]["bindings"][0]['count']['value'])
         
         # get the taxon id from uniprot, if not found return 404
-        query = ('PREFIX up:<http://purl.uniprot.org/core/> '
-                 'PREFIX taxon:<http://purl.uniprot.org/taxonomy/> '
-                 'PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> '
-                 'SELECT ?taxon FROM <http://sparql.uniprot.org/taxonomy> WHERE'
-                 '{{	?taxon a up:Taxon; rdfs:subClassOf taxon:2; up:scientificName "{0}" .}}'.format(name))
+        uniprot_query = sparql_queries.SELECT_UNIPROT_TAXON.format(taxon_name)
         
-        print("searching on uniprot..", flush=True)
-        
-        # Check if species exists on uniprot 
-        result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), query)
-        print(result2, flush=True)
+        print('Searching on uniprot..', flush=True)
+
+        # check if species exists on uniprot
+        result2 = aux.get_data(SPARQLWrapper(current_app.config['UNIPROT_SPARQL']), uniprot_query)
         try:
-            url = result2["results"]["bindings"][0]['taxon']['value']
+            uniprot_url = result2["results"]["bindings"][0]['taxon']['value']
         except:
-            return {"message" : "species name not found on uniprot, search on http://www.uniprot.org/taxonomy/"}, 404 
-        
+            return {'message': 'Species name not found on uniprot. Please provide a valid species name or search at http://www.uniprot.org/taxonomy/'}, 404
+
         # check if species already exists locally (typon)
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('ASK where {{ ?species owl:sameAs <{0}>}}'.format(url)))
-        
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                             (sparql_queries.ASK_SPECIES_UNIPROT.format(uniprot_url)))
+
         if result['boolean']:
-            return {"message" : "Species already exists"}, 409
+            return {'message': 'Species already added to the NS.'}, 409
         
         # species exists on uniprot, everything ok to create new species
-        new_spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(number_taxon + 1))
-        
-        data2send = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
-                     'INSERT DATA IN GRAPH <{0}> '
-                     '{{ <{1}> owl:sameAs <{2}>; typon:name "{3}"^^xsd:string; a <http://purl.uniprot.org/core/Taxon>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_spec_url, url, name))
+        new_spec_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(number_taxa+1))
 
-        # return {"msg": data2send,
-        #          "msg2": name}
+        data2send = (sparql_queries.INSERT_SPECIES.format(current_app.config['DEFAULTHGRAPH'], new_spec_url, uniprot_url, taxon_name))
 
-        #result = aux.send_data(data2send, current_app.config['URL_SEND_LOCAL_VIRTUOSO'], current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        #result = aux.send_data(data2send, 'http://172.19.1.3:8890/DAV/test_folder/data', current_app.config['VIRTUOSO_USER'], current_app.config['VIRTUOSO_PASS'])
-        result = aux.send_data(data2send, 
-                               current_app.config['LOCAL_SPARQL'], 
-                               current_app.config['VIRTUOSO_USER'], 
+        result = aux.send_data(data2send,
+                               current_app.config['LOCAL_SPARQL'],
+                               current_app.config['VIRTUOSO_USER'],
                                current_app.config['VIRTUOSO_PASS'])
 
         if result.status_code in [200, 201]:
-            return {"message" : "Species created"}, 201
-
+            return {'message': '{0} added to the NS.'.format(taxon_name)}, 201
         else:
-            return {"message" :"Sum Thing Wong",
-                    "msg": result.text}, result.status_code
-
+            return {'message': 'Could not add new taxon to the NS.',
+                    'error': result.text}, result.status_code
 
 
 @species_conf.route('/<int:species_id>') 
@@ -2317,27 +2217,18 @@ class SpeciesAPItypon(Resource):
     def get(self, species_id):
         """ Returns the species corresponding to the given id """
 
-        url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
-
+        url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
 
         # get species name and its schemas
+        # returns empty list if there is no species with provided identifier
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                ('select ?species ?name ?schemas ?schemaName '
-                                'from <{0}> '
-                                'where '
-                                '{{ {{<{1}> owl:sameAs ?species; typon:name ?name.}} '
-                                'UNION {{ ?schemas typon:isFromTaxon <{1}>; a typon:Schema; typon:schemaName ?schemaName. '
-                                'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }} }}'.format(current_app.config['DEFAULTHGRAPH'], url)))
+                                (sparql_queries.SELECT_SPECIES_AND_SCHEMAS.format(current_app.config['DEFAULTHGRAPH'], url)))
 
-        if result["results"]["bindings"] == []:
-            return {"message": "No species found with the provided id."}, 404
-
+        species_info = result['results']['bindings']
+        if species_info == []:
+            return {'NOT FOUND': 'No species found with the provided ID.'}, 404
         else:    
-            return (result["results"]["bindings"])
-        
-        # else:
-        #     return {"message" : "Unauthorized"}, 403
-
+            return species_info
 
 
 @species_conf.route('/<int:species_id>/profiles')
@@ -2356,8 +2247,7 @@ class SpeciesProfiles(Resource):
     @api.expect(profile_model)
     @jwt_required
     def post(self, species_id):
-        """ Add a an allele call profile
-        """
+        """ Add an allele call profile"""
         
         # get user data
         c_user = get_jwt_identity()
@@ -2489,7 +2379,7 @@ class SpeciesProfiles(Resource):
                 return {"message": "Profile successfully uploaded at " + isolateUri} , process_result_status_code
             
         else:
-            return {"message" : "Profile not uploaded, no alleles to send at {0}".format(isolateUri)}, 200
+            return {"message": "Profile not uploaded, no alleles to send at {0}".format(isolateUri)}, 200
 
 
 @species_conf.route('/<int:species_id>/schemas') 
@@ -2501,31 +2391,31 @@ class SchemaListAPItypon(Resource):
                          500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
-                         404: 'Not Found' },
+                         404: 'Not Found'},
             security=["access_token"])
     @jwt_required
     def get(self, species_id):
         """ Get the schemas for a particular species ID """
 
-        species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
+        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
 
+        # check if there is a species with provided identifier
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                ('select ?schemas ?name '
-                                'from <{0}> '
-                                'where '
-                                '{{ ?schemas a typon:Schema; typon:isFromTaxon <{1}>; typon:schemaName ?name. '
-                                'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }}'.format(current_app.config['DEFAULTHGRAPH'], species_url)))
-        try:
+                                            sparql_queries.ASK_SPECIES_NS.format(species_url))
 
-            if result["results"]["bindings"] == []:
-                return {"message" : "No schemas added yet for this species"}, 200
-            
-            else:
-                return result["results"]["bindings"]
-        
-        except:
-            return {"message" : "It's empty man...."}, 404
+        species_exists = result['boolean']
+        if species_exists is False:
+            return {'NOT FOUND': 'There is no species in the NS with the provided ID.'}, 404
 
+        # if there is a species with the ID, get all schemas for that species
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                (sparql_queries.SELECT_SPECIES_SCHEMAS.format(current_app.config['DEFAULTHGRAPH'], species_url)))
+
+        species_schemas = result['results']['bindings']
+        if species_schemas == []:
+            return {'NOT FOUND': 'There are no schemas for that species.'}, 404
+        else:
+            return species_schemas, 200
 
 
     @api.doc(responses={ 201: 'OK', 
@@ -2539,101 +2429,87 @@ class SchemaListAPItypon(Resource):
     @api.expect(schema_model, validate=True)
     @w.admin_contributor_required
     def post(self, species_id):
-        """ Adds a new to schema for a particular species ID """
+        """ Adds a new schema for a particular species ID """
 
         c_user = get_jwt_identity()
 
-        ### get post data
+        # get post data
         post_data = request.get_json()
-        
+
         # schema name
-        name = str(post_data["name"])
+        name = str(post_data['name'])
         # blast score ratio
-        bsr = str(post_data["bsr"])
+        bsr = str(post_data['bsr'])
         # prodigal training file
-        ptf = str(post_data["ptf"])
+        ptf = str(post_data['prodigal_training_file'])
         # translation table
-        translation_table = str(post_data["translation_table"])
+        translation_table = str(post_data['translation_table'])
         # minimum locus length
-        min_locus_len = str(post_data["min_locus_len"])
+        min_locus_len = str(post_data['minimum_locus_length'])
         # chewBBACA_version
-        chewie_version = str(post_data["chewBBACA_version"])
-        
-        if "" in (name, bsr, ptf, translation_table, min_locus_len, chewie_version):
-            return {"message": "No schema parameters specified."}, 406
+        chewie_version = str(post_data['chewBBACA_version'])
+        # clustering word_size
+        word_size = str(post_data.get('word_size', 'na'))
+        # clustering cluster similarity threshold
+        cluster_sim = str(post_data.get('cluster_sim', 'na'))
+        # clustering representative similarity exclusion threshold
+        rep_filter = str(post_data.get('representative_filter', 'na'))
+        # clustering intra cluster similarity exclusion threshold
+        intra_filter = str(post_data.get('intraCluster_filter', 'na'))
+        # schema locking property
+        session_token = request.headers['Authorization']
+        schema_lock = 'LOCKED'
+
+        if '' in (name, bsr, ptf, translation_table, min_locus_len,
+                  chewie_version, word_size, cluster_sim, rep_filter,
+                  intra_filter):
+
+            return {'message': 'No schema parameters specified.'}, 406
 
         # check if species exists
-        species_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
+        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
 
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('ASK where {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}'.format(species_url)))
-        
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              sparql_queries.ASK_SPECIES_NS.format(species_url))
+
         if not result['boolean']:
-            return {"message" : "Species doesn't exist"}, 404
-        
+            return {'NOT FOUND': 'Species does not exist'}, 404
+
         # check if a schema already exists with this description for this species
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             ('ASK where {{ ?schema a typon:Schema; typon:isFromTaxon <{0}>; typon:schemaName "{1}"^^xsd:string .}}'.format(species_url, name)))
+                             (sparql_queries.ASK_SCHEMA_DESCRIPTION.format(species_url, name)))
         if result['boolean']:
-            
+
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                ('select ?schema '
-                                 'from <{0}> '
-                                 'where {{?schema a typon:Schema; typon:isFromTaxon <{1}>; typon:schemaName "{2}"^^xsd:string .}}'.format(current_app.config['DEFAULTHGRAPH'], species_url, name)))
-            
+                                 (sparql_queries.SELECT_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], species_url, name)))
+
             schema_url = result["results"]["bindings"][0]['schema']['value']
             
-            return {"message" : "schema with that description already exists {0}".format(schema_url)}, 409
-        
-        # only users with role Admin or Contributor can do this
-        # TODO: need to change SPARQL query to include Contributor role
-        try:
-            # new_user_url = current_app.config['BASE_URL'] + "users/" + str(c_user.id)
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
+            return {'message': 'schema with that description already exists {0}'.format(schema_url)}, 409
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-            
-            if not result['boolean']:
-                return {"message" : "not authorized, admin only"}, 403
-                
-        except:
-            return {"message" : "not authorized, admin only"}, 403
-
-        
-        # only user 1 can add schemas, change at your discretion
-        # TODO: Add SPARQL query to check if the user is modifying their schemas
-        
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         # count number of schemas on the server for the uri build and send data to server
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('select (COUNT(?schemas) as ?count) '
-                              'from <{0}> '
-                              'where '
-                              '{{ ?schemas a typon:Schema;typon:isFromTaxon <{1}>. }}'.format(current_app.config['DEFAULTHGRAPH'], species_url)))
+                             (sparql_queries.COUNT_SCHEMAS.format(current_app.config['DEFAULTHGRAPH'], species_url)))
         
-        number_schemas = int(result["results"]["bindings"][0]['count']['value'])
+        number_schemas = int(result['results']['bindings'][0]['count']['value'])
         
         # Create the uri for the new schema
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(number_schemas + 1))
 
+        # add the schema identifier to the ptf basename
+        ptf = '{0}_{1}.trn'.format(ptf, str(number_schemas + 1))
+
         # The SPARQL query to send to Typon
-        query2send = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> a typon:Schema; typon:isFromTaxon <{2}>; '
-                      'typon:administratedBy <{3}>; typon:schemaName "{4}"^^xsd:string; '
-                      'typon:bsr "{5}"^^xsd:string; typon:chewBBACA_version "{6}"^^xsd:string; '
-                      'typon:ptf "{7}"^^xsd:string; typon:translation_table "{8}"^^xsd:string; '
-                      'typon:minimum_locus_length "{9}"^^xsd:string .}}'.format(current_app.config['DEFAULTHGRAPH'],
-                                                                               new_schema_url,
-                                                                               species_url,
-                                                                               new_user_url,
-                                                                               name, 
-                                                                               bsr,
-                                                                               chewie_version,
-                                                                               ptf,
-                                                                               translation_table,
-                                                                               min_locus_len))
+        query2send = (sparql_queries.INSERT_SCHEMA.format(current_app.config['DEFAULTHGRAPH'],
+                                                          new_schema_url, species_url,
+                                                          new_user_url, name,
+                                                          bsr, chewie_version,
+                                                          ptf, translation_table,
+                                                          min_locus_len, word_size,
+                                                          cluster_sim, rep_filter,
+                                                          intra_filter, schema_lock))
     
         result = aux.send_data(query2send, 
                                current_app.config['LOCAL_SPARQL'], 
@@ -2641,12 +2517,10 @@ class SchemaListAPItypon(Resource):
                                current_app.config['VIRTUOSO_PASS'])
         
         if result.status_code in [200, 201]:
-            return {"message" : "A new schema for {0} was created sucessfully".format(species_url),
+            return {'message': 'A new schema for {0} was created sucessfully'.format(species_url),
                     "url" : new_schema_url}, 201
-        
         else:
-            return {"message" : "Sum Thing Wong"}, result.status_code
-
+            return {'message': 'Could not add new schema to the NS.'}, result.status_code
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>') 
@@ -2662,80 +2536,80 @@ class SchemaAPItypon(Resource):
              security=["access_token"])
     @jwt_required
     def get(self, species_id, schema_id):
-        """ Return a particular schema for a particular species """
+        """Return a particular schema for a particular species"""
 
-        
-        new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], 
-                                                                str(species_id), 
-                                                                str(schema_id))
-        
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                ('ASK where {{ <{0}> typon:deprecated "true"^^xsd:boolean.}}'.format(new_schema_url)))
-        if result['boolean']:
-            return {"message" : "Schema is now deprecated"}, 200
-            
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                ('select (str(?description) as ?name) '
-                                '(str(?bsr) as ?bsr) (str(?chewBBACA_version) as ?chewBBACA_version) '
-                                '(str(?ptf) as ?prodigal_training_file) (str(?trans) as ?translation_table) '
-                                '(str(?min_locus_len) as ?minimum_locus_length) '
-                                'from <{0}> '
-                                'where '
-                                '{{ <{1}> typon:schemaName ?description; '
-                                'typon:bsr ?bsr; typon:chewBBACA_version ?chewBBACA_version; typon:ptf ?ptf; '
-                                'typon:translation_table ?trans; typon:minimum_locus_length ?min_locus_len. }}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
-        
-        if result["results"]["bindings"] == []:
-            return {"message": "Schema not found with provided id."}, 404
-        
+        user_id = get_jwt_identity()
+
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], user_id)
+
+        # check if there is a species with provided identifier
+        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                            sparql_queries.ASK_SPECIES_NS.format(species_url))
+
+        species_exists = result['boolean']
+        if species_exists is False:
+            return {'NOT FOUND': 'There is no species in the NS with the provided ID.'}, 404
+
+        # construct schema URI
+        new_schema_url = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                             species_id,
+                                                             schema_id)
+
+        # check if schema is deprecated
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.ASK_SCHEMA_DEPRECATED.format(new_schema_url)))
+        if result['boolean'] is True:
+            # check user permissions, Admin can access deprecated schemas
+            user_info = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                                   sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri))
+            user_role = user_info['results']['bindings'][0]['role']['value']
+
+            if user_role != 'Admin':
+                return {'message': 'Schema is deprecated.'}, 403
+
+        # get schema info
+        schema_info = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SPECIES_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+
+        schema_properties = schema_info['results']['bindings']
+
+        if schema_properties == []:
+            return {'NOT FOUND': 'Could not find a schema with provided ID.'}, 404
         else:
-            finalresult = result["results"]["bindings"]
-            return (finalresult)
-                    
+            return schema_properties
+
+
     # it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, 
-    # the locus is just "removed" for the specific schema!!!11
+    # the locus is just "removed" for the specific schema!!
     
     @api.doc(responses={ 201: 'OK', 
                          400: 'Invalid Argument', 
                          500: 'Internal Server Error', 
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
-                         404: 'Not Found' },
+                         404: 'Not Found'},
             security=["access_token"])
     @w.admin_required
     def delete(self, species_id, schema_id):
-        """ Deletes a particular schema for a particular species """
+        """ Deprecates a particular schema for a particular species """
 
         c_user = get_jwt_identity()
-                
-        #only admin can do this
-        try:
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  ('ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-            
-            if not result['boolean']:
-                return {"message" : "not authorized, admin only"}, 403
-                
-        except:
-            return {"message" : "not authorized, admin only"}, 403
-        
-        new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
-        
-        #check if schema exists
-        new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
+        new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+        # check if schema exists
+        new_schema_url = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
         
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             ('ASK where {{ <{0}> a typon:Schema; typon:administratedBy <{1}>.}}'.format(new_schema_url, new_user_url)))
+                             (sparql_queries.ASK_SCHEMA_OWNERSHIP.format(new_schema_url, new_user_url)))
         
         if not result['boolean']:
-            return {"message" : "Schema not found or schema is not yours"}, 404
-        
-        
-        #add a triple to the link between the schema and the locus implying that the locus is deprecated for that schema
-        query2send = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> typon:deprecated "true"^^xsd:boolean.}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url))
+            return {'message': 'Could not find schema with provided ID or schema is not administrated by current user.'}, 404
+
+        # add a triple to the link between the schema and the locus implying that the locus is deprecated for that schema
+        query2send = (sparql_queries.INSERT_SCHEMA_DEPRECATE.format(current_app.config['DEFAULTHGRAPH'], new_schema_url))
         
         result = aux.send_data(query2send, 
                                current_app.config['LOCAL_SPARQL'], 
@@ -2743,84 +2617,136 @@ class SchemaAPItypon(Resource):
                                current_app.config['VIRTUOSO_PASS'])
         
         if result.status_code in [200, 201] :
-            return {"message" : "Schema sucessfully removed."}, 201	
-        
+            return {'message': 'Schema sucessfully removed.'}, 201	
         else:
-            return {"message" : "Sum Thing Wong"}, result.status_code
+            return {'message': 'Sum Thing Wong.'}, result.status_code
 
 
-### DOWNLOAD SCHEMA ENDPOINT (WIP)
-# @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/compressed') 
-# class SchemaZipAPItypon(Resource):
-#     """ Schema Zip Resource """
-    
-#     @api.doc(responses={ 200: 'OK',
-#                          400: 'Invalid Argument', 
-#                          500: 'Internal Server Error', 
-#                          403: 'Unauthorized', 
-#                          401: 'Unauthenticated' },
-#             security="apikey")
-#     #@w.auth_required(one_of=["Admin", "Contributor", "User"])
-#     @w.token_required
-#     #@login_required
-#     def get(self, species_id, schema_id):
-#         """ Download the schema as a compressed file """
-        
-# 		#check if schema exists
-#         new_schema_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/schemas/" + str(schema_id)
-#         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?description (COUNT(?part) as ?number_loci) where { <' + new_schema_url + '> typon:schemaName ?description; typon:hasSchemaPart ?part. FILTER NOT EXISTS { <' + new_schema_url + '> typon:deprecated  "true"^^xsd:boolean }}')
-#         #print(result)
-#         try:
-#             schema_name = result["results"]["bindings"][0]["description"]["value"]
-#             #print(schema_name)
-            
-#         except:
-#             return {"message" : "Schema not found"}, 404
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/lock')
+class SchemaLockAPItypon(Resource):
+    """Schema locking property Resource"""
 
-#         # get the number of loci
-#         nr_loci_request = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?description (COUNT(?part) as ?number_loci) where { <' + new_schema_url + '> typon:schemaName ?description; typon:hasSchemaPart ?part. }')
-        
-#         nr_loci = nr_loci_request["results"]["bindings"][0]["number_loci"]["value"]
+    # get locking state for the Schema
+    @api.doc(responses={ 200: 'OK', 
+                         400: 'Invalid Argument', 
+                         500: 'Internal Server Error', 
+                         403: 'Unauthorized', 
+                         401: 'Unauthenticated',
+                         404: 'Not Found' },
+             security=["access_token"])
+    @jwt_required
+    def get(self, species_id, schema_id):
+        """Get the locking state of the schema with the given identifier."""
 
-#         # get the fasta
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'], 
+                                                             str(species_id), 
+                                                             str(schema_id))
 
-#         #fasta_uri = "http://127.0.0.1:5000/NS/api/species/" + str(species_id) + "/loci/"
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
 
-#         #new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/" + str(loci)
-#         new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/1"
+        result_data = result['results']['bindings'][0]
 
-#         fasta_r = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select ?allele_id (str(?nucSeq) as ?nucSeq) where { <' + new_locus_url + '> a typon:Locus; typon:name ?name. ?alleles typon:isOfLocus <' + new_locus_url + '> .?alleles typon:hasSequence ?sequence; typon:id ?allele_id .?sequence typon:nucleotideSequence ?nucSeq. } order by ASC(?allele_id)')
+        if result_data == []:
+            return {'message': 'Could not find a schema with provided id.'}, 404
+        else:
+            schema_name = result_data['name']['value']
+            locking_value = result_data['Schema_lock']['value']
+            print(locking_value, flush=True)
+            if locking_value == 'Unlocked':
+                return ('Schema {0} ({1}) status: *unlocked*.'.format(str(schema_id), schema_name))
+            else:
+                return ('Schema {0} ({1}) status: [locked].'.format(str(schema_id), schema_name))
 
-#         print(fasta_r["results"]["bindings"][0]["nucSeq"]["value"])
+    # change locking state for the Schema
+    @api.doc(responses={201: 'OK', 
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found',
+                        406: 'Not acceptable'},
+             security=['access_token'])
+    @api.expect(schema_lock_model, validate=True)
+    @w.admin_contributor_required
+    def post(self, species_id, schema_id):
+        """Change the locking state of the schema with the given identifier."""
 
+        c_user = get_jwt_identity()
 
-#         #for loci in range(1, nr_loci + 1):
+        new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
 
-#         #fasta_loci_uri = fasta_uri + str(loci) + "/fasta"
-#         # fasta_loci_uri = fasta_uri + "1/fasta"
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
 
-#         # waitFactor = 2
-#         #attempts=0
+        # create schema URI
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
 
-#         # fasta_r = requests.get(fasta_loci_uri, timeout=10)
-        
-#         # if fasta_r.status_code > 201:
-#         #     time.sleep(waitFactor)
+        user_role = result['results']['bindings'][0]['role']['value']
 
-#         # fasta_r_result = fasta_r.text
-#         # print(fasta_r_result)
+        allow = enforce_locking(user_role, new_user_url, schema_uri)
+        if allow[0] == False:
+            return allow[1], 403
 
+        # get schema locking status
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
 
-# 		# #build the dowload path
-#         # down_folder = os.path.join(app.config['DOWNLOAD_FOLDER'], str(species_id), str(schema_id))
-        
-#         # zippath = os.path.join(down_folder, "schema_" + schema_name + ".zip")
-        
-#         # if os.path.isfile(zippath):
-#         #     return send_from_directory(down_folder, "schema_" + schema_name + ".zip", as_attachment=True)
-        
-#         # else:
-#         #     return {"message" : "File doesn't exist"}, 404
+        # get post data
+        post_data = request.get_json()
+        result_data = result['results']['bindings'][0]
+        lock_state = result_data['Schema_lock']['value']
+        print(lock_state, flush=True)
+        action = post_data['action']
+        if action == 'lock':
+            lock_token = 'LOCKED'
+            if lock_state == 'Unlocked':
+                # first delete Schema_lock property value
+                delprop_query = (sparql_queries.DELETE_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'],
+                                                                          schema_uri))
+
+                delprop_result = aux.send_data(delprop_query,
+                                               current_app.config['LOCAL_SPARQL'],
+                                               current_app.config['VIRTUOSO_USER'],
+                                               current_app.config['VIRTUOSO_PASS'])
+
+                # insert new value
+                query2send = (sparql_queries.INSERT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri, lock_token))
+
+                result = aux.send_data(query2send,
+                                       current_app.config['LOCAL_SPARQL'],
+                                       current_app.config['VIRTUOSO_USER'],
+                                       current_app.config['VIRTUOSO_PASS'])
+            else:
+                return {'message': 'Schema already locked.'}, 201
+
+        elif action == 'unlock':
+            unlock_token = 'Unlocked'
+            if lock_state == 'Unlocked':
+                return {'message': 'Schema already unlocked.'}, 201
+            else:
+                # first delete Schema_lock property value
+                delprop_query = (sparql_queries.DELETE_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'],
+                                                                          schema_uri))
+                delprop_result = aux.send_data(delprop_query,
+                                               current_app.config['LOCAL_SPARQL'],
+                                               current_app.config['VIRTUOSO_USER'],
+                                               current_app.config['VIRTUOSO_PASS'])
+
+                # insert new value
+                query2send = (sparql_queries.INSERT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri, unlock_token))
+
+                result = aux.send_data(query2send,
+                                       current_app.config['LOCAL_SPARQL'],
+                                       current_app.config['VIRTUOSO_USER'],
+                                       current_app.config['VIRTUOSO_PASS'])
+
+        if result.status_code in [200, 201]:
+            return {'message': 'Schema sucessfully locked/unlocked.'}, 201
+        else:
+            return {'message': 'Could not lock/unlock schema.'}, result.status_code
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci')
@@ -2835,7 +2761,6 @@ class SchemaLociAPItypon(Resource):
                         help='provide a date in the format YYYY-MM-DDTHH:MM:SS to get the alleles that were uploaded after that defined date')
 
 
-
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
                          500: 'Internal Server Error', 
@@ -2844,146 +2769,111 @@ class SchemaLociAPItypon(Resource):
                          404: 'Not Found' },
             security=[])
     @w.use_kwargs(api, parser)
-    # @jwt_required
     def get(self, species_id, schema_id, **kwargs):
         """ Returns the loci of a particular schema from a particular species """
         
+        c_user = get_jwt_identity()
+
         # get request data
         request_data = request.args
-        
-        #check if schema exists or deprecated
+
+        # check if there is a species with provided identifier
+        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                            sparql_queries.ASK_SPECIES_NS.format(species_url))
+
+        species_exists = result['boolean']
+        if species_exists is False:
+            return {'NOT FOUND': 'There is no species in the NS with the provided ID.'}, 404
+
+        # check if schema exists or is deprecated
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
-        
+
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('ASK where {{ <{0}> a typon:Schema; typon:deprecated  "true"^^xsd:boolean }}'.format(new_schema_url)))
-        
+                             (sparql_queries.ASK_SCHEMA_DEPRECATED2.format(new_schema_url)))
+
         if result['boolean']:
-            return {"message" : "Schema not found or deprecated"}, 404
+            return {'message': 'Schema not found or deprecated.'}, 404
         
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                            (sparql_queries.ASK_SCHEMA_LOCK.format(new_schema_url)))
+
+        locking_status = locking_status_query['boolean']
+
+        # if schema is locked, enforce condition that only the Admin
+        # or the Contributor that manages the schema can change it
+        if locking_status is False:
+            # check the role of the user that is trying to access
+            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
+
+            allow = enforce_locking(user_role, new_user_url, new_schema_url)
+            if allow[0] == False:
+                return allow[1], 403
+
         # if date is provided the request returns the alleles that were added after that specific date for all loci
         # else the request returns the list of loci
         # a correct request returns also the server date at which the request was done
-        try: 
+        if 'date' in request_data: 
             
-            request_data["date"]
+            # query all alleles for the loci of the schema since a specific date, sorted from oldest to newest (limit of max 50k records)
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SCHEMA_LATEST_ALLELES.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, request_data['date'])))
             
-            #query all alleles for the loci of the schema since a specific date, sorted from oldest to newest (limit of max 50k records)
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?locus_name ?allele_id ?sequence '
-                                 'from <{0}> '
-                                 'where {{ '
-                                 ' {{ select ?locus_name ?allele_id ?sequence '
-                                 'from <{0}> '
-                                 'where {{ <{1}> typon:hasSchemaPart ?part. '
-                                 '?part typon:hasLocus ?locus . '
-                                 '?alleles typon:isOfLocus ?locus ; typon:dateEntered ?date; typon:hasSequence ?sequence; typon:id ?allele_id. '
-                                 '?locus typon:name ?locus_name. '
-                                 'FILTER ( ?date > "{2}"^^xsd:dateTime ). '
-                                 'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }}.}}'
-                                 'order by ASC(?date)}} }} LIMIT 50000'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, request_data["date"])))
-            
-            if len(result["results"]["bindings"])<1:
-                
-                def generate():
-                    yield '{"newAlleles": []}'
-                r = Response(stream_with_context(generate()), content_type='application/json')
-                r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
-                return r
-            
-            #get the latest allele date (the newest)
-            latestAllele = (result["results"]["bindings"])[-1]
-            geneFasta = latestAllele['locus_name']['value']
-            alleleid = latestAllele['allele_id']['value']
-            result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  ('select ?date from <{0}> '
-                                   'where '
-                                   '{{ ?locus typon:name "{1}"^^<http://www.w3.org/2001/XMLSchema#string>. '
-                                   '?alleles typon:isOfLocus ?locus ; typon:dateEntered ?date; typon:id {2}. }}'.format(current_app.config['DEFAULTHGRAPH'], geneFasta, alleleid)))
-            
-            latestDatetime = (result2["results"]["bindings"])[0]['date']['value']
-            
-            number_of_alleles = len(result["results"]["bindings"])
-            try:
-                
-                def generate():
-                    yield '{"newAlleles": ['
-                    
-                    try:
-                        prev_item = result["results"]["bindings"].pop(0)
-                    except:
-                        yield ']}'
+            new_alleles = result['results']['bindings']
+            number_of_alleles = len(new_alleles)
 
-                    for item in result["results"]["bindings"]:
-                        yield json.dumps(prev_item) + ','
-                        prev_item = item
-                    
-                    yield json.dumps(prev_item) + ']}'
-                    
-                r = Response(stream_with_context(generate()), content_type='application/json')
-                r.headers.set('Last-Allele', latestDatetime)
-                if number_of_alleles > 49999:
-                    r.headers.set('All-Alleles-Returned', True)
+            # if there are no new alleles
+            if number_of_alleles < 1:
+
+                response = Response(stream_with_context(generate('newAlleles', new_alleles)),
+                                                        content_type='application/json')
+                # if there are no alleles, return server date information
+                response.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
+
+                return response
+            else:
+                # get the allele with the latest date from all retrieved alleles
+                latest_allele = new_alleles[-1]
+            
+                # get allele date
+                latest_datetime = latest_allele['date']['value']
+
+                response = Response(stream_with_context(generate('newAlleles', new_alleles)),
+                                                 content_type='application/json')
+                response.headers.set('Last-Allele', latest_datetime)
+                if number_of_alleles >= 10000:
+                    response.headers.set('All-Alleles-Returned', False)
                 else:
-                    r.headers.set('All-Alleles-Returned', False)
-                return r
+                    response.headers.set('Server-Date',
+                                         str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
+                    response.headers.set('All-Alleles-Returned', True)
                 
-            except:
-                
-                def generate():
-                    yield '{"newAlleles": []}'
-                
-                r = Response(stream_with_context(generate()), content_type='application/json')
-                r.headers.set('Server-Date', str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')))
-                return r
-        
-        #if no date provided, query for all loci for the schema
-        except:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) (strlen(?nucSeq) as ?nucSeqLen) '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ <{1}> typon:hasSchemaPart ?part. '
-                                  '?part typon:hasLocus ?locus.'
-                                  '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
-                                  '?allele a typon:Allele; typon:isOfLocus ?locus .'
-                                  '?allele typon:hasSequence ?sequence .'
-                                  '?sequence typon:nucleotideSequence ?nucSeq .'
-                                  'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                                  'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+                return response
+
+        # if no date provided, query for all loci for the schema
+        else:
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SCHEMA_LOCI.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
 
             # check if schema has loci
-            try:      
-                result["results"]["bindings"][0]
-            except:
-                return {"message" : "Schema exists but does not have loci yet."}, 200
+            loci_list = result['results']['bindings']
+            if loci_list == []:
+                return {'message': 'Schema exists but does not have loci yet.'}, 200
+            
+            # return all loci in stream mode
+            latestDatetime = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
+            r = Response(stream_with_context(generate('Loci', loci_list)), content_type='application/json')
+            r.headers.set('Server-Date',latestDatetime)
 
-            #return all loci in stream mode
-            try:
-                
-                latestDatetime = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-
-                def generate():
-                    yield '{"Loci": ['
-                    
-                    try:
-                        prev_item = result["results"]["bindings"].pop(0)
-                    except:
-                        yield ']}'
-                    
-                    for item in result["results"]["bindings"]:
-                        yield json.dumps(prev_item) + ','
-                        prev_item = item
-                    
-                    yield json.dumps(prev_item) + ']}'
-                    
-                r = Response(stream_with_context(generate()), content_type='application/json')
-                r.headers.set('Server-Date',latestDatetime)
-                return r
-                
-            except :
-                return {"message" : "Invalid Argument"}, 400
-
-        
+            return r
 
 
     @api.doc(responses={ 201: 'OK', 
@@ -2992,62 +2882,68 @@ class SchemaLociAPItypon(Resource):
                          403: 'Unauthorized', 
                          401: 'Unauthenticated',
                          404: 'Not found',
-                         409: 'Locus already on schema' },
+                         409: 'Locus already on schema'},
              security=["access_token"])
     @api.expect(schema_loci_model)
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
-        """ Add loci to a particular schema of a particular species """
+        """Add loci to a particular schema of a particular species."""
 
+        # get user id
         c_user = get_jwt_identity()
+
+        # check if schema exists
+        new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              sparql_queries.ASK_SCHEMA_DEPRECATED2.format(new_schema_url))
+
+        if result['boolean']:
+            return {'message': 'Schema not found.'}, 404
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                           (sparql_queries.ASK_SCHEMA_LOCK.format(new_schema_url)))
+
+        locking_status = locking_status_query['boolean']
+
+        # if schema is locked, enforce condition that only the Admin
+        # or the Contributor that locked the schema may get the FASTA sequences
+        if locking_status is False:
+            # check the role of the user that is trying to access
+            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
+            
+            allow = enforce_locking(user_role, new_user_url, schema_uri)
+            if allow[0] == False:
+                return allow[1], 403
 
         # get post data
         request_data = request.get_json()
 
-        try:
-            request_data["loci_id"]
-
-        except:
-            return {"message" : "No valid id for loci provided"}, 404
-
-        new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
-        
-        #check if schema exists
-        new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
-
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             ('ASK where {{ <{0}> a typon:Schema; typon:administratedBy <{1}>;'
-                              ' typon:deprecated "true"^^xsd:boolean }}'.format(new_schema_url, new_user_url)))
-        
-        if result['boolean']:
-            return {"message" : "Schema not found or schema is not yours"}, 404
-        
-        #check if locus exists
-        # new_locus_url = current_app.config['BASE_URL'] + "species/" + str(species_id) + "/loci/" + str(request_data["loci_id"])
-        # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'ASK where { <' + new_locus_url + '> a typon:Locus}')
-        # if not result['boolean']:
-        #     return {"message" : "Locus not found"}, 404
-
-        #check if locus exists
-        # new_locus_url = current_app.config['BASE_URL'] + "loci/" + str(request_data["loci_id"])
-        new_locus_url = "{0}loci/{1}".format(current_app.config['BASE_URL'], str(request_data["loci_id"]))
+        # check if locus exists
+        loci_id = str(request_data['loci_id'])
+        new_locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], str(loci_id))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                              ('ASK where {{ <{0}> a typon:Locus}}'.format(new_locus_url)))
         
         if not result['boolean']:
-            return {"message" : "Locus not found"}, 404
-        
-        #check if locus already exists on schema
+            return {'message': 'Could not find locus with provided ID.'}, 404
+
+        # check if locus already exists on schema
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             ('ASK where {{ <{0}> typon:hasSchemaPart ?part. '
-                              '?part typon:hasLocus <{1}>.}}'.format(new_schema_url, new_locus_url)))
+                             (sparql_queries.ASK_SCHEMA_LOCUS.format(new_schema_url, new_locus_url)))
         
         if result['boolean']:
-            return {"message" : "Locus already on schema",
-                    "locus_url" : new_locus_url}, 409
+            return {"message": "Locus already on schema",
+                    "locus_url": new_locus_url}, 409
                 
-        #get the number of loci on schema and build the uri based on that number+1 , using a celery queue
+        # get the number of loci on schema and build the uri based on that number+1 , using a celery queue
         task = add_locus_schema.apply(args=[new_schema_url, new_locus_url])
         
         process_result = task.result
@@ -3061,15 +2957,12 @@ class SchemaLociAPItypon(Resource):
             return {"status: " + process_sucess + " run:" + process_ran}, 400
         
         # celery results
-        process_result = task.result
-        print(process_result)
         new_allele_url = process_result[0]
         process_result_status_code = int(process_result[-1])
         
-        if process_result_status_code > 201 :
-            #check if process was sucessfull
-            return {"message" : "Sum Thing Wong creating sequence 2"}, process_result_status_code
-        
+        if process_result_status_code > 201:
+            # check if process was sucessfull
+            return {'message': 'Could not add locus to schema.'}, process_result_status_code
         else:
             return new_allele_url, process_result_status_code
     
@@ -3085,10 +2978,10 @@ class SchemaLociAPItypon(Resource):
     @w.use_kwargs(api, parser)
     @w.admin_required
     def delete(self, species_id, schema_id):
-        """ Delete loci to a particular schema of a particular species """
+        """Delete loci to a particular schema of a particular species."""
         
         # it doesnt delete, it just adds an attribute typon:deprecated  "true"^^xsd:boolean to that part of the schema, 
-        # the locus is just "removed" for the specific schema!!!11
+        # the locus is just "removed" for the specific schema!!!
 
         c_user = get_jwt_identity()
 
@@ -3100,46 +2993,32 @@ class SchemaLociAPItypon(Resource):
 
         except:
             return {"message" : "No valid id for loci provided"}, 404	
-                    
-        try:
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; '
-                                  'typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-            
-            if not result['boolean']:
-                return {"message" : "Not authorized, admin only"}, 403
-        except:
-            return {"message" : "Not authorized, admin only"}, 403
-            
-        
         new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
         
         # check if schema exists
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
+        # this will return FALSE for Admin if the schema was uploaded by a Contributor?
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                              ('ASK where {{ <{0}> a typon:Schema; typon:administratedBy <{1}>;'
                               ' typon:deprecated  "true"^^xsd:boolean }}'.format(new_schema_url, new_user_url)))
         
         if not result['boolean']:
-            return {"message" : "Schema not found or schema is not yours"}, 404
+            return {"message": "Schema not found or schema is not yours"}, 404
         
         # check if locus exists
         new_locus_url = "{0}species/{1}/loci/{2}".format(current_app.config['BASE_URL'], str(species_id), str(request_data["loci_id"]))
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             ('ASK where {{ <{0}> a typon:Locus}}'.format(new_locus_url)))
-        
+                             (sparql_queries.ASK_LOCUS.format(new_locus_url)))
+
         if not result['boolean']:
             return {"message" : "Locus not found"}, 404
         
         # check if locus exists on schema
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                             ('ASK where {{ <{0}> typon:hasSchemaPart ?part. '
-                              '?part typon:hasLocus <{1}>. '
-                              'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }}.}}'.format(new_schema_url, new_locus_url)))
+                             (sparql_queries.ASK_SCHEMA_LOCUS2.format(new_schema_url, new_locus_url)))
         
         if not result['boolean']:
             return {"message" : "Locus already on schema"}, 409
@@ -3152,9 +3031,8 @@ class SchemaLociAPItypon(Resource):
                               '?parts typon:hasLocus <{2}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, new_locus_url)))
         
         schema_link = result["results"]["bindings"][0]['parts']['value']
-                        
-        
-        #add a triple to the link between the schema and the locus implying that the locus is deprecated for that schema
+
+        # add a triple to the link between the schema and the locus implying that the locus is deprecated for that schema
         query2send = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:deprecated "true"^^xsd:boolean.}}'.format(current_app.config['DEFAULTHGRAPH'], schema_link))
         
@@ -3164,10 +3042,9 @@ class SchemaLociAPItypon(Resource):
                                current_app.config['VIRTUOSO_PASS'])
         
         if result.status_code in [200, 201]:
-            return {"message" : "Locus sucessfully removed from schema"}, 201
-            
+            return {"message": "Locus sucessfully removed from schema"}, 201
         else:
-            return {"message" : "Sum Thing Wong"}, result.status_code
+            return {"message": "Could not remove locus from schema."}, result.status_code
 
 
 
@@ -3204,95 +3081,53 @@ class LociListAPItypon(Resource):
         """ Lists the loci of a particular species """
 
         # get the request data
-        request_data = request.args
-        
-        # build the species uri
-        spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
-        
-        #sequence was provided, return the locus uri found that has the sequence, else give all locus from that species
-        try: 
-            
-            sequence = str(request_data["sequence"]).upper()
-            
-            new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
+        prefix = kwargs['prefix']
+        sequence = kwargs['sequence']
+        locus_ori_name = kwargs['locus_ori_name']
 
-            new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
+        # check if species exists
+        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              sparql_queries.ASK_SPECIES_NS.format(species_url))
+
+        if not result['boolean']:
+            return {'NOT FOUND': 'There is no species with provided ID.'}, 404
+        
+        # sequence was provided, return the locus uri found that has the sequence
+        if sequence != None:
+
+            sequence = sequence.upper()
+
+            # Generate hash
+            sequence_hash = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
+
+            # Query virtuoso
+            sequence_uri = '{0}sequences/{1}'.format(current_app.config['BASE_URL'], str(sequence_hash))
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_LOCI_WITH_DNA.format(current_app.config['DEFAULTHGRAPH'], sequence_uri, species_url)))
+
+            res_loci = result['results']['bindings']
+        else:
 
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?locus '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{?alleles typon:hasSequence <{1}>; typon:isOfLocus ?locus.'
-                                  '?locus typon:isOfTaxon <{2}>.}}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url, spec_url)))
+                                 (sparql_queries.SELECT_SPECIES_LOCI.format(current_app.config['DEFAULTHGRAPH'], species_url)))
 
-            try:
-                return (result["results"]["bindings"])
-            
-            except:
-                return {"message" : "Loci not found"}, 404
-                
-        except:
+            res_loci = result['results']['bindings']
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select (str(?name) as ?name) ?locus (str(?original_name) as ?original_name) '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ ?locus a typon:Locus; typon:isOfTaxon <{1}>; typon:name ?name. '
-                                  'OPTIONAL{{?locus typon:originalName ?original_name.}} }}'.format(current_app.config['DEFAULTHGRAPH'], spec_url)))
+        if prefix != None:
+            res_loci = [res for res in res_loci if prefix in res['name']['value']]
 
-            # Return records containing prefix only
-            try:
-            
-                request_data["prefix"]
-                
-                try:
-                    def generate():
+        if locus_ori_name != None:
+            res_loci = [res for res in res_loci if locus_ori_name in res['original_name']['value']]
 
-                        if len(result["results"]["bindings"]) == 0:
-                            yield '{ "Loci": [] }'
-                        
-                        else:
-
-                            resp = []
-
-                            for item in result["results"]["bindings"]:
-                                
-                                if request_data["prefix"] in item["name"]["value"]:
-                                    resp.append(json.dumps(item))
-
-                            resp = ','.join(resp)
-                            #print(resp)
-
-                            yield '{ "Loci": ['
-                            yield resp
-                            yield '] }'
-
-                    return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
-                    
-                except:
-                    return {"message" : "Bad argument"}, 400
-            
-            # return all records
-            except:
-                
-                try:
-                    def generate():
-
-                        resp = []
-
-                        for item in result["results"]["bindings"]:
-                            resp.append(json.dumps(item))
-
-                        resp = ','.join(resp)
-
-                        yield '{ "Loci": ['
-                        yield resp
-                        yield '] }'
-
-                    return Response(stream_with_context(generate()), content_type='application/json', mimetype='application/json')
-                    
-                except:
-                    return {"message" : "Bad argument"}, 400
+        # if result is not empty, stream with context
+        if len(res_loci) > 0:
+            return Response(stream_with_context(generate('Loci', res_loci)), content_type='application/json', mimetype='application/json')
+        # if there are loci with the sequence, filter based on other arguments
+        else:
+            return {'message': 'None of the loci in the NS meet the filtering criteria.'}, 404
 
 
     @api.doc(responses={ 201: 'OK', 
@@ -3311,30 +3146,15 @@ class LociListAPItypon(Resource):
 
         # get post data
         post_data = request.get_json()
-         
-        #only admin can do this
-        try:
-            new_user_url = "{0}users/{1}".format(current_app.config['BASE_URL'], str(c_user))
 
-            result_user = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                      ('ASK where {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent>; '
-                                       'typon:Role "Admin"^^xsd:string}}'.format(new_user_url)))
-            
-            if not result_user['boolean']:
-                return {"message" : "Not authorized, admin only"}, 403
-        
-        except:
-            return {"message" : "Not authorized, admin only"}, 403
-        
         spec_url = "{0}species/{1}".format(current_app.config['BASE_URL'], str(species_id))
         result_spec = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                   ('ASK where {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}'.format(spec_url)))
         
         if not result_spec['boolean']:
             return {"message" : "Species not found"}, 404
-        
 
-        #count number of loci already created for that species, build the new locus uri and send to server
+        # count number of loci already created for that species, build the new locus uri and send to server
         # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),'select (COUNT(?locus) as ?count) where { ?locus a typon:Locus; typon:isOfTaxon <' + spec_url + '>. }')
         # number_loci_spec = int(result["results"]["bindings"][0]['count']['value'])
 
@@ -3356,10 +3176,12 @@ class LociListAPItypon(Resource):
                                current_app.config['VIRTUOSO_PASS'])
             
         if result.status_code in [200, 201]:
-            return {"message" : "New locus added to species " + str(species_id)}, 201
+            return {"message": "New locus added to species." + str(species_id)}, 201
         else:
-            return {"message" : "Sum Thing Wong"}, result.status_code
+            return {"message": "Could not add locus to species."}, result.status_code
 
+
+# Isolates Routes
 
 @species_conf.route('/<int:species_id>/isolates')
 class IsolatesListAPItypon(Resource):
@@ -3482,7 +3304,7 @@ class IsolatesListAPItypon(Resource):
             
         if len(result["results"]["bindings"])<1:
             
-            def generate():
+            def generate_iso():
                 yield '{"Isolates": []}'
                 
             r = Response(stream_with_context(generate()), content_type='application/json')
@@ -3503,7 +3325,7 @@ class IsolatesListAPItypon(Resource):
         number_of_isolates = len(result["results"]["bindings"])
         try:
             
-            def generate():
+            def generate_iso():
                 yield '{"Isolates": ['
                 
                 try:
@@ -3664,7 +3486,7 @@ class IsolatesUserListAPItypon(Resource):
             
         if len(result["results"]["bindings"]) < 1:
             
-            def generate():
+            def generate_iso():
                 yield '{"Isolates": []}'
                 
             r = Response(stream_with_context(generate()), content_type='application/json')
@@ -3685,7 +3507,7 @@ class IsolatesUserListAPItypon(Resource):
         number_of_isolates = len(result["results"]["bindings"])
         try:
             
-            def generate():
+            def generate_iso():
                 yield '{"Isolates": ['
                 
                 try:
@@ -3751,7 +3573,6 @@ class IsolatesAPItypon(Resource):
             return (result["results"]["bindings"])
         except:
             return {"message" : "It's empty man..."}, 404
-
 
 
     @api.doc(responses={ 201: 'OK', 
@@ -4086,7 +3907,7 @@ class IsolatesAPItypon(Resource):
                 if result.status_code not in [200, 201] :
                     return {"message" : "Sum Thing Wong uploading metadata to isolate"}, result.status_code
                     
-            def generate():
+            def generate_iso():
 
                 yield '{"Uploaded_total": [' + str(metadataUploadable) + '],'
 
@@ -4120,10 +3941,6 @@ class IsolatesAPItypon(Resource):
                 
         else:
             return {"message" : "No metadata to upload"}, 409
-
-
-
-
 
 
 @species_conf.route('/<int:species_id>/isolates/<string:isolate_id>/alleles')
@@ -4330,8 +4147,10 @@ class IsolatesSchema(Resource):
                 return {"message" : "It's empty man..."}, 404
 
 
+# Sequences Routes
 
-    
+# Namespace
+sequences_conf = api.namespace('sequences', description = 'Sequence related operations.')
 
 @sequences_conf.route('/list')
 class SequencesListAPItypon(Resource):
@@ -4348,19 +4167,14 @@ class SequencesListAPItypon(Resource):
     def get(self):
         """ Gets the total number of sequences """
         
-        #query number of sequences on database
-        try:
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 ('select (COUNT(?seq) as ?count) '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{?seq a typon:Sequence }}'.format(current_app.config['DEFAULTHGRAPH'])))
-            
-            number_sequences_vir = int(result["results"]["bindings"][0]['count']['value'])
+        # query number of sequences on database
+        # should return 0 if there are no sequences
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.COUNT_SEQUENCES.format(current_app.config['DEFAULTHGRAPH'])))
 
-            return {"message" : "Total number of sequences is: " + str(number_sequences_vir)}
-        except:
-            return {"message" : "No sequences were found."}, 404
+        number_sequences = int(result["results"]["bindings"][0]['count']['value'])
+
+        return {"message": "Total number of sequences is: " + str(number_sequences)}
 
 
 @sequences_conf.route('/seq_info')
@@ -4395,72 +4209,59 @@ class SequencesAPItypon(Resource):
                          401: 'Unauthenticated',
                          404: 'Not Found' },
             security=["access_token"])
-    # @w.token_required
     @w.use_kwargs(api, parser)
     @jwt_required
     def get(self, **kwargs):
-        """ Get information on sequence, DNA string, uniprot URI and uniprot label """
+        """Get information on sequence, DNA string, uniprot URI and uniprot label."""
 
         # get request data
         request_data = request.args
-        
         if len(request_data) == 0:
-            return {"message" : "No DNA sequence or hash provided"}, 400
+            return {'message': 'Please provide a string for a valid DNA sequence or a valid DNA sequence hash.'}, 400
 
-        # if sequence is provided, hash it and send request to virtuoso
-        try:
+        # determine if species identifier was provided
+        query_part = ''
+        if 'species_id' in request_data:
+            species_id = request_data['species_id']
+            species_uri = '{0}{1}/{2}'.format(current_app.config['BASE_URL'], 'species', species_id)
+            # create additional query part to filter by species
+            query_part = '?locus a typon:Locus; typon:isOfTaxon <{0}> .'.format(species_uri)
 
-            sequence = request_data["sequence"]
+        # if DNA sequence is provided, hash it and send request to virtuoso
+        if 'sequence' in request_data:
+
+            sequence = request_data['sequence']
 
             new_id = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
 
-            new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(new_id))
+            new_seq_url = '{0}sequences/{1}'.format(current_app.config['BASE_URL'], str(new_id))
 
-            #check if the sequence exists
-            result_existence = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                           ('ASK where {{ <{0}> typon:nucleotideSequence ?seq.}}'.format(new_seq_url)))
+            # check if the sequence exists
+            result_existence = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                           (sparql_queries.ASK_SEQUENCE_HASH.format(new_seq_url)))
 
             if not result_existence['boolean']:
-                return {"message" : "Sequence not found"}, 404
-            
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?schemas ?locus ?alleles ?uniprot ?label '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ ?alleles typon:hasSequence <{1}>; typon:isOfLocus ?locus. '
-                                  '?schemas a typon:Schema; typon:hasSchemaPart ?part . '
-                                  '?part a typon:SchemaPart; typon:hasLocus ?locus . '
-                                  'OPTIONAL {{ <{1}> typon:hasUniprotSequence ?uniprot.}}. '
-                                  'OPTIONAL {{ <{1}> typon:hasUniprotLabel ?label.}} }}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url)))
-            
-            
-            if result["results"]["bindings"] == []:
-                return {"message": "Sequence not found."}, 404
-            
+                return {'message': 'Provided DNA sequence is not in the NS.'}, 404
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SEQUENCE_INFO_BY_DNA.format(current_app.config['DEFAULTHGRAPH'], new_seq_url, query_part)))
+
+            sequence_info = result['results']['bindings']
+            if sequence_info != []:
+                return {'result': sequence_info,
+                        'sequence_uri': new_seq_url}, 200
             else:
-                return {"result": result["results"]["bindings"], 
-                        "sequence_uri": new_seq_url}, 200
+                return {'NOT FOUND': 'Could not find provided DNA sequence in the NS.'}, 404
+        # if sequence hash is provided
+        elif 'seq_id' in request_data:
+            new_seq_url = '{0}sequences/{1}'.format(current_app.config['BASE_URL'], str(request_data['seq_id']))
 
-        except:
-            
-            new_seq_url = "{0}sequences/{1}".format(current_app.config['BASE_URL'], str(request_data["seq_id"]))
+            # get information on sequence, DNA string, uniprot URI and uniprot label
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sparql_queries.SELECT_SEQUENCE_INFO_BY_HASH.format(current_app.config['DEFAULTHGRAPH'], new_seq_url, query_part)))
 
-            #get information on sequence, DNA string, uniprot URI and uniprot label
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                                 ('select ?schemas ?locus ?alleles ?sequence ?uniprot ?label '
-                                  'from <{0}> '
-                                  'where '
-                                  '{{ <{1}> a typon:Sequence; typon:nucleotideSequence ?sequence . '
-                                  '?alleles typon:hasSequence <{1}>; typon:isOfLocus ?locus .'
-                                  '?schemas a typon:Schema; typon:hasSchemaPart ?part .'
-                                  '?part a typon:SchemaPart; typon:hasLocus ?locus . '
-                                  'OPTIONAL {{ <{1}> typon:hasUniprotSequence ?uniprot.}}. '
-                                  'OPTIONAL {{ <{1}> typon:hasUniprotLabel ?label.}} }}'.format(current_app.config['DEFAULTHGRAPH'], new_seq_url)))
-            #print(result)
-
-            try:
-                return (result["results"]["bindings"][0])
-            except:
-                return {"message" : "Empty man..."}, 404
-
-
+            sequence_info = result['results']['bindings']
+            if sequence_info != []:
+                return sequence_info, 200
+            else:
+                return {'NOT FOUND': 'Could not find information for a sequence with provided hash.'}, 404
