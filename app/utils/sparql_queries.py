@@ -58,7 +58,7 @@ SELECT_LOCUS = ('SELECT (str(?name) AS ?name) (str(?original_name) AS ?original_
                 'OPTIONAL{{<{1}> typon:originalName ?original_name.}} '
                 'OPTIONAL{{<{1}> typon:isOfTaxon ?taxon}} }}')
 
-SELECT_LOCUS_FASTA = ('SELECT ?allele_id (str(?nucSeq) AS ?nucSeq) '
+SELECT_LOCUS_FASTA = ('SELECT ?name ?allele_id (str(?nucSeq) AS ?nucSeq) '
                       'FROM <{0}> '
                       'WHERE '
                       '{{ <{1}> a typon:Locus; typon:name ?name. '
@@ -67,7 +67,7 @@ SELECT_LOCUS_FASTA = ('SELECT ?allele_id (str(?nucSeq) AS ?nucSeq) '
                       '?sequence typon:nucleotideSequence ?nucSeq. }} '
                       'ORDER BY ASC(?allele_id)')
 
-SELECT_LOCUS_UNIPROT = ('select distinct (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
+SELECT_LOCUS_UNIPROT = ('select distinct ?name (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
                         'from <{0}>'
                         'where '
                         '{{ <{1}> a typon:Locus; typon:name ?name. '
