@@ -9,12 +9,12 @@ __pycache__/
 *~
 .idea/*
 .directory
-virtuoso.*
-virtuoso-temp.*
-virtuoso_data/
+#virtuoso.*
+#virtuoso-temp.*
+#virtuoso_data/
 *.sh
 *.rdb
 
 postgres_data/*
 redis_data/dump.rdb
-virtuoso_data/db/virtuoso.db
+#virtuoso_data/db/virtuoso.db
