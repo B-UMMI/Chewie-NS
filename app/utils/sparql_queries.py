@@ -58,7 +58,7 @@ SELECT_LOCUS = ('SELECT (str(?name) AS ?name) (str(?original_name) AS ?original_
                 'OPTIONAL{{<{1}> typon:originalName ?original_name.}} '
                 'OPTIONAL{{<{1}> typon:isOfTaxon ?taxon}} }}')
 
-SELECT_LOCUS_FASTA = ('SELECT ?name ?allele_id (str(?nucSeq) AS ?nucSeq) '
+SELECT_LOCUS_FASTA = ('SELECT ?name ?allele_id (str(?nucSeq) AS ?nucSeq) (strlen(?nucSeq) as ?nucSeqLen) '
                       'FROM <{0}> '
                       'WHERE '
                       '{{ <{1}> a typon:Locus; typon:name ?name. '
