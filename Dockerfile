@@ -22,5 +22,5 @@ RUN pip install -r requirements.txt
 # Run container with gunicorn 
 # More info about workers, threads and --worker-tmp-dir
 # https://pythonspeed.com/articles/gunicorn-in-docker/
-CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "7", "--threads=3", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "7", "--threads=4", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
 
