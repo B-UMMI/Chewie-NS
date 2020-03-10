@@ -53,10 +53,8 @@ services:
       - DEFAULT_GRAPH=http://localhost:8890/test
       - DBA_PASSWORD=ummi
       - DAV_PASSWORD=ummi
-      - VIRT_PARAMETERS_NUMBEROFBUFFERS=2720000
-      - VIRT_PARAMETERS_MAXDIRTYBUFFERS=2000000
       #- LOG_FILE_LOCATION=/var/lib/virtuoso-opensource-6.1/db/
-      # - VIRTUOSO_INI_FILE=/home/pcerqueira/Lab_Software/refactored_ns/test_compose/virtuoso.ini
+      #- VIRTUOSO_INI_FILE=./virtuoso.ini
   volumes:
     # This volume contains the virtuoso database (virtuoso.db)
     - ./virtuoso_data/db:/opt/virtuoso-opensource/database
