@@ -101,6 +101,8 @@ class Schema extends Component {
     let annotations = <CircularProgress />;
     let schema_table = <CircularProgress />;
 
+    const spd = JSON.parse(localStorage.getItem("speciesD"));
+
     if (!this.props.loading) {
       // console.log(this.props.mode_data)
 
@@ -387,7 +389,7 @@ class Schema extends Component {
       },
       {
         name: "user",
-        label: "Created by",
+        label: "Created by user",
         options: {
           filter: false,
           sort: true,
@@ -528,7 +530,7 @@ class Schema extends Component {
     schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
         <MUIDataTable
-          title={`${this.props.location.state.tableData[0].schema_name} Overview`}
+          title={`${spd[this.props.match.params.species_id]} ${this.props.location.state.tableData[0].schema_name} Overview`}
           data={this.props.location.state.tableData}
           columns={columns2}
           options={options2}
@@ -640,7 +642,6 @@ const mapStateToProps = state => {
     annotations: state.annotations.annotations,
     loading_annotations: state.annotations.loading,
     error_annotations: state.annotations.error,
-    speciesDict: state.stats.speciesDict,
     species: state.species.species
     // token: state.auth.token
   };

@@ -9,8 +9,8 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
+// import Button from "@material-ui/core/Button";
+// import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -115,6 +115,8 @@ class Species extends Component {
       </div>
     );
 
+    const spd = JSON.parse(localStorage.getItem("speciesD"));
+
     // this.setState({
     //   species_name: this.props.location.state.species_name
     // })
@@ -154,7 +156,7 @@ class Species extends Component {
         },
         {
           name: "user",
-          label: "Created by",
+          label: "Created by user",
           options: {
             filter: false,
             sort: true,
@@ -290,22 +292,12 @@ class Species extends Component {
         onRowClick: rowData => this.rowClickHandler(rowData)
       };
 
-      // for (i in this.props.speciesDict) {
-
-      // }
-
-      // const title = this.props.speciesDict[this.props.match.params.species_id];
-
-      // console.log(this.props.speciesDict[this.props.match.params.species_id])
+      const title = spd[this.props.match.params.species_id];
 
       species = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            // title={
-            //   <i>
-            //     {this.props.speciesDict[this.props.match.params.species_id]}
-            //   </i>
-            // }
+            title={<i>{title}</i>}
             data={this.props.species}
             columns={columns}
             options={options}
@@ -318,8 +310,7 @@ class Species extends Component {
           data={this.props.species_annot}
           layout={{
             title: {
-              text: "species_name"
-              // text: this.props.speciesDict[this.props.match.params.species_id]
+              text: "<i>" + title + "</i>"
             },
             autosize: true,
             xaxis: {
@@ -375,8 +366,7 @@ const mapStateToProps = state => {
     species: state.species.species,
     species_annot: state.species.species_annot,
     loading: state.species.loading,
-    error: state.species.error,
-    speciesDict: state.stats.speciesDict
+    error: state.species.error
   };
 };
 

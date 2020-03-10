@@ -8,8 +8,6 @@ const initialState = {
 };
 
 const fetchStatsSuccess = (state, action) => {
-    // console.log("[stats reducer action]")
-    // console.log(action)
     return updateObject(state, {
         stats: action.stats,
         loading: false
@@ -25,11 +23,8 @@ const fetchStatsStart = (state, action) => {
 }
 
 const fetchStatsSpeciesSuccess = (state, action) => {
-    // console.log("[stats reducer action]")
-    // console.log(action)
     return updateObject(state, {
-        stats: action.stats,
-        speciesDict: action.speciesDict,
+        stats: action.stats
         loading: false
     })
 };

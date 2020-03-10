@@ -183,7 +183,6 @@ class Stats extends Component {
 const mapStateToProps = state => {
   return {
     stats: state.stats.stats,
-    speciesDict: state.stats.speciesDict,
     loading: state.stats.loading,
     error: state.stats.error
   };

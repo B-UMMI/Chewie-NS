@@ -1,6 +1,6 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
-import _ from 'lodash';
+import _ from "lodash";
 
 export const fetchSpeciesSuccess = species => {
   return {
@@ -41,7 +41,6 @@ export const fetchSpecies = spec_id => {
               ],
             schema_name: res.data.message[key].name.value,
             user:
-              "User: " +
               res.data.message[key].user.value[
                 res.data.message[key].user.value.length - 1
               ],
@@ -104,7 +103,6 @@ export const fetchSpeciesAnnot = spec_id => {
         let olaLocus = {};
         let curSchemaId = 0;
         for (let key in res.data.message) {
-
           curSchemaId = res.data.message[key].schema.value.substring(
             res.data.message[key].schema.value.lastIndexOf("/") + 1
           );
@@ -118,25 +116,24 @@ export const fetchSpeciesAnnot = spec_id => {
           y_val = res.data.message[key].nr_allele.value;
 
           if (curSchemaId in ola2) {
-            ola2[curSchemaId][[x_val]] = y_val
-            olaLocus[curSchemaId][[x_val]] = locus_id
-            ola3[curSchemaId].push(y_val)
-            ola4[curSchemaId][[locus_id]] = y_val
-
+            ola2[curSchemaId][[x_val]] = y_val;
+            olaLocus[curSchemaId][[x_val]] = locus_id;
+            ola3[curSchemaId].push(y_val);
+            ola4[curSchemaId][[locus_id]] = y_val;
           } else if (!(curSchemaId in ola2)) {
             // console.log("works2")
             // console.log(curSchemaId)
             ola2[curSchemaId] = {
               [x_val]: y_val
-            }
+            };
 
-            ola22.push(y_val)
+            ola22.push(y_val);
 
-            ola3[curSchemaId] = ola22
+            ola3[curSchemaId] = ola22;
 
             ola4[curSchemaId] = {
               [locus_id]: y_val
-            }
+            };
 
             // ola22.push(
             //   {[x_val]: y_val}
@@ -144,20 +141,22 @@ export const fetchSpeciesAnnot = spec_id => {
             olaLocus[curSchemaId] = {
               [x_val]: locus_id
               // [locus_id]: y_val
-            }
-            x_val = 0
-            locus_id = 0
-            ola22 = []
+            };
+            x_val = 0;
+            locus_id = 0;
+            ola22 = [];
           }
-          }
+        }
         // console.log("[OLA2]")
         // console.log(ola4)
 
         for (let idx in ola4) {
-
           // console.log(ola4[idx])
 
-          let sorted = _(ola4[idx]).toPairs().value().sort((a,b) => b[1] - a[1]);
+          let sorted = _(ola4[idx])
+            .toPairs()
+            .value()
+            .sort((a, b) => b[1] - a[1]);
 
           let s_loci_id = sorted.map(arr2 => arr2[0]);
 
@@ -166,14 +165,14 @@ export const fetchSpeciesAnnot = spec_id => {
           // console.log(s_loci_id)
           // console.log(s_nr_alleles)
 
-
           fetchedSpeciesAnnot2.push({
             x: Object.keys(ola2[idx]),
             y: s_nr_alleles,
             type: "bar",
             name: "Schema " + idx,
-            hovertemplate: '<b>Number of Alleles</b>: %{y}' +
-                           '<br><b>Locus_ID</b>: %{text}</br>',
+            hovertemplate:
+              "<b>Number of Alleles</b>: %{y}" +
+              "<br><b>Locus_ID</b>: %{text}</br>",
             text: s_loci_id
             //hoverinfo: "y+text"
             // line: {
