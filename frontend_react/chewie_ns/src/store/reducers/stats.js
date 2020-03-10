@@ -24,7 +24,7 @@ const fetchStatsStart = (state, action) => {
 
 const fetchStatsSpeciesSuccess = (state, action) => {
     return updateObject(state, {
-        stats: action.stats
+        stats: action.stats,
         loading: false
     })
 };
