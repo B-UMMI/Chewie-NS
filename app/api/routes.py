@@ -1307,6 +1307,7 @@ class StatsSpeciesSchemasMode(Resource):
 class StatsAnnotations(Resource):
     """ Summary of all annotations in NS. """
     
+    @api.hide
     @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument', 
                          500: 'Internal Server Error', 
@@ -1595,26 +1596,28 @@ class LociNSFastaAPItypon(Resource):
         locus_schema = locus_schema_query['results']['bindings'][0]['schema']['value']
 
         # determine if schema is locked
-        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                           (sparql_queries.ASK_SCHEMA_LOCK.format(locus_schema)))
+        #locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+        #                                   (sparql_queries.ASK_SCHEMA_LOCK.format(locus_schema)))
 
-        locking_status = locking_status_query['boolean']
+        #locking_status = locking_status_query['boolean']
+
+	#print(locking_status, flush=True)
 
         # if schema is locked, enforce condition that only the Admin
         # or the Contributor that administers the schema may get the FASTA sequences
-        if locking_status is False:
+        #if locking_status is False:
             # check the role of the user that is trying to access
-            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+        #    new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'],
-                                                                     new_user_url)))
+        #    result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+        #                          (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'],
+        #                                                             new_user_url)))
 
-            user_role = result['results']['bindings'][0]['role']['value']
+        #    user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, new_user_url, locus_schema)
-            if allow[0] == False:
-                return allow[1], 403
+        #    allow = enforce_locking(user_role, new_user_url, locus_schema)
+        #    if allow[0] == False:
+        #        return allow[1], 403
 
         # find all alleles from the locus and return the sequence and id sorted by id
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
