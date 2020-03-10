@@ -33,6 +33,7 @@ export const fetchLocusFasta = locus_id => {
       .get("loci/" + locus_id + "/fasta")
       .then(res => {
 
+        //console.log(res.data.Fasta[0]);
         const median = arr => {
           const mid = Math.floor(arr.length / 2),
             nums = [...arr].sort((a, b) => a - b);
@@ -47,13 +48,16 @@ export const fetchLocusFasta = locus_id => {
         let fastaData = [];
         let blastData = [];
         const locusName = res.data.Fasta[0].name.value;
-        for (let key in res.data.Fasta) {
+	for (let key in res.data.Fasta) {
+	 //console.log("[locus action key]");
+         //console.log(res.data.Fasta[key]);
           allele_ids.push(res.data.Fasta[key].allele_id.value)
           nucSeqLen.push(res.data.Fasta[key].nucSeqLen.value)
-
           fastaData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value)
           blastData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "%0A" + res.data.Fasta[key].nucSeq.value)
         }
+
+	//console.log(nuc);
 
         let concatBlastDATA = blastData.join("%0A");
 
@@ -61,8 +65,8 @@ export const fetchLocusFasta = locus_id => {
         let blastnQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + concatBlastDATA;
 
         const min_len = Math.min(...nucSeqLen.map(Number));
-        const max_len = Math.max(...nucSeqLen.map(Number))
-        const median_len = median(nucSeqLen.map(Number))
+        const max_len = Math.max(...nucSeqLen.map(Number));
+        const median_len = median(nucSeqLen.map(Number));
         
         basic_stats.push({
           num_alleles: nucSeqLen.length,
@@ -70,6 +74,7 @@ export const fetchLocusFasta = locus_id => {
           median: median_len
         })
 
+	//console.log(basic_stats);
 
         histogram_data.push({
           x: nucSeqLen,
@@ -84,6 +89,8 @@ export const fetchLocusFasta = locus_id => {
           name: "Locus Details",
           mode: "markers"
         })
+	//console.log(histogram_data);
+	//console.log(scatter_data);
         dispatch(fetchLocusFastaSuccess(histogram_data, fastaData, scatter_data, basic_stats, blastxQuery, blastnQuery));
       })
       .catch(fastaErr => {
@@ -118,7 +125,7 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
       axios
         .get("loci/" + locus_id + "/uniprot")
         .then(res => {
-          // console.log(res.data);
+          //console.log(res.data);
           let uniprot_annot = [];
           uniprot_annot.push({
             locus_label: res.data.UniprotInfo[0].name.value,
@@ -126,7 +133,7 @@ export const fetchLocusUniprotSuccess = locus_uniprot => {
             uniprot_submitted_name: res.data.UniprotInfo[0].UniprotSName.value,
             uniprot_uri: res.data.UniprotInfo[0].UniprotURI.value
           })
-          // console.log(uniprot_annot)
+          //console.log(uniprot_annot);
           dispatch(fetchLocusUniprotSuccess(uniprot_annot));
         })
         .catch(uniprotErr => {
