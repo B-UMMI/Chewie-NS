@@ -7,6 +7,8 @@ const initialState = {
     fasta_data: [],
     scatter_data: [],
     basic_stats: [],
+    blastxQuery: [],
+    blastnQuery: [],
     loading: false, 
     error: false
 };
