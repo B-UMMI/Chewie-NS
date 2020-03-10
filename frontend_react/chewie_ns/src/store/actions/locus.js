@@ -49,20 +49,20 @@ export const fetchLocusFasta = locus_id => {
         let blastData = [];
         const locusName = res.data.Fasta[0].name.value;
 	for (let key in res.data.Fasta) {
-	 //console.log("[locus action key]");
-         //console.log(res.data.Fasta[key]);
+
           allele_ids.push(res.data.Fasta[key].allele_id.value)
           nucSeqLen.push(res.data.Fasta[key].nucSeqLen.value)
+          
           fastaData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "\n" + res.data.Fasta[key].nucSeq.value)
-          blastData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "%0A" + res.data.Fasta[key].nucSeq.value)
+          // blastData.push(">" + locusName + "_" + res.data.Fasta[key].allele_id.value + "%0A" + res.data.Fasta[key].nucSeq.value)
         }
 
-	//console.log(nuc);
+        blastData.push(">" + locusName + "_" + res.data.Fasta[0].allele_id.value + "%0A" + res.data.Fasta[0].nucSeq.value)
 
-        let concatBlastDATA = blastData.join("%0A");
+        // let concatBlastDATA = blastData.join("%0A");
 
-        let blastxQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastx&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + concatBlastDATA;
-        let blastnQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + concatBlastDATA;
+        let blastxQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastx&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + blastData;
+        let blastnQuery = 'https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn&PAGE_TYPE=BlastSearch&LINK_LOC=blasthome&QUERY=' + blastData;
 
         const min_len = Math.min(...nucSeqLen.map(Number));
         const max_len = Math.max(...nucSeqLen.map(Number));
@@ -73,8 +73,6 @@ export const fetchLocusFasta = locus_id => {
           size_range: min_len.toString() + "-" + max_len.toString(),
           median: median_len
         })
-
-	//console.log(basic_stats);
 
         histogram_data.push({
           x: nucSeqLen,
@@ -89,8 +87,6 @@ export const fetchLocusFasta = locus_id => {
           name: "Locus Details",
           mode: "markers"
         })
-	//console.log(histogram_data);
-	//console.log(scatter_data);
         dispatch(fetchLocusFastaSuccess(histogram_data, fastaData, scatter_data, basic_stats, blastxQuery, blastnQuery));
       })
       .catch(fastaErr => {
