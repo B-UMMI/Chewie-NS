@@ -530,7 +530,7 @@ class Schema extends Component {
     schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
         <MUIDataTable
-          title={`${spd[this.props.match.params.species_id]} ${this.props.location.state.tableData[0].schema_name} Overview`}
+          title={`<i>${spd[this.props.match.params.species_id]}</i> ${this.props.location.state.tableData[0].schema_name} Overview`}
           data={this.props.location.state.tableData}
           columns={columns2}
           options={options2}
