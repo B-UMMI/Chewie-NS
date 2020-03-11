@@ -7,6 +7,7 @@ import IMMlogo from "../../assets/images/iMM_JLA_medium2.png";
 
 // Material UI import
 import SvgIcon from "@material-ui/core/SvgIcon";
+import Button from "@material-ui/core/Button";
 
 // Material Design import
 import { mdiAlert } from "@mdi/js";
