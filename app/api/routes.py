@@ -1731,7 +1731,7 @@ class LociNSAlleles(Resource):
 
             user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, new_user_url, locus_schema)
+            allow = enforce_locking(user_role, new_user_url, locking_status)
             if allow[0] == False:
                 return allow[1], 403
 
@@ -1841,7 +1841,7 @@ class LociNSAlleles(Resource):
 
             user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, new_user_url, locus_schema)
+            allow = enforce_locking(user_role, new_user_url, locking_status)
             if allow[0] == False:
                 return allow[1], 403
 
@@ -2649,18 +2649,17 @@ class SchemaLockAPItypon(Resource):
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sparql_queries.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
 
-        result_data = result['results']['bindings'][0]
+        result_data = result['results']['bindings']
+        if len(result_data) == 0:
+            return {'Not found': 'Could not find a schema with provided ID.'}, 404
 
-        if result_data == []:
-            return {'message': 'Could not find a schema with provided id.'}, 404
+        schema_name = result_data[0]['name']['value']
+        locking_value = result_data[0]['Schema_lock']['value']
+
+        if locking_value == 'Unlocked':
+            return ('Schema {0} ({1}) status: *unlocked*.'.format(str(schema_id), schema_name))
         else:
-            schema_name = result_data['name']['value']
-            locking_value = result_data['Schema_lock']['value']
-            print(locking_value, flush=True)
-            if locking_value == 'Unlocked':
-                return ('Schema {0} ({1}) status: *unlocked*.'.format(str(schema_id), schema_name))
-            else:
-                return ('Schema {0} ({1}) status: [locked].'.format(str(schema_id), schema_name))
+            return ('Schema {0} ({1}) status: [locked].'.format(str(schema_id), schema_name))
 
     # change locking state for the Schema
     @api.doc(responses={201: 'OK', 
@@ -2699,8 +2698,11 @@ class SchemaLockAPItypon(Resource):
         # get post data
         post_data = request.get_json()
 
-        result_data = result['results']['bindings'][0]
-        lock_state = result_data['Schema_lock']['value']
+        result_data = result['results']['bindings']
+        if len(result_data) == 0:
+            return {'Not found': 'Could not find a schema with provided ID.'}, 404
+        
+        lock_state = result_data[0]['Schema_lock']['value']
 
         action = post_data['action']
         if action == 'lock':
@@ -2821,7 +2823,7 @@ class SchemaLociAPItypon(Resource):
 
             user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, new_user_url, new_schema_url)
+            allow = enforce_locking(user_role, new_user_url, locking_status)
             if allow[0] == False:
                 return allow[1], 403
 
@@ -2924,8 +2926,7 @@ class SchemaLociAPItypon(Resource):
                                   (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
 
             user_role = result['results']['bindings'][0]['role']['value']
-            
-            allow = enforce_locking(user_role, new_user_url, new_schema_url)
+            allow = enforce_locking(user_role, new_user_url, locking_status)
             if allow[0] == False:
                 return allow[1], 403
 
