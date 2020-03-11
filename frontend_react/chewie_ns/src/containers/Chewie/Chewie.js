@@ -1,11 +1,14 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
-// import Spinner from "../../components/UI/Spinner/Spinner";
 import INCDlogo from "../../assets/images/INCD-small.png";
 import UMMIlogo from "../../assets/images/ummi1small2.png";
 import IMMlogo from "../../assets/images/iMM_JLA_medium2.png";
 
+// Material UI import
 import SvgIcon from "@material-ui/core/SvgIcon";
+
+// Material Design import
 import { mdiAlert } from "@mdi/js";
 
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
@@ -14,9 +17,9 @@ import axios from "../../axios-backend";
 import classes from "./Chewie.module.css";
 
 class Chewie extends Component {
-    render() {
-        return (
-       <div id="homeDiv" className={classes.homeDiv}>
+  render() {
+    return (
+      <div id="homeDiv" className={classes.homeDiv}>
         <div
           id="logoDiv"
           style={{
@@ -68,6 +71,16 @@ class Chewie extends Component {
           <SvgIcon htmlColor="#FFC107" fontSize="small">
             <path d={mdiAlert} />
           </SvgIcon>
+          <div id="availableSchemasDiv" style={{ marginTop: "30px" }}>
+            <Button
+              variant="contained"
+              color="default"
+              component={Link}
+              to="/stats"
+            >
+              Available Schemas
+            </Button>
+          </div>
         </div>
         <div id="INCD_div" className={classes.incdDiv}>
           <div id="resourcesTextDiv">
@@ -78,8 +91,8 @@ class Chewie extends Component {
           </div>
         </div>
       </div>
-        );
-    }
+    );
+  }
 }
 
-export default withErrorHandler( Chewie, axios ) ;
+export default withErrorHandler(Chewie, axios);
