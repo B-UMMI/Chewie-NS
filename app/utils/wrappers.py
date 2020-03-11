@@ -151,7 +151,7 @@ def admin_required(fn):
         verify_jwt_in_request()
         claims = get_jwt_claims()
         if claims['roles'] != 'Admin':
-            return {'Admins only!'}, 403
+            return {'Not authorized': 'Admins only!'}, 403
         else:
             return fn(*args, **kwargs)
     return wrapper
@@ -166,7 +166,7 @@ def admin_contributor_required(fn):
         verify_jwt_in_request()
         claims = get_jwt_claims()
         if claims['roles'] not in ['Admin', 'Contributor']:
-            return {"message": 'Admins or Contributors only!'}, 403
+            return {'Not authorized': 'Admins or Contributors only!'}, 403
         else:
             return fn(*args, **kwargs)
     return wrapper
