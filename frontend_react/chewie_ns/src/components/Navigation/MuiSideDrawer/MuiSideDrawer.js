@@ -196,7 +196,7 @@ export default function PersistentDrawerLeft() {
           <ListItem
             button
             component="a"
-            href={"http://127.0.0.1:5000/NS/api/docs"}
+            href={"https://194.210.120.209/api/NS/api/docs"} // Check --> https://material-ui.com/components/links/#security
             target={"_blank"}
             rel="noopener noreferrer"
           >
