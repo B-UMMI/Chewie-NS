@@ -13,6 +13,7 @@ import { connect } from "react-redux";
 import Aux from "./hoc/Aux/Aux";
 import Layout from "./hoc/Layout/Layout";
 import Chewie from "./containers/Chewie/Chewie";
+import About from "./containers/About/About";
 import Auth from "./containers/Auth/Auth";
 import Logout from "./containers/Auth/Logout/Logout";
 import Stats from "./containers/Stats/Stats";
@@ -27,6 +28,7 @@ import MuiLink from "@material-ui/core/Link";
 
 function SimpleBreadcrumbs() {
   const homeMatches = useRouteMatch("/");
+  const aboutMatches = useRouteMatch("/about");
   const statsMatches = useRouteMatch("/stats");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
   const schemasIdMatches = useRouteMatch(
@@ -51,6 +53,11 @@ function SimpleBreadcrumbs() {
         {homeMatches && (
           <MuiLink component={Link} to="/" style={styles.breadcrumb}>
             Home
+          </MuiLink>
+        )}
+        {aboutMatches && (
+          <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
+            About
           </MuiLink>
         )}
         {statsMatches && (
@@ -101,6 +108,7 @@ class App extends Component {
         <SimpleBreadcrumbs />
         <Switch>
           <Route path="/auth" component={Auth} />
+          <Route path="/about" component={About} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
           <Route

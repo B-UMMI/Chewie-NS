@@ -167,11 +167,13 @@ export default function PersistentDrawerLeft() {
         </List>
         <Divider />
         <List>
-          <ListItem button>
+          <ListItem 
+            button
+            component={Link} to="/about">
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>
-            <ListItemText primary={"About Us WIP"} />
+            <ListItemText primary={"About Us"} />
           </ListItem>
           <ListItem
             button
@@ -196,9 +198,9 @@ export default function PersistentDrawerLeft() {
           <ListItem
             button
             component="a"
-            href={"https://194.210.120.209/api/NS/api/docs"} // Check --> https://material-ui.com/components/links/#security
+            href={"https://194.210.120.209/api/NS/api/docs"} 
             target={"_blank"}
-            rel="noopener noreferrer"
+            rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
           >
             <ListItemIcon>
               <SvgIcon fontSize="large" htmlColor="#000000">
