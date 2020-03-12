@@ -26,7 +26,7 @@ from flask_jwt_extended import (
 )
 
 from flask import (current_app, render_template, flash, redirect, url_for, request, make_response, 
-                  Response, stream_with_context, send_from_directory, jsonify)
+                   Response, stream_with_context, send_from_directory, jsonify)
 
 # App imports
 from app.utils import aux
@@ -233,9 +233,18 @@ user_datastore = datastore_cheat
 def create_role():
 
     # check if Admin was previously created
-    # during first execution
-    default = user_datastore.get_user(1)
-    # create Admin if it does not exist
+    try:
+        default = user_datastore.get_user(1)
+    # will raise exception if database does not exist
+    # this will happen at first execution when we
+    # build the compose for the first time and there is no
+    # Postgres database. After that, the Postgres database
+    # should persist even if we remove all images
+    except Exception:
+        default = None
+
+    # if the database or the Admin user do not exist
+    # create the database
     if default == None:
         # this will drop db and delete all users
         # will not delete users from Virtuoso
@@ -246,9 +255,9 @@ def create_role():
 
         print('Creating Admin account...', flush=True)
         # add possible roles to database
-        user_datastore.create_role(name='Admin', description='')
-        user_datastore.create_role(name='Contributor', description='')
-        user_datastore.create_role(name='User', description='')
+        user_datastore.create_role(name='Admin')
+        user_datastore.create_role(name='Contributor')
+        user_datastore.create_role(name='User')
         # create Admin user
         u = user_datastore.create_user(email="test@refns.com", password=hash_password("mega_secret"))
         user_datastore.add_role_to_user(u, "Admin")
