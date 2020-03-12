@@ -71,6 +71,8 @@ class Species extends Component {
     console.log("rowData: ", rowData.slice(0, -1));
 
     const schema_id = rowData[0];
+
+    localStorage.setItem('schemaName', rowData[1]);
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
@@ -90,9 +92,10 @@ class Species extends Component {
       minLen: rowData[9]
     });
 
+    localStorage.setItem('tableData', JSON.stringify(tableData))
+
     this.props.history.push({
-      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`,
-      state: { tableData: tableData }
+      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`
     });
   };
 

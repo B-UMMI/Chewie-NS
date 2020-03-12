@@ -43,6 +43,7 @@ function SimpleBreadcrumbs() {
   };
 
   const spd = JSON.parse(localStorage.getItem("speciesD"));
+  const schemaName = localStorage.getItem("schemaName");
 
   return (
     <>
@@ -63,7 +64,7 @@ function SimpleBreadcrumbs() {
             to={`/species/${speciesIdMatches.params.species_id}`}
             style={styles.breadcrumb}
           >
-            {spd[speciesIdMatches.params.species_id]}
+            <i>{spd[speciesIdMatches.params.species_id]}</i>
           </MuiLink>
         )}
         {schemasIdMatches && (
@@ -72,7 +73,7 @@ function SimpleBreadcrumbs() {
             to={`/species/${schemasIdMatches.params.species_id}/schemas/${schemasIdMatches.params.schema_id}`}
             style={styles.breadcrumb}
           >
-            Schema {schemasIdMatches.params.schema_id}
+            {schemaName}
           </MuiLink>
         )}
         {locusIdMatches && (

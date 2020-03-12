@@ -37,10 +37,6 @@ class Schema extends Component {
   };
 
   componentDidMount() {
-    // console.log(this.props.match);
-    // console.log(this.props.location);
-    console.log(this.props.history);
-    // console.log(this.props.match.params.species_id)
 
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;
@@ -69,15 +65,9 @@ class Schema extends Component {
   clickScatterPlotHandler = event => {
     // console.log(event.points[0]);
 
-    // const species_id = this.props.match.params.species_id;
-
     const schema_id = this.props.match.params.schema_id;
 
     const locus_id = event.points[0].text;
-
-    // console.log(species_id);
-    // console.log(schema_id);
-    // console.log(locus_id);
 
     this.props.history.push(schema_id + "/locus/" + locus_id);
   };
@@ -102,9 +92,9 @@ class Schema extends Component {
     let schema_table = <CircularProgress />;
 
     const spd = JSON.parse(localStorage.getItem("speciesD"));
+    const tableData = JSON.parse(localStorage.getItem("tableData"));
 
     if (!this.props.loading) {
-      // console.log(this.props.mode_data)
 
       mode_plot = (
         <Plot
@@ -126,7 +116,6 @@ class Schema extends Component {
           line={{
             width: 1
           }}
-          //   onClick={e => this.clickPlotHandler(e)}
         />
       );
 
@@ -150,7 +139,6 @@ class Schema extends Component {
           line={{
             width: 1
           }}
-          // onClick={e => console.log(e)}
         />
       );
 
@@ -186,7 +174,6 @@ class Schema extends Component {
     }
 
     if (this.props.annotations !== undefined || this.props.annotations !== []) {
-      // let ola = this.mergeByProperty(this.props.annotations, this.props.mode_data2, "locus_name");
 
       let newAnnotations = [
         ...this.props.annotations
@@ -284,7 +271,6 @@ class Schema extends Component {
                   href={`${this.props.history.location.pathname}/locus/${value}`}
                 >
                   {value}
-                  {/* href={`/locus/${value}` */}
                 </a>
               );
             }
@@ -530,8 +516,8 @@ class Schema extends Component {
     schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
         <MUIDataTable
-          title={`<i>${spd[this.props.match.params.species_id]}</i> ${this.props.location.state.tableData[0].schema_name} Overview`}
-          data={this.props.location.state.tableData}
+          title={`<i>${spd[this.props.match.params.species_id]}</i> ${tableData[0].schema_name} Overview`}
+          data={tableData}
           columns={columns2}
           options={options2}
         />
