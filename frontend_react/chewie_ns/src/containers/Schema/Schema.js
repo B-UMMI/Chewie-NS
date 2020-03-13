@@ -33,15 +33,24 @@ import Plot from "react-plotly.js";
 
 class Schema extends Component {
   state = {
-    tabValue: 0
+    tabValue: 0,
+    hits: []
   };
 
   componentDidMount() {
-
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;
 
-    this.props.onFetchSchemaAlleleMode(species_id, schema_id);
+    const query =
+      "stats/species/" + species_id + "/schema/" + schema_id + "/loci";
+
+    const query_hits = localStorage.getItem(query);
+
+    if (query_hits) {
+      this.setState({ hits: JSON.parse(query_hits) });
+    } else {
+      this.props.onFetchSchemaAlleleMode(species_id, schema_id);
+    }
 
     // fetch schema annotations
     this.props.onFetchAnnotations(species_id, schema_id);
@@ -95,10 +104,16 @@ class Schema extends Component {
     const tableData = JSON.parse(localStorage.getItem("tableData"));
 
     if (!this.props.loading) {
+      
+      let mode_plot_data =
+        typeof this.props.mode_data === "undefined" ||
+        this.props.mode_data === []
+          ? this.state.hits[0]
+          : this.props.mode_data;
 
       mode_plot = (
         <Plot
-          data={this.props.mode_data}
+          data={mode_plot_data}
           layout={{
             title: {
               text: "Distribution of allele mode sizes"
@@ -119,9 +134,15 @@ class Schema extends Component {
         />
       );
 
+      let total_allele_plot_data =
+        typeof this.props.total_allele_data === "undefined" ||
+        this.props.total_allele_data === []
+          ? this.state.hits[1]
+          : this.props.total_allele_data;
+
       total_allele_plot = (
         <Plot
-          data={this.props.total_allele_data}
+          data={total_allele_plot_data}
           layout={{
             title: {
               text: "Number of Loci with given Number of Alleles"
@@ -142,9 +163,15 @@ class Schema extends Component {
         />
       );
 
+      let scatter_plot_data =
+        typeof this.props.scatter_data === "undefined" ||
+        this.props.scatter_data === []
+          ? this.state.hits[2]
+          : this.props.scatter_data;
+
       scatter_plot = (
         <Plot
-          data={this.props.scatter_data}
+          data={scatter_plot_data}
           layout={{
             title: {
               text: "Locus Statistics"
@@ -174,7 +201,6 @@ class Schema extends Component {
     }
 
     if (this.props.annotations !== undefined || this.props.annotations !== []) {
-
       let newAnnotations = [
         ...this.props.annotations
           .concat(this.props.mode_data2)
@@ -516,7 +542,9 @@ class Schema extends Component {
     schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
         <MUIDataTable
-          title={`${spd[this.props.match.params.species_id]} ${tableData[0].schema_name} Overview`}
+          title={`${spd[this.props.match.params.species_id]} ${
+            tableData[0].schema_name
+          } Overview`}
           data={tableData}
           columns={columns2}
           options={options2}

@@ -31,6 +31,7 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
       .get("stats/species/" + species_id + "/schema/" + schema_id + "/loci")
       .then(res => {
         // console.log(res.data);
+        let query = "stats/species/" + species_id + "/schema/" + schema_id + "/loci";
         let allele_mode = [];
         let locus_name = [];
         let mode_data = [];
@@ -121,6 +122,9 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
           text: locus_id
         })
         // console.log(plot_data)
+        let chewie = [];
+        chewie.push(mode_data, total_al_data, scatter_data, mode_data2)
+        localStorage.setItem(query, JSON.stringify(chewie));
         dispatch(fetchSchemaAlleleModeSuccess(mode_data, total_al_data, scatter_data, mode_data2));
       })
       .catch(modeErr => {
