@@ -154,9 +154,9 @@ class Stats extends Component {
         <div>
           <h1 style={{ textAlign: "center" }}>Overview</h1>
         </div>
-        <div>
+        {/* <div>
           <p>Lorem Ipsum</p>
-        </div>
+        </div> */}
         <div>{stats}</div>
         <footer
           style={{
