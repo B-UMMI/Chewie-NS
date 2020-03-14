@@ -37,7 +37,8 @@ class About extends Component {
           >
             GPLv3 license
           </a>
-          . The source code of Chewie-NS is available at <a
+          . The source code of Chewie-NS is available at{" "}
+          <a
             href="https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
             target={"_blank"}
             rel="noopener noreferrer"
@@ -58,8 +59,9 @@ class About extends Component {
         >
           <div id="homeFooter" style={{ display: "block" }}>
             <div>
-              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-              {/* <p>© UMMI 2020</p> */}
+              <Typography style={{ fontSize: "10" }}>
+                © UMMI {new Date().getFullYear()}
+              </Typography>
             </div>
           </div>
         </footer>
