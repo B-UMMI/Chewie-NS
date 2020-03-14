@@ -129,7 +129,9 @@ export default function PersistentDrawerLeft() {
           <Typography variant="h6" className={classes.title}>
             Chewie-NS
           </Typography>
-          <Button color="inherit">Login</Button>
+          <Button color="inherit" component={Link} to="/auth">
+            Login
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -167,9 +169,7 @@ export default function PersistentDrawerLeft() {
         </List>
         <Divider />
         <List>
-          <ListItem 
-            button
-            component={Link} to="/about">
+          <ListItem button component={Link} to="/about">
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>
@@ -198,7 +198,7 @@ export default function PersistentDrawerLeft() {
           <ListItem
             button
             component="a"
-            href={"https://194.210.120.209/api/NS/api/docs"} 
+            href={"https://194.210.120.209/api/NS/api/docs"}
             target={"_blank"}
             rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
           >

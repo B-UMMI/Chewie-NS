@@ -15,6 +15,7 @@ import Layout from "./hoc/Layout/Layout";
 import Chewie from "./containers/Chewie/Chewie";
 import About from "./containers/About/About";
 import Auth from "./containers/Auth/Auth";
+import MuiLogin from "./containers/Auth/MuiLogin/MuiLogin";
 import Logout from "./containers/Auth/Logout/Logout";
 import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
@@ -107,7 +108,7 @@ class App extends Component {
       <Aux>
         <SimpleBreadcrumbs />
         <Switch>
-          <Route path="/auth" component={Auth} />
+          <Route path="/auth" component={MuiLogin} />
           <Route path="/about" component={About} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
