@@ -6,7 +6,7 @@ class Config(object):
     """ Configuration class for the application """
 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess' # only for debug
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:test@postgres_compose/ref_ns_sec'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:test@172.19.1.2:5432/ref_ns_sec'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECURITY_PASSWORD_HASH = 'pbkdf2_sha512'
     SECURITY_TRACKABLE = True
@@ -87,3 +87,7 @@ class Config(object):
     # FLASK-RESTPLUS CONFIG
     SWAGGER_UI_JSON_EDITOR = True
     RESTPLUS_MASK_SWAGGER = False
+
+    # file transfer configs
+    SCHEMAS_PTF = './downloadable_data/prodigal_training_files'
+    SCHEMAS_ZIP = './downloadable_data/compressed_schemas'
