@@ -3,6 +3,8 @@ import axios from "../../axios-backend";
 
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
+import Typography from "@material-ui/core/Typography";
+
 import classes from "./About.module.css";
 
 class About extends Component {
