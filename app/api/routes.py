@@ -28,6 +28,8 @@ from flask_jwt_extended import (
 from flask import (current_app, render_template, flash, redirect, url_for, request, make_response, 
                    Response, stream_with_context, send_from_directory, jsonify)
 
+from werkzeug.utils import secure_filename
+
 # App imports
 from app.utils import aux
 from app.models import User, Role
@@ -2047,6 +2049,8 @@ schema_model = api.model('SchemaModel',
                                                              description="Translation table used to create the schema."),
                           'minimum_locus_length': fields.String(required=True,
                                                                 description="Minimum locus length used to create the schema."),
+                          'size_threshold': fields.String(required=True,
+                                                                description="Size variation threshold value."),
                           'chewBBACA_version': fields.String(required=True,
                                                              description="Version of chewBBACA used to create the schema."),
                           'word_size': fields.String(required=True,
@@ -2458,6 +2462,8 @@ class SchemaListAPItypon(Resource):
         translation_table = str(post_data['translation_table'])
         # minimum locus length
         min_locus_len = str(post_data['minimum_locus_length'])
+        # size threshold
+        size_threshold = str(post_data['size_threshold'])
         # chewBBACA_version
         chewie_version = str(post_data['chewBBACA_version'])
         # clustering word_size
@@ -2508,18 +2514,16 @@ class SchemaListAPItypon(Resource):
         # Create the uri for the new schema
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(number_schemas + 1))
 
-        # add the schema identifier to the ptf basename
-        ptf = '{0}_{1}.trn'.format(ptf, str(number_schemas + 1))
-
         # The SPARQL query to send to Typon
         query2send = (sparql_queries.INSERT_SCHEMA.format(current_app.config['DEFAULTHGRAPH'],
                                                           new_schema_url, species_url,
                                                           new_user_url, name,
                                                           bsr, chewie_version,
                                                           ptf, translation_table,
-                                                          min_locus_len, word_size,
-                                                          cluster_sim, rep_filter,
-                                                          intra_filter, schema_lock))
+                                                          min_locus_len, size_threshold,
+                                                          word_size, cluster_sim,
+                                                          rep_filter, intra_filter,
+                                                          schema_lock))
 
         result = aux.send_data(query2send,
                                current_app.config['LOCAL_SPARQL'],
@@ -2766,6 +2770,124 @@ class SchemaLockAPItypon(Resource):
             return {'message': 'Schema sucessfully locked/unlocked.'}, 201
         else:
             return {'message': 'Could not lock/unlock schema.'}, result.status_code
+
+
+# Prodigal training files Routes
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/ptf')
+class SchemaPtfAPItypon(Resource):
+    """ Prodigal training files Resource """
+
+    @api.doc(responses={ 200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error', 
+                        403: 'Unauthorized', 
+                        401: 'Unauthenticated',
+                        404: 'Not Found' },
+        security=[""])
+    def get(self, species_id, schema_id):
+        """Download the Prodigal training file for the specified schema."""
+
+        # create schema URI
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
+
+        # get the prodigal training file hash
+        ptf_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SCHEMA_PTF.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        
+        ptf_hash = ptf_query['results']['bindings'][0]['ptf']['value']
+
+        root_dir = os.path.abspath(current_app.config['SCHEMAS_PTF'])
+
+        return send_from_directory(root_dir, ptf_hash, as_attachment=True)
+
+    # upload schema Prodigal training file
+    @api.doc(responses={201: 'OK', 
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found',
+                        406: 'Not acceptable'},
+             security=['access_token'])
+    @w.admin_contributor_required
+    def post(self, species_id, schema_id):
+        """Upload the Prodigal training file for the specified schema."""
+
+        root_dir = os.path.abspath(current_app.config['SCHEMAS_PTF'])
+        request_data = request.get_json()
+
+        filename = request_data['filename']
+        file_content = request_data['content']
+
+        # check if training file hash is the one associated with the schema
+        # create schema URI
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
+
+        # get the prodigal training file hash
+        ptf_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SCHEMA_PTF.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        
+        ptf_hash = ptf_query['results']['bindings'][0]['ptf']['value']
+        if filename != ptf_hash:
+            return {'Not acceptable': 'Provided training file is not the one associated with the specified schema.'}, 406
+
+        # list training files in the NS
+        ns_ptfs = os.listdir(root_dir)
+        if filename in ns_ptfs:
+            return {'Conflict': 'Provided training file is already in the NS.'}, 409
+
+        file_path = os.path.join(root_dir, filename)
+
+        with open(file_path, 'wb') as ptf:
+            # file was decoded for upload so we have to encode
+            # with ISO-8859-1 to return to original format
+            ptf.write(file_content.encode(encoding='ISO-8859-1'))
+
+        return {'OK': 'Received new Prodigal training file.'}, 201
+
+
+# Compressed schemas Routes
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/zip')
+class SchemaZipAPItypon(Resource):
+    """ Compressed schemas Routes """
+
+    @api.doc(responses={ 200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found'},
+        security=[""])
+    def get(self, species_id, schema_id):
+        """Download zip archive with the files of the specified schema."""
+        
+        # create schema URI
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
+        # get the schema description
+        schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_SCHEMA_PTF.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        
+        schema_results = schema_query['results']['bindings']
+        if len(schema_results) == 0:
+            return {'Not found': 'Could not find a schema with specified ID.'}, 404
+        else:
+            schema_name = schema_results[0]['name']['value']
+
+        schema_zip = '{0}_{1}.zip'.format(species_id, schema_name)
+
+        root_dir = os.path.abspath(current_app.config['SCHEMAS_ZIP'])
+
+        schemas_list = os.listdir(root_dir)
+        if schema_zip in schemas_list:
+            return send_from_directory(root_dir, schema_zip, as_attachment=True)
+        else:
+            return {'Not found': 'Specified schema does not have a compressed version.'}, 404
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci')
