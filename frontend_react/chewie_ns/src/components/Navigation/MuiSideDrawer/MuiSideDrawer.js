@@ -1,8 +1,9 @@
-import React from "react";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 import clsx from "clsx";
 
 // Material UI imports
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+import { withStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
@@ -33,7 +34,7 @@ import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
 
-const useStyles = makeStyles(theme => ({
+const styles = theme => ({
   root: {
     display: "flex"
   },
@@ -90,135 +91,165 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1
   }
-}));
+});
 
-export default function PersistentDrawerLeft() {
-  const classes = useStyles();
-  const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
-
-  const handleDrawerOpen = () => {
-    setOpen(true);
+class PersistentDrawerLeft extends Component {
+  state = {
+    open: false
   };
 
-  const handleDrawerClose = () => {
-    setOpen(false);
+  handleDrawerOpen = () => {
+    this.setState({ open: true });
   };
 
-  return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: open
-        })}
-        color="primary"
-        style={{ backgroundColor: "#3b3b3b" }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, open && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
-            Chewie-NS
-          </Typography>
-          <Button color="inherit" component={Link} to="/auth">
-            Login
-          </Button>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        className={classes.drawer}
-        variant="persistent"
-        anchor="left"
-        open={open}
-        classes={{
-          paper: classes.drawerPaper
-        }}
-      >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "ltr" ? (
-              <ChevronLeftIcon />
+  handleDrawerClose = () => {
+    this.setState({ open: false });
+  };
+
+  render() {
+    const { classes } = this.props;
+
+    return (
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: this.state.open
+          })}
+          color="primary"
+          style={{ backgroundColor: "#3b3b3b" }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={() => this.handleDrawerOpen()}
+              edge="start"
+              className={clsx(
+                classes.menuButton,
+                this.state.open && classes.hide
+              )}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" className={classes.title}>
+              Chewie-NS
+            </Typography>
+            {/* <Button color="inherit" component={Link} to="/auth">
+              Login
+            </Button> */}
+            {!this.props.isAuthenticated ? (
+              <Button color="inherit" component={Link} to="/auth">
+                Login
+              </Button>
             ) : (
-              <ChevronRightIcon />
+              <Button color="inherit" component={Link} to="/logout">
+                Logout
+              </Button>
             )}
-          </IconButton>
-        </div>
-        <Divider />
-        <List>
-          <ListItem button component={Link} to="/">
-            <ListItemIcon>
-              <HomeIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Home"} />
-          </ListItem>
-          <ListItem button component={Link} to="/stats">
-            <ListItemIcon>
-              <DescriptionIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Schemas"} />
-          </ListItem>
-        </List>
-        <Divider />
-        <List>
-          <ListItem button component={Link} to="/about">
-            <ListItemIcon>
-              <InfoIcon />
-            </ListItemIcon>
-            <ListItemText primary={"About Us"} />
-          </ListItem>
-          <ListItem
-            button
-            component="a"
-            href={
-              "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
-            }
-            target={"_blank"}
-            rel="noopener noreferrer"
-          >
-            <ListItemIcon>
-              <GitHubIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Github"} />
-          </ListItem>
-          <ListItem button>
-            <ListItemIcon>
-              <ChromeReaderModeIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Read The Docs WIP"} />
-          </ListItem>
-          <ListItem
-            button
-            component="a"
-            href={"https://194.210.120.209/api/NS/api/docs"}
-            target={"_blank"}
-            rel="noopener noreferrer" // Check --> https://material-ui.com/components/links/#security
-          >
-            <ListItemIcon>
-              <SvgIcon fontSize="large" htmlColor="#000000">
-                {" "}
-                <path d={mdiApi} />{" "}
-              </SvgIcon>
-            </ListItemIcon>
-            <ListItemText primary={"API"} />
-          </ListItem>
-        </List>
-      </Drawer>
-      <main
-        className={clsx(classes.content, {
-          [classes.contentShift]: open
-        })}
-      >
-        <div className={classes.drawerHeader} />
-      </main>
-    </div>
-  );
+          </Toolbar>
+        </AppBar>
+        <Drawer
+          className={classes.drawer}
+          variant="persistent"
+          anchor="left"
+          open={this.state.open}
+          classes={{
+            paper: classes.drawerPaper
+          }}
+        >
+          <div className={classes.drawerHeader}>
+            <IconButton onClick={() => this.handleDrawerClose()}>
+              {this.props.theme.direction === "ltr" ? (
+                <ChevronLeftIcon />
+              ) : (
+                <ChevronRightIcon />
+              )}
+            </IconButton>
+          </div>
+          <Divider />
+          <List>
+            <ListItem button component={Link} to="/">
+              <ListItemIcon>
+                <HomeIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Home"} />
+            </ListItem>
+            <ListItem button component={Link} to="/stats">
+              <ListItemIcon>
+                <DescriptionIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Schemas"} />
+            </ListItem>
+          </List>
+          <Divider />
+          <List>
+            <ListItem button component={Link} to="/about">
+              <ListItemIcon>
+                <InfoIcon />
+              </ListItemIcon>
+              <ListItemText primary={"About Us"} />
+            </ListItem>
+            <ListItem
+              button
+              component="a"
+              href={
+                "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
+              }
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <GitHubIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Github"} />
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon>
+                <ChromeReaderModeIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Read The Docs WIP"} />
+            </ListItem>
+            <ListItem
+              button
+              component="a"
+              href={"https://127.0.0.1/NS/api/docs"}
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon fontSize="large" htmlColor="#000000">
+                  {" "}
+                  <path d={mdiApi} />{" "}
+                </SvgIcon>
+              </ListItemIcon>
+              <ListItemText primary={"API"} />
+            </ListItem>
+          </List>
+        </Drawer>
+        <main
+          className={clsx(classes.content, {
+            [classes.contentShift]: this.state.open
+          })}
+        >
+          <div className={classes.drawerHeader} />
+        </main>
+      </div>
+    );
+  }
 }
+
+const mapStateToProps = state => {
+  return {
+    loading: state.auth.loading,
+    error: state.auth.error,
+    isAuthenticated: state.auth.token !== null,
+    authRedirectPath: state.auth.authRedirectPath
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  null
+)(withStyles(styles, { withTheme: true })(PersistentDrawerLeft));

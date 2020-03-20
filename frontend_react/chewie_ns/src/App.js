@@ -14,8 +14,9 @@ import Aux from "./hoc/Aux/Aux";
 import Layout from "./hoc/Layout/Layout";
 import Chewie from "./containers/Chewie/Chewie";
 import About from "./containers/About/About";
-import Auth from "./containers/Auth/Auth";
+// import Auth from "./containers/Auth/Auth";
 import MuiLogin from "./containers/Auth/MuiLogin/MuiLogin";
+import MuiRegister from "./containers/Auth/MuiRegister/MuiRegister";
 import Logout from "./containers/Auth/Logout/Logout";
 import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
@@ -109,6 +110,7 @@ class App extends Component {
         <SimpleBreadcrumbs />
         <Switch>
           <Route path="/auth" component={MuiLogin} />
+          <Route path="/register" component={MuiRegister} />
           <Route path="/about" component={About} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
@@ -130,8 +132,18 @@ class App extends Component {
       routes = (
         <Switch>
           <Route path="/logout" component={Logout} />
+          <Route path="/about" component={About} />
           <Route path="/stats" component={Stats} />
           <Route path="/" exact component={Chewie} />
+          <Route
+            path="/species/:species_id/schemas/:schema_id/locus/:locus_id"
+            component={Locus}
+          />
+          <Route
+            path="/species/:species_id/schemas/:schema_id"
+            component={Schema}
+          />
+          <Route path="/species/:species_id" component={Species} />
           <Redirect to="/" />
         </Switch>
       );

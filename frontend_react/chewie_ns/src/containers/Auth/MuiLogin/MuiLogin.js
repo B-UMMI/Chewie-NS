@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import { Redirect } from 'react-router-dom';
+import { Redirect, Link as RouterLink } from "react-router-dom";
 
 import * as actions from "../../../store/actions/index";
 
@@ -19,7 +19,6 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-
 
 const styles = theme => ({
   paper: {
@@ -42,12 +41,12 @@ class SignIn extends Component {
     email: "",
     password: "",
     showPassword: false,
-    isSignup: false,
+    isSignup: false
   };
 
   componentDidMount() {
-    if (this.props.authRedirectPath !== '/') {
-      this.props.onSetAuthRedirectPath()
+    if (this.props.authRedirectPath !== "/") {
+      this.props.onSetAuthRedirectPath();
     }
   }
 
@@ -69,7 +68,6 @@ class SignIn extends Component {
   };
 
   render() {
-
     const { classes } = this.props;
 
     const copyright = (
@@ -79,7 +77,7 @@ class SignIn extends Component {
         {"."}
       </Typography>
     );
-    
+
     let visibilityIcon = (
       <InputAdornment position="end">
         <IconButton
@@ -95,16 +93,13 @@ class SignIn extends Component {
     let errorMessage = null;
 
     if (this.props.error) {
-        errorMessage = (
-        <p>{this.props.error.message}</p>
-        )
+      errorMessage = <p>{this.props.error.message}</p>;
     }
 
     let authRedirect = null;
     if (this.props.isAuthenticated) {
-      authRedirect = <Redirect to={this.props.authRedirectPath} />
+      authRedirect = <Redirect to={this.props.authRedirectPath} />;
     }
-
 
     return (
       <Container component="main" maxWidth="xs">
@@ -165,16 +160,14 @@ class SignIn extends Component {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                <Link variant="body2" component={RouterLink} to="/register">
+                  Don't have an account? Sign Up
                 </Link>
               </Grid>
             </Grid>
           </form>
         </div>
-        <Box mt={8}>
-          {copyright}
-        </Box>
+        <Box mt={8}>{copyright}</Box>
       </Container>
     );
   }
@@ -182,18 +175,22 @@ class SignIn extends Component {
 
 const mapStateToProps = state => {
   return {
-      loading: state.auth.loading,
-      error: state.auth.error,
-      isAuthenticated: state.auth.token !== null,
-      authRedirectPath: state.auth.authRedirectPath
+    loading: state.auth.loading,
+    error: state.auth.error,
+    isAuthenticated: state.auth.token !== null,
+    authRedirectPath: state.auth.authRedirectPath
   };
 };
 
 const mapDispatchToProps = dispatch => {
-return {
-  onAuth: (email, password, isSignup) => dispatch(actions.auth(email, password, isSignup)),
-  onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath('/'))
-};
+  return {
+    onAuth: (email, password, isSignup) =>
+      dispatch(actions.auth(email, password, isSignup)),
+    onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath("/"))
+  };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SignIn));
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withStyles(styles)(SignIn));
