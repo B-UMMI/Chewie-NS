@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Link as RouterLink } from "react-router-dom";
 
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
@@ -103,6 +104,32 @@ class Stats extends Component {
           }
         },
         {
+          name: "Schema Details",
+          options: {
+            filter: false,
+            empty: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <Button
+                  variant="contained"
+                  color="default"
+                  component={RouterLink}
+                  to={`/species/${tableMeta.rowData[3]}`}
+                >
+                  Schema Details
+                </Button>
+              );
+            }
+          }
+        },
+        {
           name: "species_id",
           label: "Species ID",
           options: {
@@ -115,6 +142,39 @@ class Stats extends Component {
                   fontWeight: "bold"
                 }
               };
+            }
+          }
+        },
+        {
+          name: "ptf",
+          label: "Training File",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <div>
+                  <div>{value}</div>
+                  {/* <div>
+                    <Button variant="contained" color="default">
+                      Download
+                    </Button>
+                  </div>
+                  <div>
+                    <Button variant="contained" color="default">
+                      More Info
+                    </Button>
+                  </div> */}
+                </div>
+              );
             }
           }
         }
@@ -154,9 +214,6 @@ class Stats extends Component {
         <div>
           <h1 style={{ textAlign: "center" }}>Overview</h1>
         </div>
-        {/* <div>
-          <p>Lorem Ipsum</p>
-        </div> */}
         <div>{stats}</div>
         <footer
           style={{
@@ -171,7 +228,6 @@ class Stats extends Component {
           <div id="homeFooter" style={{ display: "block" }}>
             <div>
               <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-              {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
         </footer>

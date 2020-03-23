@@ -79,6 +79,7 @@ export const fetchStatsSpecies = () => {
               ],
             species_name: res.data.message[key].name.value,
             nr_schemas: res.data.message[key].schemas.value,
+            ptf: res.data.message[key].ptf.value,
             id: key
           });
 
