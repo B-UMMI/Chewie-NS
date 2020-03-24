@@ -1007,10 +1007,10 @@ class StatsSpecies(Resource):
         try:
             
             result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select ?species ?name (COUNT(?sch) AS ?schemas) '    # HURR-DURR with a space after the end it works...
+                ('select ?species ?name (COUNT(?sch) AS ?schemas) ?ptf '    # HURR-DURR with a space after the end it works...
                     'from <{0}> '
                     'where '
-                    '{{ ?sch a typon:Schema; typon:isFromTaxon ?species . '
+                    '{{ ?sch a typon:Schema; typon:ptf ?ptf; typon:isFromTaxon ?species . '
                     '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'
                     'ORDER BY ?species'.format(current_app.config['DEFAULTHGRAPH'])))
 
