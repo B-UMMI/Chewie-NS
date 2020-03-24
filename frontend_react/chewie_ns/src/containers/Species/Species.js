@@ -283,6 +283,38 @@ class Species extends Component {
               };
             }
           }
+        },
+        {
+          name: "Creation Date",
+          options: {
+            filter: false,
+            sort: true,
+            display: false,
+            empty: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
+        },
+        {
+          name: "Last Change Date",
+          options: {
+            filter: false,
+            sort: true,
+            display: false,
+            empty: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            }
+          }
         }
       ];
 
