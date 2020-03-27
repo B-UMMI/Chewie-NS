@@ -15,6 +15,7 @@ __pycache__/
 *.sh
 *.rdb
 
+self_certs/*
 postgres_data/*
 redis_data/dump.rdb
 #virtuoso_data/db/virtuoso.db
