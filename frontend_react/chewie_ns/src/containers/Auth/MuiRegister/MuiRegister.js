@@ -85,11 +85,11 @@ class SignUp extends Component {
 
   onSubmitHandler = event => {
     event.preventDefault();
-    console.log(event);
-    console.log(this.state.email);
-    console.log(this.state.username);
-    console.log(this.state.password);
-    console.log(this.state.confirmPassword);
+    //console.log(event);
+    //console.log(this.state.email);
+    //console.log(this.state.username);
+    //console.log(this.state.password);
+    //console.log(this.state.confirmPassword);
 
     if (this.state.password === this.state.confirmPassword) {
       console.log("Happy Chewie");
