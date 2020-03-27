@@ -214,7 +214,7 @@ class PersistentDrawerLeft extends Component {
             <ListItem
               button
               component="a"
-              href={"https://127.0.0.1/NS/api/docs"}
+              href={"https://194.210.120.209/api/NS/api/docs"}
               target={"_blank"}
               rel="noopener noreferrer"
             >
