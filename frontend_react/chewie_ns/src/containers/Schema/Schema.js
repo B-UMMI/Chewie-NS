@@ -46,11 +46,13 @@ class Schema extends Component {
 
     const query_hits = localStorage.getItem(query);
 
-    if (query_hits) {
-      this.setState({ hits: JSON.parse(query_hits) });
-    } else {
-      this.props.onFetchSchemaAlleleMode(species_id, schema_id);
-    }
+    //if (query_hits) {
+    //  this.setState({ hits: JSON.parse(query_hits) });
+    //} else {
+    //  this.props.onFetchSchemaAlleleMode(species_id, schema_id);
+    //}
+
+    this.props.onFetchSchemaAlleleMode(species_id, schema_id);
 
     // fetch schema annotations
     this.props.onFetchAnnotations(species_id, schema_id);
