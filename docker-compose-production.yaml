@@ -9,6 +9,7 @@ services:
   # - "8000"
   volumes:
    - .:/app
+   - ./pre-computed-data:/app/pre-computed-data
   environment:
    - FLASK_ENV=development
    - BASE_URL=https://194.210.120.209/NS/api/
@@ -98,6 +99,7 @@ services:
   container_name: nginx
   volumes:
    - ./self_certs:/etc/nginx/certs
+   - ./downloadable_data:/var/www/my-app/internal_redirect
   ports:
    - "443:443"
   depends_on:
