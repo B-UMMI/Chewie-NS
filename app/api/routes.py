@@ -1036,30 +1036,46 @@ class StatsSpeciesId(Resource):
         """ Get the loci and count the alleles for each schema of a particular species. """
 
         new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
+        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "species_" + str(species_id) + ".json"
+
+        if os.path.isfile(precomputed_data_file):
+            
+            with open(precomputed_data_file, "r") as json_file:
+                json_data = json.load(json_file)
+
+            return json_data
+
+        else:
     
-        #count stuff from on virtuoso
-        try:
+            #count stuff from on virtuoso
+            try:
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen (COUNT(DISTINCT ?locus) as ?nr_loci) (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
-                    'from <{0}> '
-                    'where '
-                    '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
-                    'typon:schemaName ?name; typon:administratedBy ?user; '
-                    'typon:chewBBACA_version ?chewie; typon:bsr ?bsr; '
-                    'typon:ptf ?ptf; typon:translation_table ?tl_table; '
-                    'typon:minimum_locus_length ?minLen; '
-                    'typon:hasSchemaPart ?part . '
-                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
-                    'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                    ('select ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen (COUNT(DISTINCT ?locus) as ?nr_loci) (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
+                        'from <{0}> '
+                        'where '
+                        '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                        'typon:schemaName ?name; typon:administratedBy ?user; '
+                        'typon:chewBBACA_version ?chewie; typon:bsr ?bsr; '
+                        'typon:ptf ?ptf; typon:translation_table ?tl_table; '
+                        'typon:minimum_locus_length ?minLen; '
+                        'typon:hasSchemaPart ?part . '
+                        '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                        '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
+                        'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
+                json_to_file = {"message" : result["results"]["bindings"]}
 
-                        
-            return {"message" : result["results"]["bindings"]}, 200
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
+                filename = "species_" + str(species_id) + ".json"
+                
+                with open(os.path.join(os.getcwd(), "/pre-computed-data/", filename), "w") as json_outfile:
+                    json.dump(json_to_file, json_outfile)
+                            
+                return {"message" : result["results"]["bindings"]}, 200
+            
+            except:
+                return {"message" : "Sum thing wong"}, 404
 
 
 @stats_conf.route("/species/<int:species_id>/schema")
@@ -1077,52 +1093,43 @@ class StatsSpeciesSchemas(Resource):
         """ Get the loci and count the alleles for each schema of a particular species. """
 
         new_species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], str(species_id))
+
+        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "species_" + str(species_id) + "_schema.json"
+
+        if os.path.isfile(precomputed_data_file):
+            
+            with open(precomputed_data_file, "r") as json_file:
+                json_data = json.load(json_file)
+
+            return json_data
+
+        else:
     
-        #count stuff from on virtuoso
-        try:
+            #count stuff from on virtuoso
+            try:
 
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
-                    'from <{0}> '
-                    'where '
-                    '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
-                    'typon:hasSchemaPart ?part . '
-                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    '?allele a typon:Allele; typon:isOfLocus ?locus . '
-                    '?allele typon:hasSequence ?sequence . }}'
-                    'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                    ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
+                        'from <{0}> '
+                        'where '
+                        '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                        'typon:hasSchemaPart ?part . '
+                        '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                        '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                        '?allele typon:hasSequence ?sequence . }}'
+                        'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
-                    # ('select ?schema ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '    # HURR-DURR with a space after the end it works...
-                    # 'from <{0}> '
-                    # 'where '
-                    # '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
-                    # 'typon:hasSchemaPart ?part . '
-                    # '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    # '?allele a typon:Allele; typon:isOfLocus ?locus . '
-                    # '?allele typon:hasSequence ?sequence . '
-                    # 'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-                    # 'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}} '
-                    # 'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'
-                    # 'ORDER BY ?schema ?locus'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
+                json_to_file = {"message" : result["results"]["bindings"]}
 
+                filename = "species_" + str(species_id) + "_schema.json"
+                
+                with open(os.path.join(os.getcwd(), "/pre-computed-data/", filename), "w") as json_outfile:
+                    json.dump(json_to_file, json_outfile)
 
-                    # result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                    #          ('select distinct (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
-                    #           'from <{0}>'
-                    #           'where '
-                    #           '{{ <{1}> a typon:Locus; typon:name ?name. '
-                    #           '?alleles typon:isOfLocus <{1}> .'
-                    #           '?alleles typon:hasSequence ?sequence. '
-                    #           'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-                    #           'OPTIONAL{{?sequence typon:hasUniprotSName ?UniprotSName.}}'
-                    #           'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }}'.format(current_app.config['DEFAULTHGRAPH'], new_locus_url)))
-
-
-                        
-            return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
+                return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
+            
+            except:
+                return {"message" : "Sum thing wong"}, 404
 
 
 @stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/loci")
@@ -1143,169 +1150,190 @@ class StatsSpeciesSchemasMode(Resource):
 
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
-        result1 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-            ('select ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
-                'from <{0}> '
-                'where '
-                '{{ <{1}> a typon:Schema; typon:isFromTaxon <{2}>; '
-                'typon:hasSchemaPart ?part . '
-                '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, new_species_url)))
+        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "gbs_test_schema_loci.json"
 
-        # print(result1["results"]["bindings"][0]["nr_allele"]["value"], flush=True)
-
-        schema_alleles = 0
-        # schema_loci_id = []
-
-        for r in result1["results"]["bindings"]:
+        if os.path.isfile(precomputed_data_file):
             
-            schema_alleles += int(r["nr_allele"]["value"])
+            with open(precomputed_data_file, "r") as json_file:
+                json_data = json.load(json_file)
 
-            # schema_loci_id.append(r["locus"]["value"])
+            return json_data
 
-        print(schema_alleles, flush=True)
+        else:
+            
+
+            result1 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                ('select ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
+                    'from <{0}> '
+                    'where '
+                    '{{ <{1}> a typon:Schema; typon:isFromTaxon <{2}>; '
+                    'typon:hasSchemaPart ?part . '
+                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, new_species_url)))
+
+            # print(result1["results"]["bindings"][0]["nr_allele"]["value"], flush=True)
+
+            schema_alleles = 0
+            # schema_loci_id = []
+
+            for r in result1["results"]["bindings"]:
                 
-        try:
+                schema_alleles += int(r["nr_allele"]["value"])
 
-            result = []
-            offset = 0
-            limit = 1000
-            count = 0
+                # schema_loci_id.append(r["locus"]["value"])
 
-            # Virtuoso can only return a max of 10k rows...
-            if schema_alleles < 10000:
-
-                data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                            ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                            ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
-                            'from <{0}> '
-                            'where '
-                            '{{ <{1}> typon:hasSchemaPart ?part. '
-                            '?part typon:hasLocus ?locus.'
-                            '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
-                            '?allele a typon:Allele; typon:isOfLocus ?locus .'
-                            '?allele typon:hasSequence ?sequence .'
-                            '?sequence typon:nucleotideSequence ?nucSeq .'
-                            'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                            'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
-                
-                result.append(data["results"]["bindings"])
-                
-            else:
-
-                # for locus_id in sorted(schema_loci_id):
-
-                #     data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                #                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                #                 ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
-                #                 'from <{0}> '
-                #                 'where '
-                #                 '{{ <{1}> typon:hasSchemaPart ?part. '
-                #                 '?part typon:hasLocus <{2}>.'
-                #                 '<{2}> typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
-                #                 '?allele a typon:Allele; typon:isOfLocus <{2}> .'
-                #                 '?allele typon:hasSequence ?sequence .'
-                #                 '?sequence typon:nucleotideSequence ?nucSeq .'
-                #                 'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                #                 'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, locus_id)))
-
+            print(schema_alleles, flush=True)
                     
-                #     result.append(data["results"]["bindings"][0])
+            try:
 
-                while count != schema_alleles:
+                result = []
+                offset = 0
+                limit = 1000
+                count = 0
+
+                # Virtuoso can only return a max of 10k rows...
+                if schema_alleles < 10000:
 
                     data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
                                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                                ' (strlen(?nucSeq) as ?nucSeqLen) '
+                                ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
                                 'from <{0}> '
                                 'where '
                                 '{{ <{1}> typon:hasSchemaPart ?part. '
-                                '?part typon:hasLocus ?locus .'
+                                '?part typon:hasLocus ?locus.'
                                 '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
                                 '?allele a typon:Allele; typon:isOfLocus ?locus .'
                                 '?allele typon:hasSequence ?sequence .'
                                 '?sequence typon:nucleotideSequence ?nucSeq .'
                                 'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                                'order by (?name) OFFSET {2} LIMIT {3} '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, offset, limit)))
-
-                    # print(len(result), flush=True)
-                    # print(data["results"]["bindings"], flush=True)
-
+                                'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
+                    
                     result.append(data["results"]["bindings"])
-
-                    count = sum( [ len(listElem) for listElem in result ] )
-
-                    print(count, flush=True)
-
-                    offset += 1000
-
-            
-            result_loop = list(itertools.chain(*result))
-
-            loci_data = {}
-            # count = []
-
-            for i in result_loop:
-                # print(i["name"]["value"])
-                # count += 1
-
-                locus_name = i["name"]["value"]
-                # count.append(i["name"]["value"])
-                alleles_len = []
-                # nr_alleles = i["nr_allele"]["value"]
-
-                if locus_name not in loci_data:
-
-                    alleles_len.append(i["nucSeqLen"]["value"])
-
-                    loci_data[locus_name] = alleles_len
-
+                    
                 else:
-                    loci_data[locus_name].append(i["nucSeqLen"]["value"])
 
-            # print(len(loci_data["GBS_CC1_2-007569"]))
-            # print(len(count))
-            # print(len(set(count))
+                    # for locus_id in sorted(schema_loci_id):
 
-            mode_res = []
-            total_al_res = []
-            scatter_res = []
+                    #     data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                    #                 ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
+                    #                 ' (strlen(?nucSeq) as ?nucSeqLen) (COUNT(?allele) as ?nr_allele) '
+                    #                 'from <{0}> '
+                    #                 'where '
+                    #                 '{{ <{1}> typon:hasSchemaPart ?part. '
+                    #                 '?part typon:hasLocus <{2}>.'
+                    #                 '<{2}> typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                    #                 '?allele a typon:Allele; typon:isOfLocus <{2}> .'
+                    #                 '?allele typon:hasSequence ?sequence .'
+                    #                 '?sequence typon:nucleotideSequence ?nucSeq .'
+                    #                 'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
+                    #                 'order by (?name) '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, locus_id)))
 
-            for k,v in loci_data.items():
-                t = Counter(v)
-                # print(str(k) + ": " + t.most_common(1)[0][0])
-                # print(str(k).split("-")[1])
-
-                allele_sizes = [int(size) for size in v]
-                
-                mode_res.append({
-                    "locus_name": str(k),
-                    "alleles_mode": t.most_common(1)[0][0]
-                })
-
-                total_al_res.append({
-                    "locus_name": str(k),
-                    "nr_alleles": len(v)
-                })
-
-                scatter_res.append({
-                    "locus_name": str(k),
-                    "locus_id": str(k).split("-")[1],
-                    "nr_alleles": len(v),
-                    "alleles_mean": round(sum(allele_sizes) / len(allele_sizes)),
-                    "alleles_median": round(statistics.median(allele_sizes)),
-                    "alleles_mode": t.most_common(1)[0][0]
-                })
-            
-            # print(loci_data)
                         
-            return {"mode": mode_res,
-                    "total_alleles": total_al_res,
-                    "scatter_data": scatter_res}, 200
-            # return {"message": result["results"]["bindings"]}, 200
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
+                    #     result.append(data["results"]["bindings"][0])
+
+                    while count != schema_alleles:
+
+                        data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
+                                    ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
+                                    ' (strlen(?nucSeq) as ?nucSeqLen) '
+                                    'from <{0}> '
+                                    'where '
+                                    '{{ <{1}> typon:hasSchemaPart ?part. '
+                                    '?part typon:hasLocus ?locus .'
+                                    '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
+                                    '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                                    '?allele typon:hasSequence ?sequence .'
+                                    '?sequence typon:nucleotideSequence ?nucSeq .'
+                                    'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
+                                    'order by (?name) OFFSET {2} LIMIT {3} '.format(current_app.config['DEFAULTHGRAPH'], new_schema_url, offset, limit)))
+
+                        # print(len(result), flush=True)
+                        # print(data["results"]["bindings"], flush=True)
+
+                        result.append(data["results"]["bindings"])
+
+                        count = sum( [ len(listElem) for listElem in result ] )
+
+                        print(count, flush=True)
+
+                        offset += 1000
+
+                
+                result_loop = list(itertools.chain(*result))
+
+                loci_data = {}
+                # count = []
+
+                for i in result_loop:
+                    # print(i["name"]["value"])
+                    # count += 1
+
+                    locus_name = i["name"]["value"]
+                    # count.append(i["name"]["value"])
+                    alleles_len = []
+                    # nr_alleles = i["nr_allele"]["value"]
+
+                    if locus_name not in loci_data:
+
+                        alleles_len.append(i["nucSeqLen"]["value"])
+
+                        loci_data[locus_name] = alleles_len
+
+                    else:
+                        loci_data[locus_name].append(i["nucSeqLen"]["value"])
+
+                # print(len(loci_data["GBS_CC1_2-007569"]))
+                # print(len(count))
+                # print(len(set(count))
+
+                mode_res = []
+                total_al_res = []
+                scatter_res = []
+
+                for k,v in loci_data.items():
+                    t = Counter(v)
+                    # print(str(k) + ": " + t.most_common(1)[0][0])
+                    # print(str(k).split("-")[1])
+
+                    allele_sizes = [int(size) for size in v]
+                    
+                    mode_res.append({
+                        "locus_name": str(k),
+                        "alleles_mode": t.most_common(1)[0][0]
+                    })
+
+                    total_al_res.append({
+                        "locus_name": str(k),
+                        "nr_alleles": len(v)
+                    })
+
+                    scatter_res.append({
+                        "locus_name": str(k),
+                        "locus_id": str(k).split("-")[1],
+                        "nr_alleles": len(v),
+                        "alleles_mean": round(sum(allele_sizes) / len(allele_sizes)),
+                        "alleles_median": round(statistics.median(allele_sizes)),
+                        "alleles_mode": t.most_common(1)[0][0]
+                    })
+                
+                # print(loci_data)
+
+                json_to_file = {"mode": mode_res,
+                                "total_alleles": total_al_res,
+                                "scatter_data": scatter_res}
+
+                filename = "species_" + str(species_id) + "_" + str(schema_id) + ".json"
+                
+                with open(os.path.join(os.getcwd(), "/pre-computed-data/", "testing.json"), "w") as json_outfile:
+                    json.dump(json_to_file, json_outfile)
+                            
+                return {"mode": mode_res,
+                        "total_alleles": total_al_res,
+                        "scatter_data": scatter_res}, 200
+                # return {"message": result["results"]["bindings"]}, 200
+            
+            except:
+                return {"message" : "Sum thing wong"}, 404
 
 
 
