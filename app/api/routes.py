@@ -1065,13 +1065,23 @@ class StatsSpeciesId(Resource):
                         '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
                         'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
+                #print(result["results"]["bindings"], flush=True)
+
                 json_to_file = {"message" : result["results"]["bindings"]}
 
+                #print(json_to_file, flush=True)
+
                 filename = "species_" + str(species_id) + ".json"
+
+                #print(filename, flush=True)
+
+                #print(os.path.join(os.getcwd(), "pre-computed-data", filename), flush=True)
                 
-                with open(os.path.join(os.getcwd(), "/pre-computed-data/", filename), "w") as json_outfile:
+                with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
-                            
+
+                #print("written json file", flush=True)
+
                 return {"message" : result["results"]["bindings"]}, 200
             
             except:
@@ -1123,7 +1133,7 @@ class StatsSpeciesSchemas(Resource):
 
                 filename = "species_" + str(species_id) + "_schema.json"
                 
-                with open(os.path.join(os.getcwd(), "/pre-computed-data/", filename), "w") as json_outfile:
+                with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
 
                 return {"message" : result["results"]["bindings"]}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
@@ -1150,12 +1160,14 @@ class StatsSpeciesSchemasMode(Resource):
 
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
 
-        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "gbs_test_schema_loci.json"
+        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "species_" + str(species_id) + "_" + str(schema_id) + ".json"
 
         if os.path.isfile(precomputed_data_file):
             
             with open(precomputed_data_file, "r") as json_file:
                 json_data = json.load(json_file)
+
+            print("sending json file contents", flush=True)
 
             return json_data
 
@@ -1324,7 +1336,7 @@ class StatsSpeciesSchemasMode(Resource):
 
                 filename = "species_" + str(species_id) + "_" + str(schema_id) + ".json"
                 
-                with open(os.path.join(os.getcwd(), "/pre-computed-data/", "testing.json"), "w") as json_outfile:
+                with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
                             
                 return {"mode": mode_res,
