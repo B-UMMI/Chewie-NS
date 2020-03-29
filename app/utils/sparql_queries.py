@@ -38,7 +38,9 @@ INSERT_SCHEMA = ('INSERT DATA IN GRAPH <{0}> '
                  'typon:cluster_sim "{12}"^^xsd:string; '
                  'typon:representative_filter "{13}"^^xsd:string; '
                  'typon:intraCluster_filter "{14}"^^xsd:string; '
-                 'typon:Schema_lock "{15}"^^xsd:string .}}')
+                 'typon:dateEntered "{15}"^^xsd:dateTime; '
+                 'typon:last_modified "{16}"^^xsd:string; '
+                 'typon:Schema_lock "{17}"^^xsd:string .}}')
 
 COUNT_TOTAL_LOCI = ('SELECT (COUNT(?locus) AS ?count) '
                     'FROM <{0}> '
@@ -68,6 +70,17 @@ SELECT_LOCUS_FASTA = ('SELECT ?name ?allele_id (str(?nucSeq) AS ?nucSeq) (strlen
                       '?sequence typon:nucleotideSequence ?nucSeq. }} '
                       'ORDER BY ASC(?allele_id)')
 
+SELECT_LOCUS_FASTA_BY_DATE = ('SELECT ?name ?allele_id (str(?nucSeq) AS ?nucSeq) (strlen(?nucSeq) AS ?nucSeqLen) ?date '
+                              'FROM <{0}> '
+                              'WHERE '
+                              '{{ <{1}> a typon:Locus; typon:name ?name .'
+                              '?alleles typon:isOfLocus <{1}>; '
+                              'typon:dateEntered ?date .'
+                              '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .'
+                              '?sequence typon:nucleotideSequence ?nucSeq . '
+                              'FILTER ( ?date < "{2}"^^xsd:dateTime )}} '
+                              'ORDER BY ASC(?allele_id)')
+
 SELECT_LOCUS_UNIPROT = ('select distinct ?name (str(?UniprotLabel) as ?UniprotLabel) (str(?UniprotSName) as ?UniprotSName) (str(?UniprotURI) as ?UniprotURI) '
                         'from <{0}>'
                         'where '
@@ -85,6 +98,16 @@ SELECT_LOCUS_SEQS = ('SELECT ?allele_id ?sequence '
                      '?alleles typon:isOfLocus <{1}> .'
                      '?alleles typon:hasSequence ?sequence; typon:id ?allele_id .}} '
                      'ORDER BY ASC(?allele_id)')
+
+SELECT_LOCUS_SEQS_BY_DATE = ('SELECT ?allele_id ?sequence ?date '
+                             'FROM <{0}>'
+                             'WHERE '
+                             '{{ <{1}> a typon:Locus; typon:name ?name. '
+                             '?alleles typon:isOfLocus <{1}>; '
+                             'typon:dateEntered ?date .'
+                             '?alleles typon:hasSequence ?sequence; typon:id ?allele_id . '
+                             'FILTER ( ?date < "{2}"^^xsd:dateTime )}} '
+                             'ORDER BY ASC(?allele_id)')
 
 SELECT_LOCUS_SPECIES_ALLELES = ('SELECT ?alleles '
                                 'FROM <{0}> '
@@ -156,6 +179,13 @@ SELECT_SCHEMA_LOCK = ('SELECT (str(?description) AS ?name) '
                       'WHERE '
                       '{{ <{1}> typon:schemaName ?description; '
                       'typon:Schema_lock ?Schema_lock . }}')
+
+SELECT_SCHEMA_DATE = ('SELECT (str(?description) AS ?name) '
+                      '(str(?last_modified) AS ?last_modified) '
+                      'FROM <{0}> '
+                      'WHERE '
+                      '{{ <{1}> typon:schemaName ?description; '
+                      'typon:last_modified ?last_modified . }}')
 
 SELECT_SCHEMA_PTF = ('SELECT (str(?description) AS ?name) '
                       '(str(?ptf) AS ?ptf) '
@@ -283,16 +313,20 @@ SELECT_SPECIES_SCHEMA = ('SELECT ?schema '
                          '(str(?cluster_sim) AS ?cluster_sim) '
                          '(str(?representative_filter) AS ?representative_filter) '
                          '(str(?intraCluster_filter) AS ?intraCluster_filter) '
+                         '(str(?dateEntered) AS ?dateEntered) '
+                         '(str(?last_modified) AS ?last_modified) '
                          '(str(?Schema_lock) AS ?Schema_lock) '
                          'FROM <{0}> '
                          'WHERE '
                          '{{ <{1}> typon:schemaName ?description; '
                          'typon:bsr ?bsr; typon:chewBBACA_version ?chewBBACA_version; typon:ptf ?ptf; '
-                         'typon:translation_table ?trans; typon:minimum_locus_length ?min_locus_len;'
+                         'typon:translation_table ?trans; typon:minimum_locus_length ?min_locus_len; '
                          'typon:size_threshold ?st; typon:word_size ?word_size; '
-                         'typon:cluster_sim ?cluster_sim;'
-                         'typon:representative_filter ?representative_filter;'
-                         'typon:intraCluster_filter ?intraCluster_filter;'
+                         'typon:cluster_sim ?cluster_sim; '
+                         'typon:representative_filter ?representative_filter; '
+                         'typon:intraCluster_filter ?intraCluster_filter; '
+                         'typon:dateEntered ?dateEntered; '
+                         'typon:last_modified ?last_modified; '
                          'typon:Schema_lock ?Schema_lock . }}')
 
 SELECT_SPECIES_SCHEMAS = ('SELECT ?schemas ?name '
@@ -312,8 +346,13 @@ INSERT_SCHEMA_DEPRECATE = ('INSERT DATA IN GRAPH <{0}> '
 
 DELETE_SCHEMA_LOCK = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Schema_lock ?Schema_lock . }} }}')
 
+DELETE_SCHEMA_DATE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:{2} ?{2} . }} }}')
+
 INSERT_SCHEMA_LOCK = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:Schema_lock "{2}"^^xsd:string . }}')
+
+INSERT_SCHEMA_DATE = ('INSERT DATA IN GRAPH <{0}> '
+                      '{{ <{1}> typon:{2} "{3}"^^xsd:string . }}')
 
 COUNT_SEQUENCES = ('SELECT (COUNT(?seq) AS ?count) '
                    'FROM <{0}> '

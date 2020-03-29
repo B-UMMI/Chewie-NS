@@ -31,12 +31,12 @@ from flask import (current_app, render_template, flash, redirect, url_for, reque
 from werkzeug.utils import secure_filename
 
 # App imports
-from app.utils import aux
 from app.models import User, Role
 from app.utils import wrappers as w
 from app.utils import sparql_queries
+from app.utils import auxiliary_functions as aux
 from app import (db, celery, login_manager, 
-                datastore_cheat, security, jwt)
+                 datastore_cheat, security, jwt)
 
 from app.api import api, blueprint
 
@@ -1172,7 +1172,6 @@ class StatsSpeciesSchemasMode(Resource):
             return json_data
 
         else:
-            
 
             result1 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                 ('select ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '    # HURR-DURR with a space after the end it works...
@@ -1335,10 +1334,10 @@ class StatsSpeciesSchemasMode(Resource):
                                 "scatter_data": scatter_res}
 
                 filename = "species_" + str(species_id) + "_" + str(schema_id) + ".json"
-                
+
                 with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
-                            
+
                 return {"mode": mode_res,
                         "total_alleles": total_al_res,
                         "scatter_data": scatter_res}, 200
@@ -1614,14 +1613,24 @@ class LociNS(Resource):
 class LociNSFastaAPItypon(Resource):
     """Loci NS Fasta Resource."""
 
-    @api.doc(responses={ 200: 'OK',
+    # Define extra arguments for requests
+    parser = api.parser()
+    
+    parser.add_argument('date', 
+                        type=str,
+                        help='provide a date in the format YYYY-MM-DDTHH:MM:SS '
+                             'to get the alleles that were uploaded up to the '
+                             'provided date.')
+
+    @api.doc(responses={200: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not found'},
             security=[])
-    def get(self, loci_id):
+    @w.use_kwargs(api, parser)
+    def get(self, loci_id, **kwargs):
         """Gets the FASTA sequence of the alleles from a particular loci from a particular species."""
 
         c_user = get_jwt_identity()
@@ -1671,16 +1680,26 @@ class LociNSFastaAPItypon(Resource):
         #        if allow[0] == False:
         #            return allow[1], 403
 
-        # find all alleles from the locus and return the sequence and id sorted by id
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                             (sparql_queries.SELECT_LOCUS_FASTA.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
+        # get request data
+        request_data = request.args
+        if 'date' in request_data:
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_LOCUS_FASTA_BY_DATE.format(current_app.config['DEFAULTHGRAPH'], locus_uri, request_data['date'])))
+        else:
+            # find all alleles from the locus and return the sequence and id sorted by id
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                 (sparql_queries.SELECT_LOCUS_FASTA.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
 
         # virtuoso returned an error because request length exceeded maximum value
         # get each allele separately
         if 'Max row length is exceeded when trying to store a string of' in str(result):
             # get locus sequences hashes
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 (sparql_queries.SELECT_LOCUS_SEQS.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
+            if 'date' in request_data:
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                     (sparql_queries.SELECT_LOCUS_SEQS_BY_DATE.format(current_app.config['DEFAULTHGRAPH'], locus_uri, request_data['date'])))
+            else:
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                     (sparql_queries.SELECT_LOCUS_SEQS.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
 
             seqs_hashes = result['results']['bindings']
             for s in range(len(seqs_hashes)):
@@ -1920,7 +1939,7 @@ class LociNSAlleles(Resource):
                         'http://www.uniprot.org/taxonomy/'}, 404
 
             # after determining that the species exists, check if the sequence is a valid CDS
-            translation_result = aux.translate_dna(sequence, 11)
+            translation_result = aux.translate_dna(sequence, 11, 0)
             if isinstance(translation_result, list):
                 protein_sequence = str(translation_result[0][0])
             else:
@@ -2112,6 +2131,11 @@ schema_lock_model = api.model('SchemaLockModel',
                                                        description='Action to perform (lock or unlock).'),
                               })
 
+schema_modification_model = api.model('SchemaModModel',
+                              {'date': fields.String(required=True,
+                                                       description='Last modification date for the schema.'),
+                              })
+
 schema_loci_model = api.model('SchemaLociModel',
                               {'loci_id': fields.String(required=True,
                                                         description="Id of the loci")
@@ -2164,15 +2188,15 @@ class SpeciesListAPItypon(Resource):
                         type=str,
                         help='Name of the species')
     
-    @api.doc(responses={ 200: 'OK', 
+    @api.doc(responses={ 200: 'OK',
                          400: 'Invalid Argument',
-                         500: 'Internal Server Error', 
-                         403: 'Unauthorized', 
+                         500: 'Internal Server Error',
+                         403: 'Unauthorized',
                          401: 'Unauthenticated',
                          404: 'Not Found' },
              security=["access_token"])
     @w.use_kwargs(api, parser)
-    @jwt_required
+    #@jwt_required
     def get(self, **kwargs):
         """ Get a list of all species on Typon """
 
@@ -2555,6 +2579,7 @@ class SchemaListAPItypon(Resource):
         new_schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(number_schemas + 1))
 
         # The SPARQL query to send to Typon
+        insertion_date = 'singularity'
         query2send = (sparql_queries.INSERT_SCHEMA.format(current_app.config['DEFAULTHGRAPH'],
                                                           new_schema_url, species_url,
                                                           new_user_url, name,
@@ -2563,6 +2588,7 @@ class SchemaListAPItypon(Resource):
                                                           min_locus_len, size_threshold,
                                                           word_size, cluster_sim,
                                                           rep_filter, intra_filter,
+                                                          insertion_date, insertion_date,
                                                           schema_lock))
 
         result = aux.send_data(query2send,
@@ -2658,7 +2684,7 @@ class SchemaAPItypon(Resource):
 
         # check if schema exists
         new_schema_url = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
-        
+
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                              (sparql_queries.ASK_SCHEMA_OWNERSHIP.format(new_schema_url, new_user_url)))
         
@@ -2677,6 +2703,140 @@ class SchemaAPItypon(Resource):
             return {'message': 'Schema sucessfully removed.'}, 201	
         else:
             return {'message': 'Sum Thing Wong.'}, result.status_code
+
+
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/modified')
+class SchemaModDateAPItypon(Resource):
+    """
+    """
+
+    # get last modification date for the schema
+    @api.doc(responses={ 200: 'OK',
+                         400: 'Invalid Argument',
+                         500: 'Internal Server Error',
+                         403: 'Unauthorized',
+                         401: 'Unauthenticated',
+                         404: 'Not Found'},
+             security=["access_token"])
+    @jwt_required
+    def get(self, species_id, schema_id):
+        """Get last modification date of the schema with the given identifier."""
+
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+
+        result_data = result['results']['bindings']
+        if len(result_data) == 0:
+            return {'Not found': 'Could not find a schema with provided ID.'}, 404
+
+        schema_name = result_data[0]['name']['value']
+        last_modified = result_data[0]['last_modified']['value']
+
+        return ('Schema {0} ({1}) last modified in: {2}.'.format(str(schema_id), schema_name, last_modified))
+
+    # change last modification date for the Schema
+    # also changes the insertion date if it corresponds to the value inserted when the schema is created in the graph.
+    @api.doc(responses={201: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found',
+                        406: 'Not acceptable'},
+             security=['access_token'])
+    @api.expect(schema_modification_model, validate=True)
+    @w.admin_contributor_required
+    def post(self, species_id, schema_id):
+        """Change the last modification date of the schema with the given identifier."""
+
+        c_user = get_jwt_identity()
+
+        new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
+
+        # create schema URI
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
+                                                         str(species_id),
+                                                         str(schema_id))
+
+        user_role = result['results']['bindings'][0]['role']['value']
+
+        # get schema locking status
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+
+        # get post data
+        post_data = request.get_json()
+
+        result_data = result['results']['bindings']
+        if len(result_data) == 0:
+            return {'Not found': 'Could not find a schema with provided ID.'}, 404
+
+        lock_state = result_data[0]['Schema_lock']['value']
+        permission = enforce_locking(user_role, new_user_url, lock_state)
+        if permission[0] is not True:
+            return permission[1], 403
+
+        date = post_data['date']
+        # check if date is in a valid date format
+        try:
+            dt.datetime.strptime(date, '%Y-%m-%dT%H:%M:%S.%f')
+        except ValueError:
+            return {'Invalid Argument': 'Invalid date format. Please provide a date in format Y-M-DTH:M:S'}, 400
+
+        # get schema info
+        schema_info = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                              (sparql_queries.SELECT_SPECIES_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+
+        schema_properties = schema_info['results']['bindings']
+
+        dateEntered = schema_properties[0]['dateEntered']['value']
+
+        # first delete current modification date value
+        delprop_query = (sparql_queries.DELETE_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'],
+                                                                  schema_uri, 'last_modified'))
+
+        delprop_result = aux.send_data(delprop_query,
+                                       current_app.config['LOCAL_SPARQL'],
+                                       current_app.config['VIRTUOSO_USER'],
+                                       current_app.config['VIRTUOSO_PASS'])
+
+        # insert new value
+        query2send = (sparql_queries.INSERT_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'], schema_uri, 'last_modified', date))
+
+        last_modified_result = aux.send_data(query2send,
+                                             current_app.config['LOCAL_SPARQL'],
+                                             current_app.config['VIRTUOSO_USER'],
+                                             current_app.config['VIRTUOSO_PASS'])
+
+        # check insertion date
+        if dateEntered == 'singularity':
+            delprop_query = (sparql_queries.DELETE_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'],
+                                                                  schema_uri, 'dateEntered'))
+
+            delprop_result = aux.send_data(delprop_query,
+                                           current_app.config['LOCAL_SPARQL'],
+                                           current_app.config['VIRTUOSO_USER'],
+                                           current_app.config['VIRTUOSO_PASS'])
+
+            # insert new value
+            query2send = (sparql_queries.INSERT_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'], schema_uri, 'dateEntered', date))
+
+            date_entered_result = aux.send_data(query2send,
+                                                current_app.config['LOCAL_SPARQL'],
+                                                current_app.config['VIRTUOSO_USER'],
+                                                current_app.config['VIRTUOSO_PASS'])
+
+        if last_modified_result.status_code in [200, 201]:
+            return {'message': 'Changed schema modification date.'}, 201
+        else:
+            return {'message': 'Could not change schema modification date.'}, last_modified_result.status_code
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/lock')
@@ -2835,7 +2995,7 @@ class SchemaPtfAPItypon(Resource):
         # get the prodigal training file hash
         ptf_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                  (sparql_queries.SELECT_SCHEMA_PTF.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
-        
+
         ptf_hash = ptf_query['results']['bindings'][0]['ptf']['value']
 
         root_dir = os.path.abspath(current_app.config['SCHEMAS_PTF'])
@@ -2904,30 +3064,16 @@ class SchemaZipAPItypon(Resource):
         security=[""])
     def get(self, species_id, schema_id):
         """Download zip archive with the files of the specified schema."""
-        
-        # create schema URI
-        schema_uri = '{0}species/{1}/schemas/{2}'.format(current_app.config['BASE_URL'],
-                                                         str(species_id),
-                                                         str(schema_id))
-        # get the schema description
-        schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                 (sparql_queries.SELECT_SCHEMA_PTF.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
-        
-        schema_results = schema_query['results']['bindings']
-        if len(schema_results) == 0:
-            return {'Not found': 'Could not find a schema with specified ID.'}, 404
-        else:
-            schema_name = schema_results[0]['name']['value']
 
-        schema_zip = '{0}_{1}.zip'.format(species_id, schema_name)
+        zip_prefix = '{0}_{1}'.format(species_id, schema_id)
 
         root_dir = os.path.abspath(current_app.config['SCHEMAS_ZIP'])
 
-        schemas_list = os.listdir(root_dir)
-        if schema_zip in schemas_list:
-            return send_from_directory(root_dir, schema_zip, as_attachment=True)
+        schema_zip = [z for z in os.listdir(root_dir) if z.startswith(zip_prefix) is True]
+        if len(schema_zip) > 0:
+            return send_from_directory(root_dir, schema_zip[0], as_attachment=True)
         else:
-            return {'Not found': 'Specified schema does not have a compressed version.'}, 404
+            return {'Not found': 'Could not find a compressed version of specified schema.'}, 404
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci')
@@ -2977,26 +3123,6 @@ class SchemaLociAPItypon(Resource):
 
         if result['boolean']:
             return {'message': 'Schema not found or deprecated.'}, 404
-
-        # determine if schema is locked
-        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                           (sparql_queries.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], new_schema_url)))
-        locking_status = locking_status_query['results']['bindings'][0]['Schema_lock']['value']
-
-        # if schema is locked, enforce condition that only the Admin
-        # or the Contributor that locked the schema may change it
-        if locking_status != 'Unlocked':
-            # check the role of the user that is trying to access
-            new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], str(c_user))
-
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                  (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], new_user_url)))
-
-            user_role = result['results']['bindings'][0]['role']['value']
-
-            allow = enforce_locking(user_role, new_user_url, locking_status)
-            if allow[0] == False:
-                return allow[1], 403
 
         # if date is provided the request returns the alleles that were added after that specific date for all loci
         # else the request returns the list of loci
