@@ -16,6 +16,12 @@ RUN pip install gunicorn
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+# install BLAST+
+RUN mkdir /blast
+RUN cd ../blast; wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.0+-x64-linux.tar.gz \
+&& tar -xzvf ncbi-blast-2.10.0+-x64-linux.tar.gz && rm ncbi-blast-2.10.0+-x64-linux.tar.gz
+ENV PATH="/blast/ncbi-blast-2.10.0+/bin:${PATH}"
+
 #ENTRYPOINT ["python","ref_ns_security_run.py"]
 #CMD [ "flask", "run" ]
 
@@ -23,4 +29,3 @@ RUN pip install -r requirements.txt
 # More info about workers, threads and --worker-tmp-dir
 # https://pythonspeed.com/articles/gunicorn-in-docker/
 CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "7", "--threads=4", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
-
