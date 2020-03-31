@@ -1060,29 +1060,6 @@ class StatsSpeciesId(Resource):
                     '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
                     'ORDER BY ?schema'.format(current_app.config['DEFAULTHGRAPH'], new_species_url)))
 
-<<<<<<< HEAD
-                #print(result["results"]["bindings"], flush=True)
-
-                json_to_file = {"message" : result["results"]["bindings"]}
-
-                #print(json_to_file, flush=True)
-
-                filename = "species_" + str(species_id) + ".json"
-
-                #print(filename, flush=True)
-
-                #print(os.path.join(os.getcwd(), "pre-computed-data", filename), flush=True)
-                
-                with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
-                    json.dump(json_to_file, json_outfile)
-
-                #print("written json file", flush=True)
-
-                return {"message" : result["results"]["bindings"]}, 200
-            
-            except:
-                return {"message" : "Sum thing wong"}, 404
-=======
             result_data = result["results"]["bindings"]
 
             if len(result_data) > 0:
@@ -1094,7 +1071,6 @@ class StatsSpeciesId(Resource):
                     json.dump(json_to_file, json_outfile)
 
             return {"message" : result_data}, 200
->>>>>>> adcff6c5a46f5cee7d835f9a050c002fa5c83910
 
 
 @stats_conf.route("/species/<int:species_id>/schema")
@@ -1141,11 +1117,7 @@ class StatsSpeciesSchemas(Resource):
                 json_to_file = {"message" : result["results"]["bindings"]}
 
                 filename = "species_" + str(species_id) + "_schema.json"
-<<<<<<< HEAD
-                
-=======
 
->>>>>>> adcff6c5a46f5cee7d835f9a050c002fa5c83910
                 with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
 
