@@ -53,14 +53,18 @@ function SimpleBreadcrumbs() {
     <>
       <Breadcrumbs>
         {homeMatches && (
-          <MuiLink component={Link} to="/" style={styles.breadcrumb}>
-            Home
-          </MuiLink>
+          <div style={{ display: "flex", marginRight: "60px" }}>
+            <MuiLink component={Link} to="/" style={styles.breadcrumb}>
+              Home
+            </MuiLink>
+          </div>
         )}
         {aboutMatches && (
-          <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
-            About
-          </MuiLink>
+          <div style={{ display: "flex", marginRight: "60px" }}>
+            <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
+              About
+            </MuiLink>
+          </div>
         )}
         {statsMatches && (
           <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>

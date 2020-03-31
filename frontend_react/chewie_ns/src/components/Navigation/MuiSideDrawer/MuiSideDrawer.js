@@ -25,6 +25,7 @@ import GitHubIcon from "@material-ui/icons/GitHub";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
 import Button from "@material-ui/core/Button";
 import SvgIcon from "@material-ui/core/SvgIcon";
+import Tooltip from "@material-ui/core/Tooltip";
 
 // Material Design Icon import
 import { mdiApi } from "@mdi/js";
@@ -39,32 +40,54 @@ const styles = theme => ({
     display: "flex"
   },
   appBar: {
+    zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
     })
   },
   appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
     marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen
     })
   },
   menuButton: {
-    marginRight: theme.spacing(2)
+    // marginRight: theme.spacing(2)
+    marginRight: 36
   },
   hide: {
     display: "none"
   },
   drawer: {
     width: drawerWidth,
-    flexShrink: 0
+    flexShrink: 0,
+    whiteSpace: "nowrap"
   },
-  drawerPaper: {
-    width: drawerWidth
+  drawerOpen: {
+    width: drawerWidth,
+    // backgroundColor: "#3b3b3b",
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen
+    })
   },
+  drawerClose: {
+    transition: theme.transitions.create("width", {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen
+    }),
+    overflowX: "hidden",
+    width: theme.spacing(7) + 1,
+    [theme.breakpoints.up("sm")]: {
+      width: theme.spacing(9) + 1
+    }
+  },
+  // drawerPaper: {
+  //   width: drawerWidth
+  // },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -74,20 +97,20 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    }),
-    marginLeft: -drawerWidth
+    padding: theme.spacing(3)
+    // transition: theme.transitions.create("margin", {
+    //   easing: theme.transitions.easing.sharp,
+    //   duration: theme.transitions.duration.leavingScreen
+    // }),
+    // marginLeft: -drawerWidth
   },
-  contentShift: {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen
-    }),
-    marginLeft: 0
-  },
+  // contentShift: {
+  //   transition: theme.transitions.create("margin", {
+  //     easing: theme.transitions.easing.easeOut,
+  //     duration: theme.transitions.duration.enteringScreen
+  //   }),
+  //   marginLeft: 0
+  // },
   title: {
     flexGrow: 1
   }
@@ -151,17 +174,23 @@ class PersistentDrawerLeft extends Component {
           </Toolbar>
         </AppBar>
         <Drawer
-          className={classes.drawer}
-          variant="persistent"
-          anchor="left"
+          variant="permanent"
+          className={clsx(classes.drawer, {
+            [classes.drawerOpen]: this.state.open,
+            [classes.drawerClose]: !this.state.open
+          })}
+          // anchor="left"
           open={this.state.open}
           classes={{
-            paper: classes.drawerPaper
+            paper: clsx({
+              [classes.drawerOpen]: this.state.open,
+              [classes.drawerClose]: !this.state.open
+            })
           }}
         >
           <div className={classes.drawerHeader}>
             <IconButton onClick={() => this.handleDrawerClose()}>
-              {this.props.theme.direction === "ltr" ? (
+              {this.props.theme.direction === "rtl" ? (
                 <ChevronLeftIcon />
               ) : (
                 <ChevronRightIcon />
@@ -170,69 +199,77 @@ class PersistentDrawerLeft extends Component {
           </div>
           <Divider />
           <List>
-            <ListItem button component={Link} to="/">
-              <ListItemIcon>
-                <HomeIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Home"} />
-            </ListItem>
-            <ListItem button component={Link} to="/stats">
-              <ListItemIcon>
-                <DescriptionIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Schemas"} />
-            </ListItem>
+            <Tooltip title="Home">
+              <ListItem button component={Link} to="/">
+                <ListItemIcon>
+                  <HomeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Home"} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="Schemas">
+              <ListItem button component={Link} to="/stats">
+                <ListItemIcon>
+                  <DescriptionIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Schemas"} />
+              </ListItem>
+            </Tooltip>
           </List>
           <Divider />
           <List>
-            <ListItem button component={Link} to="/about">
-              <ListItemIcon>
-                <InfoIcon />
-              </ListItemIcon>
-              <ListItemText primary={"About Us"} />
-            </ListItem>
-            <ListItem
-              button
-              component="a"
-              href={
-                "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
-              }
-              target={"_blank"}
-              rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <GitHubIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Github"} />
-            </ListItem>
-            <ListItem button>
-              <ListItemIcon>
-                <ChromeReaderModeIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Read The Docs WIP"} />
-            </ListItem>
-            <ListItem
-              button
-              component="a"
-              href={"https://194.210.120.209/api/NS/api/docs"}
-              target={"_blank"}
-              rel="noopener noreferrer"
-            >
-              <ListItemIcon>
-                <SvgIcon fontSize="large" htmlColor="#000000">
-                  {" "}
-                  <path d={mdiApi} />{" "}
-                </SvgIcon>
-              </ListItemIcon>
-              <ListItemText primary={"API"} />
-            </ListItem>
+            <Tooltip title="About Us">
+              <ListItem button component={Link} to="/about">
+                <ListItemIcon>
+                  <InfoIcon />
+                </ListItemIcon>
+                <ListItemText primary={"About Us"} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="Github">
+              <ListItem
+                button
+                component="a"
+                href={
+                  "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
+                }
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                <ListItemIcon>
+                  <GitHubIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Github"} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="Read the Docs WIP">
+              <ListItem button>
+                <ListItemIcon>
+                  <ChromeReaderModeIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Read The Docs WIP"} />
+              </ListItem>
+            </Tooltip>
+            <Tooltip title="API">
+              <ListItem
+                button
+                component="a"
+                href={"https://194.210.120.209/api/NS/api/docs"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                <ListItemIcon>
+                  <SvgIcon fontSize="large" htmlColor="#000000">
+                    {" "}
+                    <path d={mdiApi} />{" "}
+                  </SvgIcon>
+                </ListItemIcon>
+                <ListItemText primary={"API"} />
+              </ListItem>
+            </Tooltip>
           </List>
         </Drawer>
-        <main
-          className={clsx(classes.content, {
-            [classes.contentShift]: this.state.open
-          })}
-        >
+        <main className={classes.content}>
           <div className={classes.drawerHeader} />
         </main>
       </div>
