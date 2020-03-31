@@ -100,11 +100,11 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-      >
-        <a href={this.props.blastxQuery} target="_blank" rel="noopener noreferrer">
-          BLASTx
-        </a>
-      </Button>
+        component="a"
+        href={this.props.blastxQuery}
+        target="_blank"
+        rel="noopener noreferrer"
+      />
     );
 
     let blastn = (
@@ -116,11 +116,11 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-      >
-        <a href={this.props.blastnQuery} target="_blank" rel="noopener noreferrer">
-          BLASTn
-        </a>
-      </Button>
+        component="a"
+        href={this.props.blastnQuery}
+        target="_blank"
+        rel="noopener noreferrer"
+      />
     );
 
     // console.log(this.props.locus_fasta)
