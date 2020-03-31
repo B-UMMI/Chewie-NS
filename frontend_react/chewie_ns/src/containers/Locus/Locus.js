@@ -104,7 +104,9 @@ class Locus extends Component {
         href={this.props.blastxQuery}
         target="_blank"
         rel="noopener noreferrer"
-      />
+      >
+        BLASTx
+      </Button>
     );
 
     let blastn = (
@@ -120,7 +122,9 @@ class Locus extends Component {
         href={this.props.blastnQuery}
         target="_blank"
         rel="noopener noreferrer"
-      />
+      >
+        BLASTn
+      </Button>
     );
 
     // console.log(this.props.locus_fasta)
