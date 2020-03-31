@@ -1005,10 +1005,10 @@ class StatsSpecies(Resource):
     
         # count number of schemas per species
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-               ('select ?species ?name (COUNT(?sch) AS ?schemas) '
+               ('select ?species ?name (COUNT(?sch) AS ?schemas) ?ptf '
                 'from <{0}> '
                 'where '
-                '{{ ?sch a typon:Schema; typon:isFromTaxon ?species . '
+                '{{ ?sch a typon:Schema; typon:ptf ?ptf; typon:isFromTaxon ?species . '
                 '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'
                 'ORDER BY ?species'.format(current_app.config['DEFAULTHGRAPH'])))
 
@@ -1319,11 +1319,7 @@ class StatsSpeciesSchemasMode(Resource):
                                 "scatter_data": scatter_res}
 
                 filename = "species_" + str(species_id) + "_" + str(schema_id) + ".json"
-<<<<<<< HEAD
-                
-=======
 
->>>>>>> adcff6c5a46f5cee7d835f9a050c002fa5c83910
                 with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
                     json.dump(json_to_file, json_outfile)
 
