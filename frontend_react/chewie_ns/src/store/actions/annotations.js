@@ -38,14 +38,15 @@ export const fetchAnnotations = (species_id, schema_id) => {
           annotTableData.push({
             uniprot_label: res.data.message[key].UniprotLabel.value,
             uniprot_uri: res.data.message[key].UniprotURI.value,
-            species: res.data.message[key].species.value,
+            //species: res.data.message[key].species.value,
             // schema: res.data.message[key].schema.value.substring(
             //   res.data.message[key].schema.value.lastIndexOf("/") + 1
             // ),
             locus: res.data.message[key].locus.value.substring(
               res.data.message[key].locus.value.lastIndexOf("/") + 1
             ),
-            locus_name: res.data.message[key].name.value
+            locus_name: res.data.message[key].name.value,
+            alleles_mode: parseInt(res.data.message[key].mode)
           });
         }
         // console.log(annotTableData2)

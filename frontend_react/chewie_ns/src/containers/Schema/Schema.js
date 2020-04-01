@@ -255,31 +255,6 @@ class Schema extends Component {
           }
         },
         {
-          name: "species",
-          label: "Species",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: value => {
-              return {
-                style: {
-                  fontWeight: "bold"
-                }
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => (
-              <Aux>
-                <Typography component="div">
-                  <Box display="inline" fontStyle="italic" m={1}>
-                    {value}
-                  </Box>
-                </Typography>
-              </Aux>
-            )
-          }
-        },
-        {
           name: "locus",
           label: "Locus ID",
           options: {
@@ -321,7 +296,7 @@ class Schema extends Component {
           }
         },
         {
-          name: "mode",
+          name: "alleles_mode",
           label: "Alleles Mode",
           options: {
             filter: true,
@@ -361,7 +336,7 @@ class Schema extends Component {
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
             title={"Annotations"}
-            data={newAnnotations}
+            data={this.props.annotations}
             columns={columns}
             options={options}
           />
