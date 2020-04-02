@@ -91,3 +91,6 @@ class Config(object):
     # file transfer configs
     SCHEMAS_PTF = './downloadable_data/prodigal_training_files'
     SCHEMAS_ZIP = './downloadable_data/compressed_schemas'
+
+    # pre-computed stats for frontend
+    PRE_COMPUTE = './pre-computed-data'

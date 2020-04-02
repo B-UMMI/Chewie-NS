@@ -126,13 +126,13 @@ def compress_determiner(schemas, species_id, sp_name, compressed_schemas, to_com
         last_date, lock_state, schema_info = determine_date(schema_uri)
 
         schema_date = last_date
+        schema_lock = lock_state
         schema_bsr = schema_info['bsr']['value']
         schema_ml = schema_info['minimum_locus_length']['value']
         schema_tt = schema_info['translation_table']['value']
         schema_ptf = schema_info['prodigal_training_file']['value']
         schema_st = schema_info['size_threshold']['value']
         chewie_version = schema_info['chewBBACA_version']['value']
-        schema_lock = lock_state
 
         comp_schema = [f for f in compressed_schemas if f.startswith(schema_prefix)]
         if len(comp_schema) == 0:
