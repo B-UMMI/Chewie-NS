@@ -146,39 +146,6 @@ class Stats extends Component {
               };
             }
           }
-        },
-        {
-          name: "ptf",
-          label: "Training File",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: value => {
-              return {
-                style: {
-                  fontWeight: "bold"
-                }
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return (
-                <div>
-                  <div>{value}</div>
-                  {/* <div>
-                    <Button variant="contained" color="default">
-                      Download
-                    </Button>
-                  </div>
-                  <div>
-                    <Button variant="contained" color="default">
-                      More Info
-                    </Button>
-                  </div> */}
-                </div>
-              );
-            }
-          }
         }
       ];
 
