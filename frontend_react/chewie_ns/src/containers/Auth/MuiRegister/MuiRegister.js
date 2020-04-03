@@ -5,6 +5,7 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 import * as actions from "../../../store/actions/index";
 
 // Material Ui imports
+import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
@@ -12,17 +13,13 @@ import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-
 import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
+
+// Material UI icon imports
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
-
-// import Snackbar from "@material-ui/core/Snackbar";
-// import MuiAlert from '@material-ui/lab/Alert';
-// import CloseIcon from "@material-ui/icons/Close";
 
 const styles = theme => ({
   paper: {
@@ -41,20 +38,64 @@ const styles = theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  buttonRoot: {
+    boxShadow: "none",
+    textTransform: "none",
+    color: "#ffffff",
+    borderRadius: 4,
+    fontSize: 16,
+    padding: "6px 12px",
+    border: "1px solid",
+    backgroundColor: "#3b3b3b",
+    borderColor: "#3b3b3b",
+    "&:hover": {
+      backgroundColor: "#3b3b3b",
+      borderColor: "#3b3b3b"
+    },
+    "&:active": {
+      boxShadow: "none",
+      backgroundColor: "#3b3b3b",
+      borderColor: "#3b3b3b"
+    },
+    "&:focus": {
+      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)"
+    }
+  },
+  linkRoot: {
+    color: "#b26046"
   }
 });
+
+const CssTextField = withStyles({
+  root: {
+    "& label.Mui-focused": {
+      color: "#b26046"
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: "#b26046"
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "black"
+      },
+      "&:hover fieldset": {
+        borderColor: "black"
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#b26046"
+      }
+    }
+  }
+})(TextField);
 
 class SignUp extends Component {
   state = {
     username: "",
+    organization: "",
     email: "",
     password: "",
     confirmPassword: "",
-    // status: {
-    //   msg: "Error. Passwords do not match. Please try again.",
-    //   key: Math.random()
-    // },
-    // openSnackBar: false,
     showPassword: false,
     isSignup: true
   };
@@ -73,35 +114,33 @@ class SignUp extends Component {
     event.preventDefault();
   };
 
-  //   handleOpenSnackBar = () => {
-  //     this.setState({ openSnackBar: true });
-  //   };
-
-  //   handleCloseSnackBar = (event, reason) => {
-  //     if (reason === "clickaway") {
-  //       return;
-  //     }
-  //   };
-
   onSubmitHandler = event => {
     event.preventDefault();
-    //console.log(event);
-    //console.log(this.state.email);
-    //console.log(this.state.username);
-    //console.log(this.state.password);
-    //console.log(this.state.confirmPassword);
 
     if (this.state.password === this.state.confirmPassword) {
       console.log("Happy Chewie");
+      axios
+        .post("/user/register_user", {
+          email: this.state.email,
+          password: this.state.password
+        })
+        .then(res => {
+          console.log(res);
+          if (res.status === 200) {
+            alert("You have registered successfully.");
+            this.props.history.push({
+              pathname: "/auth"
+            });
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
     } else {
       //   this.setState({ openSnackBar: true, status: "error" });
       alert("Passwords do not match. Please try again.");
+      window.location.reload();
     }
-    // this.props.onAuth(
-    //   this.state.email,
-    //   this.state.password,
-    //   this.state.isSignup
-    // );
   };
 
   render() {
@@ -127,32 +166,6 @@ class SignUp extends Component {
       </InputAdornment>
     );
 
-    // let snackBar = (
-    //   <Snackbar
-    //     anchorOrigin={{
-    //       vertical: "bottom",
-    //       horizontal: "left"
-    //     }}
-    //     open={this.state.open}
-    //     autoHideDuration={2000}
-    //     onClose={(e, r) => this.handleCloseSnackBar(e, r)}
-    //     variant="warning"
-    //     ContentProps={{
-    //       "aria-describedby": "message-id"
-    //     }}
-    //     message={this.state.status.msg}
-    //     key={this.state.status.key}
-    //     action={[
-    //       <IconButton
-    //         key="close"
-    //         onClick={(e, r) => this.handleCloseSnackBar(e, r)}
-    //       >
-    //         <CloseIcon />
-    //       </IconButton>
-    //     ]}
-    //   />
-    // );
-
     let errorMessage = null;
 
     if (this.props.error) {
@@ -168,10 +181,11 @@ class SignUp extends Component {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
+          {/* <Typography component="h1" variant="h5">
             Sign up
-          </Typography>
+          </Typography> */}
           {authRedirect}
+          {errorMessage}
           <form
             className={classes.form}
             noValidate
@@ -179,7 +193,7 @@ class SignUp extends Component {
           >
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <TextField
+                <CssTextField
                   variant="outlined"
                   required
                   fullWidth
@@ -191,7 +205,18 @@ class SignUp extends Component {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <CssTextField
+                  variant="outlined"
+                  required
+                  fullWidth
+                  id="organization"
+                  label="Organization"
+                  name="Organization"
+                  onInput={e => this.setState({ organization: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CssTextField
                   variant="outlined"
                   required
                   fullWidth
@@ -203,7 +228,7 @@ class SignUp extends Component {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <CssTextField
                   variant="outlined"
                   required
                   fullWidth
@@ -222,7 +247,7 @@ class SignUp extends Component {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
+                <CssTextField
                   variant="outlined"
                   required
                   fullWidth
@@ -247,15 +272,23 @@ class SignUp extends Component {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
               className={classes.submit}
+              classes={{
+                root: classes.buttonRoot
+              }}
             >
-              Sign Up
+              SIGN UP
             </Button>
-            {/* {this.state.status === "error" ? { snackBar } : null} */}
             <Grid container justify="flex-end">
               <Grid item>
-                <Link variant="body2" component={RouterLink} to="/auth">
+                <Link
+                  variant="body2"
+                  component={RouterLink}
+                  to="/auth"
+                  classes={{
+                    root: classes.linkRoot
+                  }}
+                >
                   Already have an account? Sign in
                 </Link>
               </Grid>

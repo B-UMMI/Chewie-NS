@@ -9,23 +9,25 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import List from "@material-ui/core/List";
-import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+import Typography from "@material-ui/core/Typography";
+import Divider from "@material-ui/core/Divider";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import SvgIcon from "@material-ui/core/SvgIcon";
+
+// Material UI  icon imports
+import MenuIcon from "@material-ui/icons/Menu";
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import HomeIcon from "@material-ui/icons/Home";
 import DescriptionIcon from "@material-ui/icons/Description";
 import InfoIcon from "@material-ui/icons/Info";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
-import Button from "@material-ui/core/Button";
-import SvgIcon from "@material-ui/core/SvgIcon";
-import Tooltip from "@material-ui/core/Tooltip";
 
 // Material Design Icon import
 import { mdiApi } from "@mdi/js";
@@ -67,14 +69,17 @@ const styles = theme => ({
     whiteSpace: "nowrap"
   },
   drawerOpen: {
+    backgroundColor: "#3b3b3b",
+    color: "white",
     width: drawerWidth,
-    // backgroundColor: "#3b3b3b",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
     })
   },
   drawerClose: {
+    backgroundColor: "#3b3b3b",
+    color: "white",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen
@@ -159,9 +164,6 @@ class PersistentDrawerLeft extends Component {
             <Typography variant="h6" className={classes.title}>
               Chewie-NS
             </Typography>
-            {/* <Button color="inherit" component={Link} to="/auth">
-              Login
-            </Button> */}
             {!this.props.isAuthenticated ? (
               <Button color="inherit" component={Link} to="/auth">
                 Login
@@ -190,10 +192,10 @@ class PersistentDrawerLeft extends Component {
         >
           <div className={classes.drawerHeader}>
             <IconButton onClick={() => this.handleDrawerClose()}>
-              {this.props.theme.direction === "rtl" ? (
-                <ChevronLeftIcon />
+              {this.props.theme.direction === "ltr" ? (
+                <ChevronLeftIcon style={{ color: "white" }} />
               ) : (
-                <ChevronRightIcon />
+                <ChevronRightIcon style={{ color: "white" }} />
               )}
             </IconButton>
           </div>
@@ -202,7 +204,7 @@ class PersistentDrawerLeft extends Component {
             <Tooltip title="Home">
               <ListItem button component={Link} to="/">
                 <ListItemIcon>
-                  <HomeIcon />
+                  <HomeIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"Home"} />
               </ListItem>
@@ -210,7 +212,7 @@ class PersistentDrawerLeft extends Component {
             <Tooltip title="Schemas">
               <ListItem button component={Link} to="/stats">
                 <ListItemIcon>
-                  <DescriptionIcon />
+                  <DescriptionIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"Schemas"} />
               </ListItem>
@@ -221,7 +223,7 @@ class PersistentDrawerLeft extends Component {
             <Tooltip title="About Us">
               <ListItem button component={Link} to="/about">
                 <ListItemIcon>
-                  <InfoIcon />
+                  <InfoIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"About Us"} />
               </ListItem>
@@ -237,7 +239,7 @@ class PersistentDrawerLeft extends Component {
                 rel="noopener noreferrer"
               >
                 <ListItemIcon>
-                  <GitHubIcon />
+                  <GitHubIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"Github"} />
               </ListItem>
@@ -245,7 +247,7 @@ class PersistentDrawerLeft extends Component {
             <Tooltip title="Read the Docs WIP">
               <ListItem button>
                 <ListItemIcon>
-                  <ChromeReaderModeIcon />
+                  <ChromeReaderModeIcon style={{ color: "white" }} />
                 </ListItemIcon>
                 <ListItemText primary={"Read The Docs WIP"} />
               </ListItem>
@@ -259,7 +261,7 @@ class PersistentDrawerLeft extends Component {
                 rel="noopener noreferrer"
               >
                 <ListItemIcon>
-                  <SvgIcon fontSize="large" htmlColor="#000000">
+                  <SvgIcon fontSize="large" htmlColor="#ffffff">
                     {" "}
                     <path d={mdiApi} />{" "}
                   </SvgIcon>
