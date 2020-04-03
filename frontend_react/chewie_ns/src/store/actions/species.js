@@ -26,7 +26,7 @@ export const fetchSpecies = spec_id => {
   return dispatch => {
     dispatch(fetchSpeciesStart());
     axios
-      .get("stats/species/" + spec_id)
+      .get("stats/species/" + spec_id + "/totals")
       .then(res => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
@@ -87,7 +87,7 @@ export const fetchSpeciesAnnot = spec_id => {
   return dispatch => {
     dispatch(fetchSpeciesAnnotStart());
     axios
-      .get("stats/species/" + spec_id + "/schema")
+      .get("stats/species/" + spec_id + "/schema/loci/nr_alleles")
       .then(res => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
