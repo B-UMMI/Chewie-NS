@@ -47,7 +47,7 @@ from app.utils import wrappers as w
 from app.utils import sparql_queries
 from app.utils import auxiliary_functions as aux
 from app import (db, celery, login_manager,
-                 datastore_cheat, security)
+                 datastore_cheat, security, jwt as jwtm)
 
 from app.api import api, blueprint
 
@@ -57,7 +57,7 @@ from app.api import api, blueprint
 from SPARQLWrapper import SPARQLWrapper
 
 # Get the error handlers to work with restplus
-jwt._set_error_handler_callbacks(api)
+jwtm._set_error_handler_callbacks(api)
 
 # queue to add locus do schema
 @celery.task(time_limit=20)
@@ -1063,7 +1063,7 @@ class StatsSpeciesId(Resource):
     @w.use_kwargs(api, parser)
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
-        """."""
+        """..."""
 
         if schema_id is None:
             return {'Invalid Argument': 'Please provide a valid schema identifier'}, 400
@@ -1145,7 +1145,7 @@ class StatsSpeciesSchemas(Resource):
     @w.use_kwargs(api, parser)
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
-        """."""
+        """..."""
 
         if schema_id is None:
             return {'Invalid Argument': 'Please provide a valid schema identifier'}, 400
@@ -1215,7 +1215,7 @@ class StatsSpeciesSchemasMode(Resource):
              security=['access_token'])
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
-        """."""
+        """..."""
 
         user_id = get_jwt_identity()
 
@@ -1282,7 +1282,7 @@ class StatsAnnotations(Resource):
              security=['access_token'])
     @w.admin_contributor_required
     def post(self, species_id, schema_id):
-        """."""
+        """..."""
 
         user_id = get_jwt_identity()
 
@@ -1292,156 +1292,6 @@ class StatsAnnotations(Resource):
                               (sparql_queries.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
         user_role = result['results']['bindings'][0]['role']['value']
 
-<<<<<<< HEAD
-    #@api.hide
-    @api.doc(responses={ 200: 'OK',
-                         400: 'Invalid Argument',
-                         500: 'Internal Server Error',
-                         403: 'Unauthorized',
-                         401: 'Unauthenticated',
-                         404: 'Not Found'},
-             security=[])
-    def get(self, species_id, schema_id):	
-        """ Get all the annotations in NS. """
-
-        species_url = '{0}species/{1}'.format(current_app.config['BASE_URL'], species_id)
-        schema_url = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], str(species_id), str(schema_id))
-
-        precomputed_data_file = os.getcwd() + "/pre-computed-data/" + "species_" + str(species_id) + "_" + str(schema_id) + "_annotations.json"
-
-        if os.path.isfile(precomputed_data_file):
-
-            with open(precomputed_data_file, "r") as json_file:
-                json_data = json.load(json_file)
-
-            print("sending json file contents", flush=True)
-
-            return {"message": json_data}, 200
-
-        try:
-
-            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                ('select DISTINCT ?locus (str(?name) as ?name) (str(?UniprotLabel) as ?UniprotLabel) '
-                    '(str(?UniprotURI) as ?UniprotURI) '    
-                    'from <{0}> '
-                    'where '
-                    '{{ <{1}> a typon:Schema; typon:isFromTaxon ?taxon; typon:hasSchemaPart ?part . '
-                    '?taxon a <http://purl.uniprot.org/core/Taxon>; typon:name ?species . '
-                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                    '?locus a typon:Locus; typon:name ?name .'
-                    '?allele a typon:Allele; typon:isOfLocus ?locus . '
-                    '?allele typon:hasSequence ?sequence . '
-                    'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
-                    'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }} '
-                    'ORDER BY ?UniprotLabel '.format(current_app.config['DEFAULTHGRAPH'], schema_url)))
-
-            annotations = result["results"]["bindings"]
-
-            # get total number of alleles
-            result1 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                    ('select ?locus (COUNT(DISTINCT ?allele) as ?nr_allele) '
-                     'from <{0}> '
-                     'where '
-                     '{{ <{1}> a typon:Schema; typon:isFromTaxon <{2}>; '
-                     'typon:hasSchemaPart ?part . '
-                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                     '?allele a typon:Allele; typon:isOfLocus ?locus .}}'.format(current_app.config['DEFAULTHGRAPH'], schema_url, species_url)))
-
-            loci = result1["results"]["bindings"]
-            schema_alleles = sum(map(int, [a["nr_allele"]["value"] for a in loci]))
-
-            result = []
-            offset = 0
-            limit = 1000
-            count = 0
-            while count != schema_alleles:
-
-                data = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']), 
-                        ('select ?locus (str(?name) as ?name) (str(?original_name) as ?original_name) '
-                        ' (strlen(?nucSeq) as ?nucSeqLen) '
-                        'from <{0}> '
-                        'where '
-                        '{{ <{1}> typon:hasSchemaPart ?part. '
-                        '?part typon:hasLocus ?locus .'
-                        '?locus typon:name ?name ; typon:originalName ?original_name; typon:hasDefinedAllele ?allele . ' 
-                        '?allele a typon:Allele; typon:isOfLocus ?locus .'
-                        '?allele typon:hasSequence ?sequence .'
-                        '?sequence typon:nucleotideSequence ?nucSeq .'
-                        'FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
-                        'order by (?name) OFFSET {2} LIMIT {3} '.format(current_app.config['DEFAULTHGRAPH'], schema_url, offset, limit)))
-
-                result.append(data["results"]["bindings"])
-            
-                count = sum( [ len(listElem) for listElem in result ] )
-            
-                print(count, flush=True)
-            
-                offset += limit
-
-            result_loop = list(itertools.chain(*result))
-
-            loci_data = {}
-            for i in result_loop:
-                
-                locus_name = i["name"]["value"]
-                alleles_len = []
-                if locus_name not in loci_data:
-                    alleles_len.append(i["nucSeqLen"]["value"])
-                    loci_data[locus_name] = alleles_len
-                else:
-                    loci_data[locus_name].append(i["nucSeqLen"]["value"])
-
-            modes = {}
-            for k, v in loci_data.items():
-                t = Counter(v)
-                mode = t.most_common()[0][0]
-                modes[k] = mode
-
-            for a in annotations:
-                locus = a['name']['value']
-                a['mode'] = modes[locus]
-
-            filename = "species_" + str(species_id) + "_" + str(schema_id) + "_annotations.json"
-
-            with open(os.path.join(os.getcwd(), "pre-computed-data", filename), "w") as json_outfile:
-                json.dump(annotations, json_outfile)
-
-
-            #loci_data = {}
-
-            #for i in result["results"]["bindings"]:
-            #    locus_name = i["name"]["value"]
-
-            #    alleles_len = []
-
-            #    if locus_name not in loci_data:
-
-            #        alleles_len.append(i["nucSeqLen"]["value"])
-
-            #        loci_data[locus_name] = alleles_len
-
-            #    else:
-            #        loci_data[locus_name].append(i["nucSeqLen"]["value"])
-            
-            #test = {"message": []}
-
-            #for o in result["results"]["bindings"]:
-            #    locus_name = o["name"]["value"]
-
-            #    if locus_name in loci_data:
-            #        t = Counter(loci_data[locus_name])
-            #        test["message"].append({
-            #                "locus": o["locus"]["value"],
-            #                "name": o["name"]["value"],
-            #                "alleles_mode": t.most_common(1)[0][0],
-            #                "UniprotLabel": o["UniprotLabel"]["value"],
-            #                "UniprotURI": o["UniprotURI"]["value"]})
-                         
-            return {"message": annotations}, 200, {'Server-Date': str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))}
-        
-        except:
-            return {"message" : "Sum thing wong"}, 404
-=======
         # check if schema is locked
         schema_uri = os.path.join(current_app.config['BASE_URL'], 'species/{0}/schemas/{1}'.format(species_id, schema_id))
         locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1464,8 +1314,6 @@ class StatsAnnotations(Resource):
         os.system(annotations_cmd)
 
         return {'OK': '.'}, 201
->>>>>>> cf5215cf823f9dd75c1df18954eda5e67dc3c308
-
 
 # Loci Routes
 
