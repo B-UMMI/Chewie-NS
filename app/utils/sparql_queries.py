@@ -259,6 +259,11 @@ ASK_SPECIES_UNIPROT = ('ASK WHERE {{ ?species owl:sameAs <{0}> .}}')
 # determine if species exists locally with species NS URI
 ASK_SPECIES_NS = ('ASK where {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}')
 
+SELECT_SINGLE_SPECIES = ('SELECT ?species ?name '
+                         'FROM <{0}> '
+                         'WHERE '
+                         '{{ <{1}> a <http://purl.uniprot.org/core/Taxon>; typon:name ?name .}}')
+
 ASK_LOCUS = ('ASK WHERE {{ <{0}> a typon:Locus .}}')
 
 ASK_SEQUENCE_HASH = ('ASK WHERE {{ <{0}> typon:nucleotideSequence ?seq.}}')
@@ -283,6 +288,93 @@ NS_STATS = ('SELECT * '
             '{{ SELECT (COUNT(?isol) AS ?isolates) WHERE {{?isol a typon:Isolate. }} }} '
             '{{ SELECT (COUNT(?all) AS ?alleles) WHERE {{?all a typon:Allele. }} }} }}')
 
+COUNT_SPECIES_SCHEMAS = ('SELECT ?species ?name (COUNT(?sch) AS ?schemas) '
+                         'FROM <{0}> '
+                         'WHERE '
+                         '{{ ?sch a typon:Schema; typon:isFromTaxon ?species . '
+                         '?species a <http://purl.uniprot.org/core/Taxon>; typon:name ?name . }}'
+                         'ORDER BY ?species')
+
+COUNT_LOCI_ALLELE = ('SELECT ?schema ?locus (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                     'FROM <{0}> '
+                     'WHERE '
+                     '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                     'typon:hasSchemaPart ?part . '
+                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                     '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                     '?allele typon:hasSequence ?sequence . }}'
+                     'ORDER BY ?schema ?locus')
+
+COUNT_SINGLE_SCHEMA_LOCI_ALLELE = ('SELECT ?locus (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                                   'FROM <{0}> '
+                                   'WHERE '
+                                   '{{ <{1}> a typon:Schema; '
+                                   'typon:hasSchemaPart ?part . '
+                                   '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                                   '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                                   '?allele typon:hasSequence ?sequence . }}'
+                                   'ORDER BY ?schema ?locus')
+
+COUNT_SCHEMA_LOCI_ALLELES = ('SELECT ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen ?Schema_lock (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                              'FROM <{0}> '
+                              'WHERE '
+                              '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
+                              'typon:schemaName ?name; typon:administratedBy ?user; '
+                              'typon:chewBBACA_version ?chewie; typon:bsr ?bsr; '
+                              'typon:ptf ?ptf; typon:translation_table ?tl_table; '
+                              'typon:minimum_locus_length ?minLen; typon:Schema_lock ?Schema_lock; '
+                              'typon:hasSchemaPart ?part . '
+                              '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                              '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
+                              'ORDER BY ?schema')
+
+# query for single schema
+COUNT_SINGLE_SCHEMA_LOCI_ALLELES = ('SELECT ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen ?last_modified (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                                    'FROM <{0}> '
+                                    'WHERE '
+                                    '{{ <{1}> a typon:Schema; '
+                                    'typon:schemaName ?name; typon:administratedBy ?user; '
+                                    'typon:chewBBACA_version ?chewie; typon:bsr ?bsr; '
+                                    'typon:ptf ?ptf; typon:translation_table ?tl_table; '
+                                    'typon:minimum_locus_length ?minLen; '
+                                    'typon:last_modified ?last_modified; '
+                                    'typon:hasSchemaPart ?part . '
+                                    '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}')
+
+COUNT_SCHEMA_ALLELES = ('SELECT ?locus (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                        'FROM <{0}> '
+                        'WHERE '
+                        '{{ <{1}> a typon:Schema; '
+                        'typon:hasSchemaPart ?part . '
+                        '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                        '?allele a typon:Allele; typon:isOfLocus ?locus .}}')
+
+SELECT_ALLELES_LENGTH = ('SELECT ?locus (str(?name) AS ?name) (strlen(?nucSeq) AS ?nucSeqLen) '
+                         'FROM <{0}> '
+                         'WHERE '
+                         '{{ <{1}> typon:hasSchemaPart ?part. '
+                         '?part typon:hasLocus ?locus .'
+                         '?locus typon:name ?name; typon:hasDefinedAllele ?allele . ' 
+                         '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                         '?allele typon:hasSequence ?sequence .'
+                         '?sequence typon:nucleotideSequence ?nucSeq .'
+                         'FILTER NOT EXISTS {{ ?part typon:deprecated "true"^^xsd:boolean }} }}'
+                         'ORDER BY (?name) OFFSET {2} LIMIT {3}')
+
+SELECT_SCHEMA_LOCI_ANNOTATIONS = ('SELECT DISTINCT ?locus ?name (str(?UniprotLabel) AS ?UniprotLabel) '
+                                  '(str(?UniprotURI) AS ?UniprotURI) '
+                                  'FROM <{0}> '
+                                  'WHERE '
+                                  '{{ <{1}> a typon:Schema; typon:hasSchemaPart ?part . '
+                                  '?part a typon:SchemaPart; typon:hasLocus ?locus .'
+                                  '?locus a typon:Locus; typon:name ?name . '
+                                  '?allele a typon:Allele; typon:isOfLocus ?locus . '
+                                  '?allele typon:hasSequence ?sequence . '
+                                  'OPTIONAL{{?sequence typon:hasUniprotLabel ?UniprotLabel.}} '
+                                  'OPTIONAL{{?sequence typon:hasUniprotSequence ?UniprotURI }} }} '
+                                  'ORDER BY ?locus ')
+
 SELECT_SPECIES = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
                   'SELECT ?species ?name '
                   'FROM <{0}> '
@@ -295,11 +387,11 @@ INSERT_SPECIES = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
                   '{{ <{1}> owl:sameAs <{2}>; typon:name "{3}"^^xsd:string; a <http://purl.uniprot.org/core/Taxon>.}}')
 
 SELECT_SPECIES_AND_SCHEMAS = ('SELECT ?species ?name ?schemas ?schemaName '
-                          'FROM <{0}> '
-                          'WHERE '
-                          '{{ {{<{1}> owl:sameAs ?species; typon:name ?name.}} '
-                          'UNION {{ ?schemas typon:isFromTaxon <{1}>; a typon:Schema; typon:schemaName ?schemaName. '
-                          'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }} }}')
+                              'FROM <{0}> '
+                              'WHERE '
+                              '{{ {{<{1}> owl:sameAs ?species; typon:name ?name.}} '
+                              'UNION {{ ?schemas typon:isFromTaxon <{1}>; a typon:Schema; typon:schemaName ?schemaName. '
+                              'FILTER NOT EXISTS {{ ?schemas typon:deprecated  "true"^^xsd:boolean }} }} }}')
 
 SELECT_SPECIES_SCHEMA = ('SELECT ?schema '
                          '(str(?description) AS ?name) '

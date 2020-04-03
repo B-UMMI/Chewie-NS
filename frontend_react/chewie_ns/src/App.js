@@ -29,7 +29,7 @@ import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 import MuiLink from "@material-ui/core/Link";
 
 function SimpleBreadcrumbs() {
-  const homeMatches = useRouteMatch("/");
+  // const homeMatches = useRouteMatch("/");
   const aboutMatches = useRouteMatch("/about");
   const statsMatches = useRouteMatch("/stats");
   const speciesIdMatches = useRouteMatch("/species/:species_id");
@@ -52,13 +52,13 @@ function SimpleBreadcrumbs() {
   return (
     <>
       <Breadcrumbs>
-        {homeMatches && (
+        {/* {homeMatches && (
           <div style={{ display: "flex", marginRight: "60px" }}>
             <MuiLink component={Link} to="/" style={styles.breadcrumb}>
               Home
             </MuiLink>
           </div>
-        )}
+        )} */}
         {aboutMatches && (
           <div style={{ display: "flex", marginRight: "60px" }}>
             <MuiLink component={Link} to="/about" style={styles.breadcrumb}>

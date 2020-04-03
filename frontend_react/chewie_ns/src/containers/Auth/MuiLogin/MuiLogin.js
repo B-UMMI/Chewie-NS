@@ -4,7 +4,8 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 
 import * as actions from "../../../store/actions/index";
 
-// Material Ui imports
+// Material UI imports
+import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import TextField from "@material-ui/core/TextField";
@@ -12,11 +13,11 @@ import Link from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
-
-import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+
+// Material UI icon imports
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
@@ -33,8 +34,56 @@ const styles = theme => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2)
+  },
+  buttonRoot: {
+    boxShadow: "none",
+    textTransform: "none",
+    color: "#ffffff",
+    borderRadius: 4,
+    fontSize: 16,
+    padding: "6px 12px",
+    border: "1px solid",
+    backgroundColor: "#3b3b3b",
+    borderColor: "#3b3b3b",
+    "&:hover": {
+      backgroundColor: "#3b3b3b",
+      borderColor: "#3b3b3b"
+    },
+    "&:active": {
+      boxShadow: "none",
+      backgroundColor: "#3b3b3b",
+      borderColor: "#3b3b3b"
+    },
+    "&:focus": {
+      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)"
+    }
+  },
+  linkRoot: {
+    color: "#b26046"
   }
 });
+
+const CssTextField = withStyles({
+  root: {
+    "& label.Mui-focused": {
+      color: "#b26046"
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: "#b26046"
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "black"
+      },
+      "&:hover fieldset": {
+        borderColor: "black"
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#b26046"
+      }
+    }
+  }
+})(TextField);
 
 class SignIn extends Component {
   state = {
@@ -105,16 +154,17 @@ class SignIn extends Component {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h5">
+          {/* <Typography component="h1" variant="h5">
             Sign in
-          </Typography>
+          </Typography> */}
           {authRedirect}
+          {errorMessage}
           <form
             className={classes.form}
             noValidate
             onSubmit={e => this.onSubmitHandler(e)}
           >
-            <TextField
+            <CssTextField
               variant="outlined"
               margin="normal"
               required
@@ -126,7 +176,7 @@ class SignIn extends Component {
               autoFocus
               onInput={e => this.setState({ email: e.target.value })}
             />
-            <TextField
+            <CssTextField
               variant="outlined"
               margin="normal"
               required
@@ -148,19 +198,30 @@ class SignIn extends Component {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
               className={classes.submit}
+              classes={{
+                root: classes.buttonRoot
+              }}
             >
-              Sign In
+              SIGN IN
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="#" variant="body2">
+                <Link
+                  href="#"
+                  variant="body2"
+                  classes={{ root: classes.linkRoot }}
+                >
                   Forgot password?
                 </Link>
               </Grid>
               <Grid item>
-                <Link variant="body2" component={RouterLink} to="/register">
+                <Link
+                  variant="body2"
+                  component={RouterLink}
+                  to="/register"
+                  classes={{ root: classes.linkRoot }}
+                >
                   Don't have an account? Sign Up
                 </Link>
               </Grid>
