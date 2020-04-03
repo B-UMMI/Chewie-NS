@@ -42,7 +42,7 @@ class Schema extends Component {
     const schema_id = this.props.match.params.schema_id;
 
     const query =
-      "stats/species/" + species_id + "/schema/" + schema_id + "/loci";
+      "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
 
     const query_hits = localStorage.getItem(query);
 
