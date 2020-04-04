@@ -269,7 +269,9 @@ def create_role():
         user_datastore.create_role(name='User')
         # create Admin user
         u = user_datastore.create_user(email="test@refns.com",
-                                       password=hash_password("mega_secret"))
+                                       password=hash_password("mega_secret"),
+                                       username="chewie",
+                                       organization="UMMI")
         user_datastore.add_role_to_user(u, "Admin")
 
         # check if Admin was successfully created in Postgres db
@@ -460,6 +462,8 @@ user_model = api.model('UserModel',
                                              description='User unique integer identifier.'),
                         'email': fields.String(required=True,
                                                description='User email address.'),
+                        'username': fields.String(required=True, description='Username.'),
+                        'organization': fields.String(required=True, description='Organization that the user belongs to.'),
                         'last_login_at': fields.DateTime(required=True,
                                                          description='User last login date.'),
                         'roles': fields.String(required=True,
@@ -474,6 +478,8 @@ current_user_model = api.model('CurrentUserModel',
                                                      description='User unique integer identifier.'),
                                 'email': fields.String(required=True,
                                                        description='User email address.'),
+                                'username': fields.String(required=True, description='Username.'),
+                                'organization': fields.String(required=True, description='Organization that the user belongs to.'),
                                 'last_login_at': fields.DateTime(required=True,
                                                                  description='User last login date.'),
                                 'roles': fields.String(required=True,
@@ -489,6 +495,8 @@ register_user_model = api.model('RegisterUserModel',
                                  'password': fields.String(required=True,
                                                            description='User NS account password.',
                                                            min_length=8),
+                                 'username': fields.String(required=True, description='Username.'),
+                                 'organization': fields.String(required=True, description='Organization that the user belongs to.')
                                  })
 
 create_user_model = api.model('CreateUserModel',
@@ -497,6 +505,8 @@ create_user_model = api.model('CreateUserModel',
                                'password': fields.String(required=True,
                                                          description='User NS account password.',
                                                          min_length=8),
+                               'username': fields.String(required=True, description='Username.'),
+                               'organization': fields.String(required=True, description='Organization that the user belongs to.'),
                                'role': fields.String(required=False,
                                                      default='User',
                                                      description='Role/Permissions for the new user (User or Contributor).')
@@ -537,6 +547,8 @@ class AllUsers(Resource):
             current_user_dict = {}
             current_user_dict['id'] = user.id
             current_user_dict['email'] = user.email
+            current_user_dict['username'] = user.username
+            current_user_dict['organization'] = user.organization
             # this value will be None/null if user never logged in
             current_user_dict['last_login_at'] = user.last_login_at
             current_user_dict['roles'] = str(user.roles[0])
@@ -568,6 +580,8 @@ class AllUsers(Resource):
 
         email = data['email']
         password = data['password']
+        username = data['username']
+        organization = data['organization']
         # new users are created with User permissions
         new_user_role = data['role']
 
@@ -580,7 +594,10 @@ class AllUsers(Resource):
             new_user_id = postgres_user.id
         else:
             # add new user to memory, without synchronising with DB and making it persistent
-            new_user = user_datastore.create_user(email=email, password=hash_password(password))
+            new_user = user_datastore.create_user(email=email, 
+                                                  password=hash_password(password),
+                                                  username=username,
+                                                  organization=organization)
             default_role = user_datastore.find_role(new_user_role)
             user_datastore.add_role_to_user(new_user, default_role)
             # we can get the new user identifier because session has autoflush
@@ -670,6 +687,8 @@ class RegisterUser(Resource):
 
         email = data['email']
         password = data['password']
+        username = data['username']
+        organization = data['organization']
         # new users are created with User permissions
         new_user_role = 'User'
 
@@ -682,7 +701,10 @@ class RegisterUser(Resource):
             new_user_id = postgres_user.id
         else:
             # add new user to memory, without synchronising with DB and making it persistent
-            new_user = user_datastore.create_user(email=email, password=hash_password(password))
+            new_user = user_datastore.create_user(email=email, 
+                                                  password=hash_password(password),
+                                                  username=username,
+                                                  organization=organization)
             default_role = user_datastore.find_role(new_user_role)
             user_datastore.add_role_to_user(new_user, default_role)
             # we can get the new user identifier because session has autoflush
@@ -780,6 +802,8 @@ class CurrentUser(Resource):
         current_user_dict = {}
         current_user_dict['id'] = user.id
         current_user_dict['email'] = user.email
+        current_user_dict['username'] = user.username
+        current_user_dict['organization'] = user.organization
         current_user_dict['last_login_at'] = user.last_login_at
         current_user_dict['roles'] = str(user.roles[0])
         current_user_dict['validated'] = user_exists
@@ -823,6 +847,8 @@ class Users(Resource):
         current_user_dict = {}
         current_user_dict['id'] = user.id
         current_user_dict['email'] = user.email
+        current_user_dict['username'] = user.username
+        current_user_dict['organization'] = user.organization
         # this value will be None/null if user never logged in
         current_user_dict['last_login_at'] = user.last_login_at
         current_user_dict['roles'] = str(user.roles[0])
