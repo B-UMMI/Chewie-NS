@@ -1269,7 +1269,7 @@ class StatsAnnotations(Resource):
         with open(precomputed_data_file, 'r') as json_file:
             json_data = json.load(json_file)
 
-        return json_data
+        return {"message": json_data}, 200
 
     #
     @api.doc(responses={201: 'OK',
