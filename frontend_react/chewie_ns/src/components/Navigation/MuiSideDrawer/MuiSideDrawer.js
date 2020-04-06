@@ -37,36 +37,36 @@ import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
 
-const styles = theme => ({
+const styles = (theme) => ({
   root: {
-    display: "flex"
+    display: "flex",
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
-    })
+      duration: theme.transitions.duration.leavingScreen,
+    }),
   },
   appBarShift: {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["margin", "width"], {
       easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen
-    })
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
   menuButton: {
     // marginRight: theme.spacing(2)
-    marginRight: 36
+    marginRight: 36,
   },
   hide: {
-    display: "none"
+    display: "none",
   },
   drawer: {
     width: drawerWidth,
     flexShrink: 0,
-    whiteSpace: "nowrap"
+    whiteSpace: "nowrap",
   },
   drawerOpen: {
     backgroundColor: "#3b3b3b",
@@ -74,21 +74,21 @@ const styles = theme => ({
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
+      duration: theme.transitions.duration.enteringScreen,
+    }),
   },
   drawerClose: {
     backgroundColor: "#3b3b3b",
     color: "white",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
+      duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: "hidden",
     width: theme.spacing(7) + 1,
     [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9) + 1
-    }
+      width: theme.spacing(9) + 1,
+    },
   },
   // drawerPaper: {
   //   width: drawerWidth
@@ -98,12 +98,12 @@ const styles = theme => ({
     alignItems: "center",
     padding: theme.spacing(0, 1),
     ...theme.mixins.toolbar,
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
   },
   content: {
     flexGrow: 1,
     padding: theme.spacing(3),
-    marginTop: "10px"
+    marginTop: "10px",
     // transition: theme.transitions.create("margin", {
     //   easing: theme.transitions.easing.sharp,
     //   duration: theme.transitions.duration.leavingScreen
@@ -118,14 +118,21 @@ const styles = theme => ({
   //   marginLeft: 0
   // },
   title: {
-    flexGrow: 1
-  }
+    flexGrow: 1,
+  },
 });
 
 class PersistentDrawerLeft extends Component {
-  state = {
-    open: false
-  };
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      open: false,
+      hoverOpen: false,
+    };
+
+    this.mouseOverTimer = null;
+  }
 
   handleDrawerOpen = () => {
     this.setState({ open: true });
@@ -134,6 +141,25 @@ class PersistentDrawerLeft extends Component {
   handleDrawerClose = () => {
     this.setState({ open: false });
   };
+
+  scheduleMouseOver = () => {
+    if (this.state.open === false && this.state.hoverOpen === false) {
+      this.mouseOverTimer = setTimeout(() => {this.handleDrawerOpen()}, 350);
+      this.setState({ hoverOpen: true });
+    }
+  };
+
+  cancelMouseOver = () => {
+    if (this.state.hoverOpen === true) {
+      this.handleDrawerClose();
+      this.setState({ hoverOpen: false });
+    }
+    if (this.state.mouseOverTimer) {
+      clearTimeout(this.mouseOverTimer);
+      this.mouseOverTimer = null;
+    }
+  };
+
 
   render() {
     const { classes } = this.props;
@@ -144,7 +170,7 @@ class PersistentDrawerLeft extends Component {
         <AppBar
           position="fixed"
           className={clsx(classes.appBar, {
-            [classes.appBarShift]: this.state.open
+            [classes.appBarShift]: this.state.open,
           })}
           color="primary"
           style={{ backgroundColor: "#3b3b3b" }}
@@ -178,17 +204,18 @@ class PersistentDrawerLeft extends Component {
         </AppBar>
         <Drawer
           variant="permanent"
+          open={this.state.open}
+          onMouseEnter={() => this.scheduleMouseOver()}
+          onMouseLeave={() => this.cancelMouseOver()}
           className={clsx(classes.drawer, {
             [classes.drawerOpen]: this.state.open,
-            [classes.drawerClose]: !this.state.open
+            [classes.drawerClose]: !this.state.open,
           })}
-          // anchor="left"
-          open={this.state.open}
           classes={{
             paper: clsx({
               [classes.drawerOpen]: this.state.open,
-              [classes.drawerClose]: !this.state.open
-            })
+              [classes.drawerClose]: !this.state.open,
+            }),
           }}
         >
           <div className={classes.drawerHeader}>
@@ -281,12 +308,12 @@ class PersistentDrawerLeft extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
     error: state.auth.error,
     isAuthenticated: state.auth.token !== null,
-    authRedirectPath: state.auth.authRedirectPath
+    authRedirectPath: state.auth.authRedirectPath,
   };
 };
 
