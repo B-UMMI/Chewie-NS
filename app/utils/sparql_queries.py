@@ -226,17 +226,18 @@ SELECT_SCHEMA = ('SELECT ?schema '
 
 INSERT_USER = ('INSERT DATA IN GRAPH <{0}> '
                '{{ <{1}> a <http://xmlns.com/foaf/0.1/Agent>; '
-               'typon:Role "{2}"^^xsd:string}}')
+               'typon:Role "{2}"^^xsd:string; '
+               'typon:username "{3}"^^xsd:string . }}')
 
 ASK_USER = ('ASK WHERE {{ <{0}> a <http://xmlns.com/foaf/0.1/Agent> .}}')
 
-SELECT_USER = ('SELECT ?user ?role '
+SELECT_USER = ('SELECT ?user ?role ?username '
                'FROM <{0}>'
                'WHERE {{ ?user a <http://xmlns.com/foaf/0.1/Agent>; '
-               'typon:Role ?role . FILTER ( ?user = <{1}> )}}')
+               'typon:Role ?role; typon:username ?username . FILTER ( ?user = <{1}> )}}')
 
 DELETE_USER = ('DELETE WHERE {{ GRAPH <{0}> {{ ?user a <http://xmlns.com/foaf/0.1/Agent>; '
-               'typon:Role ?role . FILTER ( ?user = <{1}> ) }} }}')
+               'typon:Role ?role; typon:username ?username . FILTER ( ?user = <{1}> ) }} }}')
 
 DELETE_ROLE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Role ?role . }} }}')
 INSERT_ROLE = ('INSERT DATA IN GRAPH <{0}> '
@@ -315,7 +316,7 @@ COUNT_SINGLE_SCHEMA_LOCI_ALLELE = ('SELECT ?locus (COUNT(DISTINCT ?allele) AS ?n
                                    '?allele typon:hasSequence ?sequence . }}'
                                    'ORDER BY ?schema ?locus')
 
-COUNT_SCHEMA_LOCI_ALLELES = ('SELECT ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen ?Schema_lock (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+COUNT_SCHEMA_LOCI_ALLELES = ('SELECT ?schema ?name ?user ?username ?chewie ?bsr ?ptf ?tl_table ?minLen ?Schema_lock (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
                               'FROM <{0}> '
                               'WHERE '
                               '{{ ?schema a typon:Schema; typon:isFromTaxon <{1}>; '
@@ -325,11 +326,12 @@ COUNT_SCHEMA_LOCI_ALLELES = ('SELECT ?schema ?name ?user ?chewie ?bsr ?ptf ?tl_t
                               'typon:minimum_locus_length ?minLen; typon:Schema_lock ?Schema_lock; '
                               'typon:hasSchemaPart ?part . '
                               '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                              '?allele a typon:Allele; typon:isOfLocus ?locus .}}'
+                              '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                              '?user a <http://xmlns.com/foaf/0.1/Agent>; typon:username ?username .}}'
                               'ORDER BY ?schema')
 
 # query for single schema
-COUNT_SINGLE_SCHEMA_LOCI_ALLELES = ('SELECT ?name ?user ?chewie ?bsr ?ptf ?tl_table ?minLen ?last_modified (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
+COUNT_SINGLE_SCHEMA_LOCI_ALLELES = ('SELECT ?name ?user ?username ?chewie ?bsr ?ptf ?tl_table ?minLen ?last_modified (COUNT(DISTINCT ?locus) AS ?nr_loci) (COUNT(DISTINCT ?allele) AS ?nr_allele) '
                                     'FROM <{0}> '
                                     'WHERE '
                                     '{{ <{1}> a typon:Schema; '
@@ -340,7 +342,8 @@ COUNT_SINGLE_SCHEMA_LOCI_ALLELES = ('SELECT ?name ?user ?chewie ?bsr ?ptf ?tl_ta
                                     'typon:last_modified ?last_modified; '
                                     'typon:hasSchemaPart ?part . '
                                     '?part a typon:SchemaPart; typon:hasLocus ?locus .'
-                                    '?allele a typon:Allele; typon:isOfLocus ?locus .}}')
+                                    '?allele a typon:Allele; typon:isOfLocus ?locus .'
+                                    '?user a <http://xmlns.com/foaf/0.1/Agent>; typon:username ?username .}}')
 
 COUNT_SCHEMA_ALLELES = ('SELECT ?locus (COUNT(DISTINCT ?allele) AS ?nr_allele) '
                         'FROM <{0}> '
