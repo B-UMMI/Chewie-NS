@@ -5,7 +5,7 @@ import {
   withRouter,
   Redirect,
   Link,
-  useRouteMatch
+  useRouteMatch,
 } from "react-router-dom";
 import { connect } from "react-redux";
 
@@ -17,6 +17,7 @@ import About from "./containers/About/About";
 // import Auth from "./containers/Auth/Auth";
 import MuiLogin from "./containers/Auth/MuiLogin/MuiLogin";
 import MuiRegister from "./containers/Auth/MuiRegister/MuiRegister";
+import MuiSideDrawer from "./components/Navigation/MuiSideDrawer/MuiSideDrawer";
 import Logout from "./containers/Auth/Logout/Logout";
 import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
@@ -42,8 +43,8 @@ function SimpleBreadcrumbs() {
 
   const styles = {
     breadcrumb: {
-      color: "#bb7944"
-    }
+      color: "#bb7944",
+    },
   };
 
   const spd = JSON.parse(localStorage.getItem("speciesD"));
@@ -155,21 +156,22 @@ class App extends Component {
 
     return (
       <div>
-        <Layout>{routes}</Layout>
+        {/* <Layout>{routes}</Layout> */}
+        <MuiSideDrawer>{routes}</MuiSideDrawer>
       </div>
     );
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
-    isAuthenticated: state.auth.token !== null
+    isAuthenticated: state.auth.token !== null,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    onTryAutoSignup: () => dispatch(actions.authCheckState())
+    onTryAutoSignup: () => dispatch(actions.authCheckState()),
   };
 };
 

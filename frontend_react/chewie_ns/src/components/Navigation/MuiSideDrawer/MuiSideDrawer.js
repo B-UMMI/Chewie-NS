@@ -102,7 +102,8 @@ const styles = theme => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3)
+    padding: theme.spacing(3),
+    marginTop: "10px"
     // transition: theme.transitions.create("margin", {
     //   easing: theme.transitions.easing.sharp,
     //   duration: theme.transitions.duration.leavingScreen
@@ -273,6 +274,7 @@ class PersistentDrawerLeft extends Component {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.drawerHeader} />
+          {this.props.children}
         </main>
       </div>
     );
