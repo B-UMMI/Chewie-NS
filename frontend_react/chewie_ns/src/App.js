@@ -53,15 +53,15 @@ function SimpleBreadcrumbs() {
   return (
     <>
       <Breadcrumbs>
-        {homeMatches && (
+        {/* {homeMatches && (
           <div style={{ display: "flex", marginRight: "60px" }}>
             <MuiLink component={Link} to="/" style={styles.breadcrumb}>
               Home
             </MuiLink>
           </div>
-        )}
+        )} */}
         {aboutMatches && (
-          <div style={{ display: "flex", marginRight: "60px" }}>
+          <div>
             <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
               About
             </MuiLink>
