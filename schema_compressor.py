@@ -183,7 +183,7 @@ def schema_loci(schema_uri):
 def fasta_sequences(locus, date):
     """
     """
-    
+
     # will get to maximum row! Write code to get alleles one by one
     fasta_result = aux.get_data(SPARQLWrapper(local_sparql),
                                 (sparql_queries.SELECT_LOCUS_FASTA_BY_DATE.format(virtuoso_graph, locus, date)))
@@ -201,7 +201,7 @@ def fasta_sequences(locus, date):
             fasta_list[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
     else:
         fasta_list = fasta_result['results']['bindings']
-    
+
     return fasta_list
 
 

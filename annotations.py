@@ -17,6 +17,7 @@ DESCRIPTION
 import os
 import sys
 import json
+import time
 import pickle
 import shutil
 import logging
@@ -102,6 +103,11 @@ def loci_annotations(schema):
 				  		sparql_queries.SELECT_SCHEMA_LOCI_ANNOTATIONS.format(virtuoso_graph, schema))
 
 	annotations = loci['results']['bindings']
+
+	annotations = [{'locus': l['locus']['value'],
+					'name': l['name']['value'],
+					'UniprotName': l['UniprotName']['value'],
+					'UniprotURI': l['UniprotURI']['value']} for l in annotations]
 	
 	return annotations
 
@@ -113,31 +119,6 @@ def loci_modes(loci_data):
 	modes = {k: Counter(v).most_common()[0][0] for k, v in loci_data.items()}
 
 	return modes
-
-
-def loci_total_alleles(loci_stats):
-	"""
-	"""
-
-	loci_total_alleles = [{'locus_name': s[0],
-						   'nr_alleles': s[2]} for s in loci_stats]
-
-	return loci_total_alleles
-
-
-def get_scatter_data(loci_stats):
-	"""
-	"""
-
-	scatter_data = [{'locus_name': s[0],
-					 'locus_id': s[1],
-					 'nr_alleles': s[2],
-					 'alleles_mean': s[4],
-					 'alleles_median': s[5],
-					 'alleles_mode': s[3]}
-					 for s in loci_stats]
-
-	return scatter_data
 
 
 def generate_info(schema, last_modified):
@@ -157,7 +138,7 @@ def generate_info(schema, last_modified):
 	modes = loci_modes(loci_data)
 
 	for a in annotations:
-		locus = a['name']['value']
+		locus = a['name']
 		a['mode'] = modes[locus]
 
 	json_to_file = {'schema': schema,
@@ -167,7 +148,92 @@ def generate_info(schema, last_modified):
 	return json_to_file
 
 
-def update_file(schema, last_modified, file):
+def fast_update(schema, last_modified, file, lengths_dir):
+	"""
+	"""
+
+	schema_id = int(schema.split('/')[-1])
+	current_file = file
+
+	# read current file
+	with open(current_file, 'r') as json_file:
+		json_data = json.load(json_file)
+
+	loci_info = json_data['message']
+
+	# get schema loci
+	loci = aux.get_data(SPARQLWrapper(local_sparql),
+						sparql_queries.SELECT_SCHEMA_LOCI.format(virtuoso_graph, schema))
+	loci = loci['results']['bindings']
+	loci_names = {l['locus']['value']: l['name']['value'] for l in loci}
+
+	if len(loci_info) == 0:
+		length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+
+		loci_modes = {}
+		for locus_file in length_files:
+			with open(locus_file, 'rb') as lf:
+				locus_data = pickle.load(lf)
+
+			locus_uri = list(locus_data.keys())[0]
+			locus_name = loci_names[locus_uri]
+			locus_id = locus_name.split('-')[-1]
+			alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+			locus_mode = Counter(alleles_lengths).most_common()[0][0]
+			loci_modes[locus_name] = locus_mode
+
+		annotations = loci_annotations(schema)
+		for a in annotations:
+			locus = a['name']
+			a['mode'] = loci_modes[locus]
+
+		json_to_file = {'schema': schema,
+						'last_modified': last_modified,
+						'message': annotations}
+
+		with open(file, 'w') as json_outfile:
+			json.dump(json_to_file, json_outfile)
+
+	# if the schema is in the json file
+	elif len(loci_modes) > 0:
+		# get modification date in json file
+		json_date = json_data['last_modified']
+		virtuoso_date = last_modified
+
+		if json_date == virtuoso_date:
+			logging.info('Information about loci annotations and length modes for schema {0} is up-to-date.'.format(schema))
+
+		elif json_date != virtuoso_date:
+			length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+
+			loci_modes = {}
+			for locus_file in length_files:
+				with open(locus_file, 'rb') as lf:
+					locus_data = pickle.load(lf)
+
+				locus_uri = list(locus_data.keys())[0]
+				locus_name = loci_names[locus_uri]
+				locus_id = locus_name.split('-')[-1]
+				alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+				locus_mode = Counter(alleles_lengths).most_common()[0][0]
+				loci_modes[locus_name] = locus_mode
+
+			annotations = loci_annotations(schema)
+			for a in annotations:
+				locus = a['name']
+				a['mode'] = loci_modes[locus]
+
+			json_to_file = {'schema': schema,
+							'last_modified': last_modified,
+							'message': annotations}
+
+			with open(file, 'w') as json_outfile:
+				json.dump(json_to_file, json_outfile)
+
+			logging.info('Updated data for schema {0}'.format())
+
+
+def full_update(schema, last_modified, file):
 	"""
 	"""
 
@@ -186,7 +252,7 @@ def update_file(schema, last_modified, file):
 			json.dump(json_to_file, json_outfile)
 		
 	# if the schema is in the json file
-	elif len(loci_modes) > 0:
+	elif len(loci_info) > 0:
 		# get modification date in json file
 		json_date = json_data['last_modified']
 		virtuoso_date = last_modified
@@ -273,10 +339,10 @@ def single_species(species_id):
 
 	# list files in folder
 	computed_dir = Config.PRE_COMPUTE
-	computed_files = os.listdir(computed_dir)		
+	computed_files = os.listdir(computed_dir)
 	for schema in schemas:
 		schema_id = schema.split('/')[-1]
-		schema_prefix = 'annotations_{0}_{1}'.format(species_id, schema_id)
+		schema_prefix = 'annotations_{0}_{1}_'.format(species_id, schema_id)
 		schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
 		schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
 
@@ -297,7 +363,13 @@ def single_species(species_id):
 			last_modified = schema_properties[0]['last_modified']['value']
 			if len(schema_files) == 0:
 				create_file(schema_file, {'message': []})
-			update_file(schema, last_modified, schema_file)
+
+			lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
+			if lengths_dir in computed_files:
+				lengths_dir = os.path.join(computed_dir, lengths_dir)
+				fast_update(schema, last_modified, schema_file, lengths_dir)
+			else:
+				full_update(schema, last_modified, schema_file)
 		else:
 			logging.warning('Schema {0} is locked. Aborting.'.format(schema))
 
@@ -306,6 +378,7 @@ def single_schema(species_id, schema_id):
 	"""
 	"""
 
+	start = time.time()
 	start_date = dt.datetime.now()
 	start_date_str = dt.datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S')
 	logging.info('Started determination of loci and alleles counts at: {0}'.format(start_date_str))
@@ -337,15 +410,26 @@ def single_schema(species_id, schema_id):
 	computed_dir = Config.PRE_COMPUTE
 	computed_files = os.listdir(computed_dir)
 
+	# check if folder with schema alleles lengths files exists
+	lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
+
 	# get files with schema prefix
-	schema_prefix = 'annotations_{0}_{1}'.format(species_id, schema_id)
+	schema_prefix = 'annotations_{0}_{1}_'.format(species_id, schema_id)
 	schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
 
 	schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
 	if len(schema_files) == 0:
 		create_file(schema_file, {'message': []})
 
-	update_file(schema_uri, last_modified, schema_file)
+	if lengths_dir in computed_files:
+		lengths_dir = os.path.join(computed_dir, lengths_dir)
+		fast_update(schema_uri, last_modified, schema_file, lengths_dir)
+	else:
+		full_update(schema_uri, last_modified, schema_file)
+
+	end = time.time()
+	delta = end - start
+	print(delta/60)
 
 
 if __name__ == '__main__':

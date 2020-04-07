@@ -223,6 +223,14 @@ typon:sentBy rdf:type owl:ObjectProperty ;
 #    Data properties
 #################################################################
 
+###  http://purl.phyloviz.net/ontology/typon#CustomAnnotation
+typon:CustomAnnotation rdf:type owl:DatatypeProperty ;
+                       rdfs:domain typon:Locus ;
+                       rdfs:range xsd:string ;
+                       rdfs:comment "Custom annotation provided by User"@en ;
+                       rdfs:label "CustomAnnotation"@en .
+
+
 ###  http://purl.phyloviz.net/ontology/typon#KreiswirthID
 typon:KreiswirthID rdf:type owl:DatatypeProperty ;
                    rdfs:domain typon:SpaRepeat ;
@@ -263,12 +271,52 @@ typon:ST rdf:type owl:DatatypeProperty ;
          rdfs:label "ST"@en .
 
 
+###  http://purl.phyloviz.net/ontology/typon#SchemaDescription
+typon:SchemaDescription rdf:type owl:DatatypeProperty ;
+                        rdfs:domain typon:Schema ;
+                        rdfs:range xsd:string ;
+                        rdfs:comment "Long Schema descirption"@en ;
+                        rdfs:label "SchemaDescription"@en .
+
+
 ###  http://purl.phyloviz.net/ontology/typon#Schema_lock
 typon:Schema_lock rdf:type owl:DatatypeProperty ;
                   rdfs:domain typon:Schema ;
                   rdfs:range xsd:string ;
                   rdfs:comment "Schema locking property. Indicates if a schema is available for download or modification. A schema should be locked during its upload and while it is being updated or downloaded for compression."@en ;
                   rdfs:label "Schema_lock"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotLabel
+typon:UniprotLabel rdf:type owl:DatatypeProperty ;
+                   rdfs:domain typon:Locus ;
+                   rdfs:range xsd:string ;
+                   rdfs:comment "Label of the annotation on Uniprot."@en ;
+                   rdfs:label "UniprotLabel"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotName
+typon:UniprotName rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:Locus ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Name of the locus annotation on Uniprot."@en ;
+                  rdfs:label "UniprotLabel"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotURI
+typon:UniprotURI rdf:type owl:DatatypeProperty ;
+                 rdfs:domain typon:Locus ;
+                 rdfs:range xsd:string ;
+                 rdfs:comment "URI for the annotation on Uniprot"@en ;
+                 rdfs:label "UniprotURI"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UserAnnotation
+typon:UserAnnotation rdf:type owl:DatatypeProperty ;
+                     rdfs:domain typon:Locus ;
+                     rdfs:range xsd:string ;
+                     rdfs:comment "Annotation name given by User"@en ;
+                     rdfs:label "UserAnnotation"@en .
 
 
 ###  http://purl.phyloviz.net/ontology/typon#bsr
@@ -670,6 +718,31 @@ typon:Locus rdf:type owl:Class ;
                               owl:someValuesFrom ns5:Taxon
                             ] ,
                             [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:CustomAnnotation ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotLabel ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotName ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotURI ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UserAnnotation ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
                               owl:onProperty typon:dateEntered ;
                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                               owl:onDataRange xsd:dateTime
@@ -765,6 +838,11 @@ typon:Schema rdf:type owl:Class ;
                              ] ,
                              [ rdf:type owl:Restriction ;
                                owl:onProperty typon:PubMedID ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:SchemaDescription ;
                                owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
                                owl:onDataRange xsd:string
                              ] ,
