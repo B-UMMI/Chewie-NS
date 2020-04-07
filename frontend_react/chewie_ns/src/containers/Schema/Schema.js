@@ -34,7 +34,7 @@ import Plot from "react-plotly.js";
 class Schema extends Component {
   state = {
     tabValue: 0,
-    hits: []
+    hits: [],
   };
 
   componentDidMount() {
@@ -63,17 +63,17 @@ class Schema extends Component {
       overrides: {
         MUIDataTableToolbar: {
           titleText: {
-            color: "#bb7944"
-          }
-        }
-      }
+            color: "#bb7944",
+          },
+        },
+      },
     });
 
-  plotChangeHandler = value => {
+  plotChangeHandler = (value) => {
     this.setState({ tabValue: value });
   };
 
-  clickScatterPlotHandler = event => {
+  clickScatterPlotHandler = (event) => {
     // console.log(event.points[0]);
 
     const schema_id = this.props.match.params.schema_id;
@@ -89,11 +89,11 @@ class Schema extends Component {
         overflowX: "auto",
         display: "flex",
         justifyContent: "center",
-        marginBottom: "20px"
+        marginBottom: "20px",
       },
       button: {
-        minWidth: "150px"
-      }
+        minWidth: "150px",
+      },
     };
 
     let mode_plot = <CircularProgress />;
@@ -106,7 +106,6 @@ class Schema extends Component {
     const tableData = JSON.parse(localStorage.getItem("tableData"));
 
     if (!this.props.loading) {
-      
       let mode_plot_data =
         typeof this.props.mode_data === "undefined" ||
         this.props.mode_data === []
@@ -118,20 +117,20 @@ class Schema extends Component {
           data={mode_plot_data}
           layout={{
             title: {
-              text: "Distribution of allele mode sizes"
+              text: "Distribution of allele mode sizes",
             },
             xaxis: {
               title: { text: "Allele Mode Size" },
-              showgrid: true
+              showgrid: true,
             },
             yaxis: {
-              title: { text: "Number of Loci" }
-            }
+              title: { text: "Number of Loci" },
+            },
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
         />
       );
@@ -147,20 +146,20 @@ class Schema extends Component {
           data={total_allele_plot_data}
           layout={{
             title: {
-              text: "Number of Loci with given Number of Alleles"
+              text: "Number of Loci with given Number of Alleles",
             },
             xaxis: {
               title: { text: "Number of Different Alleles" },
-              showgrid: true
+              showgrid: true,
             },
             yaxis: {
-              title: { text: "Number of Loci" }
-            }
+              title: { text: "Number of Loci" },
+            },
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
         />
       );
@@ -176,28 +175,28 @@ class Schema extends Component {
           data={scatter_plot_data}
           layout={{
             title: {
-              text: "Locus Statistics"
+              text: "Locus Statistics",
             },
             xaxis: {
               title: { text: "Allele size in bp" },
               showgrid: true,
-              zeroline: false
+              zeroline: false,
               // tick0: 1,
               // dtick: 1000
             },
             yaxis: {
               title: { text: "Number of alleles" },
-              zeroline: false
+              zeroline: false,
               // tick0: 0
             },
-            hovermode: "closest"
+            hovermode: "closest",
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
-          onClick={e => this.clickScatterPlotHandler(e)}
+          onClick={(e) => this.clickScatterPlotHandler(e)}
         />
       );
     }
@@ -211,7 +210,7 @@ class Schema extends Component {
               m.set(o.locus_name, Object.assign(m.get(o.locus_name) || {}, o)),
             new Map()
           )
-          .values()
+          .values(),
       ];
 
       const columns = [
@@ -222,14 +221,14 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "uniprot_uri",
@@ -238,11 +237,11 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
@@ -251,8 +250,8 @@ class Schema extends Component {
                   {value}
                 </a>
               );
-            }
-          }
+            },
+          },
         },
         {
           name: "locus",
@@ -261,11 +260,11 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
@@ -276,8 +275,8 @@ class Schema extends Component {
                   {value}
                 </a>
               );
-            }
-          }
+            },
+          },
         },
         {
           name: "locus_name",
@@ -286,14 +285,14 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "alleles_mode",
@@ -302,22 +301,22 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       const options = {
         textLabels: {
           body: {
-            noMatch: <CircularProgress />
-          }
+            noMatch: <CircularProgress />,
+          },
         },
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
@@ -329,7 +328,7 @@ class Schema extends Component {
         filterType: "multiselect",
         search: true,
         viewColumns: true,
-        pagination: true
+        pagination: true,
       };
 
       annotations = (
@@ -352,14 +351,14 @@ class Schema extends Component {
           filter: true,
           sort: true,
           display: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "schema_name",
@@ -367,14 +366,14 @@ class Schema extends Component {
         options: {
           filter: true,
           sort: false,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "user",
@@ -382,14 +381,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "nr_loci",
@@ -398,14 +397,14 @@ class Schema extends Component {
           filter: false,
           sort: true,
           display: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "nr_allele",
@@ -413,14 +412,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "chewie",
@@ -428,14 +427,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: false,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "bsr",
@@ -443,14 +442,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "ptf",
@@ -458,14 +457,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "tl_table",
@@ -473,14 +472,14 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
+          },
+        },
       },
       {
         name: "minLen",
@@ -488,22 +487,22 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
-          setCellHeaderProps: value => {
+          setCellHeaderProps: (value) => {
             return {
               style: {
-                fontWeight: "bold"
-              }
+                fontWeight: "bold",
+              },
             };
-          }
-        }
-      }
+          },
+        },
+      },
     ];
 
     const options2 = {
       textLabels: {
         body: {
-          noMatch: <CircularProgress />
-        }
+          noMatch: <CircularProgress />,
+        },
       },
       responsive: "scrollMaxHeight",
       selectableRowsHeader: false,
@@ -513,7 +512,7 @@ class Schema extends Component {
       pagination: false,
       download: false,
       filter: false,
-      search: false
+      search: false,
     };
 
     schema_table = (
@@ -595,7 +594,9 @@ class Schema extends Component {
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </div>
-          <div style={{ marginTop: "40px" }}>{annotations}</div>
+          <div style={{ marginTop: "40px", marginBottom: "40px" }}>
+            {annotations}
+          </div>
         </div>
         {/* <div style={{marginBottom: "5%"}}>
           {annotations}
@@ -607,7 +608,7 @@ class Schema extends Component {
             left: "0",
             backgroundColor: "#ccc",
             width: "100%",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
@@ -622,7 +623,7 @@ class Schema extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     mode_data: state.schema.mode_data,
     total_allele_data: state.schema.total_allele_data,
@@ -633,17 +634,17 @@ const mapStateToProps = state => {
     annotations: state.annotations.annotations,
     loading_annotations: state.annotations.loading,
     error_annotations: state.annotations.error,
-    species: state.species.species
+    species: state.species.species,
     // token: state.auth.token
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onFetchSchemaAlleleMode: (species_id, schema_id) =>
       dispatch(actions.fetchSchemaAlleleMode(species_id, schema_id)),
     onFetchAnnotations: (species_id, schema_id) =>
-      dispatch(actions.fetchAnnotations(species_id, schema_id))
+      dispatch(actions.fetchAnnotations(species_id, schema_id)),
   };
 };
 
