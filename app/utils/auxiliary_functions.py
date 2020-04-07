@@ -956,14 +956,14 @@ def get_data(server, sparql_query):
     try:
         server.setQuery(sparql_query)
         server.setReturnFormat(JSON)
-        server.setTimeout(20)
+        server.setTimeout(360)
         result = server.query().convert()
     except Exception as e:
         time.sleep(5)
         try:
             server.setQuery(sparql_query)
             server.setReturnFormat(JSON)
-            server.setTimeout(20)
+            server.setTimeout(360)
             result = server.query().convert()
         except Exception as e:
             result = e

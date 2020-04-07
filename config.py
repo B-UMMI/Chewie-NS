@@ -89,8 +89,11 @@ class Config(object):
     RESTPLUS_MASK_SWAGGER = False
 
     # file transfer configs
-    SCHEMAS_PTF = './downloadable_data/prodigal_training_files'
-    SCHEMAS_ZIP = './downloadable_data/compressed_schemas'
+    SCHEMAS_PTF = './prodigal_training_files'
+    SCHEMAS_ZIP = './compressed_schemas'
 
     # pre-computed stats for frontend
     PRE_COMPUTE = './pre-computed-data'
+
+    # schema upload directory
+    SCHEMA_UP = './schema_insertion_temp'

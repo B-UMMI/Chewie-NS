@@ -17,6 +17,7 @@ DESCRIPTION
 import os
 import sys
 import json
+import time
 import pickle
 import shutil
 import logging
@@ -77,7 +78,9 @@ def alleles_lengths(total_alleles, schema, offset, limit):
 					  		   sparql_queries.SELECT_ALLELES_LENGTH.format(virtuoso_graph, schema, offset, limit))
 		data = alleles['results']['bindings']
 		result.extend(data)
+		#result.append(data)
 		count += len(data)
+		print(count)
 		offset += limit
 
 	return result
@@ -109,7 +112,7 @@ def length_stats(loci_data):
 	return stats
 
 
-def loci_modes(loci_stats):
+def determine_modes(loci_stats):
 	"""
 	"""
 
@@ -151,13 +154,13 @@ def generate_info(schema, last_modified):
 	# get total number of alleles
 	total_alleles = count_alleles(schema)
 
-	result = alleles_lengths(total_alleles, schema, 0, 10000)
+	result = alleles_lengths(total_alleles, schema, 0, 1000)
 
 	loci_data = loci_alleles_length(result)
 
 	loci_stats = length_stats(loci_data)
 
-	modes = loci_modes(loci_stats)
+	modes = determine_modes(loci_stats)
 
 	total_alleles = loci_total_alleles(loci_stats)
 	
@@ -172,7 +175,108 @@ def generate_info(schema, last_modified):
 	return json_to_file
 
 
-def update_file(schema, last_modified, file):
+def fast_update(schema, last_modified, file, lengths_dir):
+	"""
+	"""
+
+	schema_id = int(schema.split('/')[-1])
+	current_file = file
+
+	# read current file
+	with open(current_file, 'r') as json_file:
+		json_data = json.load(json_file)
+
+	loci_modes = json_data['mode']
+	loci_alleles = json_data['total_alleles']
+	loci_scatter = json_data['scatter_data']
+
+	# get schema loci
+	loci = aux.get_data(SPARQLWrapper(local_sparql),
+						sparql_queries.SELECT_SCHEMA_LOCI.format(virtuoso_graph, schema))
+	loci = loci['results']['bindings']
+	loci_names = {l['locus']['value']: l['name']['value'] for l in loci}
+
+	if len(loci_modes) == 0:
+		length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+
+		loci_stats = []
+		for locus_file in length_files:
+			with open(locus_file, 'rb') as lf:
+				locus_data = pickle.load(lf)
+			
+			locus_uri = list(locus_data.keys())[0]
+			locus_name = loci_names[locus_uri]
+			locus_id = locus_name.split('-')[-1]
+			alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+
+			nr_alleles = len(alleles_lengths)
+			locus_mode = Counter(alleles_lengths).most_common()[0][0]
+			locus_mean = round(sum(alleles_lengths)/nr_alleles)
+			locus_median = round(statistics.median(alleles_lengths))
+
+			loci_stats.append((locus_name, locus_id, nr_alleles,
+							   locus_mode, locus_mean, locus_median))
+
+		modes = determine_modes(loci_stats)
+		total_alleles = loci_total_alleles(loci_stats)
+		scatter_data = get_scatter_data(loci_stats)
+
+		json_to_file = {'schema': schema,
+						'last_modified': last_modified,
+						'mode': modes,
+	                    'total_alleles': total_alleles,
+	                    'scatter_data': scatter_data}
+
+		with open(file, 'w') as json_outfile:
+			json.dump(json_to_file, json_outfile)
+
+	# if the schema is in the json file
+	elif len(loci_modes) > 0:
+		# get modification date in json file
+		json_date = json_data['last_modified']
+		virtuoso_date = last_modified
+
+		if json_date == virtuoso_date:
+			logging.info('Information about number  for schema {0} is up-to-date.'.format(schema))
+
+		elif json_date != virtuoso_date:
+			length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+
+			loci_stats = []
+			for locus_file in length_files:
+				with open(locus_file, 'rb') as f:
+					locus_data = pickle.load(f)
+				
+				locus_uri = list(locus_data.keys())[0]
+				locus_name = loci_names[locus_uri]
+				locus_id = locus_name.split('-')[-1]
+				alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+
+				nr_alleles = len(alleles_lengths)
+				locus_mode = Counter(alleles_lengths).most_common()[0][0]
+				locus_mean = round(sum(alleles_lengths)/nr_alleles)
+				locus_median = round(statistics.median(alleles_lengths))
+
+				loci_stats.append((locus_name, locus_id, nr_alleles,
+								   locus_mode, locus_mean, locus_median))
+
+			modes = determine_modes(loci_stats)
+			total_alleles = loci_total_alleles(loci_stats)
+			scatter_data = get_scatter_data(loci_stats)
+
+			json_to_file = {'schema': schema,
+							'last_modified': last_modified,
+							'mode': modes,
+		                    'total_alleles': total_alleles,
+		                    'scatter_data': scatter_data}
+
+			with open(file, 'w') as json_outfile:
+				json.dump(json_to_file, json_outfile)
+
+			logging.info('Updated data for schema {0}'.format(schema))
+
+
+def full_update(schema, last_modified, file):
 	"""
 	"""
 
@@ -280,10 +384,10 @@ def single_species(species_id):
 
 	# list files in folder
 	computed_dir = Config.PRE_COMPUTE
-	computed_files = os.listdir(computed_dir)		
+	computed_files = os.listdir(computed_dir)
 	for schema in schemas:
 		schema_id = schema.split('/')[-1]
-		schema_prefix = 'mode_{0}_{1}'.format(species_id, schema_id)
+		schema_prefix = 'mode_{0}_{1}_'.format(species_id, schema_id)
 		schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
 		schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
 
@@ -304,7 +408,13 @@ def single_species(species_id):
 			last_modified = schema_properties[0]['last_modified']['value']
 			if len(schema_files) == 0:
 				create_file(schema_file, {'mode': [], 'total_alleles': [], 'scatter_data': []})
-			update_file(schema, last_modified, schema_file)
+			
+			lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
+			if lengths_dir in computed_files:
+				lengths_dir = os.path.join(computed_dir, lengths_dir)
+				fast_update(schema, last_modified, schema_file, lengths_dir)
+			else:
+				full_update(schema, last_modified, schema_file)
 		else:
 			logging.warning('Schema {0} is locked. Aborting.'.format(schema))
 
@@ -313,6 +423,7 @@ def single_schema(species_id, schema_id):
 	"""
 	"""
 
+	start = time.time()
 	start_date = dt.datetime.now()
 	start_date_str = dt.datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S')
 	logging.info('Started determination of loci and alleles counts at: {0}'.format(start_date_str))
@@ -344,15 +455,26 @@ def single_schema(species_id, schema_id):
 	computed_dir = Config.PRE_COMPUTE
 	computed_files = os.listdir(computed_dir)
 
+	# check if folder with schema alleles lengths files exists
+	lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
+
 	# get files with schema prefix
-	schema_prefix = 'mode_{0}_{1}'.format(species_id, schema_id)
+	schema_prefix = 'mode_{0}_{1}_'.format(species_id, schema_id)
 	schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
 
 	schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
 	if len(schema_files) == 0:
 		create_file(schema_file, {'mode': [], 'total_alleles': [], 'scatter_data': []})
 
-	update_file(schema_uri, last_modified, schema_file)
+	if lengths_dir in computed_files:
+		lengths_dir = os.path.join(computed_dir, lengths_dir)
+		fast_update(schema_uri, last_modified, schema_file, lengths_dir)
+	else:
+		full_update(schema_uri, last_modified, schema_file)
+	
+	end = time.time()
+	delta = end - start
+	print(delta/60)
 
 
 if __name__ == '__main__':

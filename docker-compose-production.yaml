@@ -10,6 +10,9 @@ services:
   volumes:
    - .:/app
    - ./pre-computed-data:/app/pre-computed-data
+   - ./schema_insertion_temp:/app/schema_insertion_temp
+   - ./compressed_schemas:/app/compressed_schemas
+   - ./prodigal_training_files:/app/prodigal_training_files
   environment:
    - FLASK_ENV=development
    - BASE_URL=https://194.210.120.209/NS/api/
@@ -99,7 +102,8 @@ services:
   container_name: nginx
   volumes:
    - ./self_certs:/etc/nginx/certs
-   - ./downloadable_data:/var/www/my-app/internal_redirect
+   - ./compressed_schemas:/var/www/my-app/internal_redirect/compressed_schemas
+   - ./prodigal_training_files:/var/www/my-app/internal_redirect/prodigal_training_files
   ports:
    - "443:443"
   depends_on:
