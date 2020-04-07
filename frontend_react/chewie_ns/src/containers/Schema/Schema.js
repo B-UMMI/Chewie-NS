@@ -539,9 +539,9 @@ class Schema extends Component {
             {this.props.speciesDict[this.props.match.params.species_id]}
           </p> */}
         </div>
-        <div style={{ marginBottom: "0.5%" }}>{schema_table}</div>
+        <div style={{ marginTop: "40px" }}>{schema_table}</div>
         <div>
-          <div>
+          <div style={{ marginTop: "40px" }}>
             <ExpansionPanel defaultExpanded>
               <ExpansionPanelSummary>
                 <Typography variant="h5" className={classes.title}>
@@ -595,7 +595,7 @@ class Schema extends Component {
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </div>
-          <div style={{ marginBottom: "5%" }}>{annotations}</div>
+          <div style={{ marginTop: "40px" }}>{annotations}</div>
         </div>
         {/* <div style={{marginBottom: "5%"}}>
           {annotations}

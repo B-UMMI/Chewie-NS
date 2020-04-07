@@ -374,7 +374,7 @@ class Locus extends Component {
           </ExpansionPanel>
         </div>
 
-        {uniprot_data}
+        <div style={{ marginTop: "40px" }}>{uniprot_data}</div>
 
         <Box
           style={{

@@ -33,7 +33,7 @@ class Species extends Component {
     );
   }
 
-  clickPlotHandler = event => {
+  clickPlotHandler = (event) => {
     console.log(event.points[0]);
     // console.log("[Schema ID]");
     // console.log(event.points[0].data.name.slice(-1));
@@ -62,17 +62,17 @@ class Species extends Component {
         "/schemas/" +
         schema_id +
         "/locus/" +
-        locus_id
+        locus_id,
     });
   };
 
-  rowClickHandler = rowData => {
+  rowClickHandler = (rowData) => {
     console.log("[RowClick]");
     console.log("rowData: ", rowData.slice(0, -1));
 
     const schema_id = rowData[0];
 
-    localStorage.setItem('schemaName', rowData[1]);
+    localStorage.setItem("schemaName", rowData[1]);
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
@@ -89,13 +89,13 @@ class Species extends Component {
       bsr: rowData[6],
       ptf: rowData[7],
       tl_table: rowData[8],
-      minLen: rowData[9]
+      minLen: rowData[9],
     });
 
-    localStorage.setItem('tableData', JSON.stringify(tableData))
+    localStorage.setItem("tableData", JSON.stringify(tableData));
 
     this.props.history.push({
-      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`
+      pathname: `${this.props.match.params.species_id}/schemas/${schema_id}`,
     });
   };
 
@@ -104,15 +104,15 @@ class Species extends Component {
       overrides: {
         MuiTableRow: {
           root: {
-            cursor: "pointer"
-          }
+            cursor: "pointer",
+          },
         },
         MUIDataTableToolbar: {
           titleText: {
-            color: "#bb7944"
-          }
-        }
-      }
+            color: "#bb7944",
+          },
+        },
+      },
     });
 
   render() {
@@ -138,14 +138,14 @@ class Species extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "schema_name",
@@ -153,14 +153,14 @@ class Species extends Component {
           options: {
             filter: true,
             sort: false,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "user",
@@ -168,14 +168,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "nr_loci",
@@ -184,14 +184,14 @@ class Species extends Component {
             filter: false,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "nr_allele",
@@ -199,14 +199,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "chewie",
@@ -214,14 +214,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: false,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "bsr",
@@ -229,14 +229,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "ptf",
@@ -245,14 +245,14 @@ class Species extends Component {
             filter: false,
             sort: true,
             display: false,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "tl_table",
@@ -260,14 +260,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "minLen",
@@ -275,14 +275,14 @@ class Species extends Component {
           options: {
             filter: false,
             sort: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "Creation Date",
@@ -291,14 +291,14 @@ class Species extends Component {
             sort: true,
             display: false,
             empty: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "Last Change Date",
@@ -307,22 +307,22 @@ class Species extends Component {
             sort: true,
             display: false,
             empty: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       const options = {
         textLabels: {
           body: {
-            noMatch: <CircularProgress />
-          }
+            noMatch: <CircularProgress />,
+          },
         },
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
@@ -330,7 +330,7 @@ class Species extends Component {
         print: false,
         viewColumns: true,
         pagination: false,
-        onRowClick: rowData => this.rowClickHandler(rowData)
+        onRowClick: (rowData) => this.rowClickHandler(rowData),
       };
 
       const title = spd[this.props.match.params.species_id];
@@ -351,25 +351,25 @@ class Species extends Component {
           data={this.props.species_annot}
           layout={{
             title: {
-              text: "<i>" + title + "</i>"
+              text: "<i>" + title + "</i>",
             },
             autosize: true,
             xaxis: {
               title: { text: "Loci" },
-              showticklabels: false
+              showticklabels: false,
               // range: [0, 500]
             },
             yaxis: {
-              title: { text: "Number of alleles" }
+              title: { text: "Number of alleles" },
             },
-            hovermode: "closest"
+            hovermode: "closest",
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
-          onClick={e => this.clickPlotHandler(e)}
+          onClick={(e) => this.clickPlotHandler(e)}
         />
       );
     }
@@ -378,8 +378,8 @@ class Species extends Component {
         <div>
           <h1 style={{ textAlign: "center" }}>Schemas Overview</h1>
         </div>
-        {species}
-        {species_plot}
+        <div style={{ marginTop: "40px" }}>{species}</div>
+        <div style={{ marginTop: "40px" }}>{species_plot}</div>
         <footer
           style={{
             position: "fixed",
@@ -387,7 +387,7 @@ class Species extends Component {
             left: "0",
             backgroundColor: "#ccc",
             width: "100%",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
@@ -402,19 +402,20 @@ class Species extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     species: state.species.species,
     species_annot: state.species.species_annot,
     loading: state.species.loading,
-    error: state.species.error
+    error: state.species.error,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    onFetchSpecies: spec_id => dispatch(actions.fetchSpecies(spec_id)),
-    onFetchSpeciesAnnot: spec_id => dispatch(actions.fetchSpeciesAnnot(spec_id))
+    onFetchSpecies: (spec_id) => dispatch(actions.fetchSpecies(spec_id)),
+    onFetchSpeciesAnnot: (spec_id) =>
+      dispatch(actions.fetchSpeciesAnnot(spec_id)),
   };
 };
 
