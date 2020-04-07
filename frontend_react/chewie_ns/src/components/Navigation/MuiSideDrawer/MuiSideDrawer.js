@@ -16,7 +16,6 @@ import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
 import SvgIcon from "@material-ui/core/SvgIcon";
 
 // Material UI  icon imports
@@ -144,7 +143,9 @@ class PersistentDrawerLeft extends Component {
 
   scheduleMouseOver = () => {
     if (this.state.open === false && this.state.hoverOpen === false) {
-      this.mouseOverTimer = setTimeout(() => {this.handleDrawerOpen()}, 350);
+      this.mouseOverTimer = setTimeout(() => {
+        this.handleDrawerOpen();
+      }, 350);
       this.setState({ hoverOpen: true });
     }
   };
@@ -159,7 +160,6 @@ class PersistentDrawerLeft extends Component {
       this.mouseOverTimer = null;
     }
   };
-
 
   render() {
     const { classes } = this.props;
@@ -229,74 +229,62 @@ class PersistentDrawerLeft extends Component {
           </div>
           <Divider />
           <List>
-            <Tooltip title="Home">
-              <ListItem button component={Link} to="/">
-                <ListItemIcon>
-                  <HomeIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Home"} />
-              </ListItem>
-            </Tooltip>
-            <Tooltip title="Schemas">
-              <ListItem button component={Link} to="/stats">
-                <ListItemIcon>
-                  <DescriptionIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Schemas"} />
-              </ListItem>
-            </Tooltip>
+            <ListItem button component={Link} to="/">
+              <ListItemIcon>
+                <HomeIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"Home"} />
+            </ListItem>
+            <ListItem button component={Link} to="/stats">
+              <ListItemIcon>
+                <DescriptionIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"Schemas"} />
+            </ListItem>
           </List>
           <Divider />
           <List>
-            <Tooltip title="About Us">
-              <ListItem button component={Link} to="/about">
-                <ListItemIcon>
-                  <InfoIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"About Us"} />
-              </ListItem>
-            </Tooltip>
-            <Tooltip title="Github">
-              <ListItem
-                button
-                component="a"
-                href={
-                  "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
-                }
-                target={"_blank"}
-                rel="noopener noreferrer"
-              >
-                <ListItemIcon>
-                  <GitHubIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Github"} />
-              </ListItem>
-            </Tooltip>
-            <Tooltip title="Read the Docs WIP">
-              <ListItem button>
-                <ListItemIcon>
-                  <ChromeReaderModeIcon style={{ color: "white" }} />
-                </ListItemIcon>
-                <ListItemText primary={"Read The Docs WIP"} />
-              </ListItem>
-            </Tooltip>
-            <Tooltip title="API">
-              <ListItem
-                button
-                component="a"
-                href={"https://194.210.120.209/api/NS/api/docs"}
-                target={"_blank"}
-                rel="noopener noreferrer"
-              >
-                <ListItemIcon>
-                  <SvgIcon fontSize="large" htmlColor="#ffffff">
-                    {" "}
-                    <path d={mdiApi} />{" "}
-                  </SvgIcon>
-                </ListItemIcon>
-                <ListItemText primary={"API"} />
-              </ListItem>
-            </Tooltip>
+            <ListItem button component={Link} to="/about">
+              <ListItemIcon>
+                <InfoIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"About Us"} />
+            </ListItem>
+            <ListItem
+              button
+              component="a"
+              href={
+                "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
+              }
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <GitHubIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"Github"} />
+            </ListItem>
+            <ListItem button>
+              <ListItemIcon>
+                <ChromeReaderModeIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"Read The Docs WIP"} />
+            </ListItem>
+            <ListItem
+              button
+              component="a"
+              href={"https://194.210.120.209/api/NS/api/docs"}
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon fontSize="large" htmlColor="#ffffff">
+                  {" "}
+                  <path d={mdiApi} />{" "}
+                </SvgIcon>
+              </ListItemIcon>
+              <ListItemText primary={"API"} />
+            </ListItem>
           </List>
         </Drawer>
         <main className={classes.content}>
