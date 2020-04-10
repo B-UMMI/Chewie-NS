@@ -201,146 +201,147 @@ class Schema extends Component {
       );
     }
 
-    // if (this.props.annotations !== undefined || this.props.annotations !== []) {
-    //   let newAnnotations = [
-    //     ...this.props.annotations
-    //       .concat(this.props.mode_data2)
-    //       .reduce(
-    //         (m, o) =>
-    //           m.set(o.locus_name, Object.assign(m.get(o.locus_name) || {}, o)),
-    //         new Map()
-    //       )
-    //       .values(),
-    //   ];
+    if (this.props.annotations !== undefined || this.props.annotations !== []) {
+      // let newAnnotations = [
+      //   ...this.props.annotations
+      //     .concat(this.props.mode_data2)
+      //     .reduce(
+      //       (m, o) =>
+      //         m.set(o.locus_name, Object.assign(m.get(o.locus_name) || {}, o)),
+      //       new Map()
+      //     )
+      //     .values(),
+      // ];
 
-    const columns = [
-      {
-        name: "uniprot_label",
-        label: "Uniprot Label",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
+      const columns = [
+        {
+          name: "uniprot_label",
+          label: "Uniprot Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
           },
         },
-      },
-      {
-        name: "uniprot_uri",
-        label: "Uniprot URI",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-          customBodyRender: (value, tableMeta, updateValue) => {
-            return (
-              <a href={value} target="_blank" rel="noopener noreferrer">
-                {value}
-              </a>
-            );
-          },
-        },
-      },
-      {
-        name: "locus",
-        label: "Locus ID",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-          customBodyRender: (value, tableMeta, updateValue) => {
-            return (
-              <a
-                href={`${this.props.history.location.pathname}/locus/${value}`}
-              >
-                {value}
-              </a>
-            );
+        {
+          name: "uniprot_uri",
+          label: "Uniprot URI",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <a href={value} target="_blank" rel="noopener noreferrer">
+                  {value}
+                </a>
+              );
+            },
           },
         },
-      },
-      {
-        name: "locus_name",
-        label: "Locus Label",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
+        {
+          name: "locus",
+          label: "Locus ID",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <a
+                  href={`${this.props.history.location.pathname}/locus/${value}`}
+                >
+                  {value}
+                </a>
+              );
+            },
           },
         },
-      },
-      {
-        name: "alleles_mode",
-        label: "Alleles Mode",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
+        {
+          name: "locus_name",
+          label: "Locus Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
           },
         },
-      },
-    ];
+        {
+          name: "alleles_mode",
+          label: "Alleles Mode",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+      ];
 
-    const options = {
-      textLabels: {
-        body: {
-          noMatch: <CircularProgress />,
+      const options = {
+        textLabels: {
+          body: {
+            noMatch: <CircularProgress />,
+          },
         },
-      },
-      responsive: "scrollMaxHeight",
-      selectableRowsHeader: false,
-      selectableRows: "none",
-      selectableRowsOnClick: false,
-      print: false,
-      download: true,
-      filter: true,
-      filterType: "multiselect",
-      search: true,
-      viewColumns: true,
-      pagination: true,
-    };
+        responsive: "scrollMaxHeight",
+        selectableRowsHeader: false,
+        selectableRows: "none",
+        selectableRowsOnClick: false,
+        print: false,
+        download: true,
+        filter: true,
+        filterType: "multiselect",
+        search: true,
+        viewColumns: true,
+        pagination: true,
+      };
 
-    annotations = (
-      <MuiThemeProvider theme={this.getMuiTheme()}>
-        <MUIDataTable
-          title={"Annotations"}
-          data={this.props.annotations}
-          columns={columns}
-          options={options}
-        />
-      </MuiThemeProvider>
-    );
+      annotations = (
+        <MuiThemeProvider theme={this.getMuiTheme()}>
+          <MUIDataTable
+            title={"Annotations"}
+            data={this.props.annotations}
+            columns={columns}
+            options={options}
+          />
+        </MuiThemeProvider>
+      );
+    }
 
     const columns2 = [
       {
