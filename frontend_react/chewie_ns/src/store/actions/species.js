@@ -32,25 +32,23 @@ export const fetchSpecies = spec_id => {
         // console.log(res.data.message)
         const fetchedSpecies = [];
         for (let key in res.data.message) {
-          // console.log("[KEY]")
-          // console.log(key)
           fetchedSpecies.push({
             schema_id:
-              res.data.message[key].schema.value[
-                res.data.message[key].schema.value.length - 1
+              res.data.message[key].uri[
+                res.data.message[key].uri.length - 1
               ],
-            schema_name: res.data.message[key].name.value,
+            schema_name: res.data.message[key].name,
             user:
-              res.data.message[key].user.value[
-                res.data.message[key].user.value.length - 1
+              res.data.message[key].user[
+                res.data.message[key].user.length - 1
               ],
-            chewie: res.data.message[key].chewie.value,
-            bsr: res.data.message[key].bsr.value,
-            ptf: res.data.message[key].ptf.value,
-            tl_table: res.data.message[key].tl_table.value,
-            minLen: res.data.message[key].minLen.value,
-            nr_loci: res.data.message[key].nr_loci.value,
-            nr_allele: res.data.message[key].nr_allele.value,
+            chewie: res.data.message[key].chewBBACA_version,
+            bsr: res.data.message[key].bsr,
+            ptf: res.data.message[key].prodigal_training_file,
+            tl_table: res.data.message[key].translation_table,
+            minLen: res.data.message[key].minimum_locus_length,
+            nr_loci: res.data.message[key].nr_loci,
+            nr_allele: res.data.message[key].nr_alleles,
             id: key
           });
         }

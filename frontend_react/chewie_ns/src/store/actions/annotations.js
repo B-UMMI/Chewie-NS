@@ -36,16 +36,16 @@ export const fetchAnnotations = (species_id, schema_id) => {
         // let speciesNames = [];
         for (let key in res.data.message) {
           annotTableData.push({
-            uniprot_label: res.data.message[key].UniprotLabel.value,
-            uniprot_uri: res.data.message[key].UniprotURI.value,
+            uniprot_label: res.data.message[key].UniprotName,
+            uniprot_uri: res.data.message[key].UniprotURI,
             //species: res.data.message[key].species.value,
             // schema: res.data.message[key].schema.value.substring(
             //   res.data.message[key].schema.value.lastIndexOf("/") + 1
             // ),
-            locus: res.data.message[key].locus.value.substring(
-              res.data.message[key].locus.value.lastIndexOf("/") + 1
+            locus: res.data.message[key].locus.substring(
+              res.data.message[key].locus.lastIndexOf("/") + 1
             ),
-            locus_name: res.data.message[key].name.value,
+            locus_name: res.data.message[key].name,
             alleles_mode: parseInt(res.data.message[key].mode)
           });
         }
