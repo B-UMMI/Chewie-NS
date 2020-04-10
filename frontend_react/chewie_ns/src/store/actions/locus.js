@@ -156,7 +156,7 @@ export const fetchLocusUniprot = (locus_id) => {
       .get("loci/" + locus_id)
       .then((res) => {
         console.log("res.data");
-        console.log(res.data);
+        console.log(res.data[0]);
         let uniprot_annot = [];
         uniprot_annot.push({
           locus_label: res.data[0].name.value,
@@ -164,7 +164,8 @@ export const fetchLocusUniprot = (locus_id) => {
           uniprot_submitted_name: res.data[0].UniprotSName.value,
           uniprot_uri: res.data[0].UniprotURI.value,
         });
-        //console.log(uniprot_annot);
+        console.log("Uniprot annot");
+        console.log(uniprot_annot);
         dispatch(fetchLocusUniprotSuccess(uniprot_annot));
       })
       .catch((uniprotErr) => {
