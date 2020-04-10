@@ -1355,8 +1355,8 @@ class LociNS(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-            security=["access_token"])
-    @jwt_required
+            security=[])
+    #@jwt_required
     def get(self, loci_id, **kwargs):
         """Get a particular locus."""
 
