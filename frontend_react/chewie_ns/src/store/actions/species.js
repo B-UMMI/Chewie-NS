@@ -92,7 +92,7 @@ export const fetchSpeciesAnnot = (spec_id) => {
         let schemaId = res.data.message[0].schema.substring(
           res.data.message[0].schema.lastIndexOf("/") + 1
         );
-        for (let key in res.data.message[0]) {
+        for (let key in res.data.message[0].loci) {
           lociId.push(
             res.data.message[0].loci[key].locus.substring(
               res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
