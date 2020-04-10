@@ -2,46 +2,42 @@ import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 import _ from "lodash";
 
-export const fetchSpeciesSuccess = species => {
+export const fetchSpeciesSuccess = (species) => {
   return {
     type: actionTypes.FECTH_SPECIES_SUCCESS,
-    species: species
+    species: species,
   };
 };
 
-export const fetchSpeciesFail = error => {
+export const fetchSpeciesFail = (error) => {
   return {
     type: actionTypes.FECTH_SPECIES_FAIL,
-    error: error
+    error: error,
   };
 };
 
 export const fetchSpeciesStart = () => {
   return {
-    type: actionTypes.FECTH_SPECIES_START
+    type: actionTypes.FECTH_SPECIES_START,
   };
 };
 
-export const fetchSpecies = spec_id => {
-  return dispatch => {
+export const fetchSpecies = (spec_id) => {
+  return (dispatch) => {
     dispatch(fetchSpeciesStart());
     axios
       .get("stats/species/" + spec_id + "/totals")
-      .then(res => {
+      .then((res) => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
         const fetchedSpecies = [];
         for (let key in res.data.message) {
           fetchedSpecies.push({
             schema_id:
-              res.data.message[key].uri[
-                res.data.message[key].uri.length - 1
-              ],
+              res.data.message[key].uri[res.data.message[key].uri.length - 1],
             schema_name: res.data.message[key].name,
             user:
-              res.data.message[key].user[
-                res.data.message[key].user.length - 1
-              ],
+              res.data.message[key].user[res.data.message[key].user.length - 1],
             chewie: res.data.message[key].chewBBACA_version,
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,
@@ -49,138 +45,162 @@ export const fetchSpecies = spec_id => {
             minLen: res.data.message[key].minimum_locus_length,
             nr_loci: res.data.message[key].nr_loci,
             nr_allele: res.data.message[key].nr_alleles,
-            id: key
+            id: key,
           });
         }
         // console.log(fetchedSpecies)
         dispatch(fetchSpeciesSuccess(fetchedSpecies));
       })
-      .catch(err => {
+      .catch((err) => {
         dispatch(fetchSpeciesFail(err));
       });
   };
 };
 
-export const fetchSpeciesAnnotSuccess = species_annot => {
+export const fetchSpeciesAnnotSuccess = (species_annot) => {
   return {
     type: actionTypes.FECTH_SPECIES_ANNOT_SUCCESS,
-    species_annot: species_annot
+    species_annot: species_annot,
   };
 };
 
-export const fetchSpeciesAnnotFail = error => {
+export const fetchSpeciesAnnotFail = (error) => {
   return {
     type: actionTypes.FECTH_SPECIES_ANNOT_FAIL,
-    error: error
+    error: error,
   };
 };
 
 export const fetchSpeciesAnnotStart = () => {
   return {
-    type: actionTypes.FECTH_SPECIES_ANNOT_START
+    type: actionTypes.FECTH_SPECIES_ANNOT_START,
   };
 };
 
-export const fetchSpeciesAnnot = spec_id => {
-  return dispatch => {
+export const fetchSpeciesAnnot = (spec_id) => {
+  return (dispatch) => {
     dispatch(fetchSpeciesAnnotStart());
     axios
       .get("stats/species/" + spec_id + "/schema/loci/nr_alleles")
-      .then(res => {
+      .then((res) => {
         // console.log("[SUCESS]")
         // console.log(res.data.message)
         // const collator = new Intl.Collator(undefined, {numeric: true, sensitivity: 'base'}); // natural sort
         const fetchedSpeciesAnnot2 = [];
-        let x_val = 0;
-        let y_val = 0;
-        let locus_id = 0;
-        let ola2 = {};
-        let ola3 = {};
-        let ola4 = {};
-        let ola22 = [];
-        let olaLocus = {};
-        let curSchemaId = 0;
-        for (let key in res.data.message) {
-          curSchemaId = res.data.message[key].schema.value.substring(
-            res.data.message[key].schema.value.lastIndexOf("/") + 1
+        let lociId = [];
+        let nrAlleles = [];
+        let schemaId = res.data.message[0].schema.substring(
+          res.data.message[0].schema.lastIndexOf("/") + 1
+        );
+        for (let key in res.data.message[0]) {
+          lociId.push(
+            res.data.message[0].loci[key].locus.substring(
+              res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
+            )
           );
 
-          locus_id = res.data.message[key].locus.value.substring(
-            res.data.message[key].locus.value.lastIndexOf("/") + 1
-          );
-
-          x_val += 1;
-
-          y_val = res.data.message[key].nr_allele.value;
-
-          if (curSchemaId in ola2) {
-            ola2[curSchemaId][[x_val]] = y_val;
-            olaLocus[curSchemaId][[x_val]] = locus_id;
-            ola3[curSchemaId].push(y_val);
-            ola4[curSchemaId][[locus_id]] = y_val;
-          } else if (!(curSchemaId in ola2)) {
-            // console.log("works2")
-            // console.log(curSchemaId)
-            ola2[curSchemaId] = {
-              [x_val]: y_val
-            };
-
-            ola22.push(y_val);
-
-            ola3[curSchemaId] = ola22;
-
-            ola4[curSchemaId] = {
-              [locus_id]: y_val
-            };
-
-            // ola22.push(
-            //   {[x_val]: y_val}
-            // )
-            olaLocus[curSchemaId] = {
-              [x_val]: locus_id
-              // [locus_id]: y_val
-            };
-            x_val = 0;
-            locus_id = 0;
-            ola22 = [];
-          }
+          nrAlleles.push(res.data.message[0].loci[key].nr_alleles);
         }
-        // console.log("[OLA2]")
-        // console.log(ola4)
+        // let x_val = 0;
+        // let y_val = 0;
+        // let locus_id = 0;
+        // let ola2 = {};
+        // let ola3 = {};
+        // let ola4 = {};
+        // let ola22 = [];
+        // let olaLocus = {};
+        // let curSchemaId = 0;
+        // for (let key in res.data.message) {
+        //   curSchemaId = res.data.message[key].schema.substring(
+        //     res.data.message[key].schema.lastIndexOf("/") + 1
+        //   );
 
-        for (let idx in ola4) {
-          // console.log(ola4[idx])
+        //   locus_id = res.data.message[key].locus.value.substring(
+        //     res.data.message[key].locus.value.lastIndexOf("/") + 1
+        //   );
 
-          let sorted = _(ola4[idx])
-            .toPairs()
-            .value()
-            .sort((a, b) => b[1] - a[1]);
+        //   x_val += 1;
 
-          let s_loci_id = sorted.map(arr2 => arr2[0]);
+        //   y_val = res.data.message[key].nr_allele.value;
 
-          let s_nr_alleles = sorted.map(arr2 => arr2[1]);
+        //   if (curSchemaId in ola2) {
+        //     ola2[curSchemaId][[x_val]] = y_val;
+        //     olaLocus[curSchemaId][[x_val]] = locus_id;
+        //     ola3[curSchemaId].push(y_val);
+        //     ola4[curSchemaId][[locus_id]] = y_val;
+        //   } else if (!(curSchemaId in ola2)) {
+        //     // console.log("works2")
+        //     // console.log(curSchemaId)
+        //     ola2[curSchemaId] = {
+        //       [x_val]: y_val
+        //     };
 
-          // console.log(s_loci_id)
-          // console.log(s_nr_alleles)
+        //     ola22.push(y_val);
 
-          fetchedSpeciesAnnot2.push({
-            x: Object.keys(ola2[idx]),
-            y: s_nr_alleles,
-            type: "bar",
-            name: "Schema " + idx,
-            hovertemplate:
-              "<b>Number of Alleles</b>: %{y}" +
-              "<br><b>Locus_ID</b>: %{text}</br>",
-            text: s_loci_id
-            //hoverinfo: "y+text"
-            // line: {
-            //   width: 1
-            // }
-          });
-        }
+        //     ola3[curSchemaId] = ola22;
+
+        //     ola4[curSchemaId] = {
+        //       [locus_id]: y_val
+        //     };
+
+        //     // ola22.push(
+        //     //   {[x_val]: y_val}
+        //     // )
+        //     olaLocus[curSchemaId] = {
+        //       [x_val]: locus_id
+        //       // [locus_id]: y_val
+        //     };
+        //     x_val = 0;
+        //     locus_id = 0;
+        //     ola22 = [];
+        //   }
+        // }
+        // // console.log("[OLA2]")
+        // // console.log(ola4)
+
+        // for (let idx in ola4) {
+        //   // console.log(ola4[idx])
+
+        //   let sorted = _(ola4[idx])
+        //     .toPairs()
+        //     .value()
+        //     .sort((a, b) => b[1] - a[1]);
+
+        //   let s_loci_id = sorted.map(arr2 => arr2[0]);
+
+        //   let s_nr_alleles = sorted.map(arr2 => arr2[1]);
+
+        //   // console.log(s_loci_id)
+        //   // console.log(s_nr_alleles)
+
+        //   fetchedSpeciesAnnot2.push({
+        //     x: Object.keys(ola2[idx]),
+        //     y: s_nr_alleles,
+        //     type: "bar",
+        //     name: "Schema " + idx,
+        //     hovertemplate:
+        //       "<b>Number of Alleles</b>: %{y}" +
+        //       "<br><b>Locus_ID</b>: %{text}</br>",
+        //     text: s_loci_id
+        //     //hoverinfo: "y+text"
+        //     // line: {
+        //     //   width: 1
+        //     // }
+        //   });
+        // }
+        fetchedSpeciesAnnot2.push({
+          x: lociId,
+          y: nrAlleles,
+          type: "bar",
+          name: "Schema " + schemaId,
+          hovertemplate:
+            "<b>Number of Alleles</b>: %{y}" +
+            "<br><b>Locus_ID</b>: %{text}</br>",
+          text: lociId
+        })
         dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot2));
       })
-      .catch(err => {
+      .catch((err) => {
         dispatch(fetchSpeciesAnnotFail(err));
       });
   };
