@@ -137,8 +137,8 @@ export const fetchSpeciesAnnot = (spec_id) => {
             ola22 = [];
           }
         }
-        // console.log("[OLA2]")
-        // console.log(ola4)
+        console.log("[OLA4]")
+        console.log(ola4)
 
         for (let idx in ola4) {
           // console.log(ola4[idx])

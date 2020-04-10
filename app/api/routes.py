@@ -1157,7 +1157,7 @@ class StatsAnnotations(Resource):
         with open(precomputed_data_file, 'r') as json_file:
             json_data = json.load(json_file)
 
-        return {"message": json_data}, 200
+        return json_data
 
 
 # Loci Routes
