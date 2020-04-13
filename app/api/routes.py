@@ -1073,19 +1073,11 @@ class StatsSpeciesId(Resource):
         with open(precomputed_data_file, 'r') as json_file:
             json_data = json.load(json_file)
 
-        print(json_data, flush=True)
-
         # get user id to obtain the username from the Postgres DB
         json_user_id = int(json_data["message"][0]["user"][-1])
 
-        print(json_user_id, flush=True)
-
         user = User.query.get_or_404(json_user_id)
-
-        print(user, flush=True)
-
-        print(user.username, flush=True)
-
+        
         # replace the user id with the username
         json_data["message"][0]["user"] = user.username 
 

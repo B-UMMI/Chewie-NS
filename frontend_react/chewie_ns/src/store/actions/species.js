@@ -36,11 +36,14 @@ export const fetchSpecies = (spec_id) => {
             schema_id:
               res.data.message[key].uri[res.data.message[key].uri.length - 1],
             schema_name: res.data.message[key].name,
-            user:
-              res.data.message[key].user[res.data.message[key].user.length - 1],
+            user: res.data.message[key].user,
             chewie: res.data.message[key].chewBBACA_version,
-            dateEntered: new Date(res.data.message[key].dateEntered).toLocaleDateString(),
-            lastModified: new Date(res.data.message[key].last_modified).toLocaleDateString(),
+            dateEntered: new Date(
+              res.data.message[key].dateEntered
+            ).toLocaleDateString(),
+            lastModified: new Date(
+              res.data.message[key].last_modified
+            ).toLocaleDateString(),
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,
             tl_table: res.data.message[key].translation_table,
@@ -99,7 +102,6 @@ export const fetchSpeciesAnnot = (spec_id) => {
         );
 
         for (let key in res.data.message[0].loci) {
-          
           locus_id = res.data.message[0].loci[key].locus.substring(
             res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
           );
@@ -140,8 +142,8 @@ export const fetchSpeciesAnnot = (spec_id) => {
             ola22 = [];
           }
         }
-        console.log("[OLA4]")
-        console.log(ola4)
+        console.log("[OLA4]");
+        console.log(ola4);
 
         for (let idx in ola4) {
           // console.log(ola4[idx])
