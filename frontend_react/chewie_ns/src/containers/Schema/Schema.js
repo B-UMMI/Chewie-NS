@@ -489,6 +489,7 @@ class Schema extends Component {
         options: {
           filter: false,
           sort: true,
+          display: false,
           setCellHeaderProps: (value) => {
             return {
               style: {
