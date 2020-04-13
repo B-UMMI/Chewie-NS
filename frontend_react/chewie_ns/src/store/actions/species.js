@@ -32,6 +32,12 @@ export const fetchSpecies = (spec_id) => {
         // console.log(res.data.message)
         const fetchedSpecies = [];
         for (let key in res.data.message) {
+          let dateEnteredFormatted = new Date(
+            res.data.message[key].dateEntered
+          );
+          let lastModifiedDateFormatted = new Date(
+            res.data.message[key].last_modified
+          );
           fetchedSpecies.push({
             schema_id:
               res.data.message[key].uri[res.data.message[key].uri.length - 1],
@@ -39,11 +45,17 @@ export const fetchSpecies = (spec_id) => {
             user: res.data.message[key].user,
             chewie: res.data.message[key].chewBBACA_version,
             dateEntered: new Date(
-              res.data.message[key].dateEntered
-            ).toLocaleDateString(),
+              dateEnteredFormatted.getTime() -
+                (dateEnteredFormatted.getTimezoneOffset() * 6000)
+            )
+              .toISOString()
+              .split("T")[0],
             lastModified: new Date(
-              res.data.message[key].last_modified
-            ).toLocaleDateString(),
+              lastModifiedDateFormatted.getTime() -
+                (lastModifiedDateFormatted.getTimezoneOffset() * 6000)
+            )
+              .toISOString()
+              .split("T")[0],
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,
             tl_table: res.data.message[key].translation_table,
