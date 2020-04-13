@@ -39,6 +39,8 @@ export const fetchSpecies = (spec_id) => {
             user:
               res.data.message[key].user[res.data.message[key].user.length - 1],
             chewie: res.data.message[key].chewBBACA_version,
+            dateEntered: new Date(res.data.message[key].dateEntered).toLocaleDateString(),
+            lastModified: new Date(res.data.message[key].last_modified).toLocaleDateString(),
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,
             tl_table: res.data.message[key].translation_table,

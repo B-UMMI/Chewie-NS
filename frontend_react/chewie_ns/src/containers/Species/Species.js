@@ -86,10 +86,12 @@ class Species extends Component {
       nr_loci: rowData[3],
       nr_allele: rowData[4],
       chewie: rowData[5],
-      bsr: rowData[6],
-      ptf: rowData[7],
-      tl_table: rowData[8],
-      minLen: rowData[9],
+      dateEntered: rowData[6],
+      lastModified: rowData[7],
+      bsr: rowData[8],
+      ptf: rowData[9],
+      tl_table: rowData[10],
+      minLen: rowData[11],
     });
 
     localStorage.setItem("tableData", JSON.stringify(tableData));
@@ -224,6 +226,38 @@ class Species extends Component {
           },
         },
         {
+          name: "dateEntered",
+          label: "Creation Date",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "lastModified",
+          label: "Last Change Date",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "bsr",
           label: "Blast Score Ratio",
           options: {
@@ -283,39 +317,7 @@ class Species extends Component {
               };
             },
           },
-        },
-        {
-          name: "Creation Date",
-          options: {
-            filter: false,
-            sort: true,
-            display: false,
-            empty: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "Last Change Date",
-          options: {
-            filter: false,
-            sort: true,
-            display: false,
-            empty: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
+        }
       ];
 
       const options = {

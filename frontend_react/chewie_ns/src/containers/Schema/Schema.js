@@ -437,6 +437,38 @@ class Schema extends Component {
         },
       },
       {
+        name: "dateEntered",
+        label: "Creation Date",
+        options: {
+          filter: false,
+          sort: true,
+          display: true,
+          setCellHeaderProps: (value) => {
+            return {
+              style: {
+                fontWeight: "bold",
+              },
+            };
+          },
+        },
+      },
+      {
+        name: "lastModified",
+        label: "Last Change Date",
+        options: {
+          filter: false,
+          sort: true,
+          display: true,
+          setCellHeaderProps: (value) => {
+            return {
+              style: {
+                fontWeight: "bold",
+              },
+            };
+          },
+        },
+      },
+      {
         name: "bsr",
         label: "Blast Score Ratio",
         options: {
