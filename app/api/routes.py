@@ -1082,6 +1082,10 @@ class StatsSpeciesId(Resource):
 
         user = User.query.get_or_404(json_user_id)
 
+        print(user, flush=True)
+
+        print(user.username, flush=True)
+
         # replace the user id with the username
         json_data["message"][0]["user"] = user.username 
 
