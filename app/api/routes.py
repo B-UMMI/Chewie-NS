@@ -1073,6 +1073,14 @@ class StatsSpeciesId(Resource):
         with open(precomputed_data_file, 'r') as json_file:
             json_data = json.load(json_file)
 
+        # get user id to obtain the username from the Postgres DB
+        json_user_id = json_data["message"][0]["user"][-1]
+
+        user = User.query.get_or_404(json_user_id)
+
+        # replace the user id with the username
+        json_data["message"][0]["user"] = user.username 
+
         if schema_id is None:
             return json_data
         elif schema_id is not None:
