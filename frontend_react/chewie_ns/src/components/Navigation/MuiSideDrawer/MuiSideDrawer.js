@@ -241,15 +241,15 @@ class PersistentDrawerLeft extends Component {
               </ListItemIcon>
               <ListItemText primary={"Schemas"} />
             </ListItem>
-          </List>
-          <Divider />
-          <List>
             <ListItem button component={Link} to="/about">
               <ListItemIcon>
                 <InfoIcon style={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary={"About Us"} />
             </ListItem>
+          </List>
+          <Divider />
+          <List>
             <ListItem
               button
               component="a"
