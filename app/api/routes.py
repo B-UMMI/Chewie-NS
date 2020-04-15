@@ -318,11 +318,11 @@ auth_conf = api.namespace('auth', description='authentication operations')
 # Login model
 auth_model = api.model('LoginModel',
                        {'email': fields.String(required=True,
-                                               description='User email address.',
-                                               example='test@refns.com'),
+                                               description='User email address.'
+                                               ),
                         'password': fields.String(required=True,
-                                                  description='User password.',
-                                                  example='mega_secret')
+                                                  description='User password.'
+                                                  )
                        })
 
 # refresh_model = api.model("RefreshModel", {
