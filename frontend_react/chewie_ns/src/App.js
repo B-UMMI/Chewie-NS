@@ -93,7 +93,7 @@ function SimpleBreadcrumbs() {
         {locusIdMatches && (
           <MuiLink
             component={Link}
-            to={`/schema/${locusIdMatches.params.schema_id}/${locusIdMatches.params.locus_id}`}
+            to={`/schema/${locusIdMatches.params.schema_id}/locus/${locusIdMatches.params.locus_id}`}
             style={styles.breadcrumb}
           >
             Locus {locusIdMatches.params.locus_id}
