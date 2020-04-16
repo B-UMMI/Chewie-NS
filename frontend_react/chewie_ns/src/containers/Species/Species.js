@@ -102,10 +102,9 @@ class Species extends Component {
   };
 
   downloadPTFHandler = (tableMeta) => {
-
     // get the ptf has from the table data
-    const ptfHash = tableMeta.rowData[9]
-    
+    const ptfHash = tableMeta.rowData[9];
+
     // make a request to the download endpoint
     axios({
       method: "get",
@@ -122,14 +121,15 @@ class Species extends Component {
 
     // create download element
     const link = document.createElement("a");
-    link.href = "https://194.210.120.209/api/NS/api/download/prodigal_training_files/" + ptfHash;
+    link.href =
+      "https://194.210.120.209/api/NS/api/download/prodigal_training_files/" +
+      ptfHash;
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
   };
 
   downloadCompressedSchemasHandler = (tableMeta) => {
-
     const spd = JSON.parse(localStorage.getItem("speciesD"));
 
     // get the species ID
@@ -138,11 +138,15 @@ class Species extends Component {
     // get the Schema ID
     const schemaId = tableMeta.rowData[0];
 
-    // get last modification date 
+    // get the Schema Name
+    const schemaName = tableMeta.rowData[1];
+
+    // get last modification date
     const lastModifiedDate = this.props.species[0].lastModifiedISO;
 
-    const endpointVariables = speciesId + "/" + schemaId + "/" + lastModifiedDate;
-    
+    const endpointVariables =
+      speciesId + "/" + schemaId + "/" + lastModifiedDate;
+
     // make a request to the download endpoint
     axios({
       method: "get",
@@ -153,16 +157,23 @@ class Species extends Component {
 
     let speciesName = spd[this.props.match.params.species_id];
 
-    const fileName = speciesName + "_" + lastModifiedDate + ".zip";
+    const fileName =
+      speciesName.replace(" ", "_") +
+      "_" +
+      schemaName +
+      "_" +
+      lastModifiedDate +
+      ".zip";
 
     // create download element
     const link = document.createElement("a");
-    link.href = "https://194.210.120.209/api/NS/api/download/compressed_schemas/" + endpointVariables;
+    link.href =
+      "https://194.210.120.209/api/NS/api/download/compressed_schemas/" +
+      endpointVariables;
     link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
   };
-
 
   getMuiTheme = () =>
     createMuiTheme({
@@ -386,11 +397,11 @@ class Species extends Component {
           options: {
             filter: false,
             empty: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
@@ -403,8 +414,8 @@ class Species extends Component {
                   More Details
                 </Button>
               );
-            }
-          }
+            },
+          },
         },
         {
           name: "Prodigal Training File",
@@ -458,7 +469,9 @@ class Species extends Component {
                       variant="contained"
                       color="default"
                       startIcon={<GetAppSharpIcon />}
-                      onClick={() => this.downloadCompressedSchemasHandler(tableMeta)}
+                      onClick={() =>
+                        this.downloadCompressedSchemasHandler(tableMeta)
+                      }
                     >
                       Download
                     </Button>
@@ -467,7 +480,7 @@ class Species extends Component {
               );
             },
           },
-        }
+        },
       ];
 
       const options = {
@@ -481,7 +494,7 @@ class Species extends Component {
         selectableRows: "none",
         print: false,
         viewColumns: true,
-        pagination: false
+        pagination: false,
       };
 
       const title = spd[this.props.match.params.species_id];
