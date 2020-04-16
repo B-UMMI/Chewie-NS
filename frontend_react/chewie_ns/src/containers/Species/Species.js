@@ -10,7 +10,7 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-// import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
+import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -66,13 +66,13 @@ class Species extends Component {
     });
   };
 
-  rowClickHandler = (rowData) => {
+  rowClickHandler = (tableMeta) => {
     console.log("[RowClick]");
     console.log("rowData: ", rowData.slice(0, -1));
 
-    const schema_id = rowData[0];
+    const schema_id = tableMeta.rowData[0];
 
-    localStorage.setItem("schemaName", rowData[1]);
+    localStorage.setItem("schemaName", tableMeta.rowData[1]);
     // console.log(this.props.match)
     // this.setState({ schema: schema_id})
     // console.log(this.props.match);
@@ -80,18 +80,18 @@ class Species extends Component {
     const tableData = [];
 
     tableData.push({
-      schema_id: rowData[0],
-      schema_name: rowData[1],
-      user: rowData[2],
-      nr_loci: rowData[3],
-      nr_allele: rowData[4],
-      chewie: rowData[5],
-      dateEntered: rowData[6],
-      lastModified: rowData[7],
-      bsr: rowData[8],
-      ptf: rowData[9],
-      tl_table: rowData[10],
-      minLen: rowData[11],
+      schema_id: tableMeta.rowData[0],
+      schema_name: tableMeta.rowData[1],
+      user: tableMeta.rowData[2],
+      nr_loci: tableMeta.rowData[3],
+      nr_allele: tableMeta.rowData[4],
+      chewie: tableMeta.rowData[5],
+      dateEntered: tableMeta.rowData[6],
+      lastModified: tableMeta.rowData[7],
+      bsr: tableMeta.rowData[8],
+      ptf: tableMeta.rowData[9],
+      tl_table: tableMeta.rowData[10],
+      minLen: tableMeta.rowData[11],
     });
 
     localStorage.setItem("tableData", JSON.stringify(tableData));
@@ -118,7 +118,7 @@ class Species extends Component {
 
     let speciesName = spd[this.props.match.params.species_id];
 
-    const fileName = speciesName + ".trn";
+    const fileName = speciesName.replace(" ", "_") + ".trn";
 
     // create download element
     const link = document.createElement("a");
@@ -382,6 +382,31 @@ class Species extends Component {
           },
         },
         {
+          name: "Schema Details",
+          options: {
+            filter: false,
+            empty: true,
+            setCellHeaderProps: value => {
+              return {
+                style: {
+                  fontWeight: "bold"
+                }
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <Button
+                  variant="contained"
+                  color="default"
+                  onClick={() => this.rowClickHandler(tableMeta)}
+                >
+                  More Details
+                </Button>
+              );
+            }
+          }
+        },
+        {
           name: "Prodigal Training File",
           options: {
             filter: false,
@@ -401,6 +426,7 @@ class Species extends Component {
                     <Button
                       variant="contained"
                       color="default"
+                      startIcon={<GetAppSharpIcon />}
                       onClick={() => this.downloadPTFHandler(tableMeta)}
                     >
                       Download
@@ -431,6 +457,7 @@ class Species extends Component {
                     <Button
                       variant="contained"
                       color="default"
+                      startIcon={<GetAppSharpIcon />}
                       onClick={() => this.downloadCompressedSchemasHandler(tableMeta)}
                     >
                       Download
@@ -454,8 +481,7 @@ class Species extends Component {
         selectableRows: "none",
         print: false,
         viewColumns: true,
-        pagination: false,
-        onRowClick: (rowData) => this.rowClickHandler(rowData),
+        pagination: false
       };
 
       const title = spd[this.props.match.params.species_id];
