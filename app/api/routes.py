@@ -1043,7 +1043,7 @@ class DownloadCompressedSchemas(Resource):
         # Set response Headers
         response.headers['Content-Description'] = 'File Transfer'
         response.headers['Cache-Control'] = 'no-cache'
-        response.headers['Content-Type'] = 'application/zip'
+        response.headers['Content-Type'] = 'application/octet-stream; charset=iso-8859-1'
         response.headers['X-Accel-Redirect'] = "/prodigal_training_files/" + ptf_file_name
 
         return response
