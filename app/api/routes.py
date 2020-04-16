@@ -991,6 +991,64 @@ class Users(Resource):
         return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
 
 
+# NS download Routes
+# Namespace for NS download operations
+download_conf = api.namespace('download', description='download data from the database.')
+
+@download_conf.route("/compressed_schemas/<int:species_id>/<int:schema_id>/<string:timestamp>")
+class DownloadCompressedSchemas(Resource):
+    """ Download a compressed chewbbaca schema. """
+
+    @api.doc(responses={200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found'},
+             security=[])
+    def get(self, species_id, schema_id, timestamp):
+        """ Get the compressed schema. """
+
+        compressed_schema_filename = "{0}_{1}_{2}.zip".format(str(species_id), str(schema_id), str(timestamp))
+        
+        response = make_response()
+
+        # Set response Headers
+        response.headers['Content-Description'] = 'File Transfer'
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['Content-Type'] = 'application/zip'
+        response.headers['X-Accel-Redirect'] = "/compressed_schemas/" + compressed_schema_filename
+
+        return response
+
+
+@download_conf.route("/prodigal_training_files/<string:ptf_hash>")
+class DownloadCompressedSchemas(Resource):
+    """ Download a prodigal training file. """
+
+    @api.doc(responses={200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found'},
+             security=[])
+    def get(self, ptf_hash):
+        """ Get the prodigal training file. """
+
+        ptf_file_name = str(ptf_hash)
+        
+        response = make_response()
+
+        # Set response Headers
+        response.headers['Content-Description'] = 'File Transfer'
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['Content-Type'] = 'application/zip'
+        response.headers['X-Accel-Redirect'] = "/prodigal_training_files/" + ptf_file_name
+
+        return response
+
+
 # NS statistics Routes
 # Namespace for NS statistics operations
 stats_conf = api.namespace('stats', description='statistics of the database.')

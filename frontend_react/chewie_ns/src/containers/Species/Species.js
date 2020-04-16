@@ -101,6 +101,65 @@ class Species extends Component {
     });
   };
 
+  downloadPTFHandler = (tableMeta) => {
+
+    // get the ptf has from the table data
+    const ptfHash = tableMeta.rowData[9]
+    
+    // make a request to the download endpoint
+    axios({
+      method: "get",
+      url: "/download/prodigal_training_files/" + ptfHash,
+    }).then((res) => {
+      console.log(res);
+    });
+
+    let speciesName = spd[this.props.match.params.species_id];
+
+    const fileName = speciesName + ".trn";
+
+    // create download element
+    const link = document.createElement("a");
+    link.href = "https://194.210.120.209/api/NS/api/download/prodigal_training_files/" + ptfHash;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+  downloadCompressedSchemasHandler = (tableMeta) => {
+
+    // get the species ID
+    const speciesId = this.props.match.params.species_id;
+
+    // get the Schema ID
+    const schemaId = tableMeta.rowData[0];
+
+    // get last modification date 
+    const lastModifiedDate = this.props.species[0].lastModifiedISO;
+
+    const endpointVariables = speciesId + "/" + schemaId + "/" + lastModifiedDate;
+    
+    // make a request to the download endpoint
+    axios({
+      method: "get",
+      url: "/download/compressed_schemas/" + endpointVariables,
+    }).then((res) => {
+      console.log(res);
+    });
+
+    let speciesName = spd[this.props.match.params.species_id];
+
+    const fileName = speciesName + "_" + lastModifiedDate + ".zip";
+
+    // create download element
+    const link = document.createElement("a");
+    link.href = "https://194.210.120.209/api/NS/api/download/compressed_schemas/" + endpointVariables;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+  };
+
+
   getMuiTheme = () =>
     createMuiTheme({
       overrides: {
@@ -315,6 +374,66 @@ class Species extends Component {
                   fontWeight: "bold",
                 },
               };
+            },
+          },
+        },
+        {
+          name: "Prodigal Training File",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <div>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="default"
+                      onClick={() => this.downloadPTFHandler(tableMeta)}
+                    >
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              );
+            },
+          },
+        },
+        {
+          name: "Compressed Schema",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return (
+                <div>
+                  <div>
+                    <Button
+                      variant="contained"
+                      color="default"
+                      onClick={() => this.downloadCompressedSchemasHandler(tableMeta)}
+                    >
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              );
             },
           },
         }

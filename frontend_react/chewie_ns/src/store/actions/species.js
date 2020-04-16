@@ -56,6 +56,7 @@ export const fetchSpecies = (spec_id) => {
             )
               .toISOString()
               .split("T")[0],
+            lastModifiedISO: res.data.message[key].last_modified,
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,
             tl_table: res.data.message[key].translation_table,
