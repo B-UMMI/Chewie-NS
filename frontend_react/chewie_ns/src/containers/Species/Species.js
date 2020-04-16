@@ -9,7 +9,7 @@ import Spinner from "../../components/UI/Spinner/Spinner";
 // Material-UI components
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Typography from "@material-ui/core/Typography";
-// import Button from "@material-ui/core/Button";
+import Button from "@material-ui/core/Button";
 // import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
@@ -114,6 +114,8 @@ class Species extends Component {
       console.log(res);
     });
 
+    const spd = JSON.parse(localStorage.getItem("speciesD"));
+
     let speciesName = spd[this.props.match.params.species_id];
 
     const fileName = speciesName + ".trn";
@@ -127,6 +129,8 @@ class Species extends Component {
   };
 
   downloadCompressedSchemasHandler = (tableMeta) => {
+
+    const spd = JSON.parse(localStorage.getItem("speciesD"));
 
     // get the species ID
     const speciesId = this.props.match.params.species_id;
