@@ -67,8 +67,8 @@ class Species extends Component {
   };
 
   rowClickHandler = (tableMeta) => {
-    console.log("[RowClick]");
-    console.log("rowData: ", rowData.slice(0, -1));
+    // console.log("[RowClick]");
+    // console.log("rowData: ", rowData.slice(0, -1));
 
     const schema_id = tableMeta.rowData[0];
 
