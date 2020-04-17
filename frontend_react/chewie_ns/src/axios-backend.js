@@ -11,7 +11,8 @@ const instance = axios.create({
    //withCredentials: true
    //baseURL: 'http://172.19.1.1:5000/NS/api'
    //baseURL: 'https://localhost/api/NS/api/'
-   baseURL: 'https://194.210.120.209/api/NS/api'
+   // baseURL: 'https://194.210.120.209/api/NS/api'
+   baseURL: 'https://chewbbaca.online/api/NS/api'
 });
 
 export default instance;
