@@ -1,35 +1,45 @@
 from flask import Flask
-#from flask.sessions import SecureCookieSessionInterface
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-#from flask_mail import Mail
-from flask_bootstrap import Bootstrap
-#from flask_moment import Moment
+# from flask_bootstrap import Bootstrap
 from flask_security import Security, SQLAlchemyUserDatastore, user_registered
 from flask_restplus import Api, marshal_with
-#from flask_marshmallow import Marshmallow
 from flask_cors import CORS
-# from flask_talisman import Talisman
-#from flask_seasurf import SeaSurf
 from flask_jwt_extended import JWTManager
 from config import Config
 from celery import Celery
 
 
+'''
+App route:
+    - Defining the global app instance.
+    - Launching database.
+    - Set the queue management.
+    - Load all the other files required for the application to work:
+        - models (load all the datatabase Resource models)
+        - api (load all the app endpoints)
+        - app_configuration (before first request)
+'''
+
 
 #get db
 db = SQLAlchemy()
+
 # provide migration
 migrate = Migrate()
+
+# Login Manager
 login_manager = LoginManager()
-# mail = Mail()
-bootstrap = Bootstrap()
+
+# Bootstrap for prototype frontend
+# bootstrap = Bootstrap()
+
+# App security
 security = Security()
-#csrf = SeaSurf()
 
+# Queue management
 celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
-
 
 
 ####### Config jwt ##############################################################
@@ -60,19 +70,35 @@ def user_identity_lookup(user):
 #################################################################################
 
 def create_app(config_class=Config):
+    # Setup app
     app = Flask(__name__)
+    # Setup CORS 
     CORS(app)
+    # Reads the config file
     app.config.from_object(config_class)
 
+    # Setup db
     db.init_app(app)
+
+    # Setup migration
     migrate.init_app(app, db)
+
+    # Setup login manager
     login_manager.init_app(app)
-    # mail.init_app(app)
-    bootstrap.init_app(app)
+
+    # Setup bootstrap
+    # bootstrap.init_app(app)
+
+    # Setup SQLAlchemy datastore
     datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
+
+    # Setup Flask-Security
     security.init_app(app, datastore=datastore)
-    #csrf.init_app(app)
+
+    # Setup JWT
     jwt.init_app(app)
+
+    # Setup Celery
     celery.conf.update(app.config)
 
     # https://flask.palletsprojects.com/en/1.1.x/deploying/wsgi-standalone/#proxy-setups
@@ -82,8 +108,8 @@ def create_app(config_class=Config):
     from app.api import blueprint as api_bp
     app.register_blueprint(api_bp)
     
-    from app.front_end import front_end_blueprint
-    app.register_blueprint(front_end_blueprint)
+    # from app.front_end import front_end_blueprint
+    # app.register_blueprint(front_end_blueprint)
 
     @user_registered.connect_via(app)
     def user_registered_sighandler(app, user, confirm_token, **extra):
@@ -97,92 +123,3 @@ def create_app(config_class=Config):
 
 from app import models
 datastore_cheat = SQLAlchemyUserDatastore(db, models.User, models.Role)
-
-
-
-# celery.conf.update(app.config)
-
-# app = Flask(__name__)
-# CORS(app)
-# app.config.from_object(Config)
-
-# # Disable Session Cookie generation
-# class CustomSessionInterface(SecureCookieSessionInterface):
-#     """Disable default cookie generation."""
-    
-#     def should_set_cookie(self, *args, **kwargs):
-#         return False
-
-#     """Prevent creating session from API requests."""
-#     def save_session(self, *args, **kwargs):
-#         if g.get('login_via_header'):
-#             #print("Custom session login via header")
-#             return
-#         return super(CustomSessionInterface, self).save_session(*args, **kwargs)
-
-# app.session_interface = CustomSessionInterface()
-
-# @user_loaded_from_header.connect
-# def user_loaded_from_header(self, user=None):
-#     g.login_via_header = True
-
-# login_manager = LoginManager(app)
-#login_manager.init_app(app)
-
-
-## HTTPS config
-
-# Content Security Policy
-# csp = {
-#     'default-src': '\'self\''
-# }
-# talisman = Talisman(app, content_security_policy=csp)
-
-# # get db
-# db = SQLAlchemy(app)
-
-# # provide migration
-# migrate = Migrate(app, db)
-
-# # Pretty Things
-# bootstrap = Bootstrap(app)
-
-# Pretty date and time
-#moment = Moment(app)
-
-# API
-
-# Define a blueprint to change the endpoint for the documentation of the API (Swagger)
-#blueprint = Blueprint("api", __name__, url_prefix='/NS/api')
-
-
-# Celery
-# celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-# celery.conf.update(app.config)
-
-
-# API authorizations
-# authorizations = {
-#     'apikey' : {
-#         'type' : 'apiKey',
-#         'in' : 'header',
-#         'name' : 'X-API-KEY'
-#     }
-# }
-
-# api = Api(blueprint,
-#           title="Nomenclature Server API",
-#           version="2.0",
-#           doc="/docs",
-#           authorizations=authorizations)
-#name_space = api.namespace('/NS/api/docs', description='Nomenclature Server API')
-
-#app.register_blueprint(blueprint)
-
-
-
-# from app import models, routes
-
-
-# if __name__ == "__main__":
-#     app.run(Threaded=True, debug=True)

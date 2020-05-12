@@ -43,7 +43,17 @@ UNIPROT_SERVER = SPARQLWrapper("http://sparql.uniprot.org/sparql")
 
 
 def binary_file_hash(binary_file):
-    """
+    """ Obtains the hash of binary file.
+
+    Parameters
+    ----------
+    binary_file: str
+        Path to the binary file.
+
+    Returns
+    -------
+    file_hash: str
+        Hash of the binary file.
     """
 
     with open(binary_file, 'rb') as bf:
@@ -58,7 +68,29 @@ def binary_file_hash(binary_file):
 def write_schema_config(blast_score_ratio, ptf_hash,
                         translation_table, minimum_sequence_length,
                         chewie_version, size_threshold, output_directory):
-    """
+    """ Writes a pickle (binary) file with the schema configurations.
+
+    Parameters
+    ----------
+    bsr: float
+        Blast Score Ratio used to create the schema.
+    prodigal_training_file: str
+        Hash of the prodigal training file.
+    translation_table: int
+        Translation table used to create the schema.
+    minimum_locus_length: int
+        Minimum locus length allowed to create the schema.
+    chewBBACA_version: str
+        Version of chewBBACA used to create the schema.
+    size_threshold: str
+
+    Returns
+    -------
+    list
+        List containing a bool confirming the creation of the
+        configuration file and a str corresponding to the path
+        of the configuration file.
+
     """
 
     params = {}
@@ -77,10 +109,23 @@ def write_schema_config(blast_score_ratio, ptf_hash,
 
 
 def write_gene_list(schema_dir):
-    """
+    """ Writes a pickle (binary) file containing a list of input genes.
+
+    Parameters
+    ----------
+    schema_dir: str
+        Path to the schema directory.
+
+    Returns
+    -------
+    list
+        List containing a bool confirming the creation of the
+        gene list file and a str corresponding to the path
+        of the gene list file.
     """
 
-    schema_files = [file for file in os.listdir(schema_dir) if '.fasta' in file]
+    schema_files = [file for file in os.listdir(
+        schema_dir) if '.fasta' in file]
     schema_list_file = os.path.join(schema_dir, '.genes_list')
     with open(schema_list_file, 'wb') as sl:
         pickle.dump(schema_files, sl)
@@ -91,12 +136,16 @@ def write_gene_list(schema_dir):
 def is_fasta(filename):
     """ Checks if a file is a FASTA file.
 
-        Args:
-            filename (str): the full path to the FASTA file
+        Parameters
+        ----------
+        filename: str
+            The full path to the FASTA file.
 
-        Returns:
+        Returns
+        -------
+        bool
             True if FASTA file,
-            False otherwise
+            False otherwise.
     """
 
     with open(filename, 'r') as handle:
@@ -112,10 +161,15 @@ def is_fasta(filename):
 def filter_files(files_list, suffixes):
     """ Checks if files names contain any suffix from a list of suffixes.
 
-        Args:
-            files_list (list): a list with all files names.
-        Returns:
-            suffixes (list): a list with all suffixes to search for in
+        Parameters
+        ----------
+        files_list: list
+            a list with all files names.
+
+        Returns
+        -------
+        suffixes: list
+            a list with all suffixes to search for in
             the files names.
     """
 
@@ -128,10 +182,15 @@ def filter_files(files_list, suffixes):
 def filter_non_fasta(files_list):
     """ Creates a new list of files names/paths that only contains FASTA files.
 
-        Args:
-            files_list (list): a list with files names/paths.
-        Returns:
-            real_fasta (list): a list with files names/paths that correspond
+        Parameters
+        ----------
+        files_list: list
+            a list with files names/paths.
+
+        Returns
+        -------
+        real_fasta: list
+            a list with files names/paths that correspond
             to FASTA files.
     """
 
@@ -144,11 +203,16 @@ def gene_seqs_info(gene):
     """ Determines the total number of alleles and the mean length
         of allele sequences per gene.
 
-        Args:
-            genes_list (list): a list with names/paths for FASTA
+        Parameters
+        ----------
+        genes_list: list
+            a list with names/paths for FASTA
             files.
-        Returns:
-            genes_info (list): a list with a sublist for each input
+
+        Returns
+        -------
+        genes_info: list
+            a list with a sublist for each input
             gene file. Each sublist contains a gene identifier, the
             total number of alleles for that gene and the mean length
             of allele sequences for that gene.
@@ -166,14 +230,19 @@ def gene_seqs_info(gene):
 def make_blast_db(input_fasta, output_path, db_type):
     """ Creates a BLAST database.
 
-        Args:
-            input_fasta (str): path to the input file with sequences.
-            output_path (str): path to the output database.
-            db_type (str): type of the database, nucleotide (nuc) or
+        Parameters
+        ----------
+        input_fasta: str
+            path to the input file with sequences.
+        output_path: str
+            path to the output database.
+        db_type: str
+            type of the database, nucleotide (nuc) or
             protein (prot).
 
-        Returns:
-            Creates a BLAST database with the input sequences.
+        Returns
+        -------
+        Creates a BLAST database with the input sequences.
     """
 
     makedb_cmd = ('makeblastdb -in {0} -out {1} -parse_seqids '
@@ -186,11 +255,15 @@ def make_blast_db(input_fasta, output_path, db_type):
 def determine_blast_task(proteins):
     """ Determine the type of task that should be used to run BLAST.
 
-        Args:
-            proteins (str): path to a file with sequences.
+        Parameters
+        ----------
+        proteins: str
+            path to a file with sequences.
 
-        Returns:
-            blast_task (str): a string that indicates the type of BLAST
+        Returns
+        -------
+        blast_task: str
+            a string that indicates the type of BLAST
             task to run.
     """
 
@@ -204,14 +277,39 @@ def determine_blast_task(proteins):
 
 
 def create_directory(directory_path):
-    """ Creates a diretory if it does not exist."""
+    """ Creates a diretory if it does not exist.
+
+        Parameters
+        ----------
+        directory_path: str
+            Path to the directory
+
+        Returns
+        -------
+        Creates a directory.
+
+    """
 
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
 
 
 def join_paths(parent_path, child_path):
-    """ Joins a parent directory and a subdirectory."""
+    """ Joins a parent directory and a subdirectory.
+
+        Parameters
+        ----------
+        parent_path: str
+            Parent directory path
+        child_path: str
+            Subdirectory path
+
+        Returns
+        -------
+        joined_paths: str
+            The parent path joined with the
+            subdirectory path.
+    """
 
     joined_paths = os.path.join(parent_path, child_path)
 
@@ -221,13 +319,22 @@ def join_paths(parent_path, child_path):
 def check_input_type(input_path, output_file):
     """ Checks if the input is a file or a directory.
 
-        Args:
-            folder_or_list (str): the full path to the file or directory
+        Parameters
+        ----------
+        folder_or_list: str
+            the full path to the file or directory
 
-        Returns:
-            list_files (str) if folder_or_list is a path to a file,
-            list_files (list) if folder_or_list is a path to a directory,
-            Raises Exception otherwise
+        Returns
+        -------
+        list_files: str
+            if folder_or_list is a path to a file,
+        list_files: list
+            if folder_or_list is a path to a directory,
+
+        Raises
+        ------
+        Exception
+            If none of the above is True.
     """
 
     # check if input argument is a file or a directory
@@ -274,16 +381,19 @@ def check_input_type(input_path, output_file):
 def flatten_list(list_to_flatten):
     """Flattens one level of a nested list
 
-        Args:
-            list_to_flatten (list)
+        Parameters
+        ----------
+        list_to_flatten: list
 
-        Returns:
-            flattened list
+        Returns
+        -------
+        list
+            Flattened list
 
-        Example:
-
-            >>> flatten_list([[[1,2],[3,4]]])
-            [[1, 2], [3, 4]]
+        Example
+        -------
+        >>> flatten_list([[[1,2],[3,4]]])
+        [[1, 2], [3, 4]]
 
     """
 
@@ -293,11 +403,15 @@ def flatten_list(list_to_flatten):
 def read_blast_tabular(blast_tabular_file):
     """ Read a file with BLAST results in tabular format
 
-        Args:
-            blast_tabular_file (str): path to output file of BLAST.
+        Parameters
+        ----------
+        blast_tabular_file: str
+            path to output file of BLAST.
 
-        Returns:
-            blasting_results (list): a list with a sublist per line
+        Returns
+        -------
+        blasting_results: list
+            a list with a sublist per line
             in the input file.
     """
 
@@ -312,14 +426,19 @@ def fasta_lines(identifiers, sequences_dictionary):
     """ Creates list with line elements for a FASTA file based on the sequence
         identifiers passed.
 
-        Args:
-            identifiers (list): a list with the identifiers of sequences that
+        Parameters
+        ----------
+        identifiers: list
+            a list with the identifiers of sequences that
             will be included in the list.
-            sequences_dictionary (dict): a dictionary with sequence identifeirs
+        sequences_dictionary: dict
+            a dictionary with sequence identifeirs
             as keys and sequences as values.
 
-        Returns:
-            seqs_lines (list): a list with strings representing the header of
+        Returns
+        -------
+        seqs_lines: list
+            a list with strings representing the header of
             the sequence and the sequence for each of the specified sequence
             identifiers.
     """
@@ -333,13 +452,17 @@ def fasta_lines(identifiers, sequences_dictionary):
 def write_list(lines, output_file):
     """ Writes list elements to file.
 
-        Args:
-            lines (list): list with the ordered lines that will be written
+        Parameters
+        ----------
+        lines: list
+            list with the ordered lines that will be written
             to the output file.
-            output_file (str): name/path of the output file.
+        output_file: str
+            name/path of the output file.
 
-        Returns:
-            Writes contents of 'lines' argument into 'output_file'.
+        Returns
+        -------
+        Writes contents of 'lines' argument into 'output_file'.
     """
 
     with open(output_file, 'w') as file:
@@ -350,12 +473,16 @@ def determine_duplicated_prots(proteins):
     """ Creates a dictionary with protein sequences as keys and all sequence
         identifiers associated with that protein as values.
 
-        Args:
-            proteins (dict): dictionary with protein sequence identifiers as
+        Parameters
+        ----------
+        proteins: dict
+            dictionary with protein sequence identifiers as
             keys and protein sequences as values.
 
-        Returns:
-            equal_prots (dict): dictionary with protein sequence as keys and
+        Returns
+        -------
+        equal_prots: dict
+            dictionary with protein sequence as keys and
             sequence identifiers that are associated with each protein sequence
             as values.
     """
@@ -377,10 +504,21 @@ def determine_duplicated_prots(proteins):
 def determine_longest(seqids, proteins):
     """ Determines which sequence is the longest among
         sequences with the specified identifiers.
+
+        Parameters
+        ----------
+        seqids: list
+        proteins: dict
+
+        Returns
+        -------
+        chosen:
+            Longest sequence
+
     """
 
     seqids_prots = [(seqid, proteins[seqid]) for seqid in seqids]
-    sorted_prots = sorted(seqids_prots, key= lambda x: len(x[1]), reverse=True)
+    sorted_prots = sorted(seqids_prots, key=lambda x: len(x[1]), reverse=True)
     chosen = sorted_prots[0][0]
 
     return chosen
@@ -389,11 +527,16 @@ def determine_longest(seqids, proteins):
 def locus_mode(alleles):
     """ Determines the mode value from a set of sequence length values.
 
-        Args:
-            alleles (dict): dictionary with alleles identifiers as keys
+        Parameters
+        ----------
+        alleles: dict
+            dictionary with alleles identifiers as keys
             and the allele length as value.
-        Returns:
-            modes (list): The most frequent length values. The distribution
+
+        Returns
+        -------
+        modes: list
+            The most frequent length values. The distribution
             of length values for a locus might have more than one mode.
     """
 
@@ -415,10 +558,14 @@ def mode_filter(alleles, size_threshold):
         and identifies sequences that have a length value
         smaller or greater than the mode based on a threshold.
 
-        Args:
-            alleles (dict):
-            size_threshold (float):
-        Returns:
+        Parameters
+        ----------
+            alleles: dict
+            size_threshold: float
+
+        Returns
+        -------
+        list
             A list with the following variables:
                 - modes (list):
                 - alm (list):
@@ -441,8 +588,10 @@ def mode_filter(alleles, size_threshold):
     bot_limit = min_mode - (min_mode*size_threshold)
 
     # determine sequences that are below or above limits
-    alm = [seqid for seqid, length in alleles_lengths.items() if length > top_limit]
-    asm = [seqid for seqid, length in alleles_lengths.items() if length < bot_limit]
+    alm = [seqid for seqid, length in alleles_lengths.items() if length >
+                                                            top_limit]
+    asm = [seqid for seqid, length in alleles_lengths.items() if length <
+                                                            bot_limit]
 
     return [modes, alm, asm, alleles_lengths]
 
@@ -451,12 +600,17 @@ def get_seqs_dicts(gene_file, gene_id, table_id, min_len, size_threshold):
     """ Creates a dictionary mapping seqids to DNA sequences and
         another dictionary mapping protids to protein sequences.
 
-        Args:
-            gene_file (str): path/name of the FASTA file with
+        Parameters
+        ----------
+        gene_file: str
+            path/name of the FASTA file with
             DNA sequences.
-            table_id (int): translation table identifier.
+        table_id: int
+            translation table identifier.
 
-        Returns:
+        Returns
+        -------
+        list
             List with following elements:
                 dna_seqs (dict): dictionary with sequence identifiers as keys
                 and DNA sequences as values.
@@ -473,7 +627,8 @@ def get_seqs_dicts(gene_file, gene_id, table_id, min_len, size_threshold):
     seqids_map = {}
     invalid_alleles = []
     seq_generator = SeqIO.parse(gene_file, 'fasta', generic_dna)
-    translated_seqs = [(rec.id, translate_dna(str(rec.seq), table_id, min_len)) for rec in seq_generator]
+    translated_seqs = [(rec.id, translate_dna(
+        str(rec.seq), table_id, min_len)) for rec in seq_generator]
     total_seqs = len(translated_seqs)
 
     for rec in translated_seqs:
@@ -501,11 +656,14 @@ def get_seqs_dicts(gene_file, gene_id, table_id, min_len, size_threshold):
 
     if size_threshold is not None and len(prot_seqs) > 0:
         # remove alleles based on length mode and size threshold
-        modes, alm, asm, alleles_lengths = mode_filter(dna_seqs, size_threshold)
+        modes, alm, asm, alleles_lengths = mode_filter(
+            dna_seqs, size_threshold)
         excluded = set(asm + alm)
 
-        dna_seqs = {seqid: seq for seqid, seq in dna_seqs.items() if seqid not in excluded}
-        prot_seqs = {seqid: seq for seqid, seq in prot_seqs.items() if seqids_map[seqid] not in excluded}
+        dna_seqs = {seqid: seq for seqid,
+            seq in dna_seqs.items() if seqid not in excluded}
+        prot_seqs = {seqid: seq for seqid, seq in prot_seqs.items(
+        ) if seqids_map[seqid] not in excluded}
 
         modes_concat = ':'.join(map(str, modes))
         st_percentage = int(size_threshold*100)
@@ -524,19 +682,25 @@ def split_genes_by_core(inputs, threads, method):
         length of the sequences in each locus or the product of
         both variables.
 
-        Args:
-            inputs (list): list with information about the data of
+        Parameters
+        ----------
+        inputs: list
+            list with information about the data of
             each locus that needs to be processed.
-            threads (int): the number of sublists with inputs that
+        threads: int
+            the number of sublists with inputs that
             should be created, based on the number of CPU threads
             that will be used to process the inputs.
-            method (str): "seqcount" to split inputs into sublists
+        method: str
+            "seqcount" to split inputs into sublists
             with even number of sequences, "length" to split based
             on mean length of sequences and "seqcount+length" to
             split based on both criteria.
 
-        Returns:
-            splitted_ids (list): subslists with paths to loci, each
+        Returns
+        -------
+        splitted_ids: list
+            subslists with paths to loci, each
             sublist containing paths for a set of loci that should
             not differ much from other sublists based on the criterion
             used to separate the inputs.
@@ -567,13 +731,18 @@ def concatenate_list(str_list, join_char):
     """ Concatenates list elements with specified
         character between each original list element.
 
-        Args:
-            sequence_ids (list): list with strings that will be concatenated.
-            join_char (str): character that will be used to join all list
+        Parameters
+        ----------
+        sequence_ids: list
+            list with strings that will be concatenated.
+        join_char: str
+            character that will be used to join all list
             elements.
 
-        Returns:
-            ids_str (str): concatenation of all strings in the input list.
+        Returns
+        -------
+        ids_str: str
+            concatenation of all strings in the input list.
     """
 
     concat = join_char.join(str_list)
@@ -584,13 +753,17 @@ def concatenate_list(str_list, join_char):
 def write_text_chunk(output_file, text):
     """ Write single string to file.
 
-        Args:
-            output_file (str): path/name of the file that will store
+        Parameters
+        ----------
+        output_file: str
+            path/name of the file that will store
             the input text.
-            text (str): single string to write to file.
+        text: str
+            single string to write to file.
 
-        Returns:
-            Writes input text to output file.
+        Returns
+        -------
+        Writes input text to output file.
     """
 
     with open(output_file, 'w') as out:
@@ -600,16 +773,21 @@ def write_text_chunk(output_file, text):
 def reverse_complement(dna_sequence):
     """ Determines the reverse complement of given DNA strand.
 
-        Args:
-            strDNA (str): string representing a DNA sequence.
+        Parameters
+        ----------
+        strDNA: str
+            string representing a DNA sequence.
 
-        Returns:
-            revC_dna (str): the reverse complement of the DNA sequence, without
+        Returns
+        -------
+        revC_dna: str
+            the reverse complement of the DNA sequence, without
             lowercase letters.
 
-        Example:
-            >>> reverse_complement('ATCGgcaNn')
-            'NNTGCCGAT'
+        Example
+        -------
+        >>> reverse_complement('ATCGgcaNn')
+        'NNTGCCGAT'
     """
 
     base_complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A',
@@ -633,11 +811,15 @@ def reverse_complement(dna_sequence):
 def reverse_str(string):
     """ Reverse character order in input string.
 
-        Args:
-            string (str): string to be reversed.
+        Parameters
+        ----------
+        string: str
+            string to be reversed.
 
-        Returns:
-            revstr (str): reverse of input string.
+        Returns
+        -------
+        revstr: str
+            reverse of input string.
     """
 
     revstr = string[::-1]
@@ -648,12 +830,17 @@ def reverse_str(string):
 def translate_sequence(dna_str, table_id):
     """ Translate a DNA sequence using the BioPython package.
 
-        Args:
-            dna_str (str): DNA sequence as string type.
-            table_id (int): translation table identifier.
+        Parameters
+        ----------
+        dna_str: str
+            DNA sequence as string type.
+        table_id: int
+            translation table identifier.
 
-        Returns:
-            protseq (str): protein sequence created by translating
+        Returns
+        -------
+        protseq: str
+            protein sequence created by translating
             the input DNA sequence.
     """
 
@@ -668,13 +855,19 @@ def translate_dna_aux(dna_sequence, method, table_id):
     """ Tries to translate an input DNA sequence in specified orientation
         and stores exceptions when the input sequence cannot be translated.
 
-        Args:
-            dna_sequence (str): string representing a DNA sequence.
-            method (str): a string specifying the way the sequence will
+        Parameters
+        ----------
+        dna_sequence: str
+            string representing a DNA sequence.
+        method: str
+            a string specifying the way the sequence will
             be oriented to attempt translation.
-            table_id (int): translation table identifier.
+        table_id: int
+            translation table identifier.
 
-        Returns:
+        Returns
+        -------
+        list
             List with following elements if translation is successful:
                 protseq (str): string representing the translated DNA sequence.
                 myseq (str): string representing the DNA sequence in the
@@ -719,14 +912,21 @@ def check_str_alphabet(string, alphabet):
     """ Determine if a string only has characters from specified
         alphabet.
 
-        Args:
-            string (str): input string.
-            alphabet (str): string that has all characters from desired
+        Parameters
+        ----------
+        string: str
+            input string.
+        alphabet: str
+            string that has all characters from desired
             alphabet.
 
-        Returns:
+        Returns
+        -------
+        bool
             "True" if sequence only has characters from specified
-            alphabet and string "ambiguous or invalid characters" if
+            alphabet
+        str
+            "ambiguous or invalid characters" if
             it any of its characters is not in the alphabet.
     """
 
@@ -741,14 +941,21 @@ def check_str_multiple(string, number):
     """ Determine if length of input string is multiple of
         a specified number.
 
-        Args:
-            string (str): input string.
-            number (int): integer that will be used to check if sequence
+        Parameters
+        ----------
+        string: str
+            input string.
+        number: int
+            integer that will be used to check if sequence
             length is multiple of.
 
-        Returns:
+        Returns
+        -------
+        bool
             "True" if the length of the sequence is a multiple of the
-            specified number and "sequence length is not a multiple of number"
+            specified number
+        str
+            "sequence length is not a multiple of number"
             if condition is not satisfied.
     """
 
@@ -765,17 +972,21 @@ def translate_dna(dna_sequence, table_id, min_len):
         different orientations. Stores exceptions so that it is possible to
         understand the sequence could not be translated.
 
-        Args:
-            dna_sequence (str):
-            table_id (int):
+        Parameters
+        ----------
+            dna_sequence: str
+            table_id: str
 
-        Returns:
+        Returns
+        -------
+        list
             If the sequence can be translated,
             a list with following elements:
                 sequence (list): a list with two elemets, the protein sequence
                 and the DNA sequence in the correct orientation.
                 coding_strand (str): the strand orientation that had could be
                 translated.
+        str
             Otherwise:
                 exception_str (str): a string containing the exceptions that
                 determined that the sequence could not be translated.
@@ -831,17 +1042,25 @@ def retranslate(sequence, method, table_id, strands, exception_collector):
     """ Sends sequence for translation and collects exceptions when
         the sequence cannot be translated.
 
-        Args:
-            sequence (str): string representing a DNA sequence.
-            method (str): a string specifying the sequence orientation
+        Parameters
+        ----------
+        sequence: str
+            string representing a DNA sequence.
+        method: str
+            a string specifying the sequence orientation
             that should be used to attempt translation.
-            table_id (int): translation table identifier.
-            strands (list): list with 4 different orientations that can
+        table_id: int
+            translation table identifier.
+        strands: list
+            list with 4 different orientations that can
             be checked.
-            exception_collector (list): list used to store all exceptions
+        exception_collector: list
+            list used to store all exceptions
             arising from translation attempts.
 
-        Returns:
+        Returns
+        -------
+        list
             A list with following elements, if the sequence can be translated:
                 translated_seq (list): a list with the protein sequence and
                 with the DNA sequence in the orientation used for translation.
@@ -864,18 +1083,22 @@ def retranslate(sequence, method, table_id, strands, exception_collector):
 
 
 def is_url(url):
-    """ Checks if a url is valid
+    """ Checks if a url is valid.
 
-        Args: 
-        url (str): the url to be checked
+        Parameters
+        ----------
+        url: str
+            the url to be checked
 
-        Returns:
-        True if url is valid, False otherwise.
+        Returns
+        -------
+        bool
+            True if url is valid, False otherwise.
 
     """
 
     try:
-        
+
         result = urlparse(url)
         return all([result.scheme, result.netloc, result.path])
 
@@ -883,46 +1106,70 @@ def is_url(url):
         return False
 
 
-def make_url(base_url , *res, **params):
-    """ Creates a url. 
-    
-        Args: 
-            base_url (str): the base url
-            res (str): endpoint(s) to add to the base url
-            params (str): addtional parameters (WIP)
+def make_url(base_url, *res, **params):
+    """ Creates a url.
 
-        Returns:
-            url (str) with the provided parameters.
-            Otherwise, returns base_url.
+        Parameters
+        ----------
+        base_url: str
+            the base url.
+        res: str
+            endpoint(s) to add to the base url.
+        params: str
+            addtional parameters.
+
+        Returns
+        -------
+        url: str
+            url with the provided parameters.
+
+        str
+            "An invalid URL was provided." is
+            returned if a an invalid url is
+            provided.
 
     """
-    
+
     url = base_url
-    
+
     # Check if the url is valid
     if is_url(url):
-        
+
         if url[-1] == "/":
             url = url[:-1]
-    
+
         # Add the endpoints
         for r in res:
-    #        url = '{}/{}'.format(url, r)
+        #        url = '{}/{}'.format(url, r)
             url = f'{url}/{r}'
-        
+
         # Add params if they are provided
         if params:
-    #        url = '{}?{}'.format(url, urllib.urlencode(params))
+        #        url = '{}?{}'.format(url, urllib.urlencode(params))
             url = f'{url}?{urlencode(params)}'
-        
+
         return url
-    
+
     else:
         return "An invalid URL was provided."
 
 
 def progress_bar(process, total, tickval, ticknum, completed):
-    """
+    """ A progress bar to track process execution.
+
+        Parameters
+        ----------
+        process: process object
+        total: int
+        tickval: int
+        ticknum: int
+        completed: bool
+
+        Returns
+        -------
+        completed: bool
+            True if process is completed,
+            False otherwise.
     """
 
     # check if process has finished
@@ -951,8 +1198,22 @@ def progress_bar(process, total, tickval, ticknum, completed):
 
 
 def get_data(server, sparql_query):
-    """ Gets data from Virtuoso """
-    
+    """ Gets data from Virtuoso.
+
+        Parameters
+        ----------
+        server: str
+            URL of the SPARQL server.
+        sparql_query: str
+            SPARQL query to perform.
+
+        Returns
+        -------
+        result: str
+            JSON response from the server.
+
+    """
+
     try:
         server.setQuery(sparql_query)
         server.setReturnFormat(JSON)
@@ -967,106 +1228,169 @@ def get_data(server, sparql_query):
             result = server.query().convert()
         except Exception as e:
             result = e
-            
+
     return result
 
 
 def get_read_run_info_ena(ena_id):
+    """ Gets information from ENA.
 
-	url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=' + ena_id + 'AAA&result=read_run'
+        Parameters
+        ----------
+        ena_id: str
+            ID of the ENA record
 
-	read_run_info = False
-	try:
-		with urllib.request.urlopen(url) as url:
-			read_run_info = url.read().splitlines()
-			if len(read_run_info) <= 1:
-				read_run_info = False
-			else:
-				read_run_info=True
-	except Exception as error:
-		print(error)
-	
-	return read_run_info
+        Returns
+        -------
+        read_run_info: bool
+
+    """
+
+       url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=' + \
+           ena_id + 'AAA&result=read_run'
+
+        read_run_info = False
+        try:
+            with urllib.request.urlopen(url) as url:
+                read_run_info = url.read().splitlines()
+                if len(read_run_info) <= 1:
+                    read_run_info = False
+                else:
+                    read_run_info = True
+        except Exception as error:
+            print(error)
+
+        return read_run_info
 
 
 def get_read_run_info_sra(SRA_id):
-	
-	url = 'https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=%20'+SRA_id
-	
-	read_run_info = False
-	try:
-		with urllib.request.urlopen(url,timeout = 2) as url:
+    """ Gets information from SRA.
 
-			#if the SRA_id is not found ncbi is very generous and may give a tsunami of info, limit that to 30k bytes if that's the case
-			#we wont consider that ID
-			read_run_info = url.read(30000)
-			try:
-				read_run_info=read_run_info.splitlines()
-			except:
-				return read_run_info
+    Parameters
+    ----------
+    SRA_id: str
+        ID of the SRA record
 
-			
-			#check if the ERR is on the second element of the list returned
-			#thanks NCBI for returning wtv if the SRA_id is "LALA" or whatever I put there
-			#very cranky bypass of this, change in the future
-			
-			if SRA_id in read_run_info[1].decode("utf-8") :
-				read_run_info=True
-			else:
-				read_run_info=False
-			
-	except Exception as error:
-		print(error)
+    Returns
+    -------
+    read_run_info: bool
 
-	return read_run_info
+"""
+
+    url = 'https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=%20'+SRA_id
+
+    read_run_info = False
+    try:
+        with urllib.request.urlopen(url, timeout=2) as url:
+
+               # if the SRA_id is not found ncbi is very generous and may give a tsunami of info, limit that to 30k bytes if that's the case
+               # we wont consider that ID
+            read_run_info = url.read(30000)
+            try:
+                read_run_info = read_run_info.splitlines()
+            except:
+                return read_run_info
+
+            # check if the ERR is on the second element of the list returned
+            # thanks NCBI for returning wtv if the SRA_id is "LALA" or whatever I put there
+            # very cranky bypass of this, change in the future
+
+            if SRA_id in read_run_info[1].decode("utf-8"):
+                read_run_info = True
+            else:
+                read_run_info = False
+
+    except Exception as error:
+        print(error)
+
+    return read_run_info
 
 
-#dirty way to check the disease URI is real, no pun intended :)))
+# dirty way to check the disease URI is real, no pun intended :)))
 def check_disease_resource(URI):
-	try:
-		
-		print('http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
-		r = requests.get('http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
-		print(r.status_code)
-		diseaseFound=False
-		if int(r.status_code)<202:
-			diseaseFound=True
-	except Exception as e:
-		print(e)
-		diseaseFound=False
-	return diseaseFound
+    """ Check disease URI with disease ontology.
+
+        Parameters
+        ----------
+        URI: str
+
+        Returns
+        -------
+        diseaseFound: bool
+    """
+       try:
+
+            print('http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
+            r = requests.get(
+                'http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
+            print(r.status_code)
+            diseaseFound = False
+            if int(r.status_code) < 202:
+                diseaseFound = True
+        except Exception as e:
+            print(e)
+            diseaseFound = False
+        return diseaseFound
 
 
 def sanitize_input(mystring):
+    """ Clean a string.
+
+        Parameters
+        ----------
+        mystring: str
+
+        Returns
+        -------
+        mystring: str
+            Clean string.
     """
-    """
-    
-    print ("sanitizing")
-    
+
+    print("sanitizing")
+
     mystring = mystring.replace("'", "")
-    
+
     mystring = mystring.encode('ascii', 'ignore')
     mystring = mystring.decode("utf-8")
-    
-    mystring = mystring.replace("\\", "") 
-	
+
+    mystring = mystring.replace("\\", "")
+
     return mystring
 
 
 def send_data(sparql_query, url_send_local_virtuoso, virtuoso_user, virtuoso_pass):
-    """ Sends data to Virtuoso
+    """ Sends data to Virtuoso.
+
+        Parameters
+        ----------
+        sparql_query: str
+            SPARQL query to perform.
+        url_send_local_virtuoso: str
+            URL of the SPARQL server.
+        virtuoso_user: str
+            Virtuoso username.
+        virtuoso_pass: str
+            Virtuoso password.
+
+        Returns
+        -------
+        r: str
+            Request response
     """
 
     url = url_send_local_virtuoso
     headers = {'content-type': 'application/sparql-query'}
-    r = requests.post(url, data=sparql_query, headers=headers, auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
-    
-    #sometimes virtuoso returns 405 God knows why ¯\_(ツ)_/¯ retry in 2 sec
-    if r.status_code >201:
+    r = requests.post(url, data=sparql_query, headers=headers,
+                      auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
+
+    # sometimes virtuoso returns 405 God knows why ¯\_(ツ)_/¯ retry in 2 sec
+    if r.status_code > 201:
         time.sleep(2)
-        r = requests.post(url, data=sparql_query, headers=headers, auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
-        
+        r = requests.post(url, data=sparql_query, headers=headers,
+                          auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
+
     return r
+
 
 def send_big_query(server, sparql_query):
     """ Sends a big query to Virtuoso
@@ -1076,17 +1400,25 @@ def send_big_query(server, sparql_query):
         server.setReturnFormat(JSON)
         server.method = "POST"
         result = server.query().convert()
-    
+
     except Exception as e:
         result = e
-        
+
     return result
 
 
 def check_len(arg):
-    """ Check string length 
+    """ Check string length.
+
+        Parameters
+        ----------
+        arg: str
+
+        Returns
+        -------
+        bool
     """
-    
+
     # if there is no arg, abort
     if len(arg) == 0 or len(arg) > 30000:
         return False
@@ -1095,7 +1427,15 @@ def check_len(arg):
 
 
 def check_prefix(prefix):
-    """ Check prefix 
+    """ Check prefix.
+
+        Parameters
+        ----------
+        arg: str
+
+        Returns
+        -------
+        bool
     """
 
     # if there is no arg, abort
@@ -1110,15 +1450,21 @@ def check_prefix(prefix):
     else:
         return True
 
+
 def uniprot_query(sequence):
     """ Constructs a SPARQL query to search for exact matches in the
         UniProt endpoint.
 
-        Args:
-            sequence (str): the Protein sequence that will be added
+        Parameters
+        ---------
+        sequence: str
+            the protein sequence that will be added
             to the query.
-        Returns:
-            query (str): the SPARQL query that will allow to seaarch for
+
+        Returns
+        -------
+        query: str
+            the SPARQL query that will allow to search for
             exact matches in the UniProt database.
     """
 
@@ -1140,10 +1486,14 @@ def select_name(result):
     """ Extracts the annotation description from the result
         of a query to the UniProt SPARQL endpoint.
 
-        Args:
-            result (dict): a dictionary with the results
-            from querying the UniProt SPARQL endpoint.
-        Returns:
+        Parameters
+        ----------
+        result: dict
+            results from querying the UniProt SPARQL endpoint.
+
+        Returns
+        -------
+        list
             A list with the following elements:
                 - the annotation descrition;
                 - the URI to the UniProt page for the protein;

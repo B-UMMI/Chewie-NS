@@ -41,18 +41,27 @@ def bsr_categorizer(blast_results, representatives,
     """ Determines the BLAST hits that have a BSR below a minimum threshold
         and the BLAST hits that have a BSR above a maximum threshold.
 
-        Args:
-            blast_results (list): a list with sublists, each sublist contains
+        Parameters
+        ----------
+        blast_results: list
+            a list with sublists, each sublist contains
             information about a BLAST hit.
-            representatives (list): list with sequence identifiers of
+        representatives: list
+            list with sequence identifiers of
             representative sequences.
-            representatives_scores (dict): dictionary with self BLAST raw score
+        representatives_scores: dict
+            dictionary with self BLAST raw score
             for every representative.
-            min_bsr (float): minimum BSR value accepted to consider a sequence
+        min_bsr: float
+            minimum BSR value accepted to consider a sequence
             as a possible new representative.
-            max_bsr (float): maximum BSR value accepted to consider a sequence
+        max_bsr: float
+            maximum BSR value accepted to consider a sequence
             as a possible new representative.
-        Returns:
+
+        Returns
+        -------
+        list
             List with following elements:
                 high_bsr (list): list with all sequence identifiers of subject
                 sequences that had hits with a BSR higher than the maximum
@@ -65,14 +74,14 @@ def bsr_categorizer(blast_results, representatives,
     high_bsr = []
     hotspot_bsr = []
     low_bsr = []
-    
+
     high_reps = {}
     hot_reps = {}
     low_reps = {}
 
-    filtered_results = [res for res in blast_results 
+    filtered_results = [res for res in blast_results
                         if res[0] != res[1] and res[1] not in representatives]
-    bsr_values = [float(res[2])/float(representatives_scores[res[0]]) 
+    bsr_values = [float(res[2])/float(representatives_scores[res[0]])
                   for res in filtered_results]
 
     high_bsr = [res[1] for ind, res in enumerate(filtered_results)
@@ -97,24 +106,31 @@ def bsr_categorizer(blast_results, representatives,
 
 
 def select_candidate(candidates, proteins,
-                                 seqids, representatives,
-                                 final_representatives):
+                     seqids, representatives,
+                     final_representatives):
     """ Chooses a new representative sequence.
 
-        Args:
-            candidates (list): list with the sequence identifiers
+        Parameters
+        ----------
+        candidates: list
+            list with the sequence identifiers
             of all candidates.
-            proteins (dict): a dictionary with protein identifiers
+        proteins: dict
+            a dictionary with protein identifiers
             as keys and protein sequences as values.
-            seqids (list): a list with the sequence identifiers that
+        seqids: list
+            a list with the sequence identifiers that
             still have no representative (representatives identifiers
             are included because they have to be BLASTed in order to
             determine their self score).
-            representatives (list): the sequence identifiers of all
+        representatives: list
+            the sequence identifiers of all
             representatives.
 
-        Returns:
-            representatives (list): the set of all representatives,
+        Returns
+        -------
+        representatives: list
+            the set of all representatives,
             including the new repsentative that was chosen by the function.
     """
 
@@ -166,15 +182,20 @@ def adapt_loci(genes_list):
         used with chewBBACA. Removes invalid alleles and selects
         representative alleles to include in the "short" directory.
 
-        Args:
-            genes_list (list): a list with the paths for the files
+        Parameters
+        ----------
+        genes_list: list
+            a list with the paths for the files
             to be processed, the path to the schema directory, the path
             to the "short" directory and the BLAST Score Ratio value.
 
-        Returns:
-            invalid_alleles (list): list with the identifiers of the alleles
+        Returns
+        -------
+        invalid_alleles: list
+            list with the identifiers of the alleles
             that were determined to be invalid.
-            invalid_genes (list): list with the identifiers of the genes
+        invalid_genes: list
+            list with the identifiers of the genes
             that had no valid alleles.
             After determining representatives for a gene/locus, writes the
             schema files.
@@ -202,14 +223,14 @@ def adapt_loci(genes_list):
 
         # create paths to gene files in new schema
         gene_file = aux.join_paths(schema_path,
-                               '{0}{1}'.format(gene_id, '.fasta'))
+                                   '{0}{1}'.format(gene_id, '.fasta'))
 
         gene_short_file = aux.join_paths(schema_short_path,
-                                     '{0}{1}'.format(gene_id, '_short.fasta'))
+                                         '{0}{1}'.format(gene_id, '_short.fasta'))
 
         # create path to temp working directory for current gene
         gene_temp_dir = aux.join_paths(schema_path,
-                                   '{0}{1}'.format(gene_id, '_temp'))
+                                       '{0}{1}'.format(gene_id, '_temp'))
 
         # create temp directory for the current gene
         aux.create_directory(gene_temp_dir)
@@ -217,7 +238,8 @@ def adapt_loci(genes_list):
         # dictionaries mapping gene identifiers to DNA sequences
         # and Protein sequences
         gene_seqs, prot_seqs, gene_invalid, seqids_map, total_sequences = \
-            aux.get_seqs_dicts(gene, gene_id, table_id, min_len, size_threshold)
+            aux.get_seqs_dicts(gene, gene_id, table_id,
+                               min_len, size_threshold)
         invalid_alleles.extend(gene_invalid)
 
         # if locus has no valid CDS sequences,
@@ -233,7 +255,8 @@ def adapt_loci(genes_list):
             equal_prots = aux.determine_duplicated_prots(prot_seqs)
 
             # get only one identifier per protein
-            ids_to_blast = [protids[0] for protein, protids in equal_prots.items()]
+            ids_to_blast = [protids[0]
+                            for protein, protids in equal_prots.items()]
 
             # get longest sequence as first representative
             longest = aux.determine_longest(ids_to_blast, prot_seqs)
@@ -242,7 +265,7 @@ def adapt_loci(genes_list):
 
             # create FASTA file with distinct protein sequences
             protein_file = aux.join_paths(gene_temp_dir,
-                                      '{0}_protein.fasta'.format(gene_id))
+                                          '{0}_protein.fasta'.format(gene_id))
             protein_lines = aux.fasta_lines(ids_to_blast, prot_seqs)
             aux.write_list(protein_lines, protein_file)
 
@@ -259,19 +282,20 @@ def adapt_loci(genes_list):
 
                 # create FASTA file with representative sequences
                 rep_file = aux.join_paths(gene_temp_dir,
-                                      '{0}_rep_protein.fasta'.format(gene_id))
+                                          '{0}_rep_protein.fasta'.format(gene_id))
                 rep_protein_lines = aux.fasta_lines(representatives, prot_seqs)
                 aux.write_list(rep_protein_lines, rep_file)
 
                 # create file with seqids to BLAST against
-                ids_str = aux.concatenate_list([str(i) for i in ids_to_blast], '\n')
+                ids_str = aux.concatenate_list(
+                    [str(i) for i in ids_to_blast], '\n')
                 ids_file = aux.join_paths(gene_temp_dir,
-                                      '{0}_ids.txt'.format(gene_id))
+                                          '{0}_ids.txt'.format(gene_id))
                 aux.write_text_chunk(ids_file, ids_str)
 
                 # BLAST representatives against non-represented
                 blast_output = aux.join_paths(gene_temp_dir,
-                                          '{0}_blast_out.tsv'.format(gene_id))
+                                              '{0}_blast_out.tsv'.format(gene_id))
                 # set max_target_seqs to huge number because BLAST only
                 # returns 500 hits by default
                 blast_command = ('blastp -task {0} -db {1} -query {2} -out {3} '
@@ -292,17 +316,20 @@ def adapt_loci(genes_list):
                 # divide results into high, low and hot BSR values
                 hitting_high, hitting_low, hotspots, high_reps, low_reps, hot_reps = \
                     bsr_categorizer(blast_results, representatives,
-                                           rep_self_scores, bsr, bsr+0.1)
+                                    rep_self_scores, bsr, bsr+0.1)
 
                 excluded_reps = []
 
                 # remove high BSR hits that have representative
                 hitting_high = set(hitting_high)
-                ids_to_blast = [i for i in ids_to_blast if i not in hitting_high]
+                ids_to_blast = [
+                    i for i in ids_to_blast if i not in hitting_high]
 
                 # remove representatives that led to high BSR with subjects that were removed
-                prunned_high_reps = {k: [r for r in v if r in ids_to_blast] for k, v in high_reps.items()}
-                reps_to_remove = [k for k,v in prunned_high_reps.items() if len(v) == 0]
+                prunned_high_reps = {
+                    k: [r for r in v if r in ids_to_blast] for k, v in high_reps.items()}
+                reps_to_remove = [
+                    k for k, v in prunned_high_reps.items() if len(v) == 0]
 
                 excluded_reps.extend(reps_to_remove)
 
@@ -321,18 +348,20 @@ def adapt_loci(genes_list):
                 # remove representatives that only led to low BSR
                 excluded_reps.extend(low_reps)
 
-                representatives = [rep for rep in representatives if rep not in excluded_reps]
-                ids_to_blast = [i for i in ids_to_blast if i not in excluded_reps]
+                representatives = [
+                    rep for rep in representatives if rep not in excluded_reps]
+                ids_to_blast = [
+                    i for i in ids_to_blast if i not in excluded_reps]
 
                 # determine next representative from candidates
                 rep_candidates = list(set(hotspots) - hitting_high)
                 # sort to guarantee reproducible results with same datasets
-                rep_candidates = sorted(rep_candidates, key= lambda x: int(x))
+                rep_candidates = sorted(rep_candidates, key=lambda x: int(x))
                 representatives, final_representatives = select_candidate(rep_candidates,
-                                                               prot_seqs,
-                                                               ids_to_blast,
-                                                               representatives,
-                                                               final_representatives)
+                                                                          prot_seqs,
+                                                                          ids_to_blast,
+                                                                          representatives,
+                                                                          final_representatives)
 
                 # remove files created for current gene iteration
                 os.remove(rep_file)
@@ -350,7 +379,8 @@ def adapt_loci(genes_list):
         valid_sequences = len(gene_lines)
 
         # write schema file with representatives
-        final_representatives = [seqids_map[rep] for rep in final_representatives]
+        final_representatives = [seqids_map[rep]
+                                 for rep in final_representatives]
         gene_rep_lines = aux.fasta_lines(final_representatives, gene_seqs)
         aux.write_list(gene_rep_lines, gene_short_file)
 
@@ -448,11 +478,15 @@ def main(external_schema, output_schema, core_count, bsr, min_len, trans_tbl, pt
         logging.info('The process encountered some problem and could '
                      'not complete successfully. Raised exceptions:\n')
         # get traceback as list of lines
-        traceback_lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        traceback_lines = traceback.format_exception(
+            exc_type, exc_value, exc_traceback)
         # keep first exception traceback and exclude traceback from rawr.get()
-        exc_index = traceback_lines.index('The above exception was the direct cause of the following exception:\n\n')
-        traceback_lines[0] = traceback_lines[0].split('multiprocessing.pool.RemoteTraceback: \n"""')[1]
-        traceback_lines[exc_index-1] = traceback_lines[exc_index-1].rstrip('"""\n')
+        exc_index = traceback_lines.index(
+            'The above exception was the direct cause of the following exception:\n\n')
+        traceback_lines[0] = traceback_lines[0].split(
+            'multiprocessing.pool.RemoteTraceback: \n"""')[1]
+        traceback_lines[exc_index -
+                        1] = traceback_lines[exc_index-1].rstrip('"""\n')
         logging.info(''.join(traceback_lines[0:exc_index]))
         return False
 
@@ -461,7 +495,8 @@ def main(external_schema, output_schema, core_count, bsr, min_len, trans_tbl, pt
     invalid_alleles = list(itertools.chain.from_iterable(invalid_alleles))
     invalid_alleles = [','.join(a) for a in invalid_alleles]
     if len(invalid_alleles) > 0:
-        logging.warning('Invalid alleles: {0}'.format(';'.join(invalid_alleles)))
+        logging.warning('Invalid alleles: {0}'.format(
+            ';'.join(invalid_alleles)))
 
     # log identifiers of genes that had no valid alleles
     invalid_genes = [sub[1] for sub in invalid_data]
@@ -532,17 +567,20 @@ def parse_arguments():
                         help='CDS size variation threshold. At the default '
                              'value no alleles will be discarded due to size '
                              'variation.')
+    parser.add_argument('--log', type=str, required=False,
+                        default=None, dest='logfile',
+                        help='Logfile of the execution.')
 
     args = parser.parse_args()
 
     return [args.input_files, args.output_directory,
             args.cpu_cores, args.blast_score_ratio,
             args.minimum_length, args.translation_table,
-            args.ptf_path, args.size_threshold]
+            args.ptf_path, args.size_threshold, args.logfile]
 
 
 if __name__ == '__main__':
 
     args = parse_arguments()
     main(args[0], args[1], args[2], args[3],
-         args[4], args[5], args[6], args[7])
+         args[4], args[5], args[6], args[7], args[8])
