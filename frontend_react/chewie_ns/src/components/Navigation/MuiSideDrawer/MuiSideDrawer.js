@@ -264,11 +264,17 @@ class PersistentDrawerLeft extends Component {
               </ListItemIcon>
               <ListItemText primary={"Github"} />
             </ListItem>
-            <ListItem button>
+            <ListItem
+              button
+              component="a"
+              href={"https://chewie-ns.readthedocs.io/en/latest/"}
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
               <ListItemIcon>
                 <ChromeReaderModeIcon style={{ color: "white" }} />
               </ListItemIcon>
-              <ListItemText primary={"Read The Docs WIP"} />
+              <ListItemText primary={"Read The Docs"} />
             </ListItem>
             <ListItem
               button

@@ -8,6 +8,7 @@ import classes from "./Locus.module.css";
 
 import classNames from "classnames";
 
+// Import Icons from Material UI and Material Design
 import SvgIcon from "@material-ui/core/SvgIcon";
 import { mdiOpenInNew } from "@mdi/js";
 
@@ -21,6 +22,7 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
+import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -33,7 +35,8 @@ import { saveAs } from "file-saver";
 
 class Locus extends Component {
   state = {
-    tabValue: 0
+    tabValue: 0,
+    showSnack: false,
   };
 
   componentDidMount() {
@@ -59,7 +62,23 @@ class Locus extends Component {
     saveAs(blob, "locus_" + locusIdDown + ".fasta");
   };
 
-  plotChangeHandler = value => {
+  openBlastPageHandler = (query) => {
+    const queryToCheck = query;
+
+    // If query is too long show warning.
+    // Else open the page.
+    if (queryToCheck.length > 10000) {
+      this.setState({ showSnack: true });
+    } else {
+      const anchor = document.createElement("a");
+      anchor.href = link;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.click();
+    }
+  };
+
+  plotChangeHandler = (value) => {
     this.setState({ tabValue: value });
   };
 
@@ -69,11 +88,11 @@ class Locus extends Component {
         overflowX: "auto",
         display: "flex",
         justifyContent: "center",
-        marginBottom: "20px"
+        marginBottom: "20px",
       },
       button: {
-        minWidth: "150px"
-      }
+        minWidth: "150px",
+      },
     };
 
     let uniprot_data = <CircularProgress />;
@@ -100,10 +119,7 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-        component="a"
-        href={this.props.blastxQuery}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={this.openBlastPageHandler(this.props.blastxQuery)}
       >
         BLASTx
       </Button>
@@ -118,10 +134,7 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-        component="a"
-        href={this.props.blastnQuery}
-        target="_blank"
-        rel="noopener noreferrer"
+        onClick={this.openBlastPageHandler(this.props.blastnQuery)}
       >
         BLASTn
       </Button>
@@ -137,14 +150,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "num_alleles",
@@ -153,14 +166,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "size_range",
@@ -169,14 +182,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "median",
@@ -185,14 +198,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "uniprot_label",
@@ -201,14 +214,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "uniprot_submitted_name",
@@ -217,14 +230,14 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: false,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "uniprot_uri",
@@ -233,11 +246,11 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
@@ -246,9 +259,9 @@ class Locus extends Component {
                   {value}
                 </a>
               );
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       const options = {
@@ -261,11 +274,11 @@ class Locus extends Component {
         filter: false,
         search: false,
         viewColumns: true,
-        pagination: false
+        pagination: false,
       };
 
       let table_data = [
-        { ...this.props.locus_uniprot[0], ...this.props.basic_stats[0] }
+        { ...this.props.locus_uniprot[0], ...this.props.basic_stats[0] },
       ];
 
       uniprot_data = (
@@ -282,19 +295,19 @@ class Locus extends Component {
           data={this.props.locus_fasta}
           layout={{
             title: {
-              text: table_data[0].locus_label
+              text: table_data[0].locus_label,
             },
             xaxis: {
-              title: { text: "Sequence size in bp" }
+              title: { text: "Sequence size in bp" },
             },
             yaxis: {
-              title: { text: "Number of Alleles" }
-            }
+              title: { text: "Number of Alleles" },
+            },
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
         />
       );
@@ -304,20 +317,20 @@ class Locus extends Component {
           data={this.props.scatter_data}
           layout={{
             title: {
-              text: table_data[0].locus_label
+              text: table_data[0].locus_label,
             },
             xaxis: {
-              title: { text: "Allele ID", tick0: 0, dtick: 1 }
+              title: { text: "Allele ID", tick0: 0, dtick: 1 },
             },
             yaxis: {
-              title: { text: "Sequence size in bp", tick0: 0, dtick: 1 }
+              title: { text: "Sequence size in bp", tick0: 0, dtick: 1 },
             },
-            hovermode: "closest"
+            hovermode: "closest",
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           line={{
-            width: 1
+            width: 1,
           }}
         />
       );
@@ -328,7 +341,7 @@ class Locus extends Component {
           marginLeft: "5%",
           marginRight: "5%",
           marginBottom: "2%",
-          marginTop: "2%"
+          marginTop: "2%",
         }}
       >
         <div>
@@ -381,13 +394,16 @@ class Locus extends Component {
             height: 80,
             display: "flex",
             justifyContent: "center",
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           {downloadFasta}
           {blastx}
           {blastn}
         </Box>
+
+        <div>{this.state.showSnack ? <AlertSnackbar /> : null}</div>
+
         <footer
           style={{
             position: "fixed",
@@ -395,7 +411,7 @@ class Locus extends Component {
             left: "0",
             backgroundColor: "#ccc",
             width: "100%",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
@@ -410,7 +426,7 @@ class Locus extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     locus_fasta: state.locus.locus_fasta,
     locus_uniprot: state.locus.locus_uniprot,
@@ -420,16 +436,17 @@ const mapStateToProps = state => {
     scatter_data: state.locus.scatter_data,
     basic_stats: state.locus.basic_stats,
     loading: state.locus.loading,
-    error: state.locus.error
+    error: state.locus.error,
     // token: state.auth.token
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
-    onFetchLocusFasta: locus_id => dispatch(actions.fetchLocusFasta(locus_id)),
-    onFetchLocusUniprot: locus_id =>
-      dispatch(actions.fetchLocusUniprot(locus_id))
+    onFetchLocusFasta: (locus_id) =>
+      dispatch(actions.fetchLocusFasta(locus_id)),
+    onFetchLocusUniprot: (locus_id) =>
+      dispatch(actions.fetchLocusUniprot(locus_id)),
   };
 };
 

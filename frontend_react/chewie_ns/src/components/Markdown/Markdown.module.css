@@ -1,0 +1,16 @@
+.App {
+  font-family: sans-serif;
+}
+
+.photo {
+  height: 50px;
+  width: 50px;
+}
+
+:local(.mainPaper) {
+  flex-grow: 1;
+}
+
+:local(.title){
+  color: #bb7944;
+}
