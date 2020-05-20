@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTHORS
+Purpose
+-------
+This module contains auxiliary functions used in the API.
 
-    Mickael Silva
-    github: @
-
-    Pedro Cerqueira
-    github: @pedrorvc
-
-    Rafael Mamede
-    github: @rfm-targa
-
-DESCRIPTION
+Code documentation
+------------------
 
 """
 
@@ -1246,21 +1240,21 @@ def get_read_run_info_ena(ena_id):
 
     """
 
-       url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=' + \
-           ena_id + 'AAA&result=read_run'
+    url = 'http://www.ebi.ac.uk/ena/data/warehouse/filereport?accession=' + \
+        ena_id + 'AAA&result=read_run'
 
-        read_run_info = False
-        try:
-            with urllib.request.urlopen(url) as url:
-                read_run_info = url.read().splitlines()
-                if len(read_run_info) <= 1:
-                    read_run_info = False
-                else:
-                    read_run_info = True
-        except Exception as error:
-            print(error)
+    read_run_info = False
+    try:
+        with urllib.request.urlopen(url) as url:
+            read_run_info = url.read().splitlines()
+            if len(read_run_info) <= 1:
+                read_run_info = False
+            else:
+                read_run_info = True
+    except Exception as error:
+        print(error)
 
-        return read_run_info
+    return read_run_info
 
 
 def get_read_run_info_sra(SRA_id):
@@ -1275,7 +1269,7 @@ def get_read_run_info_sra(SRA_id):
     -------
     read_run_info: bool
 
-"""
+    """
 
     url = 'https://trace.ncbi.nlm.nih.gov/Traces/sra/sra.cgi?save=efetch&db=sra&rettype=runinfo&term=%20'+SRA_id
 
@@ -1318,19 +1312,19 @@ def check_disease_resource(URI):
         -------
         diseaseFound: bool
     """
-       try:
+    try:
 
-            print('http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
-            r = requests.get(
-                'http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
-            print(r.status_code)
-            diseaseFound = False
-            if int(r.status_code) < 202:
-                diseaseFound = True
-        except Exception as e:
-            print(e)
-            diseaseFound = False
-        return diseaseFound
+        print('http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
+        r = requests.get(
+            'http://www.ontobee.org/ontology/rdf/DOID?iri='+URI)
+        print(r.status_code)
+        diseaseFound = False
+        if int(r.status_code) < 202:
+            diseaseFound = True
+    except Exception as e:
+        print(e)
+        diseaseFound = False
+    return diseaseFound
 
 
 def sanitize_input(mystring):

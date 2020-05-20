@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTHORS
+Purpose
+-------
+This module enables the adaptation of external schemas so that the loci and
+alleles present in those schemas can be used with chewBBACA. During the
+process, alleles that do not correspond to a complete CDS or that cannot be
+translated are discarded from the final schema. One or more alleles of each
+gene/locus will be chosen as representatives and included in the 'short'
+directory.
 
-    Pedro Cerqueira
-    github: @pedrorvc
-
-    Rafael Mamede
-    github: @rfm-targa
-
-DESCRIPTION
-
-    This script enables the adaptation of external schemas so that the loci and
-    alleles present in those schemas can be used with chewBBACA. During the
-    process, alleles that do not correspond to a complete CDS or that cannot be
-    translated are discarded from the final schema. One or more alleles of each
-    gene/locus will be chosen as representatives and included in the 'short'
-    directory.
+Code documentation
+------------------
 """
 
 import os

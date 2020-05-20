@@ -1,3 +1,12 @@
+"""
+Purpose
+-------
+This module contains decorators used throughout the API routes.
+
+Code documentation
+------------------
+"""
+
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
 
