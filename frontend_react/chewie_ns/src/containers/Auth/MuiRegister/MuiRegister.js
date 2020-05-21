@@ -119,11 +119,12 @@ class SignUp extends Component {
     event.preventDefault();
 
     if (this.state.password === this.state.confirmPassword) {
-      console.log("Happy Chewie");
       axios
         .post("/user/register_user", {
           email: this.state.email,
-          password: this.state.password
+          password: this.state.password,
+          username: this.state.username,
+          organization: this.state.organization
         })
         .then(res => {
           console.log(res);
@@ -138,7 +139,6 @@ class SignUp extends Component {
           console.log(err);
         });
     } else {
-      //   this.setState({ openSnackBar: true, status: "error" });
       alert("Passwords do not match. Please try again.");
       window.location.reload();
     }
