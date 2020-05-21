@@ -71,7 +71,7 @@ class Locus extends Component {
       this.setState({ showSnack: true });
     } else {
       const anchor = document.createElement("a");
-      anchor.href = link;
+      anchor.href = queryToCheck;
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
       anchor.click();
