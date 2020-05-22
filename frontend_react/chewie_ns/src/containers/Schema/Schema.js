@@ -15,13 +15,13 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-// import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 import Typography from "@material-ui/core/Typography";
 
 import Button from "@material-ui/core/Button";
 
-import Box from "@material-ui/core/Box";
+// import Box from "@material-ui/core/Box";
 
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
@@ -575,7 +575,7 @@ class Schema extends Component {
         <div>
           <div style={{ marginTop: "40px" }}>
             <ExpansionPanel defaultExpanded>
-              <ExpansionPanelSummary>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h5" className={classes.title}>
                   Schema Evaluation
                 </Typography>
