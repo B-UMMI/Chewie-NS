@@ -63,6 +63,7 @@ class User(Base, UserMixin):
 	__tablename__ = 'auth_user'
 	email = db.Column(db.String(255), nullable=False, unique=True)
 	password = db.Column(db.String(255), nullable=False)
+	name = db.Column(db.String(255), nullable=False)
 	username = db.Column(db.String(255), nullable=False)
 	organization = db.Column(db.String(255), nullable=False)
 	active = db.Column(db.Boolean())

@@ -377,6 +377,7 @@ def create_role():
         # create Admin user
         u = user_datastore.create_user(email="test@refns.com",
                                        password=hash_password("mega_secret"),
+                                       name="chewie",
                                        username="chewie",
                                        organization="UMMI")
         user_datastore.add_role_to_user(u, "Admin")
@@ -800,6 +801,7 @@ class RegisterUser(Resource):
 
         email = data['email']
         password = data['password']
+        name = data['name']
         username = data['username']
         organization = data['organization']
         # new users are created with User permissions
@@ -817,6 +819,7 @@ class RegisterUser(Resource):
             new_user = user_datastore.create_user(email=email,
                                                   password=hash_password(
                                                       password),
+                                                  name=name,
                                                   username=username,
                                                   organization=organization)
             default_role = user_datastore.find_role(new_user_role)
@@ -1146,8 +1149,7 @@ class DownloadCompressedSchemas(Resource):
         response.headers['Content-Description'] = 'File Transfer'
         response.headers['Cache-Control'] = 'no-cache'
         response.headers['Content-Type'] = 'application/zip'
-        response.headers['X-Accel-Redirect'] = "/compressed_schemas/" + \
-            compressed_schema_filename
+        response.headers['X-Accel-Redirect'] = "/compressed_schemas/" + compressed_schema_filename
 
         return response
 
