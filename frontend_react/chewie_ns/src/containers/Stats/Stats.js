@@ -75,16 +75,6 @@ class Stats extends Component {
             },
             customBodyRender: (value, tableMeta, updateValue) => (
               <Aux>
-                {/* <Typography component="div">
-                  <Box
-                    display="inline"
-                    fontStyle="italic"
-                    color="#bb7944"
-                    m={1}
-                  >
-                    {value}
-                  </Box>
-                </Typography> */}
                 <i>{value}</i>
               </Aux>
             )
@@ -137,7 +127,7 @@ class Stats extends Component {
           options: {
             filter: false,
             sort: true,
-            display: false,
+            display: true,
             setCellHeaderProps: value => {
               return {
                 style: {
