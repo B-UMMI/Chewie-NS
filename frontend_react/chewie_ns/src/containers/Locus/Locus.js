@@ -62,8 +62,24 @@ class Locus extends Component {
     saveAs(blob, "locus_" + locusIdDown + ".fasta");
   };
 
-  openBlastPageHandler = (query) => {
-    const queryToCheck = query;
+  openBlastxPageHandler = () => {
+    const queryToCheck = this.props.blastxQuery;
+
+    // If query is too long show warning.
+    // Else open the page.
+    if (queryToCheck.length > 10000) {
+      this.setState({ showSnack: true });
+    } else {
+      const anchor = document.createElement("a");
+      anchor.href = queryToCheck;
+      anchor.target = "_blank";
+      anchor.rel = "noopener noreferrer";
+      anchor.click();
+    }
+  };
+
+  openBlastnPageHandler = () => {
+    const queryToCheck = this.props.blastnQuery;
 
     // If query is too long show warning.
     // Else open the page.
@@ -119,7 +135,7 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-        onClick={this.openBlastPageHandler(this.props.blastxQuery)}
+        onClick={this.openBlastxPageHandler}
       >
         BLASTx
       </Button>
@@ -134,13 +150,12 @@ class Locus extends Component {
             <path d={mdiOpenInNew} />
           </SvgIcon>
         }
-        onClick={this.openBlastPageHandler(this.props.blastnQuery)}
+        onClick={this.openBlastnPageHandler}
       >
         BLASTn
       </Button>
     );
 
-    // console.log(this.props.locus_fasta)
     if (!this.props.loading) {
       const columns = [
         {
