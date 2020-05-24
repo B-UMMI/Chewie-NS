@@ -6,10 +6,6 @@ import MuiAlert from "@material-ui/lab/Alert";
 import AlertTitle from "@material-ui/lab/AlertTitle";
 import { makeStyles } from "@material-ui/core/styles";
 
-// function Alert(props) {
-//   return <MuiAlert elevation={6} variant="filled" {...props} />;
-// }
-
 const Alert = (props) => {
   return <MuiAlert elevation={6} variant="filled" {...props} />;
 };
@@ -45,7 +41,7 @@ export default function CustomizedSnackbars() {
         <Alert variant="standard" onClose={handleClose} severity="warning">
           <AlertTitle>Sequence is too long!</AlertTitle>
           Due to the size of the sequence, the browser will not be able to open
-          the BLASTX page. Please download the FASTA file of the Locus.
+          the BLAST page. Please download the FASTA file of the Locus.
         </Alert>
       </Snackbar>
     </div>
