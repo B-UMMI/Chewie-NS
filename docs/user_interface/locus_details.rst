@@ -3,6 +3,15 @@ Locus Details
 
 This page displays details about a single locus.
 
+.. note::
+    The Locus Details panel is **by default expanded**. It can be collapsed by clicking on the **arrow icon** on the
+    upper-right corner of the panel.
+
+.. figure:: ../resources/locus_details_overview.png
+    :align: center
+
+    Figure 1: Locus Details page.
+
 Histogram
 ---------
 
@@ -15,7 +24,7 @@ size distribution between 800 and 899 base pairs.
 .. figure:: ../resources/locus_details_hist.png
     :align: center
 
-    Figure 1: Number of alleles (12) that have a sequence size distribution of 800-899 (bp).
+    Figure 2: Number of alleles (12) that have a sequence size distribution of 800-899 (bp).
 
 
 Scatter
@@ -29,7 +38,7 @@ For example, **Figure 2** shows that allele 12 has a sequence size of 897 base p
 .. figure:: ../resources/locus_details_scatter.png
     :align: center
 
-    Figure 2: Sequence size (897 bp) of allele 12.
+    Figure 3: Sequence size (897 bp) of allele 12.
 
 
 Details table
@@ -48,7 +57,7 @@ The locus details table displays the following information about the locus:
 .. figure:: ../resources/locus_details_table.png
     :align: center
 
-    Figure 3: Locus Details table.
+    Figure 4: Locus Details table.
 
 
 Interactive Buttons

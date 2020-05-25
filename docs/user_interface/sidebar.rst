@@ -8,9 +8,20 @@ will open a sidebar contaning six buttons:
     :align: middle
     :scale: 50%
 
-.. image:: ../resources/sidebar.png
+.. figure:: ../resources/sidebar_closed.png
     :align: center
 
+    Figure 1: Sidebar closed.
+
+.. figure:: ../resources/sidebar_open.png
+    :align: center
+
+    Figure 2: Sidebar open.
+
+.. figure:: ../resources/sidebar.png
+    :align: center
+
+    Figure 3: Sidebar menu.
 
 Home
 ----
