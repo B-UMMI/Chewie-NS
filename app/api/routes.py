@@ -1618,9 +1618,7 @@ class LociNSFastaAPItypon(Resource):
                                           (sq.SELECT_LOCUS_SCHEMA.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
 
         # get schema URI from response
-        has_schema = False
-                     if locus_schema_query['results']['bindings'] == []
-                     else True
+        has_schema = False if locus_schema_query['results']['bindings'] == [] else True
 
         if has_schema is False:
             return {'message': 'Locus is not associated with any schema.'}
