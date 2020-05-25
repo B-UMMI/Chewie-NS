@@ -72,8 +72,10 @@ def user_identity_lookup(user):
 def create_app(config_class=Config):
     # Setup app
     app = Flask(__name__)
+
     # Setup CORS 
     CORS(app)
+
     # Reads the config file
     app.config.from_object(config_class)
 

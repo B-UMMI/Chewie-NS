@@ -44,7 +44,7 @@ INSERT_SCHEMA = ('INSERT DATA IN GRAPH <{0}> '
                    ' typon:representative_filter "{13}"^^xsd:string;'
                    ' typon:intraCluster_filter "{14}"^^xsd:string;'
                    ' typon:dateEntered "{15}"^^xsd:dateTime;'
-                   ' typon:last_modified "{16}"^^xsd:string;'
+                   ' typon:last_modified "{16}"^^xsd:dateTime;'
                    ' typon:Schema_lock "{17}"^^xsd:string;'
                    ' typon:SchemaDescription "{18}"^^xsd:string .}}')
 
@@ -62,7 +62,14 @@ INSERT_LOCUS = ('INSERT DATA IN GRAPH <{0}> '
                   ' typon:name "{2}"^^xsd:string;'
                   ' typon:UniprotName "{3}"^^xsd:string;'
                   ' typon:UniprotLabel "{4}"^^xsd:string;'
-                  ' typon:UniprotURI "{5}"^^xsd:string{6} }}')
+                  ' typon:UniprotURI "{5}"^^xsd:string;'
+                  ' typon:UserAnnotation "{6}"^^xsd:string;'
+                  ' typon:CustomAnnotation "{7}"^^xsd:string{8} }}')
+
+MULTIPLE_INSERT_LOCUS = ('')
+
+
+##############################################################
 
 SELECT_LOCUS = ('SELECT '
                 '(str(?name) AS ?name) '
@@ -70,13 +77,17 @@ SELECT_LOCUS = ('SELECT '
                 '?UniprotName '
                 '?UniprotLabel '
                 '?UniprotURI '
+                '?UserAnnotation '
+                '?CustomAnnotation '
                 'FROM <{0}>'
                 ' WHERE '
                 '{{ <{1}> a typon:Locus;'
                   ' typon:name ?name;'
                   ' typon:UniprotName ?UniprotName;'
                   ' typon:UniprotLabel ?UniprotLabel;'
-                  ' typon:UniprotURI ?UniprotURI .'
+                  ' typon:UniprotURI ?UniprotURI;'
+                  ' typon:UserAnnotation ?UserAnnotation;'
+                  ' typon:CustomAnnotation ?CustomAnnotation .'
                   ' OPTIONAL{{<{1}> typon:originalName ?original_name .}}'
                   ' OPTIONAL{{<{1}> typon:isOfTaxon ?taxon}} }}')
 
@@ -217,6 +228,12 @@ INSERT_SCHEMA_LOCUS = ('INSERT DATA IN GRAPH <{0}> '
                          ' typon:hasLocus <{3}> .'
                          ' <{4}> typon:hasSchemaPart <{5}> .}}')
 
+MULTIPLE_INSERT_SCHEMA_LOCUS = ('')
+
+INSERT_SPECIES_LOCUS = ('INSERT DATA IN GRAPH <{0}> '
+                        '{{ <{1}> a typon:Locus;'
+                          ' typon:isOfTaxon <{2}> .}}')
+
 ASK_SCHEMA_LOCK = ('ASK WHERE {{ <{0}> a typon:Schema;'
                                ' typon:Schema_lock "Unlocked"^^xsd:string }}')
 
@@ -246,6 +263,15 @@ SELECT_SCHEMA_DATE = ('SELECT (str(?description) AS ?name) '
                       '{{ <{1}> typon:schemaName ?description;'
                         ' typon:last_modified ?last_modified .}}')
 
+SELECT_SCHEMA_DESCRIPTION = ('SELECT ?name ?description '
+                             'FROM <{0}> '
+                             'WHERE '
+                             '{{ <{1}> typon:schemaName ?name;'
+                             ' typon:SchemaDescription ?description .}}')
+
+ASK_SCHEMA_DATE = ('ASK WHERE {{ <{0}> a typon:Schema;'
+                               ' typon:{1} "{2}"^^xsd:dateTime .}}')
+
 SELECT_SCHEMA_PTF = ('SELECT '
                      '(str(?description) AS ?name) '
                      '(str(?ptf) AS ?ptf) '
@@ -267,6 +293,32 @@ SELECT_SCHEMA_LOCI = ('SELECT '
                         ' FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }} }}'
                       'ORDER BY (?name) ')
 
+SELECT_SCHEMA_LATEST_FASTA = ('SELECT '
+                                '?locus_name '
+                                '?allele_id '
+                                '?nucSeq '
+                                '?date '
+                                'FROM <{0}> '
+                                'WHERE {{ '
+                                '{{ SELECT '
+                                   '?locus_name '
+                                   '?allele_id '
+                                   '?nucSeq '
+                                   '?date '
+                                   'FROM <{0}> '
+                                   'WHERE {{ <{1}> typon:hasSchemaPart ?part.'
+                                           ' ?part typon:hasLocus ?locus .'
+                                           ' ?alleles typon:isOfLocus ?locus;'
+                                           ' typon:dateEntered ?date .'
+                                           ' ?alleles typon:hasSequence ?sequence;'
+                                           ' typon:id ?allele_id .'
+                                           '?sequence typon:nucleotideSequence ?nucSeq .'
+                                           ' ?locus typon:name ?locus_name.'
+                                           ' FILTER ( ?date > "{2}"^^xsd:dateTime && ?date < "{3}"^^xsd:dateTime ).'
+                                           ' FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }}.}} '
+                                   'ORDER BY ASC(?date) }} '
+                                '}} LIMIT 50000')
+
 SELECT_SCHEMA_LATEST_ALLELES = ('SELECT '
                                 '?locus_name '
                                 '?allele_id '
@@ -287,7 +339,7 @@ SELECT_SCHEMA_LATEST_ALLELES = ('SELECT '
                                            ' typon:hasSequence ?sequence;'
                                            ' typon:id ?allele_id.'
                                            ' ?locus typon:name ?locus_name.'
-                                           ' FILTER ( ?date > "{2}"^^xsd:dateTime ).'
+                                           ' FILTER ( ?date > "{2}"^^xsd:dateTime && ?date < "{3}"^^xsd:dateTime ).'
                                            ' FILTER NOT EXISTS {{ ?part typon:deprecated  "true"^^xsd:boolean }}.}} '
                                    'ORDER BY ASC(?date) }} '
                                 '}} LIMIT 50000')
@@ -315,6 +367,7 @@ DELETE_USER = ('DELETE WHERE {{ GRAPH <{0}> {{ ?user a <http://xmlns.com/foaf/0.
                'typon:Role ?role . FILTER ( ?user = <{1}> ) }} }}')
 
 DELETE_ROLE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Role ?role . }} }}')
+
 INSERT_ROLE = ('INSERT DATA IN GRAPH <{0}> '
                '{{ <{1}> typon:Role "Contributor"^^xsd:string . }}')
 
@@ -333,7 +386,7 @@ COUNT_TAXON = ('SELECT (COUNT(?taxon) AS ?count) '
 ASK_SPECIES_UNIPROT = ('ASK WHERE {{ ?species owl:sameAs <{0}> .}}')
 
 # determine if species exists locally with species NS URI
-ASK_SPECIES_NS = ('ASK where {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}')
+ASK_SPECIES_NS = ('ASK WHERE {{ <{0}> a <http://purl.uniprot.org/core/Taxon>}}')
 
 SELECT_SINGLE_SPECIES = ('SELECT ?species ?name '
                          'FROM <{0}> '
@@ -493,6 +546,8 @@ SELECT_SCHEMA_LOCI_ANNOTATIONS = ('SELECT DISTINCT '
                                   '?name '
                                   '?UniprotName '
                                   '?UniprotURI '
+                                  '?UserAnnotation '
+                                  '?CustomAnnotation '
                                   'FROM <{0}> '
                                   'WHERE '
                                   '{{ <{1}> a typon:Schema;'
@@ -502,7 +557,9 @@ SELECT_SCHEMA_LOCI_ANNOTATIONS = ('SELECT DISTINCT '
                                     ' ?locus a typon:Locus;'
                                     ' typon:name ?name;'
                                     ' typon:UniprotName ?UniprotName;'
-                                    ' typon:UniprotURI ?UniprotURI .}}'
+                                    ' typon:UniprotURI ?UniprotURI;'
+                                    ' typon:UserAnnotation ?UserAnnotation;'
+                                    ' typon:CustomAnnotation ?CustomAnnotation .}}'
                                   'ORDER BY ?locus ')
 
 SELECT_SPECIES = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
@@ -591,7 +648,7 @@ INSERT_SCHEMA_LOCK = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:Schema_lock "{2}"^^xsd:string .}}')
 
 INSERT_SCHEMA_DATE = ('INSERT DATA IN GRAPH <{0}> '
-                      '{{ <{1}> typon:{2} "{3}"^^xsd:string .}}')
+                      '{{ <{1}> typon:{2} "{3}"^^xsd:dateTime .}}')
 
 COUNT_SEQUENCES = ('SELECT (COUNT(?seq) AS ?count) '
                    'FROM <{0}> '
@@ -673,6 +730,22 @@ INSERT_ALLELE_NEW_SEQUENCE = ('INSERT DATA IN GRAPH <{0}> '
                                 ' typon:hasSequence <{1}> .'
                                 ' <{6}> typon:hasDefinedAllele <{3}> .}}')
 
+MULTIPLE_INSERT_NEW_SEQUENCE = ('INSERT {{ GRAPH <{0}> '
+                                '{{ ?seq a typon:Sequence;'
+                                ' typon:nucleotideSequence ?nucseq .'
+                                ' ?allele a typon:Allele;'
+                                ' typon:name ?species;'
+                                ' typon:sentBy ?user;'
+                                ' typon:isOfLocus ?locus;'
+                                ' typon:dateEntered ?date;'
+                                ' typon:id ?id;'
+                                ' typon:hasSequence ?seq .'
+                                ' ?locus typon:hasDefinedAllele ?allele .}} }}'
+                                'WHERE '
+                                '{{ '
+                                    'VALUES (?seq ?nucseq ?allele ?species ?user ?locus ?date ?id) {{ {1} }}'
+                                '}}')
+
 INSERT_ALLELE_LINK_SEQUENCE = ('INSERT DATA IN GRAPH <{0}> '
                                '{{ <{1}> a typon:Allele;'
                                  ' typon:name "{2}";'
@@ -682,6 +755,8 @@ INSERT_ALLELE_LINK_SEQUENCE = ('INSERT DATA IN GRAPH <{0}> '
                                  ' typon:id "{6}"^^xsd:integer;'
                                  ' typon:hasSequence <{7}> .'
                                  ' <{4}> typon:hasDefinedAllele <{1}> .}}')
+
+MULTIPLE_INSERT_LINK_SEQUENCE = ('')
 
 SELECT_SEQUENCE_LOCI = ('SELECT '
                         '?locus '
@@ -693,4 +768,3 @@ SELECT_SEQUENCE_LOCI = ('SELECT '
                           ' typon:isOfLocus ?locus .'
                           ' ?locus a typon:Locus; typon:name ?name;'
                           ' typon:originalName ?original_name .}}')
-

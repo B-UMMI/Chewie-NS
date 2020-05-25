@@ -582,10 +582,10 @@ def mode_filter(alleles, size_threshold):
     bot_limit = min_mode - (min_mode*size_threshold)
 
     # determine sequences that are below or above limits
-    alm = [seqid for seqid, length in alleles_lengths.items() if length >
-                                                            top_limit]
-    asm = [seqid for seqid, length in alleles_lengths.items() if length <
-                                                            bot_limit]
+    alm = [seqid for seqid, length in alleles_lengths.items()
+           if length > top_limit]
+    asm = [seqid for seqid, length in alleles_lengths.items()
+           if length < bot_limit]
 
     return [modes, alm, asm, alleles_lengths]
 
@@ -654,10 +654,10 @@ def get_seqs_dicts(gene_file, gene_id, table_id, min_len, size_threshold):
             dna_seqs, size_threshold)
         excluded = set(asm + alm)
 
-        dna_seqs = {seqid: seq for seqid,
-            seq in dna_seqs.items() if seqid not in excluded}
-        prot_seqs = {seqid: seq for seqid, seq in prot_seqs.items(
-        ) if seqids_map[seqid] not in excluded}
+        dna_seqs = {seqid: seq for seqid, seq in dna_seqs.items()
+                    if seqid not in excluded}
+        prot_seqs = {seqid: seq for seqid, seq in prot_seqs.items()
+                     if seqids_map[seqid] not in excluded}
 
         modes_concat = ':'.join(map(str, modes))
         st_percentage = int(size_threshold*100)
@@ -1092,10 +1092,8 @@ def is_url(url):
     """
 
     try:
-
         result = urlparse(url)
         return all([result.scheme, result.netloc, result.path])
-
     except:
         return False
 
@@ -1134,12 +1132,10 @@ def make_url(base_url, *res, **params):
 
         # Add the endpoints
         for r in res:
-        #        url = '{}/{}'.format(url, r)
             url = f'{url}/{r}'
 
         # Add params if they are provided
         if params:
-        #        url = '{}?{}'.format(url, urllib.urlencode(params))
             url = f'{url}?{urlencode(params)}'
 
         return url
@@ -1211,14 +1207,14 @@ def get_data(server, sparql_query):
     try:
         server.setQuery(sparql_query)
         server.setReturnFormat(JSON)
-        server.setTimeout(360)
+        server.setTimeout(1000)
         result = server.query().convert()
     except Exception as e:
         time.sleep(5)
         try:
             server.setQuery(sparql_query)
             server.setReturnFormat(JSON)
-            server.setTimeout(360)
+            server.setTimeout(1000)
             result = server.query().convert()
         except Exception as e:
             result = e
@@ -1277,8 +1273,8 @@ def get_read_run_info_sra(SRA_id):
     try:
         with urllib.request.urlopen(url, timeout=2) as url:
 
-               # if the SRA_id is not found ncbi is very generous and may give a tsunami of info, limit that to 30k bytes if that's the case
-               # we wont consider that ID
+            # if the SRA_id is not found ncbi is very generous and may give a tsunami of info, limit that to 30k bytes if that's the case
+            # we wont consider that ID
             read_run_info = url.read(30000)
             try:
                 read_run_info = read_run_info.splitlines()

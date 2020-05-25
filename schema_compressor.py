@@ -34,7 +34,7 @@ local_sparql = os.environ.get('LOCAL_SPARQL')
 virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
-logfile = 'schema_compression.log'
+logfile = './log_files/schema_compression.log'
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 

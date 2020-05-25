@@ -37,7 +37,7 @@ local_sparql = os.environ.get('LOCAL_SPARQL')
 virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
-logfile = 'schema_annotations.log'
+logfile = './log_files/schema_annotations.log'
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 
@@ -177,7 +177,6 @@ def fast_update(schema, last_modified, file, lengths_dir):
 
 			locus_uri = list(locus_data.keys())[0]
 			locus_name = loci_names[locus_uri]
-			locus_id = locus_name.split('-')[-1]
 			alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
 			locus_mode = Counter(alleles_lengths).most_common()[0][0]
 			loci_modes[locus_name] = locus_mode
@@ -195,7 +194,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			json.dump(json_to_file, json_outfile)
 
 	# if the schema is in the json file
-	elif len(loci_modes) > 0:
+	elif len(loci_info) > 0:
 		# get modification date in json file
 		json_date = json_data['last_modified']
 		virtuoso_date = last_modified
@@ -213,7 +212,6 @@ def fast_update(schema, last_modified, file, lengths_dir):
 
 				locus_uri = list(locus_data.keys())[0]
 				locus_name = loci_names[locus_uri]
-				locus_id = locus_name.split('-')[-1]
 				alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
 				locus_mode = Counter(alleles_lengths).most_common()[0][0]
 				loci_modes[locus_name] = locus_mode
@@ -230,7 +228,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			with open(file, 'w') as json_outfile:
 				json.dump(json_to_file, json_outfile)
 
-			logging.info('Updated data for schema {0}'.format())
+			logging.info('Updated data for schema {0}'.format(schema))
 
 
 def full_update(schema, last_modified, file):

@@ -100,9 +100,8 @@ def bsr_categorizer(blast_results, representatives,
     return [high_bsr, low_bsr, hotspot_bsr, high_reps, low_reps, hot_reps]
 
 
-def select_candidate(candidates, proteins,
-                     seqids, representatives,
-                     final_representatives):
+def select_candidate(candidates, proteins, seqids,
+                     representatives, final_representatives):
     """ Chooses a new representative sequence.
 
         Parameters
@@ -480,8 +479,7 @@ def main(external_schema, output_schema, core_count, bsr, min_len, trans_tbl, pt
             'The above exception was the direct cause of the following exception:\n\n')
         traceback_lines[0] = traceback_lines[0].split(
             'multiprocessing.pool.RemoteTraceback: \n"""')[1]
-        traceback_lines[exc_index -
-                        1] = traceback_lines[exc_index-1].rstrip('"""\n')
+        traceback_lines[exc_index-1] = traceback_lines[exc_index-1].rstrip('"""\n')
         logging.info(''.join(traceback_lines[0:exc_index]))
         return False
 
@@ -562,6 +560,7 @@ def parse_arguments():
                         help='CDS size variation threshold. At the default '
                              'value no alleles will be discarded due to size '
                              'variation.')
+
     parser.add_argument('--log', type=str, required=False,
                         default=None, dest='logfile',
                         help='Logfile of the execution.')
@@ -571,11 +570,13 @@ def parse_arguments():
     return [args.input_files, args.output_directory,
             args.cpu_cores, args.blast_score_ratio,
             args.minimum_length, args.translation_table,
-            args.ptf_path, args.size_threshold, args.logfile]
+            args.ptf_path, args.size_threshold,
+            args.logfile]
 
 
 if __name__ == '__main__':
 
     args = parse_arguments()
     main(args[0], args[1], args[2], args[3],
-         args[4], args[5], args[6], args[7], args[8])
+         args[4], args[5], args[6], args[7],
+         args[8])

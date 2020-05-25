@@ -13,6 +13,7 @@ services:
    - ./schema_insertion_temp:/app/schema_insertion_temp
    - ./compressed_schemas:/app/compressed_schemas
    - ./prodigal_training_files:/app/prodigal_training_files
+   - ./log_files:/app/log_files
   environment:
    - FLASK_ENV=development
    - BASE_URL=https://194.210.120.209/NS/api/

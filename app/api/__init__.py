@@ -27,7 +27,6 @@ authorizations = {
 
 #security = {}
 
-
 class Custom_API(Api):
     @property
     def specs_url(self):
@@ -37,7 +36,6 @@ class Custom_API(Api):
         :rtype: str
         '''
         return url_for(self.endpoint('specs'), _external=False)
-
 
 # Fix for reverse proxy issue.
 # Fix of returning swagger.json on HTTP

@@ -35,7 +35,7 @@ local_sparql = os.environ.get('LOCAL_SPARQL')
 virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
-logfile = 'loci_totals.log'
+logfile = './log_files/loci_totals.log'
 logging.basicConfig(filename=logfile, level=logging.INFO)
 
 
@@ -96,7 +96,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			with open(current_file, 'w') as json_outfile:
 				json.dump(json_data, json_outfile)
 
-			logging.info('Updated data for schema {0}'.format())
+			logging.info('Updated data for schema {0}'.format(schema))
 
 	# new schema that is not in the json file
 	elif schema_id not in schemas_indexes:
