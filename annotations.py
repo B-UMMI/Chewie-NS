@@ -340,9 +340,9 @@ def single_species(species_id):
 	computed_files = os.listdir(computed_dir)
 	for schema in schemas:
 		schema_id = schema.split('/')[-1]
-		schema_prefix = 'annotations_{0}_{1}_'.format(species_id, schema_id)
+		schema_prefix = 'annotations_{0}_{1}'.format(species_id, schema_id)
+		schema_files = [f for f in computed_files if f == '{0}.json'.format(schema_prefix)]
 		schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
-		schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
 
 		# check if schema is locked
 		schema_lock = aux.get_data(SPARQLWrapper(local_sparql),
@@ -412,10 +412,10 @@ def single_schema(species_id, schema_id):
 	lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
 
 	# get files with schema prefix
-	schema_prefix = 'annotations_{0}_{1}_'.format(species_id, schema_id)
-	schema_files = [f for f in computed_files if f.startswith(schema_prefix)]
-
+	schema_prefix = 'annotations_{0}_{1}'.format(species_id, schema_id)
+	schema_files = [f for f in computed_files if f == '{0}.json'.format(schema_prefix)]
 	schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
+
 	if len(schema_files) == 0:
 		create_file(schema_file, {'message': []})
 
