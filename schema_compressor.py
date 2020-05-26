@@ -24,7 +24,7 @@ import datetime as dt
 from SPARQLWrapper import SPARQLWrapper
 
 from config import Config
-from app.utils import sparql_queries
+from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
 from app.utils import PrepExternalSchema
 
@@ -42,8 +42,8 @@ def change_lock(schema_uri, action):
     """
     """
 
-    del_lock_query = (sparql_queries.DELETE_SCHEMA_LOCK.format(virtuoso_graph,
-                                                               schema_uri))
+    del_lock_query = (sq.DELETE_SCHEMA_LOCK.format(virtuoso_graph,
+                                                   schema_uri))
 
     del_lock_result = aux.send_data(del_lock_query,
                                     local_sparql,
@@ -51,9 +51,9 @@ def change_lock(schema_uri, action):
                                     virtuoso_pass)
 
     # insert new value
-    add_lock_query = (sparql_queries.INSERT_SCHEMA_LOCK.format(virtuoso_graph,
-                                                               schema_uri,
-                                                               action))
+    add_lock_query = (sq.INSERT_SCHEMA_LOCK.format(virtuoso_graph,
+                                                   schema_uri,
+                                                   action))
 
     add_lock_result = aux.send_data(add_lock_query,
                                     local_sparql,
@@ -67,8 +67,8 @@ def get_species():
 
     # get the list of species in NS
     species_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                  (sparql_queries.SELECT_SPECIES.format(virtuoso_graph,
-                                                                        ' typon:name ?name. ')))
+                                  (sq.SELECT_SPECIES.format(virtuoso_graph,
+                                                            ' typon:name ?name. ')))
 
     species = species_result['results']['bindings']
     if len(species) == 0:
@@ -84,8 +84,8 @@ def species_schemas(species_uri, schemas):
     """
 
     result = aux.get_data(SPARQLWrapper(local_sparql),
-                          (sparql_queries.SELECT_SPECIES_SCHEMAS.format(virtuoso_graph,
-                                                                        species_uri)))
+                          (sq.SELECT_SPECIES_SCHEMAS.format(virtuoso_graph,
+                                                            species_uri)))
     ns_schemas = result['results']['bindings']
     if len(ns_schemas) == 0:
         result = None
@@ -103,7 +103,7 @@ def determine_date(schema_uri):
 
     # get schema last modification date
     date_result = aux.get_data(SPARQLWrapper(local_sparql),
-                               (sparql_queries.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
+                               (sq.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
 
     schema_info = date_result['results']['bindings'][0]
 
@@ -170,7 +170,7 @@ def schema_loci(schema_uri):
 
     # get loci
     loci_result = aux.get_data(SPARQLWrapper(local_sparql),
-                               (sparql_queries.SELECT_SCHEMA_LOCI.format(virtuoso_graph, schema_uri)))
+                               (sq.SELECT_SCHEMA_LOCI.format(virtuoso_graph, schema_uri)))
 
     # check if schema has loci
     loci_list = loci_result['results']['bindings']
@@ -184,23 +184,13 @@ def fasta_sequences(locus, date):
     """
     """
 
-    # will get to maximum row! Write code to get alleles one by one
+    # setting [SPARQL] ResultSetMaxRows = 400000 in virtuoso.ini
+    # should ensure that it returns all sequences, but it is better
+    # to implement a solution if returned data exceeds that value
     fasta_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                (sparql_queries.SELECT_LOCUS_FASTA_BY_DATE.format(virtuoso_graph, locus, date)))
+                                (sq.SELECT_LOCUS_FASTA_BY_DATE.format(virtuoso_graph, locus, date)))
 
-    if 'Max row length is exceeded when trying to store a string of' in str(fasta_result):
-
-        fasta_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                    (sparql_queries.SELECT_LOCUS_SEQS_BY_DATE.format(virtuoso_graph, locus, date)))
-
-        fasta_list = fasta_result['results']['bindings']
-        for s in range(len(fasta_list)):
-            # get the sequence corresponding to the hash
-            result2 = aux.get_data(SPARQLWrapper(local_sparql),
-                                  (sparql_queries.SELECT_SEQ_FASTA.format(virtuoso_graph, fasta_list[s]['sequence']['value'])))
-            fasta_list[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
-    else:
-        fasta_list = fasta_result['results']['bindings']
+    fasta_list = fasta_result['results']['bindings']
 
     return fasta_list
 
@@ -264,7 +254,7 @@ def compress_schema(schema, old_zip):
     # run PrepExternalSchema
     logging.info('Adapting schema {0} ({1})'.format(schema[0], schema[-2]))
     output_directory = os.path.join(Config.SCHEMAS_ZIP, '{0}_{1}'.format(schema[-3], schema[1]))
-    adapted = PrepExternalSchema.main(temp_dir, output_directory, 2,
+    adapted = PrepExternalSchema.main(temp_dir, output_directory, 6,
                                       float(schema[2]), int(schema[3]),
                                       int(schema[4]), schema[5],
                                       None, os.path.join('/app', logfile))
@@ -428,7 +418,7 @@ def single_compressor(species_id, schema_id):
     # check if species exists
     species_uri = '{0}species/{1}'.format(base_url, species_id)
     species_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                        sparql_queries.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
+                                        sq.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
     result_data = species_result['results']['bindings']
 
     if len(result_data) == 0:
@@ -443,7 +433,7 @@ def single_compressor(species_id, schema_id):
     # construct schema URI
     schema_uri = '{0}/schemas/{1}'.format(species_uri, schema_id)
     schema_info = aux.get_data(SPARQLWrapper(local_sparql),
-                          (sparql_queries.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
+                          (sq.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
 
     schema_properties = schema_info['results']['bindings']
     if len(schema_properties) == 0:
@@ -458,8 +448,8 @@ def single_compressor(species_id, schema_id):
     to_compress = []
     old_zips = {}
     to_compress, old_zip = compress_determiner(schemas, species_id,
-                                                        sp_name, compressed_schemas,
-                                                        to_compress, old_zips)
+                                               sp_name, compressed_schemas,
+                                               to_compress, old_zips)
 
     if len(to_compress) == 0:
         logging.info('Aborting schema compression.\n\n')
@@ -470,7 +460,7 @@ def single_compressor(species_id, schema_id):
 
     # check if schema is locked
     schema_lock = aux.get_data(SPARQLWrapper(local_sparql),
-                               (sparql_queries.ASK_SCHEMA_LOCK.format(schema_uri)))
+                               (sq.ASK_SCHEMA_LOCK.format(schema_uri)))
 
     lock_status = schema_lock['boolean']
     if lock_status is True:

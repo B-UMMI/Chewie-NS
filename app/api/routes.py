@@ -347,15 +347,15 @@ def add_profile(rdf_2_ins):
 
 user_datastore = datastore_cheat
 
-@blueprint.before_request
-def before_request():
-    """ Replaces http with https.
-    """
-    scheme = request.headers.get('X-Forwarded-Proto')
-    if scheme and scheme == 'http' and request.url.startswith('http://'):
-        url = request.url.replace('http://', 'https://', 1)
-        code = 301
-        return redirect(url, code=code)
+# @blueprint.before_request
+# def before_request():
+#     """ Replaces http with https.
+#     """
+#     scheme = request.headers.get('X-Forwarded-Proto')
+#     if scheme and scheme == 'http' and request.url.startswith('http://'):
+#         url = request.url.replace('http://', 'https://', 1)
+#         code = 301
+#         return redirect(url, code=code)
 
 # Create a default admin user on Postgres and Virtuoso
 # This runs every time this file reloads
@@ -1574,7 +1574,8 @@ class LociNS(Resource):
     def get(self, loci_id, **kwargs):
         """Get a particular locus."""
 
-        locus_url = request.url
+        locus_url = '{0}loci/{1}'.format(
+            current_app.config['BASE_URL'], loci_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.SELECT_LOCUS.format(current_app.config['DEFAULTHGRAPH'], locus_url)))
@@ -1618,7 +1619,7 @@ class LociNSFastaAPItypon(Resource):
 
         # c_user = get_jwt_identity()
 
-        locus_uri = (request.url).split('/fasta')[0]
+        locus_uri = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
 
         # check if locus exists
         locus_exists = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1677,31 +1678,9 @@ class LociNSFastaAPItypon(Resource):
                                   (sq.SELECT_LOCUS_FASTA.format(current_app.config['DEFAULTHGRAPH'],
                                                                 locus_uri)))
 
-        # virtuoso returned an error because request length exceeded maximum value
-        # get each allele separately
-        if 'Max row length is exceeded when trying to store a string of' in str(result):
-            # get locus sequences hashes
-            if 'date' in request_data:
-                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                      (sq.SELECT_LOCUS_SEQS_BY_DATE.format(current_app.config['DEFAULTHGRAPH'],
-                                                                           locus_uri, request_data['date'])))
-            else:
-                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                      (sq.SELECT_LOCUS_SEQS.format(current_app.config['DEFAULTHGRAPH'],
-                                                                   locus_uri)))
+        fasta_seqs = result['results']['bindings']
 
-            seqs_hashes = result['results']['bindings']
-            for s in range(len(seqs_hashes)):
-                # get the sequence corresponding to the hash
-                result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                                       (sq.SELECT_SEQ_FASTA.format(current_app.config['DEFAULTHGRAPH'],
-                                                                   seqs_hashes[s]['sequence']['value'])))
-
-                seqs_hashes[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
-        else:
-            seqs_hashes = result['results']['bindings']
-
-        return Response(stream_with_context(generate('Fasta', seqs_hashes)), content_type='application/json')
+        return Response(stream_with_context(generate('Fasta', fasta_seqs)), content_type='application/json')
 
 
 @loci_conf.route('/<int:loci_id>/uniprot')
@@ -1718,7 +1697,7 @@ class LociNSUniprotAPItypon(Resource):
     def get(self, loci_id):
         """Gets Uniprot annotations for a particular loci from a particular species."""
 
-        locus_url = (request.url).rstrip('/uniprot')
+        locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
 
         # get all uniprot labels and URI from all alleles of the selected locus
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1759,7 +1738,7 @@ class LociNSAlleles(Resource):
         # Get request data
         request_data = request.args
 
-        locus_url = (request.url).rstrip('/alleles')
+        locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
 
         # check if provided loci id exists
         result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1869,7 +1848,7 @@ class LociNSAlleles(Resource):
         # get the DNA sequence
         sequence = (str(post_data['sequence'])).upper()
 
-        locus_url = (request.url).rstrip('/alleles')
+        locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
 
         # check if locus exists, must exist to be able to add alleles
         #result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2045,7 +2024,8 @@ class AlleleNSAPItypon(Resource):
     def get(self, loci_id, allele_id):
         """ Gets a particular allele from a particular loci """
 
-        allele_url = request.url
+        allele_url = '{0}loci/{1}/alleles/{2}'.format(
+            current_app.config['BASE_URL'], loci_id, allele_id)
 
         # check if provided loci id exists
         locus_url = allele_url.split('/alleles')[0]
@@ -2278,7 +2258,8 @@ class SpeciesAPItypon(Resource):
     def get(self, species_id):
         """ Returns the species corresponding to the given id """
 
-        species_url = request.url
+        species_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         # get species name and its schemas
         # returns empty list if there is no species with provided identifier
@@ -2465,7 +2446,8 @@ class SchemaListAPItypon(Resource):
     def get(self, species_id):
         """ Get the schemas for a particular species ID """
 
-        species_url = (request.url).rstrip('/schemas')
+        species_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         # check if there is a species with provided identifier
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2544,7 +2526,8 @@ class SchemaListAPItypon(Resource):
             return {'message': 'Schema files hashes not provided.'}, 400
 
         # check if species exists
-        species_url = (request.url).rstrip('/schemas')
+        species_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               sq.ASK_SPECIES_NS.format(species_url))
@@ -2573,7 +2556,8 @@ class SchemaListAPItypon(Resource):
 
         # Create the uri for the new schema
         schema_id = number_schemas + 1
-        new_schema_url = '{0}/{1}'.format(request.url, schema_id)
+        new_schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # create new schema
         insertion_date = 'singularity'
@@ -2648,7 +2632,8 @@ class SchemaAPItypon(Resource):
             return {'NOT FOUND': 'There is no species in the NS with the provided ID.'}, 404
 
         # construct schema URI
-        schema_url = request.url
+        schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # check if schema is deprecated
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -2696,7 +2681,8 @@ class SchemaAPItypon(Resource):
             current_app.config['BASE_URL'], c_user)
 
         # check if schema exists
-        schema_url = request.url
+        schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.ASK_SCHEMA_OWNERSHIP.format(schema_url, user_url)))
@@ -2741,7 +2727,8 @@ class SchemaAdminAPItypon(Resource):
         user_uri = '{0}users/{1}'.format(
             current_app.config['BASE_URL'], c_user)
 
-        schema_uri = (request.url).rstrip('/administrated')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.ASK_SCHEMA_OWNERSHIP.format(schema_uri, user_uri)))
@@ -2768,7 +2755,8 @@ class SchemaModDateAPItypon(Resource):
     def get(self, species_id, schema_id):
         """Get last modification date of the schema with the given identifier."""
 
-        schema_uri = (request.url).rstrip('/modified')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.SELECT_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
@@ -2806,7 +2794,8 @@ class SchemaModDateAPItypon(Resource):
                               (sq.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_url)))
 
         # create schema URI
-        schema_uri = (request.url).rstrip('/modified')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         user_role = result['results']['bindings'][0]['role']['value']
 
@@ -2900,7 +2889,8 @@ class SchemaLockAPItypon(Resource):
     def get(self, species_id, schema_id):
         """Get the locking state of the schema with the given identifier."""
 
-        schema_uri = (request.url).rstrip('/lock')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
@@ -2940,7 +2930,8 @@ class SchemaLockAPItypon(Resource):
                               (sq.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_url)))
 
         # create schema URI
-        schema_uri = (request.url).rstrip('/lock')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         user_role = result['results']['bindings'][0]['role']['value']
 
@@ -3031,7 +3022,8 @@ class SchemaPtfAPItypon(Resource):
         """Download the Prodigal training file for the specified schema."""
 
         # create schema URI
-        schema_uri = (request.url).rstrip('/ptf')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # get the prodigal training file hash
         ptf_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3063,7 +3055,8 @@ class SchemaPtfAPItypon(Resource):
 
         # check if training file hash is the one associated with the schema
         # create schema URI
-        schema_uri = (request.url).rstrip('/ptf')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # get the prodigal training file hash
         ptf_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3108,7 +3101,8 @@ class SchemaZipAPItypon(Resource):
         """Checks existence of or downloads zip archive of the specified schema."""
 
         # check if schema is locked
-        schema_uri = (request.url).split('/zip')[0]
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                             (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
@@ -3160,7 +3154,8 @@ class SchemaZipAPItypon(Resource):
         user_role = result['results']['bindings'][0]['role']['value']
 
         # check if schema is locked
-        schema_uri = (request.url).rstrip('/zip')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
         locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                             (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
         locking_status = locking_status_query['results']['bindings']
@@ -3199,7 +3194,8 @@ class SchemaDescriptionAPItypon(Resource):
 
         root_dir = os.path.abspath(current_app.config['PRE_COMPUTE'])
 
-        schema_uri = (request.url).rstrip('/description')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.SELECT_SCHEMA_DESCRIPTION.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
@@ -3229,7 +3225,8 @@ class SchemaDescriptionAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        schema_uri = (request.url).rstrip('/description')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # check the role of the user that is trying to access
         user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], c_user)
@@ -3298,7 +3295,8 @@ class SchemaLociAPItypon(Resource):
         request_data = request.args
 
         # check if there is a species with provided identifier
-        species_url = (request.url).split('/schemas')[0]
+        species_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               sq.ASK_SPECIES_NS.format(species_url))
@@ -3308,7 +3306,8 @@ class SchemaLociAPItypon(Resource):
             return {'NOT FOUND': 'There is no species in the NS with the provided ID.'}, 404
 
         # check if schema exists or is deprecated
-        schema_url = (request.url).split('/loci')[0]
+        schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.ASK_SCHEMA_DEPRECATED2.format(schema_url)))
@@ -3386,7 +3385,8 @@ class SchemaLociAPItypon(Resource):
         c_user = get_jwt_identity()
 
         # check if schema exists
-        schema_url = (request.url).rstrip('/loci')
+        schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               sq.ASK_SCHEMA_DEPRECATED2.format(schema_url))
@@ -3487,7 +3487,8 @@ class SchemaLociAPItypon(Resource):
             current_app.config['BASE_URL'], c_user)
 
         # check if schema exists
-        schema_url = (request.url).rstrip('/loci')
+        schema_url = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # this will return FALSE for Admin if the schema was uploaded by a Contributor?
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3553,7 +3554,8 @@ class SchemaLociDataAPItypon(Resource):
         """
         """
 
-        schema_uri = (request.url).rstrip('/loci/data')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # check if schema has been fully uploaded
         date_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3595,7 +3597,8 @@ class SchemaLociDataAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        schema_uri = (request.url).rstrip('/loci/data')
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # check if schema has been fully uploaded
         date_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3705,7 +3708,8 @@ class SchemaLociDataAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        schema_uri = (request.url).split('/loci')[0]
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # check if schema has been fully uploaded
         date_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3782,7 +3786,8 @@ class SchemaLociLengthsAPItypon(Resource):
 
         c_user = get_jwt_identity()
 
-        schema_uri = (request.url).split('/loci')[0]
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
 
         # determine if schema is locked
         locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -3903,7 +3908,8 @@ class LociListAPItypon(Resource):
         locus_ori_name = kwargs['locus_ori_name']
 
         # check if species exists
-        species_url = (request.url).split('/loci')[0]
+        species_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               sq.ASK_SPECIES_NS.format(species_url))
@@ -3967,7 +3973,8 @@ class LociListAPItypon(Resource):
         # get post data
         post_data = request.get_json()
 
-        spec_url = (request.url).split('/loci')[0]
+        spec_url = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
         result_spec = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                                    (sq.ASK_SPECIES_NS.format(spec_url)))
 
