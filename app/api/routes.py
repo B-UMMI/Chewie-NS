@@ -351,8 +351,8 @@ user_datastore = datastore_cheat
 def before_request():
     """ Replaces http with https.
     """
-
-    if request.url.startswith('http://'):
+    scheme = request.headers.get('X-Forwarded-Proto')
+    if scheme and scheme == 'http' and request.url.startswith('http://'):
         url = request.url.replace('http://', 'https://', 1)
         code = 301
         return redirect(url, code=code)
