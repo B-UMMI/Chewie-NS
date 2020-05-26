@@ -245,11 +245,15 @@ class Schema extends Component {
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
-              return (
-                <a href={value} target="_blank" rel="noopener noreferrer">
-                  {value}
-                </a>
-              );
+              if (value === "NA") {
+                return { value };
+              } else {
+                return (
+                  <a href={value} target="_blank" rel="noopener noreferrer">
+                    {value}
+                  </a>
+                );
+              }
             },
           },
         },
