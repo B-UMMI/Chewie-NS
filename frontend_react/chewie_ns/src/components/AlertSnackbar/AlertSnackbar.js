@@ -40,8 +40,9 @@ export default function CustomizedSnackbars() {
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert variant="standard" onClose={handleClose} severity="warning">
           <AlertTitle>Sequence is too long!</AlertTitle>
-          Due to the size of the sequence, the browser will not be able to open
-          the BLAST page. Please download the FASTA file of the Locus.
+          Due to the size of the sequence, the browser will not be able to
+          directly open the BLAST page. Please download the FASTA file of the
+          locus and perform the BLAST search.
         </Alert>
       </Snackbar>
     </div>
