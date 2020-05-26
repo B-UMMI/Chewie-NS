@@ -142,7 +142,7 @@ class Species extends Component {
     const schemaName = tableMeta.rowData[1];
 
     // get last modification date
-    const lastModifiedDate = this.props.species[0].lastModifiedISO;
+    const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
 
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
