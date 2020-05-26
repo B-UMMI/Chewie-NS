@@ -46,13 +46,13 @@ export const fetchSpecies = (spec_id) => {
             chewie: res.data.message[key].chewBBACA_version,
             dateEntered: new Date(
               dateEnteredFormatted.getTime() -
-                (dateEnteredFormatted.getTimezoneOffset() * 6000)
+                dateEnteredFormatted.getTimezoneOffset() * 6000
             )
               .toISOString()
               .split("T")[0],
             lastModified: new Date(
               lastModifiedDateFormatted.getTime() -
-                (lastModifiedDateFormatted.getTimezoneOffset() * 6000)
+                lastModifiedDateFormatted.getTimezoneOffset() * 6000
             )
               .toISOString()
               .split("T")[0],
@@ -110,49 +110,56 @@ export const fetchSpeciesAnnot = (spec_id) => {
         let ola4 = {};
         let ola22 = [];
         let olaLocus = {};
-        let curSchemaId = res.data.message[0].schema.substring(
-          res.data.message[0].schema.lastIndexOf("/") + 1
-        );
 
-        for (let key in res.data.message[0].loci) {
-          locus_id = res.data.message[0].loci[key].locus.substring(
-            res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
-          );
+        // let curSchemaId = res.data.message[0].schema.substring(
+        //   res.data.message[0].schema.lastIndexOf("/") + 1
+        // );
 
-          x_val += 1;
+        let schema_ids = [...Array(res.data.message.length).keys()];
 
-          y_val = res.data.message[0].loci[key].nr_alleles;
+        for (let id in schema_ids) {
+          let curSchemaId = parseInt(id) + 1;
 
-          if (curSchemaId in ola2) {
-            ola2[curSchemaId][[x_val]] = y_val;
-            olaLocus[curSchemaId][[x_val]] = locus_id;
-            ola3[curSchemaId].push(y_val);
-            ola4[curSchemaId][[locus_id]] = y_val;
-          } else if (!(curSchemaId in ola2)) {
-            // console.log("works2")
-            // console.log(curSchemaId)
-            ola2[curSchemaId] = {
-              [x_val]: y_val,
-            };
+          for (let key in res.data.message[id].loci) {
+            locus_id = res.data.message[id].loci[key].locus.substring(
+              res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
+            );
 
-            ola22.push(y_val);
+            x_val += 1;
 
-            ola3[curSchemaId] = ola22;
+            y_val = res.data.message[id].loci[key].nr_alleles;
 
-            ola4[curSchemaId] = {
-              [locus_id]: y_val,
-            };
+            if (curSchemaId in ola2) {
+              ola2[curSchemaId][[x_val]] = y_val;
+              olaLocus[curSchemaId][[x_val]] = locus_id;
+              ola3[curSchemaId].push(y_val);
+              ola4[curSchemaId][[locus_id]] = y_val;
+            } else if (!(curSchemaId in ola2)) {
+              // console.log("works2")
+              // console.log(curSchemaId)
+              ola2[curSchemaId] = {
+                [x_val]: y_val,
+              };
 
-            // ola22.push(
-            //   {[x_val]: y_val}
-            // )
-            olaLocus[curSchemaId] = {
-              [x_val]: locus_id,
-              // [locus_id]: y_val
-            };
-            x_val = 0;
-            locus_id = 0;
-            ola22 = [];
+              ola22.push(y_val);
+
+              ola3[curSchemaId] = ola22;
+
+              ola4[curSchemaId] = {
+                [locus_id]: y_val,
+              };
+
+              // ola22.push(
+              //   {[x_val]: y_val}
+              // )
+              olaLocus[curSchemaId] = {
+                [x_val]: locus_id,
+                // [locus_id]: y_val
+              };
+              x_val = 0;
+              locus_id = 0;
+              ola22 = [];
+            }
           }
         }
         console.log("[OLA4]");
