@@ -347,6 +347,16 @@ def add_profile(rdf_2_ins):
 
 user_datastore = datastore_cheat
 
+@blueprint.before_request
+def before_request():
+    """ Replaces http with https.
+    """
+
+    if request.url.startswith('http://'):
+        url = request.url.replace('http://', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
+
 # Create a default admin user on Postgres and Virtuoso
 # This runs every time this file reloads
 @blueprint.before_app_first_request
