@@ -3770,6 +3770,66 @@ class SchemaLociDataAPItypon(Resource):
         return {'OK': 'Received file with data to insert alleles of new locus.'}, 201
 
 
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<int:loci_id>/update')
+class SchemaLociUpdateAPItypon(Resource):
+
+    @api.doc(responses={201: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found',
+                        406: 'Not acceptable'},
+             security=['access_token'])
+    @w.admin_contributor_required
+    def post(self, species_id, schema_id, loci_id):
+
+        c_user = get_jwt_identity()
+
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                            (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        locking_status = locking_status_query['results']['bindings'][0]['Schema_lock']['value']
+
+        if locking_status != 'Unlocked':
+            # check the role of the user that is trying to access
+            user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], c_user)
+
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                  (sq.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+
+            user_role = result['results']['bindings'][0]['role']['value']
+
+            allow = enforce_locking(user_role, user_uri, locking_status)
+
+            if allow[0] is False:
+                return allow[1], 403
+
+        root_dir = os.path.abspath(current_app.config['SCHEMA_UP'])
+
+        # folder to hold files with alleles to insert
+        temp_dir = os.path.join(
+            root_dir, '{0}_{1}'.format(species_id, schema_id))
+
+        # create folder when uploading first file
+        if os.path.isdir(temp_dir) is False:
+            os.mkdir(temp_dir)
+
+        file = request.files['file']
+        locus_hash = file.filename
+
+        file.save(os.path.join(temp_dir, locus_hash))
+
+        if 'complete' in request.headers:
+            # wait until all alleles are inserted
+            subprocess.check_output(['python', 'schema_updater.py', '-i', temp_dir])
+
+        return {'OK': 'Received file with data to insert new alleles.'}, 201
+
+
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<int:loci_id>/lengths')
 class SchemaLociLengthsAPItypon(Resource):
 
@@ -3824,16 +3884,8 @@ class SchemaLociLengthsAPItypon(Resource):
 
         request_data = request.get_json()
 
-        locus_hash = request_data['locus_hash']
-
         schemas_temp = os.path.abspath(current_app.config['SCHEMA_UP'])
         schema_temp = os.path.join(schemas_temp, '{0}_{1}'.format(species_id, schema_id))
-        hashes_file = os.path.join(schema_temp, '{0}_{1}_hashes'.format(species_id, schema_id))
-        with open(hashes_file, 'rb') as hf:
-            loci_hashes = pickle.load(hf)
-
-        if locus_hash not in loci_hashes:
-            return {'Not acceptable': 'Provided locus data does not match any locus from the schema'}, 406
 
         file_content = request_data['content']
         file_content = {locus_uri: file_content[k] for k in file_content}
@@ -3860,7 +3912,6 @@ class SchemaLociLengthsAPItypon(Resource):
             # determine new alleles
             new_alleles = user_alleles - ns_alleles
             # add new alleles
-            print('{0} new alleles for {1}'.format(len(new_alleles), locus_uri), flush=True)
             for a in new_alleles:
                 ns_data[a] = user_data[a]
 

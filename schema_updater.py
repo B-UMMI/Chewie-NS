@@ -42,7 +42,7 @@ local_sparql = os.environ.get('LOCAL_SPARQL')
 virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
-#logfile = './log_files/schema_alleles_inserter.log'
+#logfile = './log_files/schema_updater.log'
 #logging.basicConfig(filename=logfile, level=logging.INFO)
 
 
@@ -96,12 +96,12 @@ def change_lock(schema_uri, action):
 									virtuoso_pass)
 
 
-def create_single_insert(alleles, species, locus_uri, user_uri):
+def create_single_insert(alleles, species, locus_uri, user_uri, start_id):
 	"""
 	"""
 
 	queries = []
-	allele_id = 1
+	allele_id = start_id
 	for a in alleles:
 		sequence = a
 		# determine sequence hash
@@ -124,12 +124,12 @@ def create_single_insert(alleles, species, locus_uri, user_uri):
 	return queries
 
 
-def create_multiple_insert(alleles, species, locus_uri, user_uri):
+def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id):
 	"""
 	"""
 
 	queries = []
-	allele_id = 1
+	allele_id = start_id
 	allele_set = []
 	max_alleles = 100
 	for a in alleles:
@@ -174,6 +174,15 @@ def create_queries(locus_file):
 		locus_data = pickle.load(f)
 
 	locus_url = locus_data[0]
+	# count number of alleles for locus
+	count_query = (sq.COUNT_LOCUS_ALLELES.format(virtuoso_graph,
+											  	 locus_url))
+
+	count_res = aux.get_data(SPARQLWrapper(local_sparql),
+                                  		   count_query)
+
+	start_id = int(count_res['results']['bindings'][0]['count']['value']) + 1
+
 	spec_name = locus_data[1]
 	user_url = locus_data[2]
 	alleles = locus_data[3]
@@ -182,10 +191,10 @@ def create_queries(locus_file):
 
 	if max_length < 7000:
 		queries = create_multiple_insert(alleles, spec_name,
-									   	 locus_url, user_url)
+									   	 locus_url, user_url, start_id)
 	else:
 		queries = create_single_insert(alleles, spec_name,
-									   locus_url, user_url)
+									   locus_url, user_url, start_id)
 
 	queries_file = '{0}_queries'.format(locus_file.split('alleles')[0])
 	with open(queries_file, 'wb') as qf:
@@ -219,7 +228,7 @@ def post_alleles(input_file):
 				if response.status_code > 201:
 					tries += 1
 					print('failed', response.status_code, tries)
-					with open('virtuoso_errors.txt', 'a') as f:
+					with open('errors.txt', 'a') as f:
 						f.write(response.text)
 					if tries < max_tries:
 						time.sleep(1)
@@ -286,15 +295,7 @@ def insert_schema(temp_dir):
 	# create schema URI
 	schema_uri = '{0}species/{1}/schemas/{2}'.format(base_url, species_id, schema_id)
 
-	# schemas hashes are the filenames
-	schema_file = os.path.join(temp_dir, '{0}_{1}_hashes'.format(species_id, schema_id))
-	with open(schema_file, 'rb') as sh:
-		schema_vals = pickle.load(sh)
-		schema_hashes = schema_vals.keys()
-
-	post_files = [os.path.join(temp_dir, file) for file in schema_hashes]
-	if all([os.path.isfile(file) for file in post_files]) is False:
-		sys.exit(1)
+	post_files = [os.path.join(temp_dir, file) for file in os.listdir(temp_dir)]
 
 	# extract files
 	schema_files = []
@@ -324,14 +325,15 @@ def insert_schema(temp_dir):
 	change_date(schema_uri, 'dateEntered', insert_date)
 	change_date(schema_uri, 'last_modified', insert_date)
 
-	# after inserting create compressed version
-	os.system('python schema_compressor.py -m single --sp {0} --sc {1}'.format(species_id, schema_id))
-
 	# create pre-computed frontend files
-	os.system('python schema_totals.py -m single_schema --sp {0} --sc {1}'.format(species_id, schema_id))
-	os.system('python loci_totals.py -m single_schema --sp {0} --sc {1}'.format(species_id, schema_id))
-	os.system('python loci_mode.py -m single_schema --sp {0} --sc {1}'.format(species_id, schema_id))
-	os.system('python annotations.py -m single_schema --sp {0} --sc {1}'.format(species_id, schema_id))
+	os.system('python schema_totals.py -m single_schema '
+		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+	os.system('python loci_totals.py -m single_schema '
+		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+	os.system('python loci_mode.py -m single_schema '
+		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+	os.system('python annotations.py -m single_schema '
+		      '--sp {0} --sc {1}'.format(species_id, schema_id))
 
 	# unlock schema
 	change_lock(schema_uri, 'Unlocked')
