@@ -678,6 +678,7 @@ class AllUsers(Resource):
             current_user_dict = {}
             current_user_dict['id'] = user.id
             current_user_dict['email'] = user.email
+            current_user_dict['name'] = user.name
             current_user_dict['username'] = user.username
             current_user_dict['organization'] = user.organization
             # this value will be None/null if user never logged in
@@ -937,6 +938,7 @@ class CurrentUser(Resource):
         current_user_dict = {}
         current_user_dict['id'] = user.id
         current_user_dict['email'] = user.email
+        current_user_dict['name'] = user.name
         current_user_dict['username'] = user.username
         current_user_dict['organization'] = user.organization
         current_user_dict['last_login_at'] = user.last_login_at
@@ -984,6 +986,7 @@ class Users(Resource):
         current_user_dict = {}
         current_user_dict['id'] = user.id
         current_user_dict['email'] = user.email
+        current_user_dict['name'] = user.name
         current_user_dict['username'] = user.username
         current_user_dict['organization'] = user.organization
         # this value will be None/null if user never logged in
