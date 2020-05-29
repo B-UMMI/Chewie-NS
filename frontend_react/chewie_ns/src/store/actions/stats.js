@@ -86,7 +86,7 @@ export const fetchStatsSpecies = () => {
             id: key,
           });
 
-          let speciesId = parseinInt(species_id_correct);
+          let speciesId = parseInt(species_id_correct);
           let speciesName = res.data.message[key].name.value;
 
           speciesDict[speciesId] = speciesName;
