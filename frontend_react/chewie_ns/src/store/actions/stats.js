@@ -1,43 +1,43 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
 
-export const fetchStatsSuccess = stats => {
+export const fetchStatsSuccess = (stats) => {
   return {
     type: actionTypes.FECTH_STATS_SUCCESS,
-    stats: stats
+    stats: stats,
   };
 };
 
-export const fetchStatsFail = error => {
+export const fetchStatsFail = (error) => {
   return {
     type: actionTypes.FECTH_STATS_FAIL,
-    error: error
+    error: error,
   };
 };
 
 export const fetchStatsStart = () => {
   return {
-    type: actionTypes.FECTH_STATS_START
+    type: actionTypes.FECTH_STATS_START,
   };
 };
 
 export const fetchStats = () => {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(fetchStatsStart());
     axios
       .get("/stats/species")
-      .then(res => {
+      .then((res) => {
         console.log("[action]");
         const fetchedStats = [];
         for (let key in res.data.message[0]) {
           fetchedStats.push({
             data: key + ": " + res.data.message[0][key].value,
-            id: key
+            id: key,
           });
         }
         dispatch(fetchStatsSuccess(fetchedStats));
       })
-      .catch(err => {
+      .catch((err) => {
         dispatch(fetchStatsFail(err));
       });
   };
@@ -46,56 +46,56 @@ export const fetchStats = () => {
 export const fetchStatsSpeciesSuccess = (stats) => {
   return {
     type: actionTypes.FECTH_STATS_SPECIES_SUCCESS,
-    stats: stats
+    stats: stats,
   };
 };
 
-export const fetchStatsSpeciesFail = error => {
+export const fetchStatsSpeciesFail = (error) => {
   return {
     type: actionTypes.FECTH_STATS_SPECIES_FAIL,
-    error: error
+    error: error,
   };
 };
 
 export const fetchStatsSpeciesStart = () => {
   return {
-    type: actionTypes.FECTH_STATS_SPECIES_START
+    type: actionTypes.FECTH_STATS_SPECIES_START,
   };
 };
 
 export const fetchStatsSpecies = () => {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(fetchStatsSpeciesStart());
     axios
       .get("/stats/species")
-      .then(res => {
+      .then((res) => {
         const fetchedSpeciesStats = [];
         const speciesDict = {};
         for (let key in res.data.message) {
+          let species_id_format = res.data.message[key].species.value;
+
+          let species_id_array = species_id_format.split("/");
+
+          let species_id_correct =
+            species_id_array[species_id_array.length - 1];
+
           fetchedSpeciesStats.push({
-            species_id:
-              res.data.message[key].species.value[
-                res.data.message[key].species.value.length - 1
-              ],
+            species_id: species_id_correct,
             species_name: res.data.message[key].name.value,
             nr_schemas: res.data.message[key].schemas.value,
-            id: key
+            id: key,
           });
 
-          let speciesId =
-            res.data.message[key].species.value[
-              res.data.message[key].species.value.length - 1
-            ];
+          let speciesId = species_id_correct;
           let speciesName = res.data.message[key].name.value;
 
           speciesDict[speciesId] = speciesName;
-
         }
-        localStorage.setItem('speciesD', JSON.stringify(speciesDict));
+        localStorage.setItem("speciesD", JSON.stringify(speciesDict));
         console.log(fetchedSpeciesStats);
         dispatch(fetchStatsSpeciesSuccess(fetchedSpeciesStats));
       })
-      .catch(err => {
+      .catch((err) => {
         dispatch(fetchStatsSpeciesFail(err));
       });
   };
