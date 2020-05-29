@@ -80,13 +80,13 @@ export const fetchStatsSpecies = () => {
             species_id_array[species_id_array.length - 1];
 
           fetchedSpeciesStats.push({
-            species_id: species_id_correct,
+            species_id: parseInt(species_id_correct),
             species_name: res.data.message[key].name.value,
             nr_schemas: res.data.message[key].schemas.value,
             id: key,
           });
 
-          let speciesId = species_id_correct;
+          let speciesId = parseinInt(species_id_correct);
           let speciesName = res.data.message[key].name.value;
 
           speciesDict[speciesId] = speciesName;
