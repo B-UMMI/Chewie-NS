@@ -24,13 +24,16 @@ class Species extends Component {
     // console.log("[this.props Stats]")
     // console.log(this.props.history)
     // console.log("[PATH NAME]")
-    console.log(this.props.location.pathname)
-    this.props.onFetchSpecies(
-      this.props.location.pathname[this.props.location.pathname.length - 1]
-    );
-    this.props.onFetchSpeciesAnnot(
-      this.props.location.pathname[this.props.location.pathname.length - 1]
-    );
+    //console.log(this.props.location.pathname);
+
+    let species_url = this.props.location.pathname;
+
+    let species_url_array = species_url.split("/");
+
+    let species_id = species_url_array[species_url_array.length - 1];
+
+    this.props.onFetchSpecies(species_id);
+    this.props.onFetchSpeciesAnnot(species_id);
   }
 
   clickPlotHandler = (event) => {
