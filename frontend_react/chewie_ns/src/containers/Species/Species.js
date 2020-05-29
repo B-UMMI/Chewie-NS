@@ -24,7 +24,7 @@ class Species extends Component {
     // console.log("[this.props Stats]")
     // console.log(this.props.history)
     // console.log("[PATH NAME]")
-    // console.log(this.props.location.pathname[this.props.location.pathname.length - 1])
+    console.log(this.props.location.pathname)
     this.props.onFetchSpecies(
       this.props.location.pathname[this.props.location.pathname.length - 1]
     );
