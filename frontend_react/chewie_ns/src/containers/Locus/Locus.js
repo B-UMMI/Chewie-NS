@@ -67,7 +67,7 @@ class Locus extends Component {
 
     // If query is too long show warning.
     // Else open the page.
-    if (queryToCheck.length > 10000) {
+    if (queryToCheck.length > 8000) {
       this.setState({ showSnack: true });
     } else {
       const anchor = document.createElement("a");
@@ -83,7 +83,7 @@ class Locus extends Component {
 
     // If query is too long show warning.
     // Else open the page.
-    if (queryToCheck.length > 10000) {
+    if (queryToCheck.length > 8000) {
       this.setState({ showSnack: true });
     } else {
       const anchor = document.createElement("a");
