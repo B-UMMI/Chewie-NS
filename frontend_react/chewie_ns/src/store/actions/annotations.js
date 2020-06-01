@@ -31,11 +31,6 @@ export const fetchAnnotations = (species_id, schema_id) => {
       .then((res) => {
         // console.log(res);
         let annotTableData = [];
-        // let annotTableData2 = [];
-        // let curLabel = "";
-        // let schemaIds = [];
-        // let locusIds = [];
-        // let speciesNames = [];
         for (let key in res.data.message) {
           annotTableData.push({
             uniprot_label: res.data.message[key].UniprotName,
@@ -53,8 +48,11 @@ export const fetchAnnotations = (species_id, schema_id) => {
             alleles_mode: parseInt(res.data.message[key].mode),
           });
         }
-        // console.log(annotTableData2)
-        dispatch(fetchAnnotationsSuccess(annotTableData));
+        // console.log(annotTableData)
+        const annotTableDataSorted = annotTableData.sort((a, b) => {
+          return a.locus - b.locus;
+        });
+        dispatch(fetchAnnotationsSuccess(annotTableDataSorted));
       })
       .catch((annotErr) => {
         dispatch(fetchAnnotationsFail(annotErr));
