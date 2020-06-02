@@ -26,7 +26,7 @@ const fetchDescriptionsStart = (state, action) => {
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case actionTypes.FECTH_DESCRIPTIONS_START : return fetchDescriptionsStart(state, action);
-        case actionTypes.FECTH_DESCRIPTIONS_SUCCESS: return fetchADescriptionsSuccess(state, action);
+        case actionTypes.FECTH_DESCRIPTIONS_SUCCESS: return fetchDescriptionsSuccess(state, action);
         case actionTypes.FECTH_DESCRIPTIONS_FAIL: return fetchDescriptionsFail(state, action);
 
         default: return state;
