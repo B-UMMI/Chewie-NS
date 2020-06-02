@@ -3223,8 +3223,9 @@ class SchemaDescriptionAPItypon(Resource):
             elif request_type == "check":
                 description_file = "{0}/{1}".format(root_dir, schema_description)
                 file_handle = open(description_file, 'rb')
-                file_contents = file_handle.readlines()
-                response = {'description': file_contents}
+                file_contents = file_handle.read()
+                file_contents_decoded = file_contents.decode()
+                response = {'description': file_contents_decoded}
                 file_handle.close()
                 return response, 200
         elif len(schema_description) == 0:
