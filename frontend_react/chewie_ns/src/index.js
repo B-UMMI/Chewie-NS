@@ -15,6 +15,7 @@ import speciesReducer from './store/reducers/species';
 import schemaReducer from './store/reducers/schema';
 import locusReducer from './store/reducers/locus';
 import annotationsReducer from './store/reducers/annotations';
+import descriptionsReducer from './store/reducers/descriptions';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -24,7 +25,8 @@ const rootReducer = combineReducers({
     species: speciesReducer,
     schema: schemaReducer,
     locus: locusReducer,
-    annotations: annotationsReducer
+    annotations: annotationsReducer,
+    descriptions: descriptionsReducer
 });
 
 const store = createStore(rootReducer, composeEnhancers(

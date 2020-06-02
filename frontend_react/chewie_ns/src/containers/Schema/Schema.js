@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import Aux from "../../hoc/Aux/Aux";
 import * as actions from "../../store/actions/index";
 import classes from "./Schema.module.css";
 
@@ -56,6 +55,9 @@ class Schema extends Component {
 
     // fetch schema annotations
     this.props.onFetchAnnotations(species_id, schema_id);
+
+    // fetch schema description
+    this.props.onFetchDescriptions(species_id, schema_id);
   }
 
   getMuiTheme = () =>
@@ -667,6 +669,9 @@ const mapStateToProps = (state) => {
     annotations: state.annotations.annotations,
     loading_annotations: state.annotations.loading,
     error_annotations: state.annotations.error,
+    descriptions: state.descriptions.descriptions,
+    loading_descriptions: state.descriptions.loading,
+    error_descriptions: state.descriptions.error,
     species: state.species.species,
     // token: state.auth.token
   };
@@ -678,6 +683,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(actions.fetchSchemaAlleleMode(species_id, schema_id)),
     onFetchAnnotations: (species_id, schema_id) =>
       dispatch(actions.fetchAnnotations(species_id, schema_id)),
+    onFetchDescriptions: (species_id, schema_id) =>
+      dispatch(actions.fetchDescriptions(species_id, schema_id))
   };
 };
 

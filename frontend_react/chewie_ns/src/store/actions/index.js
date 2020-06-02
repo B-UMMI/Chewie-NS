@@ -22,3 +22,6 @@ export {
 export {
     fetchAnnotations
 } from './annotations';
+export {
+    fetchDescriptions
+} from './descriptions';
