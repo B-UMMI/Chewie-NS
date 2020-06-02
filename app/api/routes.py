@@ -3200,6 +3200,7 @@ class SchemaDescriptionAPItypon(Resource):
                         401: 'Unauthenticated',
                         404: 'Not Found'},
              security=[""])
+    @w.use_kwargs(api, parser)
     def get(self, species_id, schema_id, request_type):
         """Downloads file with the description for the specified schema."""
 
