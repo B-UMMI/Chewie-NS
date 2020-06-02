@@ -3185,6 +3185,14 @@ class SchemaZipAPItypon(Resource):
 class SchemaDescriptionAPItypon(Resource):
     """ Schema's description Routes """
 
+    parser = api.parser()
+
+    parser.add_argument('request_type',
+                        type=str,
+                        default='download',
+                        help='',
+                        choices=['check', 'download'])
+
     @api.doc(responses={200: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
@@ -3192,7 +3200,7 @@ class SchemaDescriptionAPItypon(Resource):
                         401: 'Unauthenticated',
                         404: 'Not Found'},
              security=[""])
-    def get(self, species_id, schema_id):
+    def get(self, species_id, schema_id, request_type):
         """Downloads file with the description for the specified schema."""
 
         root_dir = os.path.abspath(current_app.config['PRE_COMPUTE'])
@@ -3209,7 +3217,15 @@ class SchemaDescriptionAPItypon(Resource):
         files = os.listdir(root_dir)
 
         if schema_description in files:
-            return send_from_directory(root_dir, schema_description, as_attachment=True)
+            if request_type == "download":
+                return send_from_directory(root_dir, schema_description, as_attachment=True)
+            elif request_type == "check":
+                description_file = "{0}/{1}".format(root_dir, schema_description)
+                file_handle = open(description_file, 'rb')
+                file_contents = file_handle.read()
+                response = {'description': file_contents}
+                file_handle.close()
+                return response, 200
         elif len(schema_description) == 0:
             return {'Not found': 'Could not find a description for specified schema.'}, 404
 
