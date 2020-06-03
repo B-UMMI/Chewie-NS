@@ -106,6 +106,7 @@ class Schema extends Component {
     let scatter_plot = <CircularProgress />;
     let annotations = <CircularProgress />;
     let schema_table = <CircularProgress />;
+    let schema_description = <div />;
 
     const spd = JSON.parse(localStorage.getItem("speciesD"));
     const tableData = JSON.parse(localStorage.getItem("tableData"));
@@ -566,27 +567,29 @@ class Schema extends Component {
       </MuiThemeProvider>
     );
 
-    let schema_description = (
-      <div>
-        <div style={{ marginTop: "40px" }}>
-          <ExpansionPanel defaultExpanded>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h5" className={classes.title}>
-                Schema Description
-              </Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <div
-                className={classes.mainPaper}
-                style={{ width: "100%", height: "100%" }}
-              >
-                <Markdown markdown={this.state.descriptions} />
-              </div>
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+    if (!this.props.loading_descriptions) {
+      schema_description = (
+        <div>
+          <div style={{ marginTop: "40px" }}>
+            <ExpansionPanel defaultExpanded>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h5" className={classes.title}>
+                  Schema Description
+                </Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <div
+                  className={classes.mainPaper}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <Markdown markdown={this.state.descriptions} />
+                </div>
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
 
     return (
       <div style={{ marginLeft: "5%", marginRight: "5%" }}>
