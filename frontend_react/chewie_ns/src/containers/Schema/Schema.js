@@ -599,7 +599,7 @@ class Schema extends Component {
           </p> */}
         </div>
         <div style={{ marginTop: "40px" }}>{schema_table}</div>
-        <div>{schema_table}</div>
+        <div>{schema_description}</div>
         <div>
           <div style={{ marginTop: "40px" }}>
             <ExpansionPanel defaultExpanded>
