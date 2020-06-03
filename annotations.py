@@ -38,7 +38,10 @@ virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_annotations.log'
-logging.basicConfig(filename=logfile, level=logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
+                    filename=logfile)
 
 
 def create_file(filename, header):
@@ -76,7 +79,9 @@ def alleles_lengths(total_alleles, schema, offset, limit):
 	while count != total_alleles:
 		alleles = aux.get_data(SPARQLWrapper(local_sparql),
 					  		   sparql_queries.SELECT_ALLELES_LENGTH.format(virtuoso_graph, schema, offset, limit))
+
 		data = alleles['results']['bindings']
+
 		result.extend(data)
 		count += len(data)
 		offset += limit
@@ -99,26 +104,42 @@ def loci_annotations(schema):
 	"""
 
 	# get total number of alleles
-	loci = aux.get_data(SPARQLWrapper(local_sparql),
-				  		sparql_queries.SELECT_SCHEMA_LOCI_ANNOTATIONS.format(virtuoso_graph, schema))
+	tries = 0
+	bah = False
+	while bah is False:
+		loci = aux.get_data(SPARQLWrapper(local_sparql),
+					  		sparql_queries.SELECT_SCHEMA_LOCI_ANNOTATIONS.format(virtuoso_graph, schema))
 
-	annotations = loci['results']['bindings']
+		try:
+			annotations = loci['results']['bindings']
+			bah = True
+		except:
+			print(sparql_queries.SELECT_SCHEMA_LOCI_ANNOTATIONS.format(virtuoso_graph, schema))
+			logging.warning('Could not get annotations.')
+			logging.warning(loci)
+			tries += 1
+
+		if tries == 5:
+			sys.exit('This schema makes no sense!')
 
 	annotations = [{'locus': l['locus']['value'],
 					'name': l['name']['value'],
 					'UniprotName': l['UniprotName']['value'],
-					'UniprotURI': l['UniprotURI']['value']} for l in annotations]
+					'UniprotURI': l['UniprotURI']['value'],
+					'UserAnnotation': l['UserAnnotation']['value'],
+					'CustomAnnotation': l['CustomAnnotation']['value']} for l in annotations]
 	
 	return annotations
 
 
-def loci_modes(loci_data):
+def loci_stats(loci_data):
 	"""
 	"""
 
+	total_alleles = {k: len(v) for k, v in loci_data.items()}
 	modes = {k: Counter(v).most_common()[0][0] for k, v in loci_data.items()}
 
-	return modes
+	return [total_alleles, modes]
 
 
 def generate_info(schema, last_modified):
@@ -135,11 +156,12 @@ def generate_info(schema, last_modified):
 
 	loci_data = loci_alleles_length(result)
 
-	modes = loci_modes(loci_data)
+	total_alleles, modes = loci_stats(loci_data)
 
 	for a in annotations:
 		locus = a['name']
 		a['mode'] = modes[locus]
+		a['nr_alleles'] = total_alleles[locus]
 
 	json_to_file = {'schema': schema,
 					'last_modified': last_modified,
@@ -170,7 +192,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 	if len(loci_info) == 0:
 		length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
 
-		loci_modes = {}
+		loci_stats = {}
 		for locus_file in length_files:
 			with open(locus_file, 'rb') as lf:
 				locus_data = pickle.load(lf)
@@ -178,13 +200,15 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			locus_uri = list(locus_data.keys())[0]
 			locus_name = loci_names[locus_uri]
 			alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+			total_alleles = len(alleles_lengths)
 			locus_mode = Counter(alleles_lengths).most_common()[0][0]
-			loci_modes[locus_name] = locus_mode
+			loci_stats[locus_name] = [locus_mode, total_alleles]
 
 		annotations = loci_annotations(schema)
 		for a in annotations:
 			locus = a['name']
-			a['mode'] = loci_modes[locus]
+			a['mode'] = loci_stats[locus][0]
+			a['nr_alleles'] = loci_stats[locus][1]
 
 		json_to_file = {'schema': schema,
 						'last_modified': last_modified,
@@ -205,7 +229,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 		elif json_date != virtuoso_date:
 			length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
 
-			loci_modes = {}
+			loci_stats = {}
 			for locus_file in length_files:
 				with open(locus_file, 'rb') as lf:
 					locus_data = pickle.load(lf)
@@ -213,13 +237,15 @@ def fast_update(schema, last_modified, file, lengths_dir):
 				locus_uri = list(locus_data.keys())[0]
 				locus_name = loci_names[locus_uri]
 				alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
+				total_alleles = len(alleles_lengths)
 				locus_mode = Counter(alleles_lengths).most_common()[0][0]
-				loci_modes[locus_name] = locus_mode
+				loci_stats[locus_name] = [locus_mode, total_alleles]
 
 			annotations = loci_annotations(schema)
 			for a in annotations:
 				locus = a['name']
-				a['mode'] = loci_modes[locus]
+				a['mode'] = loci_stats[locus][0]
+				a['nr_alleles'] = loci_stats[locus][1]
 
 			json_to_file = {'schema': schema,
 							'last_modified': last_modified,

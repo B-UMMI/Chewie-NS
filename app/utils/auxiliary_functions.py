@@ -87,11 +87,13 @@ def write_schema_config(blast_score_ratio, ptf_hash,
 
     """
 
+    size_threshold = None if size_threshold in [None, 'None'] else float(size_threshold)
+
     params = {}
-    params['bsr'] = [blast_score_ratio]
+    params['bsr'] = [float(blast_score_ratio)]
     params['prodigal_training_file'] = [ptf_hash]
-    params['translation_table'] = [translation_table]
-    params['minimum_locus_length'] = [minimum_sequence_length]
+    params['translation_table'] = [int(translation_table)]
+    params['minimum_locus_length'] = [int(minimum_sequence_length)]
     params['chewBBACA_version'] = [chewie_version]
     params['size_threshold'] = [size_threshold]
 
@@ -1204,20 +1206,20 @@ def get_data(server, sparql_query):
 
     """
 
-    try:
-        server.setQuery(sparql_query)
-        server.setReturnFormat(JSON)
-        server.setTimeout(1000)
-        result = server.query().convert()
-    except Exception as e:
-        time.sleep(5)
+    tries = 0
+    max_tries = 5
+    success = False
+    while success is False and tries < max_tries:
         try:
             server.setQuery(sparql_query)
             server.setReturnFormat(JSON)
             server.setTimeout(1000)
             result = server.query().convert()
+            success = True
         except Exception as e:
+            tries += 1
             result = e
+            time.sleep(2)
 
     return result
 
@@ -1368,16 +1370,19 @@ def send_data(sparql_query, url_send_local_virtuoso, virtuoso_user, virtuoso_pas
             Request response
     """
 
-    url = url_send_local_virtuoso
-    headers = {'content-type': 'application/sparql-query'}
-    r = requests.post(url, data=sparql_query, headers=headers,
-                      auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
-
-    # sometimes virtuoso returns 405 God knows why ¯\_(ツ)_/¯ retry in 2 sec
-    if r.status_code > 201:
-        time.sleep(2)
+    tries = 0
+    max_tries = 3
+    success = False
+    while success is False and tries < max_tries:
+        url = url_send_local_virtuoso
+        headers = {'content-type': 'application/sparql-query'}
         r = requests.post(url, data=sparql_query, headers=headers,
                           auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass))
+
+        if r.status_code > 201:
+            tries += 1
+        else:
+            success = True
 
     return r
 
