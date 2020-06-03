@@ -36,6 +36,7 @@ export const fetchDescriptions = (species_id, schema_id) => {
         console.log(res);
         let desc = [];
         desc.push({ descriptions: res.data.description });
+        console.log(desc);
         dispatch(fetchDescriptionsSuccess(desc));
       })
       .catch((err) => {
