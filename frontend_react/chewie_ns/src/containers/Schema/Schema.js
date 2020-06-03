@@ -568,6 +568,7 @@ class Schema extends Component {
     );
 
     if (!this.props.loading_descriptions) {
+      console.log(this.state.descriptions)
       schema_description = (
         <div>
           <div style={{ marginTop: "40px" }}>
@@ -582,7 +583,7 @@ class Schema extends Component {
                   className={classes.mainPaper}
                   style={{ width: "100%", height: "100%" }}
                 >
-                  <Markdown markdown={this.state.descriptions[0].descriptions} />
+                  <Markdown markdown={this.state.descriptions} />
                 </div>
               </ExpansionPanelDetails>
             </ExpansionPanel>
