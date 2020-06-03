@@ -582,7 +582,7 @@ class Schema extends Component {
                   className={classes.mainPaper}
                   style={{ width: "100%", height: "100%" }}
                 >
-                  <Markdown markdown={this.state.descriptions} />
+                  <Markdown markdown={this.state.descriptions[0].descriptions} />
                 </div>
               </ExpansionPanelDetails>
             </ExpansionPanel>
