@@ -567,30 +567,28 @@ class Schema extends Component {
       </MuiThemeProvider>
     );
 
-    if (this.props.descriptions !== undefined || this.props.descriptions !== []) {
-      console.log(this.props.descriptions[0])
-      schema_description = (
-        <div>
-          <div style={{ marginTop: "40px" }}>
-            <ExpansionPanel defaultExpanded>
-              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h5" className={classes.title}>
-                  Schema Description
-                </Typography>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
-                <div
-                  className={classes.mainPaper}
-                  style={{ width: "100%", height: "100%" }}
-                >
-                  <Markdown markdown={this.props.descriptions} />
-                </div>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
-          </div>
+    console.log(this.props.descriptions);
+    schema_description = (
+      <div>
+        <div style={{ marginTop: "40px" }}>
+          <ExpansionPanel defaultExpanded>
+            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h5" className={classes.title}>
+                Schema Description
+              </Typography>
+            </ExpansionPanelSummary>
+            <ExpansionPanelDetails>
+              <div
+                className={classes.mainPaper}
+                style={{ width: "100%", height: "100%" }}
+              >
+                <Markdown markdown={this.props.descriptions} />
+              </div>
+            </ExpansionPanelDetails>
+          </ExpansionPanel>
         </div>
-      );
-    }
+      </div>
+    );
 
     return (
       <div style={{ marginLeft: "5%", marginRight: "5%" }}>
