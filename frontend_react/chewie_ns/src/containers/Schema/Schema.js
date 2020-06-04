@@ -567,7 +567,7 @@ class Schema extends Component {
       </MuiThemeProvider>
     );
 
-    if (!this.props.loading_descriptions) {
+    if (this.props.descriptions !== undefined || this.props.descriptions !== []) {
       console.log(this.props.descriptions)
       schema_description = (
         <div>
@@ -583,7 +583,7 @@ class Schema extends Component {
                   className={classes.mainPaper}
                   style={{ width: "100%", height: "100%" }}
                 >
-                  <Markdown markdown={this.props.descriptions} />
+                  <Markdown markdown={this.props.descriptions[0].descriptions} />
                 </div>
               </ExpansionPanelDetails>
             </ExpansionPanel>
