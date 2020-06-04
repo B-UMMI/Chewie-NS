@@ -568,7 +568,7 @@ class Schema extends Component {
     );
 
     if (this.props.descriptions !== undefined || this.props.descriptions !== []) {
-      console.log(this.props.descriptions)
+      console.log(this.props.descriptions[0])
       schema_description = (
         <div>
           <div style={{ marginTop: "40px" }}>
