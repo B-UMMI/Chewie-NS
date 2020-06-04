@@ -260,6 +260,38 @@ class Schema extends Component {
           },
         },
         {
+          name: "user_annotation",
+          label: "User Annotation",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "custom_annotation",
+          label: "Custom Annotation",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "locus",
           label: "Locus ID",
           options: {
@@ -287,6 +319,22 @@ class Schema extends Component {
         {
           name: "locus_name",
           label: "Locus Label",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "nr_alleles",
+          label: "Total Number of Alleles",
           options: {
             filter: true,
             sort: true,

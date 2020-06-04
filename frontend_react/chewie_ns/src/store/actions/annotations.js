@@ -35,10 +35,8 @@ export const fetchAnnotations = (species_id, schema_id) => {
           annotTableData.push({
             uniprot_label: res.data.message[key].UniprotName,
             uniprot_uri: res.data.message[key].UniprotURI,
-            //species: res.data.message[key].species.value,
-            // schema: res.data.message[key].schema.value.substring(
-            //   res.data.message[key].schema.value.lastIndexOf("/") + 1
-            // ),
+            user_annotation: res.data.message[key].UserAnnotation,
+            custom_annotation: res.data.message[key].CustomAnnotation,
             locus: parseInt(
               res.data.message[key].locus.substring(
                 res.data.message[key].locus.lastIndexOf("/") + 1
@@ -46,6 +44,7 @@ export const fetchAnnotations = (species_id, schema_id) => {
             ),
             locus_name: res.data.message[key].name,
             alleles_mode: parseInt(res.data.message[key].mode),
+            nr_alleles: parserInt(res.data.message[key].nr_alleles),
           });
         }
         // console.log(annotTableData)
