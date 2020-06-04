@@ -9,7 +9,7 @@ const imageRenderer = (props) => {
 
 const linkRenderer = (props) => {
   return (
-    <a href={props.href} target="_blank" rel="noopener noreferrer">
+    <a href={props.href} target={"_blank"} rel="noopener noreferrer">
       {props.children}
     </a>
   );
