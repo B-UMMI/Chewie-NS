@@ -44,7 +44,7 @@ export const fetchAnnotations = (species_id, schema_id) => {
             ),
             locus_name: res.data.message[key].name,
             alleles_mode: parseInt(res.data.message[key].mode),
-            nr_alleles: parserInt(res.data.message[key].nr_alleles),
+            nr_alleles: parseInt(res.data.message[key].nr_alleles),
           });
         }
         // console.log(annotTableData)
