@@ -1,16 +1,42 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTHOR
+Purpose
+-------
 
-    Pedro Cerqueira
-    github: @pedrorvc
+This module is used by the Chewie-NS to generate compressed
+versions of schemas.
 
-    Rafael Mamede
-    github: @rfm-targa
+It has two execution modes: single and global. The former
+enables the compression of a single schema and the latter
+enables the compression of all schemas in the Chewie-NS.
+Both modes verify if there is a compressed version for each
+schema and if it is necessary to update it based on the last
+modification date of the schema.
 
-DESCRIPTION
+Expected input
+--------------
 
+It is necessary to specify the execution mode through the
+following argument:
+
+- ``-m``, ``mode`` :
+
+    - e.g.: ``single`` or ``global``
+
+The ``single`` mode also receives the identifier of a species
+and the identifier of a schema for that species:
+
+- ``--sp``, ``species_id`` :
+
+    - e.g.: ``1``
+
+- ``--sc``, ``schema_id`` :
+
+    - e.g.: ``4``
+
+Code documentation
+------------------
 """
 
 
@@ -35,11 +61,27 @@ virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
 virtuoso_user = os.environ.get('VIRTUOSO_USER')
 virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_compression.log'
-logging.basicConfig(filename=logfile, level=logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
+                    filename=logfile)
 
 
 def change_lock(schema_uri, action):
-    """
+    """ Changes the locking state of a schema in the Chewie-NS.
+
+        Parameters
+        ----------
+        schema_uri : str
+            The URI of the schema in the Chewie-NS.
+        action : str
+            'LOCKED' if the schema should be locked or
+            'Unlocked' if it should be unlocked.
+
+        Returns
+        -------
+        True if the action is performed successfully,
+        False otherwise.
     """
 
     del_lock_query = (sq.DELETE_SCHEMA_LOCK.format(virtuoso_graph,
@@ -50,19 +92,38 @@ def change_lock(schema_uri, action):
                                     virtuoso_user,
                                     virtuoso_pass)
 
-    # insert new value
-    add_lock_query = (sq.INSERT_SCHEMA_LOCK.format(virtuoso_graph,
-                                                   schema_uri,
-                                                   action))
+    del_status = del_lock_result.status_code
+    if del_status > 201:
+        return [False, del_lock_result.content]
+    else:
+        # insert new locking value
+        add_lock_query = (sq.INSERT_SCHEMA_LOCK.format(virtuoso_graph,
+                                                       schema_uri,
+                                                       action))
 
-    add_lock_result = aux.send_data(add_lock_query,
-                                    local_sparql,
-                                    virtuoso_user,
-                                    virtuoso_pass)
+        add_lock_result = aux.send_data(add_lock_query,
+                                        local_sparql,
+                                        virtuoso_user,
+                                        virtuoso_pass)
+        add_status = add_lock_result.status_code
+        if add_status > 201:
+            return [False, add_lock_result.content]
+        else:
+            return True
 
 
 def get_species():
-    """
+    """ Gets the list of species in the Chewie-NS.
+
+        This function has no arguments but expects
+        that the SPARQL endpoint and default Virtuoso
+        Graph be set as OS environment variables.
+
+        Returns
+        -------
+        species_list : dict
+        A dictionary with species URIs as keys and species
+        names as values. None if species has no schemas.
     """
 
     # get the list of species in NS
@@ -74,31 +135,67 @@ def get_species():
     if len(species) == 0:
         species_list = None
     else:
-        species_list = {s['species']['value']: s['name']['value'] for s in species}
+        species_list = {s['species']['value']: s['name']['value']
+                        for s in species}
 
     return species_list
 
 
 def species_schemas(species_uri, schemas):
-    """
+    """ Gets the list of schemas for a species.
+
+        Parameters
+        ----------
+        species_uri : str
+            The URI of the species in the Chewie-NS.
+        schemas : dict
+            An empty dictionary to store schemas' data.
+
+        Returns
+        -------
+        A list with the following variables:
+
+        - status (int): status code of the response.
+        - schemas (dict): A dictionary with the species
+          URI as key and a list of tuples as value.
+          Each tuple has a schema URI and the name of
+          that schema.
     """
 
     result = aux.get_data(SPARQLWrapper(local_sparql),
                           (sq.SELECT_SPECIES_SCHEMAS.format(virtuoso_graph,
                                                             species_uri)))
-    ns_schemas = result['results']['bindings']
-    if len(ns_schemas) == 0:
-        result = None
-    else:
-        for schema in ns_schemas:
-            schemas.setdefault(species_uri, []).append((schema['schemas']['value'],
-                                                        schema['name']['value']))
 
-    return [result, schemas]
+    try:
+        ns_schemas = result['results']['bindings']
+        if len(ns_schemas) > 0:
+            for schema in ns_schemas:
+                schemas.setdefault(species_uri, []).append((schema['schemas']['value'],
+                                                            schema['name']['value']))
+    except Exception:
+        logging.warning('Could not retrieve schemas for '
+                        '{0}. Exception:\n{1}'.format(species_uri, result))
+
+    return schemas
 
 
 def determine_date(schema_uri):
-    """
+    """ Gets the last modification date for a schema.
+
+        Parameters
+        ----------
+        schema_uri : str
+            The URI of the schema in the Chewie-NS.
+
+        Returns
+        -------
+        A list with the following variables:
+
+        - last_date (str): The last modification date in
+          the format YYYY-MM-DDTHH:MM:SS.f.
+        - lock_state (str): Locking state of the schema.
+        - schema_info (dict): A dictionary with schema
+          properties values.
     """
 
     # get schema last modification date
@@ -113,8 +210,61 @@ def determine_date(schema_uri):
     return [last_date, lock_state, schema_info]
 
 
-def compress_determiner(schemas, species_id, sp_name, compressed_schemas, to_compress, old_zips):
-    """
+def compress_determiner(schemas, species_id, sp_name,
+                        compressed_schemas, to_compress, old_zips):
+    """ Determines if it is necessary to generate compressed
+        versions of schemas.
+
+        Parameters
+        ----------
+        schemas : list
+            List with sublists, each sublist has the name and
+            the URI for a schema of the species.
+        species_id : str
+            Identifier of the species in the Chewie-NS.
+        sp_name : str
+            Scientific name of the species.
+        compressed_schemas : list
+            List with all the compressed schema versions that are
+            currently available.
+        to_compress : list
+            A list to store data about schemas that
+            need to be compressed.
+        old_zips : dict
+            A dictionary to store the ZIP filenames of
+            the outdated compressed versions.
+
+        Returns
+        -------
+        A list with the following variables:
+        to_compress : list
+            A list with one sublist per schema that needs to
+            be compressed. Each sublist has the following variables:
+
+            - schema_uri (str): the URI of the schema in the Chewie-NS.
+            - schema_date (str): last modification date of the schema.
+            - schema_bsr (str): BLAST Score Ratio value used to create the
+              schema and perform allele calling.
+            - schema_ml (str): minimum sequence length value.
+            - schema_tt (str): genetic code used to predict and translate
+              coding sequences.
+            - schema_ptf (str): BLAKE2 hash of the Prodigal training file
+              associated with the schema.
+            - schema_st (str): sequence size variation percentage
+              threshold.
+            - chewie_version (str): version of the chewBBACA suite
+              used to create the schema and perform allele calling.
+            - sp_name (str): name of the schema's species.
+            - schema_prefix (str): filename prefix of the compressed
+              version of the schema.
+            - schema_name (str): name of the schema.
+            - schema_lock (str): locking state of the schema.
+
+        old_zips : dict
+            A dictionary with schema URIs as keys and
+            ZIP filenames of the compressed versions
+            that are outdated or None if there is no
+            compressed version.
     """
 
     for schema in schemas:
@@ -134,7 +284,9 @@ def compress_determiner(schemas, species_id, sp_name, compressed_schemas, to_com
         schema_st = schema_info['size_threshold']['value']
         chewie_version = schema_info['chewBBACA_version']['value']
 
+        # get all compressed versions that have the schema prefix
         comp_schema = [f for f in compressed_schemas if f.startswith(schema_prefix)]
+        # there is no compressed version
         if len(comp_schema) == 0:
             to_compress.append([schema_uri, schema_date, schema_bsr,
                                 schema_ml, schema_tt, schema_ptf,
@@ -142,11 +294,12 @@ def compress_determiner(schemas, species_id, sp_name, compressed_schemas, to_com
                                 schema_prefix, schema_name, schema_lock])
             logging.info('{0} ({1}) is novel schema to compress.'.format(schema_uri, schema_name))
             old_zips[schema_uri] = None
-
+        # there is a compressed version
         elif len(comp_schema) == 1:
             comp_date = comp_schema[0].split('_')[-1]
             comp_date = comp_date.split('.zip')[0]
 
+            # check if schema has been altered since compression date
             if comp_date != schema_date:
                 to_compress.append([schema_uri, schema_date, schema_bsr,
                                     schema_ml, schema_tt, schema_ptf,
@@ -165,7 +318,18 @@ def compress_determiner(schemas, species_id, sp_name, compressed_schemas, to_com
 
 
 def schema_loci(schema_uri):
-    """
+    """ Gets the list of loci for a schema.
+
+        Parameters
+        ----------
+        schema_uri : str
+            The URI of the schema in the Chewie-NS.
+
+        Returns
+        -------
+        loci_list : list of tup
+            A list with tuples. Each tuple has two
+            elements, a locus name and a locus URI.
     """
 
     # get loci
@@ -181,50 +345,133 @@ def schema_loci(schema_uri):
 
 
 def fasta_sequences(locus, date):
-    """
+    """ Get the DNA sequences of all alleles of a locus.
+
+        Parameters
+        ----------
+        locus : str
+            The URI of the locus in the Chewie-NS.
+        date : str
+            Last modification date of the schema in
+            the format YYYY-MM-DDTHH:MM:SS.f.
+
+        Returns
+        -------
+        fasta_seqs : list of dict
+            A list with one dictionary per allele.
+            Each dictionary has the identifier and the DNA
+            sequence of an allele.
     """
 
     # setting [SPARQL] ResultSetMaxRows = 400000 in virtuoso.ini
-    # should ensure that it returns all sequences, but it is better
-    # to implement a solution if returned data exceeds that value
+    # is important to return all sequences at once
     fasta_result = aux.get_data(SPARQLWrapper(local_sparql),
                                 (sq.SELECT_LOCUS_FASTA_BY_DATE.format(virtuoso_graph, locus, date)))
 
-    fasta_list = fasta_result['results']['bindings']
+    # virtuoso returned an error because request length exceeded maximum value of Temp Col
+    # get each allele separately
+    try:
+        fasta_seqs = fasta_result['results']['bindings']
+    # virtuoso returned an error
+    # probably because sequence/request length exceeded maximum value
+    except:
+        logging.warning('Could not retrieve FASTA records for locus {0}\n'
+                        'Response content:\n{1}\nTrying to get each sequence '
+                        'separately...\n'.format(locus, fasta_result))
+        # get each allele separately
+        result = aux.get_data(SPARQLWrapper(local_sparql),
+                              (sq.SELECT_LOCUS_SEQS_BY_DATE.format(virtuoso_graph, locus, date)))
+        try:
+            fasta_seqs = result['results']['bindings']
+            if len(fasta_seqs) == 0:
+                logging.warning('Locus {0} has 0 sequences.'.format(locus))
+                return False
+        except:
+            logging.warning('Could not retrieve sequences hashes '
+                            'for locus {0}.'.format(locus))
+            return False
 
-    return fasta_list
+        total = 0
+        hashes = []
+        for s in range(len(fasta_seqs)):
+            # get the sequence corresponding to the hash
+            result2 = aux.get_data(SPARQLWrapper(local_sparql),
+                                   (sq.SELECT_SEQ_FASTA.format(virtuoso_graph, fasta_seqs[s]['sequence']['value'])))
+            hashes.append(fasta_seqs[s]['sequence']['value'])
+
+            fasta_seqs[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
+            total += 1
+
+    return fasta_seqs
 
 
-def create_fasta(loci_list, schema, temp_dir):
-    """
+def create_fasta(loci_list, date, temp_dir):
+    """ Creates FASTA files for the loci of a schema.
+
+        Parameters
+        ----------
+        loci_list : list of tup
+            A list with tuples, one tuple per locus.
+            Each tuple has two elements: the locus name
+            and the locus URI.
+        date : str
+            Last modification date of the schema. The
+            function will get all sequences that were
+            inserted before this date.
+        temp_dir : str
+            The path to the directory where the FASTA files
+            will be created.
+
+        Returns
+        -------
+        temp_files : list
+            List of paths to the FASTA files that were created.
     """
 
     # download FASTA sequences and save in temp directory
+    temp_files = []
     for locus in loci_list:
         locus_name = locus[0]
         locus_uri = locus[1]
-        sequences = fasta_sequences(locus_uri, schema[1])
+        sequences = fasta_sequences(locus_uri, date)
+        if sequences is False:
+            logging.warning('Cannot continue compression '
+                            'process for schema. Could not '
+                            'retrieve sequences for one or more loci.')
+            return False
 
-        if len(sequences) > 0:
+        fasta_seqs = [(f['allele_id']['value'], f['nucSeq']['value']) for f in sequences]
 
-            fasta_seqs = [(f['allele_id']['value'], f['nucSeq']['value']) for f in sequences]
+        fasta_lines = ['>{0}_{1}\n{2}'.format(locus_name, s[0], s[1]) for s in fasta_seqs]
 
-            temp_file = '{0}/{1}.fasta'.format(temp_dir, locus_name)
+        fasta_text = '\n'.join(fasta_lines)
 
-            fasta_lines = ['>{0}_{1}\n{2}'.format(locus_name, s[0], s[1]) for s in fasta_seqs]
+        temp_file = '{0}/{1}.fasta'.format(temp_dir, locus_name)
+        temp_files.append(temp_file)
 
-            fasta_text = '\n'.join(fasta_lines)
+        with open(temp_file, 'w') as f:
+            f.write(fasta_text)
 
-            with open(temp_file, 'w') as f:
-                f.write(fasta_text)
-        else:
-            return [False, locus_uri]
-
-    return [True]
+    return temp_files
 
 
 def compress_schema(schema, old_zip):
-    """
+    """ Generates a compressed version of a schema that is in
+        the Chewie-NS.
+
+        Parameters
+        ----------
+        schema : list
+            One of the sublists with data about a schema returned
+            by the :py:func:`compress_determiner` function.
+        old_zip : str
+            Path to the outdated compressed version of the schema
+            (None if there is no compressed version).
+
+        Returns
+        -------
+        0 if the compression process completed successfully,
+        1 otherwise.
     """
 
     schema_ptf_path = os.path.join(Config.SCHEMAS_PTF, schema[5])
@@ -243,11 +490,8 @@ def compress_schema(schema, old_zip):
     os.mkdir(temp_dir)
 
     logging.info('Downloading Fasta files for schema {0} ({1})'.format(schema[0], schema[-2]))
-    temp_files = create_fasta(loci_list, schema, temp_dir)
-    if temp_files[0] is not True:
-        logging.warning('Could not retrieve sequences for locus {0} '
-                        'from schema {1} {2}. Aborting schema '
-                        'compression.'.format(temp_files[1], schema[0], schema[-2]))
+    temp_files = create_fasta(loci_list, schema[1], temp_dir)
+    if temp_files is False:
         shutil.rmtree(temp_dir)
         return 1
 
@@ -305,15 +549,25 @@ def parse_arguments():
     parser.add_argument('-m', type=str,
                         dest='mode', required=True,
                         choices=['global', 'single'],
-                        help='')
+                        help='Execution mode. The "single" mode '
+                             'compresses a single schema and the '
+                             '"global" mode compresses all schemas '
+                             'in the Chewie-NS. A compressed version '
+                             'of a schema will only be generated if '
+                             'there is no compressed version or the '
+                             'curretn one is outdated.')
 
     parser.add_argument('--sp', type=str, default=None,
                         dest='species_id', required=False,
-                        help='')
+                        help='The identifier of the species in the '
+                             'Chewie-NS (only relevant for the "single" '
+                             'mode).')
 
     parser.add_argument('--sc', type=str, default=None,
                         dest='schema_id', required=False,
-                        help='')
+                        help='The identifier of the schema in the '
+                             'Chewie-NS (only relevant for the "global" '
+                             'mode).')
 
     args = parser.parse_args()
 
@@ -321,7 +575,8 @@ def parse_arguments():
 
 
 def global_compressor():
-    """
+    """ Determines which schemas need to be compressed and generates
+        compressed versions of those schemas.
     """
 
     # get date
@@ -339,11 +594,8 @@ def global_compressor():
     # get all schemas for all species
     schemas = {}
     for species in species_list:
-        result, schemas = species_schemas(species, schemas)
-        if result is None:
-            logging.warning('Could not find any schemas for species '
-                            '{0} ({1})'.format(species, species_list[species]))
-        else:
+        schemas = species_schemas(species, schemas)
+        if len(schemas) > 0:
             current_schemas = schemas[species]
             current_schemas_strs = ['{0}, {1}'.format(s[0], s[1]) for s in current_schemas]
             logging.info('Found {0} schemas for {1} ({2}): {3}'.format(len(current_schemas),
@@ -370,8 +622,8 @@ def global_compressor():
         species_id = species.split('/')[-1]
 
         to_compress, old_zips = compress_determiner(sp_schemas, species_id,
-                                                              sp_name, compressed_schemas,
-                                                              to_compress, old_zips)
+                                                    sp_name, compressed_schemas,
+                                                    to_compress, old_zips)
 
     # exclude locked schemas
     locked = []
@@ -408,12 +660,12 @@ def global_compressor():
 
 
 def single_compressor(species_id, schema_id):
-    """
+    """ Determines if a schema needs to be compressed and
+        generates a compressed version if needed.
     """
 
-    start_date = dt.datetime.now()
-    start_date_str = dt.datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S')
-    logging.info('Started single compressor at: {0}'.format(start_date_str))
+    logging.info('Started single compressor for schema {0} '
+                 'of species {1}'.format(schema_id, species_id))
 
     # check if species exists
     species_uri = '{0}species/{1}'.format(base_url, species_id)
@@ -465,7 +717,11 @@ def single_compressor(species_id, schema_id):
     lock_status = schema_lock['boolean']
     if lock_status is True:
         # lock schema
-        change_lock(schema_uri, 'LOCKED')
+        locked = change_lock(schema_uri, 'LOCKED')
+        if isinstance(locked, list) is True:
+            logging.warning('Could not lock schema {0}. Response:'
+                            '\n{1}\n\n'.format(schema_uri, locked[1]))
+            sys.exit(1)
 
     single_schema_name = to_compress[0][-2]
     if old_zip[schema_uri] is not None:
@@ -481,11 +737,12 @@ def single_compressor(species_id, schema_id):
                      '({1})'.format(schema_uri, single_schema_name))
 
     # unlock schema
-    change_lock(schema_uri, 'Unlocked')
+    unlocked = change_lock(schema_uri, 'Unlocked')
+    if isinstance(unlocked, list) is True:
+        logging.warning('Could not unlock schema at the end of compression process.')
 
-    end_date = dt.datetime.now()
-    end_date_str = dt.datetime.strftime(end_date, '%Y-%m-%dT%H:%M:%S')
-    logging.info('Finished single compressor at: {0}\n\n'.format(end_date_str))
+        logging.info('Finished single compressor for schema {0} '
+                     'of species {1}'.format(schema_id, species_id))
 
 
 if __name__ == '__main__':

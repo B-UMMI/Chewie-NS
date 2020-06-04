@@ -17,6 +17,8 @@ DESCRIPTION
 
 """
 
+# lack of RAM related to allocation values close to the
+# Number of Buffers in Virtuoso.ini can lead to transaction timeout
 
 COUNT_SCHEMA_LOCI = ('SELECT (COUNT(?parts) AS ?count) '
                      'FROM <{0}>'
@@ -105,7 +107,7 @@ SELECT_LOCUS_FASTA = ('SELECT '
                         ' ?sequence typon:nucleotideSequence ?nucSeq .}} '
                       'ORDER BY ASC(?allele_id)')
 
-SELECT_LOCUS_FASTA_BY_DATE = ('SELECT '
+SELECT_LOCUS_FASTA_BY_DATE = ('SELECT DISTINCT '
                               '?name '
                               '?allele_id '
                               '(str(?nucSeq) AS ?nucSeq) '
@@ -150,7 +152,19 @@ SELECT_LOCUS_SEQS = ('SELECT '
                        ' typon:id ?allele_id .}} '
                      'ORDER BY ASC(?allele_id)')
 
-SELECT_LOCUS_SEQS_BY_DATE = ('SELECT '
+# Without DISTINCT it might return a lot of duplicates
+# It is not clear why it returns duplicates
+# It happens after schema insertion and seems to happen more
+# with loci that have big sequences
+# Reproducing the problem is difficult because for the same locus it
+# will return a varying number of duplicates
+# It returns duplicates when we use Python, but returns no duplicates if we run the
+# same query through SWAGGER or Virtuoso Conductor SPARQL endpoint
+# If we create a schema based on one of the loci that display this issue,
+# the process behaves as expected, it will only display abnormal behavior when
+# we insert the complete schema. If we restart the docker-compose, the issue completely
+# disappears and we are able to get the sequences thorugh Python as expected.
+SELECT_LOCUS_SEQS_BY_DATE = ('SELECT DISTINCT '
                              '?allele_id '
                              '?sequence '
                              '?date '
@@ -524,6 +538,10 @@ COUNT_SCHEMA_ALLELES = ('SELECT '
                           ' ?allele a typon:Allele;'
                           ' typon:isOfLocus ?locus .}}')
 
+# Add ORDER BY (?name) at end of query to sort by locus
+# Virtuoso will return error if the total number of values
+# that needs to be returned exceeds MaxSortedTopRows value
+# in virtuoso.ini
 SELECT_ALLELES_LENGTH = ('SELECT '
                          '?locus '
                          '(str(?name) AS ?name) '
@@ -539,7 +557,7 @@ SELECT_ALLELES_LENGTH = ('SELECT '
                            ' ?allele typon:hasSequence ?sequence .'
                            ' ?sequence typon:nucleotideSequence ?nucSeq .'
                            ' FILTER NOT EXISTS {{ ?part typon:deprecated "true"^^xsd:boolean }} }} '
-                         'ORDER BY (?name) OFFSET {2} LIMIT {3}')
+                         ' OFFSET {2} LIMIT {3}')
 
 SELECT_SCHEMA_LOCI_ANNOTATIONS = ('SELECT DISTINCT '
                                   '?locus '
@@ -560,7 +578,7 @@ SELECT_SCHEMA_LOCI_ANNOTATIONS = ('SELECT DISTINCT '
                                     ' typon:UniprotURI ?UniprotURI;'
                                     ' typon:UserAnnotation ?UserAnnotation;'
                                     ' typon:CustomAnnotation ?CustomAnnotation .}}'
-                                  'ORDER BY ?locus ')
+                                  ' ORDER BY ?locus')
 
 SELECT_SPECIES = ('PREFIX typon:<http://purl.phyloviz.net/ontology/typon#> '
                   'SELECT '
@@ -730,6 +748,8 @@ INSERT_ALLELE_NEW_SEQUENCE = ('INSERT DATA IN GRAPH <{0}> '
                                 ' typon:hasSequence <{1}> .'
                                 ' <{6}> typon:hasDefinedAllele <{3}> .}}')
 
+# PRAGMA to enable auto-commit: DEFINE sql:log-enable 2
+# Used at start of query (virtuoso.trx stops increasing)
 MULTIPLE_INSERT_NEW_SEQUENCE = ('INSERT {{ GRAPH <{0}> '
                                 '{{ ?seq a typon:Sequence;'
                                 ' typon:nucleotideSequence ?nucseq .'

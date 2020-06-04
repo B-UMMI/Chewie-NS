@@ -1629,7 +1629,7 @@ class LociNSFastaAPItypon(Resource):
                                     sq.ASK_LOCUS.format(locus_uri))
         locus_exists = locus_exists['boolean']
         if locus_exists is False:
-            return {'message': 'There is no locus with provided ID.'}
+            return {'message': 'There is no locus with provided ID.'}, 404
 
         # get schema that the locus is associated with
         locus_schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -1639,34 +1639,9 @@ class LociNSFastaAPItypon(Resource):
         has_schema = False if locus_schema_query['results']['bindings'] == [] else True
 
         if has_schema is False:
-            return {'message': 'Locus is not associated with any schema.'}
+            return {'message': 'Locus is not associated with any schema.'}, 404
 
         locus_schema = locus_schema_query['results']['bindings'][0]['schema']['value']
-
-        # determine if schema is locked
-        # locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-        #                                     (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], locus_schema)))
-        # locking_status = locking_status_query['results']['bindings'][0]['Schema_lock']['value']
-
-        # if schema is locked, enforce condition that only the Admin
-        # or the Contributor that administers the schema may get the FASTA sequences
-        # if locking_status != 'Unlocked':
-        #    if c_user is None:
-        #        return {'Not authorized': 'Schema is locked. Cannot download sequences '
-        #                                  'that belong to a locus in a locked schema.'}, 403
-        #    else:
-        # check the role of the user that is trying to access
-        #        new_user_url = '{0}users/{1}'.format(current_app.config['BASE_URL'], c_user)
-
-        #        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-        #                              (sq.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'],
-        #                                                                 new_user_url)))
-
-        #        user_role = result['results']['bindings'][0]['role']['value']
-
-        #        allow = enforce_locking(user_role, new_user_url, locus_schema)
-        #        if allow[0] == False:
-        #            return allow[1], 403
 
         # get request data
         request_data = request.args
@@ -1681,7 +1656,26 @@ class LociNSFastaAPItypon(Resource):
                                   (sq.SELECT_LOCUS_FASTA.format(current_app.config['DEFAULTHGRAPH'],
                                                                 locus_uri)))
 
-        fasta_seqs = result['results']['bindings']
+        # virtuoso returned an error because request length exceeded maximum value
+        # get each allele separately
+        try:
+            fasta_seqs = result['results']['bindings']
+        except:
+            # get locus sequences hashes
+            if 'date' in request_data:
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                      (sq.SELECT_LOCUS_SEQS_BY_DATE.format(current_app.config['DEFAULTHGRAPH'], locus_uri, request_data['date'])))
+            else:
+                result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                      (sq.SELECT_LOCUS_SEQS.format(current_app.config['DEFAULTHGRAPH'], locus_uri)))
+
+            fasta_seqs = result['results']['bindings']
+            for s in range(len(fasta_seqs)):
+                # get the sequence corresponding to the hash
+                result2 = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                       (sq.SELECT_SEQ_FASTA.format(current_app.config['DEFAULTHGRAPH'], fasta_seqs[s]['sequence']['value'])))
+
+                fasta_seqs[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
 
         return Response(stream_with_context(generate('Fasta', fasta_seqs)), content_type='application/json')
 
@@ -2203,6 +2197,7 @@ class SpeciesListAPItypon(Resource):
 
         # get taxon name from the post data
         taxon_name = str(post_data['name'])
+
         # get total number of taxa already on the graph
         result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
                               (sq.COUNT_TAXON.format(current_app.config['DEFAULTHGRAPH'])))
