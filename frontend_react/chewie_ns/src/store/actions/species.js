@@ -123,7 +123,7 @@ export const fetchSpeciesAnnot = (spec_id) => {
 
           for (let key in res.data.message[id].loci) {
             locus_id = res.data.message[id].loci[key].locus.substring(
-              res.data.message[0].loci[key].locus.lastIndexOf("/") + 1
+              res.data.message[id].loci[key].locus.lastIndexOf("/") + 1
             );
 
             x_val += 1;
