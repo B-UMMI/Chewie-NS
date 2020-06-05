@@ -279,7 +279,7 @@ class PersistentDrawerLeft extends Component {
             <ListItem
               button
               component="a"
-              href={"https://194.210.120.209/api/NS/api/docs"}
+              href={"https://chewbbaca.online/api/NS/api/docs"}
               target={"_blank"}
               rel="noopener noreferrer"
             >
