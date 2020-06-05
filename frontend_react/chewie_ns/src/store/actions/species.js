@@ -101,6 +101,7 @@ export const fetchSpeciesAnnot = (spec_id) => {
     axios
       .get("stats/species/" + spec_id + "/schema/loci/nr_alleles")
       .then((res) => {
+        console.log(res);
         const fetchedSpeciesAnnot2 = [];
         let x_val = 0;
         let y_val = 0;
@@ -198,6 +199,7 @@ export const fetchSpeciesAnnot = (spec_id) => {
         dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot2));
       })
       .catch((err) => {
+        console.log(err);
         dispatch(fetchSpeciesAnnotFail(err));
       });
   };
