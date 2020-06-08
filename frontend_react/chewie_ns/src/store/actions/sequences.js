@@ -52,7 +52,7 @@ export const fetchSequence = (sequence) => {
               species_id +
               "/schemas/" +
               schema_id +
-              "/loci/" +
+              "/locus/" +
               locusId,
             locus_id: locusId,
           });
