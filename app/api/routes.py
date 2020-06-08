@@ -5131,9 +5131,8 @@ class SequencesAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
+            )
     @w.use_kwargs(api, parser)
-    @jwt_required
     def get(self, **kwargs):
         """Get information on sequence, DNA string, uniprot URI and uniprot label."""
 
