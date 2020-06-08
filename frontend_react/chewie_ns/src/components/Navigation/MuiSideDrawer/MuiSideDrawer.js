@@ -244,7 +244,7 @@ class PersistentDrawerLeft extends Component {
             </ListItem>
             <ListItem button component={Link} to="/sequences">
               <ListItemIcon>
-                <DescriptionIcon style={{ color: "white" }} />
+                <SearchIcon style={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary={"Search"} />
             </ListItem>
