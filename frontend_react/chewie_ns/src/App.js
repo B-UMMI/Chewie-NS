@@ -23,6 +23,7 @@ import Stats from "./containers/Stats/Stats";
 import Species from "./containers/Species/Species";
 import Schema from "./containers/Schema/Schema";
 import Locus from "./containers/Locus/Locus";
+import Sequences from "./containers/Sequences/Sequences";
 import * as actions from "./store/actions/index";
 
 // Material Ui Components
@@ -119,6 +120,7 @@ class App extends Component {
           <Route path="/about" component={About} />
           <Route path="/" exact component={Chewie} />
           <Route path="/stats" component={Stats} />
+          <Route path="/sequences" component={Sequences} />
           <Route
             path="/species/:species_id/schemas/:schema_id/locus/:locus_id"
             component={Locus}

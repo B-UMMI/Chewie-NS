@@ -25,3 +25,6 @@ export {
 export {
     fetchDescriptions
 } from './descriptions';
+export {
+    fetchSequence
+} from './sequences';

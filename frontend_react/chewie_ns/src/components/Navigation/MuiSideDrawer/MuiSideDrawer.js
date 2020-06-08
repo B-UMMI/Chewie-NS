@@ -27,6 +27,7 @@ import DescriptionIcon from "@material-ui/icons/Description";
 import InfoIcon from "@material-ui/icons/Info";
 import GitHubIcon from "@material-ui/icons/GitHub";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
+import SearchIcon from "@material-ui/icons/Search";
 
 // Material Design Icon import
 import { mdiApi } from "@mdi/js";
@@ -240,6 +241,12 @@ class PersistentDrawerLeft extends Component {
                 <DescriptionIcon style={{ color: "white" }} />
               </ListItemIcon>
               <ListItemText primary={"Schemas"} />
+            </ListItem>
+            <ListItem button component={Link} to="/sequences">
+              <ListItemIcon>
+                <DescriptionIcon style={{ color: "white" }} />
+              </ListItemIcon>
+              <ListItemText primary={"Search"} />
             </ListItem>
             <ListItem button component={Link} to="/about">
               <ListItemIcon>

@@ -16,6 +16,7 @@ import schemaReducer from './store/reducers/schema';
 import locusReducer from './store/reducers/locus';
 import annotationsReducer from './store/reducers/annotations';
 import descriptionsReducer from './store/reducers/descriptions';
+import sequencesReducer from './store/reducers/sequences';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
@@ -26,7 +27,8 @@ const rootReducer = combineReducers({
     schema: schemaReducer,
     locus: locusReducer,
     annotations: annotationsReducer,
-    descriptions: descriptionsReducer
+    descriptions: descriptionsReducer,
+    sequences: sequencesReducer,
 });
 
 const store = createStore(rootReducer, composeEnhancers(
