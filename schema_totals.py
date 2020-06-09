@@ -26,17 +26,15 @@ import datetime as dt
 from SPARQLWrapper import SPARQLWrapper
 
 from config import Config
-from app.utils import sparql_queries
+from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_totals.log'
-logging.basicConfig(filename=logfile, level=logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
+                    filename=logfile)
 
 
 def create_file(filename, header):
@@ -49,7 +47,8 @@ def create_file(filename, header):
 	return os.path.isfile(filename)
 
 
-def fast_update(species_file, files_dir, schema_uri, schema_data):
+def fast_update(species_file, files_dir, schema_uri, schema_data,
+	            virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -115,7 +114,7 @@ def fast_update(species_file, files_dir, schema_uri, schema_data):
 
 		# determine user that uploaded the file
 		admin = aux.get_data(SPARQLWrapper(local_sparql),
-		   				     sparql_queries.SELECT_SCHEMA_ADMIN.format(virtuoso_graph, schema_uri))
+		   				     sq.SELECT_SCHEMA_ADMIN.format(virtuoso_graph, schema_uri))
 
 		admin = admin['results']['bindings'][0]['admin']['value']
 		new_schema = schema_data
@@ -130,7 +129,8 @@ def fast_update(species_file, files_dir, schema_uri, schema_data):
 			json.dump(json_data, json_outfile)	
 
 
-def full_update(schema_uri, file, schema_data):
+def full_update(schema_uri, file, schema_data,
+	            virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -156,7 +156,7 @@ def full_update(schema_uri, file, schema_data):
 
 		elif json_date != virtuoso_date:
 			result = aux.get_data(SPARQLWrapper(local_sparql),
-                           		  (sparql_queries.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(virtuoso_graph, schema_uri)))
+                           		  (sq.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(virtuoso_graph, schema_uri)))
 
 			result_data = result['results']['bindings'][0]
 			current_schema['last_modified'] = virtuoso_date
@@ -171,12 +171,12 @@ def full_update(schema_uri, file, schema_data):
 	# new schema that is not in the json file
 	elif schema_id not in schemas_indexes:
 		result = aux.get_data(SPARQLWrapper(local_sparql),
-                          	  (sparql_queries.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(virtuoso_graph, schema_uri)))
+                          	  (sq.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(virtuoso_graph, schema_uri)))
 		result_data = result['results']['bindings'][0]
 
 		# determine user that uploaded the file
 		admin = aux.get_data(SPARQLWrapper(local_sparql),
-		   				     sparql_queries.SELECT_SCHEMA_ADMIN.format(virtuoso_graph, schema_uri))
+		   				     sq.SELECT_SCHEMA_ADMIN.format(virtuoso_graph, schema_uri))
 
 		admin = admin['results']['bindings'][0]['admin']['value']
 		new_schema = schema_data
@@ -209,28 +209,45 @@ def parse_arguments():
     					default=None, dest='schema_id',
     					help='')
 
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph',
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql',
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url',
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.mode, args.species_id, args.schema_id]
+    return [args.mode, args.species_id, args.schema_id,
+            args.virtuoso_graph, args.local_sparql,
+            args.base_url]
 
 
-def global_species():
+def global_species(virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
-	
+
 	# get all species in the NS
 	species_result = aux.get_data(SPARQLWrapper(local_sparql),
-	                              sparql_queries.SELECT_SPECIES.format(virtuoso_graph, ' typon:name ?name. '))
+	                              sq.SELECT_SPECIES.format(virtuoso_graph, ' typon:name ?name. '))
 	result_data = species_result['results']['bindings']
 
 	ns_species = {s['species']['value']: s['name']['value'] for s in result_data}
 
 	species_ids = [s.split('/')[-1] for s in ns_species]
 	for i in species_ids:
-		single_species(i)
+		single_species(i, virtuoso_graph, local_sparql, base_url)
 
 
-def single_species(species_id):
+def single_species(species_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -241,7 +258,7 @@ def single_species(species_id):
 	# create species uri
 	species_uri = '{0}species/{1}'.format(base_url, species_id)
 	species_result = aux.get_data(SPARQLWrapper(local_sparql),
-	                              sparql_queries.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
+	                              sq.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
 	result_data = species_result['results']['bindings']
 
 	if len(result_data) == 0:
@@ -250,7 +267,7 @@ def single_species(species_id):
 
 	# get all schemas for the species
 	species_result = aux.get_data(SPARQLWrapper(local_sparql),
-	                              sparql_queries.SELECT_SPECIES_SCHEMAS.format(virtuoso_graph, species_uri))
+	                              sq.SELECT_SPECIES_SCHEMAS.format(virtuoso_graph, species_uri))
 	result_data = species_result['results']['bindings']
 
 	if len(result_data) == 0:
@@ -274,13 +291,13 @@ def single_species(species_id):
 	for schema in schemas:
 		# check if schema is locked
 		schema_lock = aux.get_data(SPARQLWrapper(local_sparql),
-                               	   (sparql_queries.ASK_SCHEMA_LOCK.format(schema)))
+                               	   (sq.ASK_SCHEMA_LOCK.format(schema)))
 
 		lock_status = schema_lock['boolean']
 		if lock_status is True:
 			# get schema info
 			schema_info = aux.get_data(SPARQLWrapper(local_sparql),
-		                          (sparql_queries.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema)))
+		                          (sq.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema)))
 
 			schema_properties = schema_info['results']['bindings']
 			if len(schema_properties) == 0:
@@ -296,14 +313,16 @@ def single_species(species_id):
 			lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
 
 			if lengths_dir in computed_files:
-				fast_update(species_file, lengths_dir, schema, schema_properties)
+				fast_update(species_file, lengths_dir, schema, schema_properties,
+					        virtuoso_graph, local_sparql, base_url)
 			else:
-				full_update(schema, species_file, schema_properties)
+				full_update(schema, species_file, schema_properties,
+					        virtuoso_graph, local_sparql, base_url)
 		else:
 			logging.warning('Schema {0} is locked. Aborting.'.format(schema))
 
 
-def single_schema(species_id, schema_id):
+def single_schema(species_id, schema_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -315,7 +334,7 @@ def single_schema(species_id, schema_id):
 	# create species uri
 	species_uri = '{0}species/{1}'.format(base_url, species_id)
 	species_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                  sparql_queries.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
+                                  sq.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
 	result_data = species_result['results']['bindings']
 
 	if len(result_data) == 0:
@@ -325,7 +344,7 @@ def single_schema(species_id, schema_id):
 
 	schema_uri = '{0}/schemas/{1}'.format(species_uri, schema_id)
 	schema_info = aux.get_data(SPARQLWrapper(local_sparql),
-                          (sparql_queries.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
+                          (sq.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
 
 	schema_properties = schema_info['results']['bindings']
 	if len(schema_properties) == 0:
@@ -353,9 +372,11 @@ def single_schema(species_id, schema_id):
 
 	if lengths_dir in computed_files:
 		lengths_dir = os.path.join(computed_dir, lengths_dir)
-		fast_update(species_file, lengths_dir, schema_uri, schema_properties)
+		fast_update(species_file, lengths_dir, schema_uri, schema_properties,
+			        virtuoso_graph, local_sparql, base_url)
 	else:
-		full_update(schema_uri, species_file, schema_properties)
+		full_update(schema_uri, species_file, schema_properties,
+					virtuoso_graph, local_sparql, base_url)
 
 	end = time.time()
 	delta = end - start
@@ -367,8 +388,10 @@ if __name__ == '__main__':
 	args = parse_arguments()
 
 	if args[0] == 'global_species':
-		global_species()
+		global_species(args[3], args[4], args[5])
 	elif args[0] == 'single_species':
-		single_species(args[1])
+		single_species(args[1], args[3], args[4],
+			           args[5])
 	elif args[0] == 'single_schema':
-		single_schema(args[1], args[2])
+		single_schema(args[1], args[2], args[3],
+					  args[4], args[5])

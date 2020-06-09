@@ -42,6 +42,7 @@ import threading
 import statistics
 import datetime as dt
 import concurrent.futures
+from itertools import repeat
 from collections import Counter
 from SPARQLWrapper import SPARQLWrapper
 
@@ -50,22 +51,17 @@ from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_alleles_inserter.log'
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt='%Y-%m-%dT%H:%M:%S.%f',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
                     filename=logfile)
 
 
 thread_local = threading.local()
 
 
-def change_date(schema_uri, date_type, date_value):
+def change_date(schema_uri, date_type, date_value, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
     """ Changes the last modification date or date of insertion
         of a schema.
 
@@ -114,7 +110,7 @@ def change_date(schema_uri, date_type, date_value):
             return True
 
 
-def change_lock(schema_uri, action):
+def change_lock(schema_uri, action, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
     """ Changes the locking state of a schema in the Chewie-NS.
 
         Parameters
@@ -159,7 +155,7 @@ def change_lock(schema_uri, action):
             return True
 
 
-def create_single_insert(alleles, species, locus_uri, user_uri):
+def create_single_insert(alleles, species, locus_uri, user_uri, base_url, virtuoso_graph):
 	""" Creates SPARQL queries that allow the insertion of a single allele.
 
 		Parameters
@@ -206,9 +202,9 @@ def create_single_insert(alleles, species, locus_uri, user_uri):
 	return queries
 
 
-def create_multiple_insert(alleles, species, locus_uri, user_uri):
+def create_multiple_insert(alleles, species, locus_uri, user_uri, base_url, virtuoso_graph):
 	""" Creates SPARQL queries that alow the insertion of multiple alleles.
-        
+
         Parameters
         ----------
         alleles : tup
@@ -263,7 +259,7 @@ def create_multiple_insert(alleles, species, locus_uri, user_uri):
 	return queries
 
 
-def create_queries(locus_file):
+def create_queries(locus_file, base_url, virtuoso_graph):
 	""" Creates SPARQL queries to insert alleles.
 
 		Parameters
@@ -303,10 +299,12 @@ def create_queries(locus_file):
 	# might not be inserted
 	if max_length < 4000:
 		queries = create_multiple_insert(alleles, spec_name,
-									   	 locus_url, user_url)
+									   	 locus_url, user_url,
+									   	 base_url, virtuoso_graph)
 	else:
 		queries = create_single_insert(alleles, spec_name,
-									   locus_url, user_url)
+									   locus_url, user_url,
+									   base_url, virtuoso_graph)
 
 	queries_file = '{0}_queries'.format(locus_file.split('alleles')[0])
 	with open(queries_file, 'wb') as qf:
@@ -338,7 +336,7 @@ def get_session():
     return thread_local.session
 
 
-def post_alleles(input_file):
+def post_alleles(input_file, local_sparql, virtuoso_user, virtuoso_pass):
 	""" Sends POST requests to insert alleles of a locus
 	    into the Chewie-NS.
 
@@ -367,6 +365,7 @@ def post_alleles(input_file):
 	for q in queries:
 		tries = 0
 		max_tries = 5
+		max_wait = 5
 		valid = False
 		while valid is False and tries < max_tries:
 			with session.post(local_sparql, data=q, headers=headers,
@@ -376,14 +375,22 @@ def post_alleles(input_file):
 					tries += 1
 					logging.warning('Could not insert query for locus {0}'
 						            '\nResponse:\n{1}\n'.format(locus, response.text))
+					# wait some time, a 404 error can occur when Virtuoso
+					# performs checkpoint() and waiting coupled with retries
+					# will help resume POST after checkpoint ends
+					time.sleep(max_wait)
+					max_wait += max_wait
 				else:
 					valid = True
 		responses[1].append(response)
+		if status_code > 201:
+			logging.warning('Could not execute query for locus {0}'
+				            '\nQuery:\n{1}\n'.format(locus, q))
 
 	return responses
 
 
-def send_alleles(post_files):
+def send_alleles(post_files, local_sparql, virtuoso_user, virtuoso_pass):
 	""" Sends POST requests to insert alleles of a set of loci.
 
 		Parameters
@@ -401,7 +408,7 @@ def send_alleles(post_files):
 	responses = {}
 	total = 0
 	with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-		for res in executor.map(post_alleles, post_files):
+		for res in executor.map(post_alleles, post_files, repeat(local_sparql), repeat(virtuoso_user), repeat(virtuoso_pass)):
 			responses[res[0]] = res[1]
 			total += 1
 
@@ -447,12 +454,39 @@ def parse_arguments():
                              'contain the ZIP archives with the '
                              'data to insert alleles.')
 
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph',
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql',
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url',
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
+    parser.add_argument('--u', type=str,
+                        dest='virtuoso_user',
+                        default=os.environ.get('VIRTUOSO_USER'),
+                        help='')
+
+    parser.add_argument('--p', type=str,
+                        dest='virtuoso_pass',
+                        default=os.environ.get('VIRTUOSO_PASS'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.input_dir]
+    return [args.input_dir, args.virtuoso_graph,
+            args.local_sparql, args.base_url,
+            args.virtuoso_user, args.virtuoso_pass]
 
 
-def main(temp_dir):
+def main(temp_dir, graph, sparql, base_url, user, password):
 
 	start = time.time()
 
@@ -462,6 +496,8 @@ def main(temp_dir):
 
 	# create schema URI
 	schema_uri = '{0}species/{1}/schemas/{2}'.format(base_url, species_id, schema_id)
+
+	logging.info('Started alleles insertion for schema {0}'.format(schema_uri))
 
 	# schemas hashes are the filenames
 	schema_file = os.path.join(temp_dir, '{0}_{1}_hashes'.format(species_id, schema_id))
@@ -485,13 +521,13 @@ def main(temp_dir):
 	# create SPARQL multiple INSERT queries
 	queries_files = []
 	with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-		for res in executor.map(create_queries, schema_files):
+		for res in executor.map(create_queries, schema_files, repeat(base_url), repeat(graph)):
 			queries_files.append(res)
 
 	start = time.time()
 	# insert data
 	# sort reponses to include summary in log file
-	post_results = send_alleles(queries_files)
+	post_results = send_alleles(queries_files, sparql, user, password)
 
 	end = time.time()
 	delta = end - start
@@ -499,25 +535,35 @@ def main(temp_dir):
 
 	# change dateEntered and last_modified dates
 	insert_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-	insert_res = change_date(schema_uri, 'dateEntered', insert_date)
-	modification_res = change_date(schema_uri, 'last_modified', insert_date)
+	insert_res = change_date(schema_uri, 'dateEntered', insert_date,
+		                     graph, sparql, user, password)
+	modification_res = change_date(schema_uri, 'last_modified', insert_date,
+		                           graph, sparql, user, password)
 
 	# after inserting create compressed version
 	os.system('python schema_compressor.py -m single '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} '
+		      '--b {4} --u {5} --p {6}'.format(species_id, schema_id,
+		      	               				   graph, sparql, base_url,
+		      	               				   user, password))
 
 	# create pre-computed frontend files
 	os.system('python schema_totals.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python loci_totals.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python loci_mode.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python annotations.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 
 	# unlock schema
-	unlocked = change_lock(schema_uri, 'Unlocked')
+	unlocked = change_lock(schema_uri, 'Unlocked',
+		                   graph, sparql, user, password)
 	if isinstance(unlocked, list) is True:
 		logging.warning('Could not unlock schema. Response:'
 			            '\n{0}\n\n'.format(unlocked[1]))
@@ -530,4 +576,5 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
-    main(args[0])
+    main(args[0], args[1], args[2],
+         args[3], args[4], args[5])

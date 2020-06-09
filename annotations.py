@@ -32,11 +32,6 @@ from app.utils import sparql_queries
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_annotations.log'
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -54,7 +49,7 @@ def create_file(filename, header):
 	return os.path.isfile(filename)
 
 
-def count_alleles(schema):
+def count_alleles(schema, virtuoso_graph, local_sparql):
 	"""
 	"""
 
@@ -68,7 +63,8 @@ def count_alleles(schema):
 	return total_alleles
 
 
-def alleles_lengths(total_alleles, schema, offset, limit):
+def alleles_lengths(total_alleles, schema, offset, limit,
+	                virtuoso_graph, local_sparql):
 	"""
 	"""
 
@@ -99,7 +95,7 @@ def loci_alleles_length(alleles):
 
 	return loci_data
 
-def loci_annotations(schema):
+def loci_annotations(schema, virtuoso_graph, local_sparql):
 	"""
 	"""
 
@@ -128,7 +124,7 @@ def loci_annotations(schema):
 					'UniprotURI': l['UniprotURI']['value'],
 					'UserAnnotation': l['UserAnnotation']['value'],
 					'CustomAnnotation': l['CustomAnnotation']['value']} for l in annotations]
-	
+
 	return annotations
 
 
@@ -142,17 +138,18 @@ def loci_stats(loci_data):
 	return [total_alleles, modes]
 
 
-def generate_info(schema, last_modified):
+def generate_info(schema, last_modified, virtuoso_graph, local_sparql):
 	"""
 	"""
 
 	# get loci annotations
-	annotations = loci_annotations(schema)
+	annotations = loci_annotations(schema, virtuoso_graph, local_sparql)
 
 	# get total number of alleles
-	total_alleles = count_alleles(schema)
+	total_alleles = count_alleles(schema, virtuoso_graph, local_sparql)
 
-	result = alleles_lengths(total_alleles, schema, 0, 10000)
+	result = alleles_lengths(total_alleles, schema, 0, 10000,
+		                     virtuoso_graph, local_sparql)
 
 	loci_data = loci_alleles_length(result)
 
@@ -170,7 +167,8 @@ def generate_info(schema, last_modified):
 	return json_to_file
 
 
-def fast_update(schema, last_modified, file, lengths_dir):
+def fast_update(schema, last_modified, file, lengths_dir,
+	            virtuoso_graph, local_sparql):
 	"""
 	"""
 
@@ -204,7 +202,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			locus_mode = Counter(alleles_lengths).most_common()[0][0]
 			loci_stats[locus_name] = [locus_mode, total_alleles]
 
-		annotations = loci_annotations(schema)
+		annotations = loci_annotations(schema, virtuoso_graph, local_sparql)
 		for a in annotations:
 			locus = a['name']
 			a['mode'] = loci_stats[locus][0]
@@ -241,7 +239,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 				locus_mode = Counter(alleles_lengths).most_common()[0][0]
 				loci_stats[locus_name] = [locus_mode, total_alleles]
 
-			annotations = loci_annotations(schema)
+			annotations = loci_annotations(schema, virtuoso_graph, local_sparql)
 			for a in annotations:
 				locus = a['name']
 				a['mode'] = loci_stats[locus][0]
@@ -257,7 +255,7 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			logging.info('Updated data for schema {0}'.format(schema))
 
 
-def full_update(schema, last_modified, file):
+def full_update(schema, last_modified, file, virtuoso_graph, local_sparql):
 	"""
 	"""
 
@@ -271,7 +269,8 @@ def full_update(schema, last_modified, file):
 	loci_info = json_data['message']
 
 	if len(loci_info) == 0:
-		json_to_file = generate_info(schema, last_modified)
+		json_to_file = generate_info(schema, last_modified,
+			                         virtuoso_graph, local_sparql)
 		with open(file, 'w') as json_outfile:
 			json.dump(json_to_file, json_outfile)
 		
@@ -285,7 +284,8 @@ def full_update(schema, last_modified, file):
 			logging.info('Information about number  for schema {0} is up-to-date.'.format(schema))
 
 		elif json_date != virtuoso_date:
-			json_to_file = generate_info(schema, last_modified)
+			json_to_file = generate_info(schema, last_modified,
+				                         virtuoso_graph, local_sparql)
 			with open(file, 'w') as json_outfile:
 				json.dump(json_to_file, json_outfile)
 
@@ -310,12 +310,29 @@ def parse_arguments():
     					default=None, dest='schema_id',
     					help='')
 
+    parser.add_argument('--g', type=str, required=False,
+                        dest='virtuoso_graph',
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql', required=False,
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url', required=False,
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.mode, args.species_id, args.schema_id]
+    return [args.mode, args.species_id, args.schema_id,
+            args.virtuoso_graph, args.local_sparql,
+            args.base_url]
 
 
-def global_species():
+def global_species(virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 	
@@ -328,10 +345,10 @@ def global_species():
 
 	species_ids = [s.split('/')[-1] for s in ns_species]
 	for i in species_ids:
-		single_species(i)
+		single_species(i, virtuoso_graph, local_sparql, base_url)
 
 
-def single_species(species_id):
+def single_species(species_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -391,14 +408,16 @@ def single_species(species_id):
 			lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
 			if lengths_dir in computed_files:
 				lengths_dir = os.path.join(computed_dir, lengths_dir)
-				fast_update(schema, last_modified, schema_file, lengths_dir)
+				fast_update(schema, last_modified, schema_file, lengths_dir,
+					        virtuoso_graph, local_sparql)
 			else:
-				full_update(schema, last_modified, schema_file)
+				full_update(schema, last_modified, schema_file,
+					        virtuoso_graph, local_sparql)
 		else:
 			logging.warning('Schema {0} is locked. Aborting.'.format(schema))
 
 
-def single_schema(species_id, schema_id):
+def single_schema(species_id, schema_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -447,9 +466,11 @@ def single_schema(species_id, schema_id):
 
 	if lengths_dir in computed_files:
 		lengths_dir = os.path.join(computed_dir, lengths_dir)
-		fast_update(schema_uri, last_modified, schema_file, lengths_dir)
+		fast_update(schema_uri, last_modified, schema_file, lengths_dir,
+			        virtuoso_graph, local_sparql)
 	else:
-		full_update(schema_uri, last_modified, schema_file)
+		full_update(schema_uri, last_modified, schema_file,
+			        virtuoso_graph, local_sparql)
 
 	end = time.time()
 	delta = end - start
@@ -461,8 +482,10 @@ if __name__ == '__main__':
 	args = parse_arguments()
 
 	if args[0] == 'global_species':
-		global_species()
+		global_species(args[3], args[4], args[5])
 	elif args[0] == 'single_species':
-		single_species(args[1])
+		single_species(args[1], args[3], args[4],
+			           args[5])
 	elif args[0] == 'single_schema':
-		single_schema(args[1], args[2])
+		single_schema(args[1], args[2], args[3],
+			          args[4], args[5])

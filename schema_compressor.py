@@ -55,11 +55,6 @@ from app.utils import auxiliary_functions as aux
 from app.utils import PrepExternalSchema
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_compression.log'
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -67,7 +62,7 @@ logging.basicConfig(level=logging.INFO,
                     filename=logfile)
 
 
-def change_lock(schema_uri, action):
+def change_lock(schema_uri, action, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
     """ Changes the locking state of a schema in the Chewie-NS.
 
         Parameters
@@ -112,7 +107,7 @@ def change_lock(schema_uri, action):
             return True
 
 
-def get_species():
+def get_species(local_sparql, virtuoso_graph):
     """ Gets the list of species in the Chewie-NS.
 
         This function has no arguments but expects
@@ -141,7 +136,7 @@ def get_species():
     return species_list
 
 
-def species_schemas(species_uri, schemas):
+def species_schemas(species_uri, schemas, local_sparql, virtuoso_graph):
     """ Gets the list of schemas for a species.
 
         Parameters
@@ -179,7 +174,7 @@ def species_schemas(species_uri, schemas):
     return schemas
 
 
-def determine_date(schema_uri):
+def determine_date(schema_uri, local_sparql, virtuoso_graph):
     """ Gets the last modification date for a schema.
 
         Parameters
@@ -210,8 +205,8 @@ def determine_date(schema_uri):
     return [last_date, lock_state, schema_info]
 
 
-def compress_determiner(schemas, species_id, sp_name,
-                        compressed_schemas, to_compress, old_zips):
+def compress_determiner(schemas, species_id, sp_name, compressed_schemas,
+                        to_compress, old_zips, local_sparql, virtuoso_graph):
     """ Determines if it is necessary to generate compressed
         versions of schemas.
 
@@ -273,7 +268,7 @@ def compress_determiner(schemas, species_id, sp_name,
         schema_id = schema_uri.split('/')[-1]
         schema_prefix = '{0}_{1}'.format(species_id, schema_id)
 
-        last_date, lock_state, schema_info = determine_date(schema_uri)
+        last_date, lock_state, schema_info = determine_date(schema_uri, local_sparql, virtuoso_graph)
 
         schema_date = last_date
         schema_lock = lock_state
@@ -317,7 +312,7 @@ def compress_determiner(schemas, species_id, sp_name,
     return [to_compress, old_zips]
 
 
-def schema_loci(schema_uri):
+def schema_loci(schema_uri, local_sparql, virtuoso_graph):
     """ Gets the list of loci for a schema.
 
         Parameters
@@ -344,7 +339,7 @@ def schema_loci(schema_uri):
     return loci_list
 
 
-def fasta_sequences(locus, date):
+def fasta_sequences(locus, date, local_sparql, virtuoso_graph):
     """ Get the DNA sequences of all alleles of a locus.
 
         Parameters
@@ -405,7 +400,7 @@ def fasta_sequences(locus, date):
     return fasta_seqs
 
 
-def create_fasta(loci_list, date, temp_dir):
+def create_fasta(loci_list, date, temp_dir, local_sparql, virtuoso_graph):
     """ Creates FASTA files for the loci of a schema.
 
         Parameters
@@ -433,7 +428,7 @@ def create_fasta(loci_list, date, temp_dir):
     for locus in loci_list:
         locus_name = locus[0]
         locus_uri = locus[1]
-        sequences = fasta_sequences(locus_uri, date)
+        sequences = fasta_sequences(locus_uri, date, local_sparql, virtuoso_graph)
         if sequences is False:
             logging.warning('Cannot continue compression '
                             'process for schema. Could not '
@@ -455,7 +450,7 @@ def create_fasta(loci_list, date, temp_dir):
     return temp_files
 
 
-def compress_schema(schema, old_zip):
+def compress_schema(schema, old_zip, local_sparql, virtuoso_graph):
     """ Generates a compressed version of a schema that is in
         the Chewie-NS.
 
@@ -480,7 +475,7 @@ def compress_schema(schema, old_zip):
                         ' Aborting schema compression.'.format(schema[0], schema[-2]))
         return 1
 
-    loci_list = schema_loci(schema[0])
+    loci_list = schema_loci(schema[0], local_sparql, virtuoso_graph)
     if len(loci_list) == 0:
         logging.info('Could not retrieve loci for {0} ({1}).'.format(schema[0], schema[-2]))
         return 1
@@ -490,7 +485,7 @@ def compress_schema(schema, old_zip):
     os.mkdir(temp_dir)
 
     logging.info('Downloading Fasta files for schema {0} ({1})'.format(schema[0], schema[-2]))
-    temp_files = create_fasta(loci_list, schema[1], temp_dir)
+    temp_files = create_fasta(loci_list, schema[1], temp_dir, local_sparql, virtuoso_graph)
     if temp_files is False:
         shutil.rmtree(temp_dir)
         return 1
@@ -569,12 +564,39 @@ def parse_arguments():
                              'Chewie-NS (only relevant for the "global" '
                              'mode).')
 
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph',
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql',
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url',
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
+    parser.add_argument('--u', type=str,
+                        dest='virtuoso_user',
+                        default=os.environ.get('VIRTUOSO_USER'),
+                        help='')
+
+    parser.add_argument('--p', type=str,
+                        dest='virtuoso_pass',
+                        default=os.environ.get('VIRTUOSO_PASS'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.mode, args.species_id, args.schema_id]
+    return [args.mode, args.species_id, args.schema_id,
+            args.virtuoso_graph, args.local_sparql, args.base_url,
+            args.virtuoso_graph, args.virtuoso_pass]
 
 
-def global_compressor():
+def global_compressor(graph, sparql, base_url):
     """ Determines which schemas need to be compressed and generates
         compressed versions of those schemas.
     """
@@ -584,7 +606,7 @@ def global_compressor():
     start_date_str = dt.datetime.strftime(start_date, '%Y-%m-%dT%H:%M:%S')
     logging.info('Started global compressor at: {0}'.format(start_date_str))
 
-    species_list = get_species()
+    species_list = get_species(sparql, graph)
     if species_list is None:
         logging.warning('Could not retrieve any species from the NS.\n\n')
         sys.exit(0)
@@ -594,7 +616,7 @@ def global_compressor():
     # get all schemas for all species
     schemas = {}
     for species in species_list:
-        schemas = species_schemas(species, schemas)
+        schemas = species_schemas(species, schemas, sparql, graph)
         if len(schemas) > 0:
             current_schemas = schemas[species]
             current_schemas_strs = ['{0}, {1}'.format(s[0], s[1]) for s in current_schemas]
@@ -623,7 +645,8 @@ def global_compressor():
 
         to_compress, old_zips = compress_determiner(sp_schemas, species_id,
                                                     sp_name, compressed_schemas,
-                                                    to_compress, old_zips)
+                                                    to_compress, old_zips,
+                                                    sparql, graph)
 
     # exclude locked schemas
     locked = []
@@ -646,7 +669,7 @@ def global_compressor():
     # for each schema: get loci, download FASTA to temp folder, apply PrepExternalSchema and compress
     for schema in to_compress:
 
-        response = compress_schema(schema, old_zips[schema[0]])
+        response = compress_schema(schema, old_zips[schema[0]], sparql, graph)
         if response == 0:
             logging.info('Successfully compressed schema {0} '
                          '({1})'.format(schema[0], schema[-2]))
@@ -659,7 +682,7 @@ def global_compressor():
     logging.info('Finished global compressor at: {0}\n\n'.format(end_date_str))
 
 
-def single_compressor(species_id, schema_id):
+def single_compressor(species_id, schema_id, graph, sparql, base_url, user, password):
     """ Determines if a schema needs to be compressed and
         generates a compressed version if needed.
     """
@@ -669,8 +692,8 @@ def single_compressor(species_id, schema_id):
 
     # check if species exists
     species_uri = '{0}species/{1}'.format(base_url, species_id)
-    species_result = aux.get_data(SPARQLWrapper(local_sparql),
-                                        sq.SELECT_SINGLE_SPECIES.format(virtuoso_graph, species_uri))
+    species_result = aux.get_data(SPARQLWrapper(sparql),
+                                  sq.SELECT_SINGLE_SPECIES.format(graph, species_uri))
     result_data = species_result['results']['bindings']
 
     if len(result_data) == 0:
@@ -684,8 +707,8 @@ def single_compressor(species_id, schema_id):
     # get schema info
     # construct schema URI
     schema_uri = '{0}/schemas/{1}'.format(species_uri, schema_id)
-    schema_info = aux.get_data(SPARQLWrapper(local_sparql),
-                          (sq.SELECT_SPECIES_SCHEMA.format(virtuoso_graph, schema_uri)))
+    schema_info = aux.get_data(SPARQLWrapper(sparql),
+                               (sq.SELECT_SPECIES_SCHEMA.format(graph, schema_uri)))
 
     schema_properties = schema_info['results']['bindings']
     if len(schema_properties) == 0:
@@ -701,7 +724,8 @@ def single_compressor(species_id, schema_id):
     old_zips = {}
     to_compress, old_zip = compress_determiner(schemas, species_id,
                                                sp_name, compressed_schemas,
-                                               to_compress, old_zips)
+                                               to_compress, old_zips,
+                                               sparql, graph)
 
     if len(to_compress) == 0:
         logging.info('Aborting schema compression.\n\n')
@@ -711,13 +735,14 @@ def single_compressor(species_id, schema_id):
         logging.info('Schema to compress: {0}'.format(';'.join(schemas)))
 
     # check if schema is locked
-    schema_lock = aux.get_data(SPARQLWrapper(local_sparql),
+    schema_lock = aux.get_data(SPARQLWrapper(sparql),
                                (sq.ASK_SCHEMA_LOCK.format(schema_uri)))
 
     lock_status = schema_lock['boolean']
     if lock_status is True:
         # lock schema
-        locked = change_lock(schema_uri, 'LOCKED')
+        locked = change_lock(schema_uri, 'LOCKED', graph,
+                             sparql, user, password)
         if isinstance(locked, list) is True:
             logging.warning('Could not lock schema {0}. Response:'
                             '\n{1}\n\n'.format(schema_uri, locked[1]))
@@ -728,7 +753,7 @@ def single_compressor(species_id, schema_id):
         old_zip[schema_uri] = os.path.join(Config.SCHEMAS_ZIP, old_zip[schema_uri])
 
     # adapt and compress schema
-    response = compress_schema(to_compress[0], old_zip[schema_uri])
+    response = compress_schema(to_compress[0], old_zip[schema_uri], sparql, graph)
     if response == 0:
         logging.info('Successfully compressed schema {0} '
                      '({1})'.format(schema_uri, single_schema_name))
@@ -737,7 +762,8 @@ def single_compressor(species_id, schema_id):
                      '({1})'.format(schema_uri, single_schema_name))
 
     # unlock schema
-    unlocked = change_lock(schema_uri, 'Unlocked')
+    unlocked = change_lock(schema_uri, 'Unlocked', graph,
+                           sparql, user, password)
     if isinstance(unlocked, list) is True:
         logging.warning('Could not unlock schema at the end of compression process.')
 
@@ -750,6 +776,8 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     if args[0] == 'global':
-        global_compressor()
+        global_compressor(args[3], args[4], args[5])
     elif args[0] == 'single':
-        single_compressor(args[1], args[2])
+        single_compressor(args[1], args[2], args[3],
+                          args[4], args[5], args[6],
+                          args[7])
