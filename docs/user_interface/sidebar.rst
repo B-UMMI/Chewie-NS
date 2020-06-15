@@ -1,8 +1,8 @@
 Sidebar
 =======
 
-Hovering over the sidebar menu |menu|, or over each element,
-will open a sidebar contaning six buttons:
+Clicking over the sidebar menu |menu|, or over each element,
+will open a sidebar contaning seven buttons:
 
 .. |menu| image:: ../resources/sidebar_menu.png
     :align: middle
@@ -32,6 +32,11 @@ Schemas
 -------
 
 **Schemas** will take to a page displaying all available :doc:`schemas`.
+
+Search
+------
+
+**Search** will take to a page that allows users to search for specific alleles in Chewie-NS.
 
 About Us
 --------

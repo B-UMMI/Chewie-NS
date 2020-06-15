@@ -14,6 +14,26 @@ Parameters table
 The `chewBBACA <https://github.com/B-UMMI/chewBBACA>`_ parameter table
 is the same as the one described on the :doc:`schema_overview`.
 
+Schema Description
+------------------
+
+The Schema Description panel contains the description of the schema
+provided by the user (in Markdown format) during the schema upload.
+
+If the user does not provide a description file, the name of the schema
+will be used as the schema description.
+
+.. note::
+    The Schema Description panel is **by default expanded**. It can be collapsed by clicking on the **arrow icon** on the
+    upper-right corner of the panel.
+
+
+.. figure:: ../resources/schema_description.png
+    :align: center
+
+    Figure 2: Schema Description panel.
+
+
 Schema Evaluation
 -----------------
 
@@ -27,12 +47,12 @@ The plots are displayed by clicking on the corrresponding buttons.
 .. figure:: ../resources/schema_evaluation_expanded.png
     :align: center
 
-    Figure 2: Expanded Schema Evaluation panel.
+    Figure 3: Expanded Schema Evaluation panel.
 
 .. figure:: ../resources/schema_evaluation_collapsed.png
     :align: center
 
-    Figure 3: Collapsed Schema Evaluation panel.
+    Figure 4: Collapsed Schema Evaluation panel.
 
 
 Allele Numbers Analysis
@@ -44,13 +64,13 @@ contain a **number of different alleles (x-axis)**.
 .. figure:: ../resources/allele_numbers_fig1.png
     :align: center
 
-    Figure 4: Number of loci (935) that contain 1 allele.
+    Figure 5: Number of loci (935) that contain 1 allele.
 
 
 .. figure:: ../resources/allele_numbers_fig2.png
     :align: center
 
-    Figure 5: Number of loci (632) that contain 2 alleles.
+    Figure 6: Number of loci (632) that contain 2 alleles.
 
 
 Allele Length Analysis
@@ -62,7 +82,7 @@ allele mode size (x-axis)** contained by a **number of loci (y-axis)**.
 .. figure:: ../resources/allele_len.png
     :align: center
 
-    Figure 6: Number of loci (326) that have an allele mode size 200-299 (bp).
+    Figure 7: Number of loci (326) that have an allele mode size 200-299 (bp).
 
    
 Locus Statistics
@@ -81,7 +101,7 @@ the allele size is between 2000-3000 base pairs.
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 7: Locus 15441 statistics.
+    Figure 8: Locus 15441 statistics.
    
 
 Annotations 
@@ -93,6 +113,8 @@ The columns of the table are the following:
 
 - **Uniprot Label**: the Uniprot annotation.
 - **Uniprot URI**: the URI of the Uniprot annotation. Clicking on the URI will open the page of the Uniprot annotation.
+- **User Annotation**: an annotation provided by the user during the schema upload.
+- **Custom Annotation**: a custom annotation also provided by the user during the schema upload.
 - **Locus ID**: the ID of the locus. Clicking on the ID will take you to the :doc:`locus_details` page.
 - **Locus Label**: the Chewie-NS label assigned to the locus.
 - **Total Number of Alelles**: the total number of alleles of that locus.
@@ -101,6 +123,6 @@ The columns of the table are the following:
 .. figure:: ../resources/annotations_table.png
     :align: center
 
-    Figure 8: Annotations table.
+    Figure 9: Annotations table.
 
    

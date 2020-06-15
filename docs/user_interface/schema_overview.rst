@@ -42,7 +42,7 @@ The parameters displayed on the table are the following:
 - **Blast Score Ratio**: the `Blast Score Ratio <https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-6-2>`_ used to generate the schema.
 - **Translation Table**: the `translation table <https://www.ncbi.nlm.nih.gov/Taxonomy/Utils/wprintgc.cgi>`_ used to generate the schema.
 - **Minimum Length (bp)**: the minimum coding sequence (CDS) length (bp) used to generate the schema.
-- **Schema Details**: clicking on this button will take you the Schema Evaluation and Annotation page.
+- **Schema Details**: clicking on this button will take you the :doc:`schema_evaluation` page.
 - **Prodigal Training File**: Click on this button to download the prodigal training file used to generate this schema.
 - **Compressed Schema**: Click on this button to download the compressed (.zip) schema.
 
