@@ -206,8 +206,8 @@ class PersistentDrawerLeft extends Component {
         <Drawer
           variant="permanent"
           open={this.state.open}
-          onMouseEnter={() => this.scheduleMouseOver()}
-          onMouseLeave={() => this.cancelMouseOver()}
+          //onMouseEnter={() => this.scheduleMouseOver()}
+          //onMouseLeave={() => this.cancelMouseOver()}
           className={clsx(classes.drawer, {
             [classes.drawerOpen]: this.state.open,
             [classes.drawerClose]: !this.state.open,
