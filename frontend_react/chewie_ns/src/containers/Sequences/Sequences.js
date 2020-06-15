@@ -3,13 +3,14 @@ import { connect } from "react-redux";
 
 import * as actions from "../../store/actions/index";
 
-// Material UI imports
+// Material UI component imports
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Container from "@material-ui/core/Container";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { withStyles } from "@material-ui/core/styles";
 
+// Material UI function imports
+import { withStyles } from "@material-ui/core/styles";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -122,7 +123,7 @@ class Sequences extends Component {
             customBodyRender: (value, tableMeta, updateValue) => {
               return (
                 <a
-                  href={this.props.sequence_data[0].schemas_url}
+                  href={this.props.sequence_data.schemas_url}
                   target={"_blank"}
                   rel="noopener noreferrer"
                 >
@@ -149,7 +150,7 @@ class Sequences extends Component {
             customBodyRender: (value, tableMeta, updateValue) => {
               return (
                 <a
-                  href={this.props.sequence_data[0].locus_url}
+                  href={this.props.sequence_data.locus_url}
                   target={"_blank"}
                   rel="noopener noreferrer"
                 >
