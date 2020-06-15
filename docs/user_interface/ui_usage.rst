@@ -15,3 +15,4 @@ The covered topics will be:
     schema_overview
     schema_evaluation
     locus_details
+    search
