@@ -85,9 +85,32 @@ services:
     test:
       ipv4_address: 172.19.1.4
 
- celery:
+ loci_worker:
   build: .
-  command: celery worker -A app.celery --loglevel=info
+  container_name: loci_worker
+  command: sh -c "celery -A app.api.routes worker -l info -Q loci_queue -c 1"
+  volumes: 
+    - .:/app
+  depends_on: 
+    - redis
+  networks: 
+    - test
+
+ alleles_worker:
+  build: .
+  container_name: alleles_worker
+  command: sh -c "celery -A app.api.routes worker -l info -Q alleles_queue -c 1"
+  volumes: 
+    - .:/app
+  depends_on: 
+    - redis
+  networks: 
+    - test
+
+ sync_worker:
+  build: .
+  container_name: sync_worker
+  command: sh -c "celery -A app.api.routes worker -l info -Q sync_queue -c 1"
   volumes: 
     - .:/app
   depends_on: 

@@ -68,8 +68,58 @@ from SPARQLWrapper import SPARQLWrapper
 # Get the error handlers to work with Flask-restplus
 jwtm._set_error_handler_callbacks(api)
 
-# queue to add locus do schema
-@celery.task(time_limit=20)
+
+# queue to add loci to new schemas
+# this will return an AsyncResult object/id
+@celery.task(name='ns.api.routes.insert_loci')
+def insert_loci(temp_dir, graph, sparql, url, user, password):
+    """
+    """
+
+    result = subprocess.check_output(['python',
+                                      'schema_loci_inserter.py',
+                                      '-i', temp_dir,
+                                      '--g', graph,
+                                      '--s', sparql,
+                                      '--b', url,
+                                      '--u', user,
+                                      '--p', password])
+
+
+# queue to add alleles to new schemas
+@celery.task(name='ns.api.routes.insert_alleles')
+def insert_alleles(temp_dir, graph, sparql, url, user, password):
+    """
+    """
+
+    result = subprocess.check_output(['python',
+                                      'schema_alleles_inserter.py',
+                                      '-i', temp_dir,
+                                      '--g', graph,
+                                      '--s', sparql,
+                                      '--b', url,
+                                      '--u', user,
+                                      '--p', password])
+
+
+# queue to add alleles to existing schemas
+@celery.task(name='ns.api.routes.update_alleles')
+def update_alleles(temp_dir, graph, sparql, url, user, password):
+    """
+    """
+
+    result = subprocess.check_output(['python',
+                                      'schema_updater.py',
+                                      '-i', temp_dir,
+                                      '--g', graph,
+                                      '--s', sparql,
+                                      '--b', url,
+                                      '--u', user,
+                                      '--p', password])
+
+
+# queue to insert single locus
+#@celery.task(time_limit=20)
 def add_locus_schema(new_schema_url, new_locus_url):
     """ Add a locus to a schema.
 
@@ -122,7 +172,7 @@ def add_locus_schema(new_schema_url, new_locus_url):
 
 
 # queue to add alleles
-@celery.task(time_limit=20)
+#@celery.task(time_limit=20)
 def add_allele(new_locus_url, spec_name, loci_id, new_user_url,
                new_seq_url, isNewSeq, sequence, allele_uri):
     """ Adds an allele to a locus.
@@ -3689,7 +3739,22 @@ class SchemaLociDataAPItypon(Resource):
             os.remove(file_path)
 
             # insert loci
-            subprocess.check_output(['python', 'schema_loci_inserter.py', '-i', temp_dir])
+            loci_insertion = insert_loci.apply_async(queue='loci_queue',
+                                                     args=(temp_dir,
+                                                           current_app.config['DEFAULTHGRAPH'],
+                                                           current_app.config['LOCAL_SPARQL'],
+                                                           current_app.config['BASE_URL'],
+                                                           current_app.config['VIRTUOSO_USER'],
+                                                           current_app.config['VIRTUOSO_PASS']))
+
+            # set time limit for task completion (seconds)
+            time_limit = 720
+            current_time = 0
+            while (loci_insertion.ready() is False) and (current_time < time_limit):
+                time.sleep(5)
+                current_time += 5
+
+            inserted = [loci_insertion.ready(), loci_insertion.get()]
 
             # determine if loci were properly inserted
             with open(hashes_file, 'rb') as hf:
@@ -3783,7 +3848,14 @@ class SchemaLociDataAPItypon(Resource):
 
         alleles_values = [v[0] for v in list(loci_hashes.values())]
         if all(alleles_values) is True:
-            subprocess.Popen(['python', 'schema_alleles_inserter.py', '-i', temp_dir])
+            # insert alleles
+            alleles_insertion = insert_alleles.apply_async(queue='alleles_queue',
+                                                           args=(temp_dir,
+                                                                 current_app.config['DEFAULTHGRAPH'],
+                                                                 current_app.config['LOCAL_SPARQL'],
+                                                                 current_app.config['BASE_URL'],
+                                                                 current_app.config['VIRTUOSO_USER'],
+                                                                 current_app.config['VIRTUOSO_PASS']))
 
         return {'OK': 'Received file with data to insert alleles of new locus.'}, 201
 
@@ -3843,7 +3915,22 @@ class SchemaLociUpdateAPItypon(Resource):
 
         if 'complete' in request.headers:
             # wait until all alleles are inserted
-            subprocess.check_output(['python', 'schema_updater.py', '-i', temp_dir])
+            result = update_alleles.apply_async(queue='sync_queue',
+                                                args=(temp_dir,
+                                                      current_app.config['DEFAULTHGRAPH'],
+                                                      current_app.config['LOCAL_SPARQL'],
+                                                      current_app.config['BASE_URL'],
+                                                      current_app.config['VIRTUOSO_USER'],
+                                                      current_app.config['VIRTUOSO_PASS']))
+
+            # set time limit for task completion (seconds)
+            time_limit = 2700
+            current_time = 0
+            while (result.ready() is False) and (current_time < time_limit):
+                time.sleep(5)
+                current_time += 5
+
+            inserted = [result.ready(), result.get()]
 
         return {'OK': 'Received file with data to insert new alleles.'}, 201
 

@@ -35,6 +35,7 @@ import argparse
 import requests
 import threading
 import concurrent.futures
+from itertools import repeat
 
 from SPARQLWrapper import SPARQLWrapper
 
@@ -42,11 +43,6 @@ from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/schema_loci_inserter.log'
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
@@ -80,7 +76,7 @@ def get_session():
     return thread_local.session
 
 
-def post_loci(query_data):
+def post_loci(query_data, local_sparql, virtuoso_user, virtuoso_pass):
     """ Performs a POST request to insert a new locus or link
         a locus to its species or schema.
 
@@ -121,7 +117,7 @@ def post_loci(query_data):
     return (locus_hash, status_code)
 
 
-def send_queries(loci_queries):
+def send_queries(loci_queries, local_sparql, virtuoso_user, virtuoso_pass):
     """ Sends a set of requests to Virtuoso's SPARQL endpoint.
 
         Parameters
@@ -143,14 +139,15 @@ def send_queries(loci_queries):
     responses = {}
     total = 0
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-        for res in executor.map(post_loci, loci_queries):
+        for res in executor.map(post_loci, loci_queries, repeat(local_sparql),
+                                repeat(virtuoso_user), repeat(virtuoso_pass)):
             responses[res[0]] = res[1]
             total += 1
 
     return responses
 
 
-def assign_identifiers(loci_data, schema_hashes, loci_prefix, start_id):
+def assign_identifiers(loci_data, schema_hashes, loci_prefix, start_id, base_url):
     """ Assigns identifiers to loci.
 
         Parameters
@@ -216,7 +213,7 @@ def assign_identifiers(loci_data, schema_hashes, loci_prefix, start_id):
     return [response, hash_to_uri, loci_data]
 
 
-def create_insert_queries(loci_data, schema_hashes):
+def create_insert_queries(loci_data, schema_hashes, virtuoso_graph):
     """ Creates SPARQL queries to insert loci into the Chewie-NS.
 
         Parameters
@@ -269,7 +266,7 @@ def create_insert_queries(loci_data, schema_hashes):
     return [insert_queries, insert]
 
 
-def species_link_queries(loci_data, schema_hashes, species_uri):
+def species_link_queries(loci_data, schema_hashes, species_uri, virtuoso_graph):
     """ Creates SPARQL queries to loci loci to a species.
 
         Parameters
@@ -314,7 +311,7 @@ def species_link_queries(loci_data, schema_hashes, species_uri):
     return [link_queries, link]
 
 
-def schema_link_queries(loci_data, schema_hashes, schema_uri):
+def schema_link_queries(loci_data, schema_hashes, schema_uri, virtuoso_graph):
     """ Creates SPARQL queries to loci loci to a schema.
 
         Parameters
@@ -418,12 +415,39 @@ def parse_arguments():
                              'receives the data necessary '
                              'for schema insertion.')
 
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph', required=True,
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql', required=True,
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url', required=True,
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
+    parser.add_argument('--u', type=str,
+                        dest='virtuoso_user', required=True,
+                        default=os.environ.get('VIRTUOSO_USER'),
+                        help='')
+
+    parser.add_argument('--p', type=str,
+                        dest='virtuoso_pass', required=True,
+                        default=os.environ.get('VIRTUOSO_PASS'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.input_dir]
+    return [args.input_dir, args.virtuoso_graph,
+            args.local_sparql, args.base_url,
+            args.virtuoso_user, args.virtuoso_pass]
 
 
-def main(temp_dir):
+def main(temp_dir, graph, sparql, base_url, user, password):
 
     # get species and schema identifiers
     species_id = os.path.basename(temp_dir).split('_')[0]
@@ -451,8 +475,11 @@ def main(temp_dir):
         sys.exit(1)
 
     # determine total number of loci in the NS
-    result = aux.get_data(SPARQLWrapper(local_sparql),
-                          (sq.COUNT_TOTAL_LOCI.format(virtuoso_graph)))
+    # result = aux.get_data(SPARQLWrapper(local_sparql),
+    #                       (sq.COUNT_TOTAL_LOCI.format(virtuoso_graph)))
+    result = aux.get_data(SPARQLWrapper(sparql),
+                          (sq.COUNT_TOTAL_LOCI.format(graph)))
+
     total_loci = int(result['results']['bindings'][0]['count']['value'])
 
     # define path to file with schema upload status data
@@ -469,10 +496,12 @@ def main(temp_dir):
 
     # assign identifiers to new loci based on the total number of loci in the Chewie-NS
     start_id = total_loci + 1
-    response, hash_to_uri, loci_data, = assign_identifiers(loci_data, schema_hashes, loci_prefix, start_id)
+    response, hash_to_uri, loci_data, = assign_identifiers(loci_data, schema_hashes,
+                                                           loci_prefix, start_id,
+                                                           base_url)
 
     # insert loci
-    insert_queries, insert = create_insert_queries(loci_data, schema_hashes)
+    insert_queries, insert = create_insert_queries(loci_data, schema_hashes, graph)
     logging.info('{0} loci to insert out of {1} total loci '
                  'in schema.'.format(insert, len(loci_data)))
     logging.info('Loci integer identifiers interval: [{0} .. {1}]'
@@ -480,7 +509,7 @@ def main(temp_dir):
 
     # insert data to create loci
     if len(insert_queries) > 0:
-        loci_insertion = send_queries(insert_queries)
+        loci_insertion = send_queries(insert_queries, sparql, user, password)
         insert_status, success, failed = results_status(loci_insertion)
 
         for h, v in insert_status.items():
@@ -500,13 +529,14 @@ def main(temp_dir):
     # link loci to species
     sp_queries, link = species_link_queries(loci_data,
                                             schema_hashes,
-                                            species_uri)
+                                            species_uri,
+                                            graph)
 
     logging.info('{0} loci to link to species out of {1} total loci '
                  'in schema.'.format(link, len(loci_data)))
 
     if len(sp_queries) > 0:
-        species_links = send_queries(sp_queries)
+        species_links = send_queries(sp_queries, sparql, user, password)
         link_status, success, failed = results_status(species_links)
 
         for h, v in link_status.items():
@@ -522,13 +552,14 @@ def main(temp_dir):
     # link loci to schema
     sc_queries, link = schema_link_queries(loci_data,
                                            schema_hashes,
-                                           schema_uri)
+                                           schema_uri,
+                                           graph)
 
     logging.info('{0} loci to link to schema out of {1} total loci '
                  'in schema.'.format(link, len(loci_data)))
 
     if len(sc_queries) > 0:
-        schema_links = send_queries(sc_queries)
+        schema_links = send_queries(sc_queries, sparql, user, password)
         link_status, success, failed = results_status(schema_links)
 
         for h, v in link_status.items():
@@ -565,4 +596,5 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
-    main(args[0])
+    main(args[0], args[1], args[2],
+         args[3], args[4], args[5])

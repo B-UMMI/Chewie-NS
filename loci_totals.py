@@ -30,13 +30,11 @@ from app.utils import sparql_queries
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
 logfile = './log_files/loci_totals.log'
-logging.basicConfig(filename=logfile, level=logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
+                    filename=logfile)
 
 
 def create_file(filename, header):
@@ -55,10 +53,6 @@ def fast_update(schema, last_modified, file, lengths_dir):
 
 	schema_id = int(schema.split('/')[-1])
 	current_file = file
-
-	# read current file
-	with open(current_file, 'r') as json_file:
-		json_data = json.load(json_file)
 
 	# read current file
 	with open(current_file, 'r') as json_file:
@@ -119,7 +113,8 @@ def fast_update(schema, last_modified, file, lengths_dir):
 			json.dump(json_data, json_outfile)	
 
 
-def full_update(schema, last_modified, file):
+def full_update(schema, last_modified, file, virtuoso_graph,
+	            local_sparql):
 	"""
 	"""
 
@@ -193,12 +188,29 @@ def parse_arguments():
     					default=None, dest='schema_id',
     					help='')
 
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph',
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql',
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url',
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
     args = parser.parse_args()
 
-    return [args.mode, args.species_id, args.schema_id]
+    return [args.mode, args.species_id, args.schema_id,
+            args.virtuoso_graph, args.local_sparql,
+            args.base_url]
 
 
-def global_species():
+def global_species(virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 	
@@ -211,10 +223,10 @@ def global_species():
 
 	species_ids = [s.split('/')[-1] for s in ns_species]
 	for i in species_ids:
-		single_species(i)
+		single_species(i, virtuoso_graph, local_sparql, base_url)
 
 
-def single_species(species_id):
+def single_species(species_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -274,12 +286,13 @@ def single_species(species_id):
 				lengths_dir = os.path.join(computed_dir, lengths_dir)
 				fast_update(schema, last_modified, species_file, lengths_dir)
 			else:
-				full_update(schema, last_modified, species_file)
+				full_update(schema, last_modified, species_file, virtuoso_graph,
+	            local_sparql)
 		else:
 			logging.warning('Schema {0} is locked. Aborting.'.format(schema))
 
 
-def single_schema(species_id, schema_id):
+def single_schema(species_id, schema_id, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -330,7 +343,8 @@ def single_schema(species_id, schema_id):
 		lengths_dir = os.path.join(computed_dir, lengths_dir)
 		fast_update(schema_uri, last_modified, species_file, lengths_dir)
 	else:
-		full_update(schema_uri, last_modified, species_file)
+		full_update(schema_uri, last_modified, species_file, virtuoso_graph,
+	                local_sparql)
 
 	end = time.time()
 	delta = end - start
@@ -342,8 +356,10 @@ if __name__ == '__main__':
 	args = parse_arguments()
 
 	if args[0] == 'global_species':
-		global_species()
+		global_species(args[3], args[4], args[5])
 	elif args[0] == 'single_species':
-		single_species(args[1])
+		single_species(args[1], args[3], args[4],
+			           args[5])
 	elif args[0] == 'single_schema':
-		single_schema(args[1], args[2])
+		single_schema(args[1], args[2], args[3],
+			          args[4], args[5])

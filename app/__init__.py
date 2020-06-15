@@ -39,7 +39,7 @@ login_manager = LoginManager()
 security = Security()
 
 # Queue management
-celery = Celery(__name__, broker=Config.CELERY_BROKER_URL)
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, backend=Config.CELERY_RESULT_BACKEND)
 
 
 ####### Config jwt ##############################################################

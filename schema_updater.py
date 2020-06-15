@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-AUTHOR
+Purpose
+-------
 
-    Pedro Cerqueira
-    github: @pedrorvc
 
-    Rafael Mamede
-    github: @rfm-targa
+Expected input
+--------------
 
-DESCRIPTION
+The process expects the following variables whether through command line
+execution or invocation of the :py:func:`main` function:
 
+- ``-i``, ``input_dir`` : Temporary directory that receives the data
+  necessary for schema insertion. It must contain the ZIP archives
+  with the data to insert alleles.
+
+Code documentation
+------------------
 """
 
 
@@ -22,13 +28,14 @@ import pickle
 import shutil
 import zipfile
 import hashlib
-#import logging
+import logging
 import argparse
 import requests
 import threading
 import statistics
 import datetime as dt
 import concurrent.futures
+from itertools import repeat
 from collections import Counter
 from SPARQLWrapper import SPARQLWrapper
 
@@ -37,19 +44,17 @@ from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
 
 
-base_url = os.environ.get('BASE_URL')
-local_sparql = os.environ.get('LOCAL_SPARQL')
-virtuoso_graph = os.environ.get('DEFAULTHGRAPH')
-virtuoso_user = os.environ.get('VIRTUOSO_USER')
-virtuoso_pass = os.environ.get('VIRTUOSO_PASS')
-#logfile = './log_files/schema_updater.log'
-#logging.basicConfig(filename=logfile, level=logging.INFO)
+logfile = './log_files/schema_updater.log'
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    datefmt='%Y-%m-%dT%H:%M:%S',
+                    filename=logfile)
 
 
 thread_local = threading.local()
 
 
-def change_date(schema_uri, date_type, date_value):
+def change_date(schema_uri, date_type, date_value, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
 	"""
 	"""
 
@@ -73,7 +78,7 @@ def change_date(schema_uri, date_type, date_value):
 								   virtuoso_pass)
 
 
-def change_lock(schema_uri, action):
+def change_lock(schema_uri, action, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
 	"""
 	"""
 
@@ -96,7 +101,7 @@ def change_lock(schema_uri, action):
 									virtuoso_pass)
 
 
-def create_single_insert(alleles, species, locus_uri, user_uri, start_id):
+def create_single_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph):
 	"""
 	"""
 
@@ -124,7 +129,7 @@ def create_single_insert(alleles, species, locus_uri, user_uri, start_id):
 	return queries
 
 
-def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id):
+def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph):
 	"""
 	"""
 
@@ -166,7 +171,7 @@ def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id):
 	return queries
 
 
-def create_queries(locus_file):
+def create_queries(locus_file, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
@@ -191,10 +196,10 @@ def create_queries(locus_file):
 
 	if max_length < 7000:
 		queries = create_multiple_insert(alleles, spec_name,
-									   	 locus_url, user_url, start_id)
+									   	 locus_url, user_url, start_id, base_url, virtuoso_graph)
 	else:
 		queries = create_single_insert(alleles, spec_name,
-									   locus_url, user_url, start_id)
+									   locus_url, user_url, start_id, base_url, virtuoso_graph)
 
 	queries_file = '{0}_queries'.format(locus_file.split('alleles')[0])
 	with open(queries_file, 'wb') as qf:
@@ -209,7 +214,7 @@ def get_session():
     return thread_local.session
 
 
-def post_alleles(input_file):
+def post_alleles(input_file, local_sparql, virtuoso_user, virtuoso_pass):
 	"""
 	"""
 
@@ -242,14 +247,14 @@ def post_alleles(input_file):
 	return responses
 
 
-def send_alleles(post_files):
+def send_alleles(post_files, local_sparql, virtuoso_user, virtuoso_pass):
 	"""
 	"""
 
 	responses = []
 	total = 0
 	with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-		for res in executor.map(post_alleles, post_files):
+		for res in executor.map(post_alleles, post_files, repeat(local_sparql), repeat(virtuoso_user), repeat(virtuoso_pass)):
 			responses.append(res)
 			total += 1
 
@@ -274,15 +279,46 @@ def parse_arguments():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
     parser.add_argument('-i', type=str,
-                        dest='input_files', required=True,
+                        dest='input_dir', required=True,
+                        help='Temporary directory that '
+                             'receives the data necessary '
+                             'for schema insertion. It must '
+                             'contain the ZIP archives with the '
+                             'data to insert alleles.')
+
+    parser.add_argument('--g', type=str,
+                        dest='virtuoso_graph', required=True,
+                        default=os.environ.get('DEFAULTHGRAPH'),
+                        help='')
+
+    parser.add_argument('--s', type=str,
+                        dest='local_sparql', required=True,
+                        default=os.environ.get('LOCAL_SPARQL'),
+                        help='')
+
+    parser.add_argument('--b', type=str,
+                        dest='base_url', required=True,
+                        default=os.environ.get('BASE_URL'),
+                        help='')
+
+    parser.add_argument('--u', type=str,
+                        dest='virtuoso_user', required=True,
+                        default=os.environ.get('VIRTUOSO_USER'),
+                        help='')
+
+    parser.add_argument('--p', type=str,
+                        dest='virtuoso_pass', required=True,
+                        default=os.environ.get('VIRTUOSO_PASS'),
                         help='')
 
     args = parser.parse_args()
 
-    return [args.input_files]
+    return [args.input_dir, args.virtuoso_graph,
+            args.local_sparql, args.base_url,
+            args.virtuoso_user, args.virtuoso_pass]
 
 
-def insert_schema(temp_dir):
+def main(temp_dir, graph, sparql, base_url, user, password):
 	"""
 	"""
 
@@ -308,35 +344,40 @@ def insert_schema(temp_dir):
 	# create SPARQL multiple INSERT queries
 	queries_files = []
 	with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-		for res in executor.map(create_queries, schema_files):
+		for res in executor.map(create_queries, schema_files, repeat(graph), repeat(sparql), repeat(base_url)):
 			queries_files.append(res)
 
 	start = time.time()
 	# insert data
 	# sort reponses to include summary in log file
-	post_results = send_alleles(queries_files)
+	post_results = send_alleles(queries_files, sparql, user, password)
 
 	end = time.time()
 	delta = end - start
 	print('Insertion: {0}'.format(delta), flush=True)
 
 	# change dateEntered and last_modified dates
-	insert_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-	change_date(schema_uri, 'dateEntered', insert_date)
-	change_date(schema_uri, 'last_modified', insert_date)
+	modification_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
+	change_date(schema_uri, 'last_modified', modification_date,
+		                     graph, sparql, user, password)
 
 	# create pre-computed frontend files
 	os.system('python schema_totals.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python loci_totals.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python loci_mode.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python annotations.py -m single_schema '
-		      '--sp {0} --sc {1}'.format(species_id, schema_id))
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
 
 	# unlock schema
-	change_lock(schema_uri, 'Unlocked')
+	change_lock(schema_uri, 'Unlocked',
+		        graph, sparql, user, password)
 
 	# remove temp directory
 	shutil.rmtree(temp_dir)
@@ -346,4 +387,5 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
-    insert_schema(args[0])
+    main(args[0], args[1], args[2],
+         args[3], args[4], args[5])
