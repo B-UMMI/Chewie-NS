@@ -107,7 +107,7 @@ class Sequences extends Component {
 
       const columns = [
         {
-          name: "schemas_id",
+          name: "schemas_url",
           label: "Schema",
           options: {
             filter: true,
@@ -121,20 +121,23 @@ class Sequences extends Component {
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
+
+              let schema_id = value.substring(value.lastIndexOf("/") + 1);
+
               return (
                 <a
-                  href={this.props.sequence_data.schemas_url}
+                  href={value}
                   target={"_blank"}
                   rel="noopener noreferrer"
                 >
-                  {value}
+                  {schema_id}
                 </a>
               );
             },
           },
         },
         {
-          name: "locus_id",
+          name: "locus_url",
           label: "Locus ID",
           options: {
             filter: true,
@@ -148,13 +151,11 @@ class Sequences extends Component {
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
+              let locus_id = value.substring(value.lastIndexOf("/") + 1);
+
               return (
-                <a
-                  href={this.props.sequence_data.locus_url}
-                  target={"_blank"}
-                  rel="noopener noreferrer"
-                >
-                  {value}
+                <a href={value} target={"_blank"} rel="noopener noreferrer">
+                  {locus_id}
                 </a>
               );
             },

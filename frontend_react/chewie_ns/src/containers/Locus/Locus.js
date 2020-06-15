@@ -269,11 +269,15 @@ class Locus extends Component {
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
-              return (
-                <a href={value} target="_blank" rel="noopener noreferrer">
-                  {value}
-                </a>
-              );
+              let link = value;
+
+              if (link === "N/A") {
+                return { value };
+              } else {
+                <a href={link} target="_blank" rel="noopener noreferrer">
+                  {link}
+                </a>;
+              }
             },
           },
         },
