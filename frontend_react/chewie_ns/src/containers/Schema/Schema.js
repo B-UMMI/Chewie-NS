@@ -245,9 +245,11 @@ class Schema extends Component {
               if (link === "N/A") {
                 return { value };
               } else {
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                  {link}
-                </a>;
+                return (
+                  <a href={link} target="_blank" rel="noopener noreferrer">
+                    {link}
+                  </a>
+                );
               }
             },
           },

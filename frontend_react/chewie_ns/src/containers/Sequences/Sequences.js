@@ -121,15 +121,10 @@ class Sequences extends Component {
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
-
               let schema_id = value.substring(value.lastIndexOf("/") + 1);
 
               return (
-                <a
-                  href={value}
-                  target={"_blank"}
-                  rel="noopener noreferrer"
-                >
+                <a href={value} target={"_blank"} rel="noopener noreferrer">
                   {schema_id}
                 </a>
               );
