@@ -243,7 +243,9 @@ class Schema extends Component {
               let link = value;
 
               if (link === "N/A") {
-                return { value };
+                return (
+                  <div>{link}</div>
+                )
               } else {
                 return (
                   <a href={link} target="_blank" rel="noopener noreferrer">
