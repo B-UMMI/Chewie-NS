@@ -43,10 +43,10 @@ class Schema extends Component {
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;
 
-    const query =
-      "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
+    // const query =
+    //   "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
 
-    const query_hits = localStorage.getItem(query);
+    // const query_hits = localStorage.getItem(query);
 
     //if (query_hits) {
     //  this.setState({ hits: JSON.parse(query_hits) });
