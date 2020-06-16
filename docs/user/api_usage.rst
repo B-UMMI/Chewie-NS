@@ -23,6 +23,7 @@ For more information on uploading and/or downloading schemas please read :doc:`c
 
     add_data_db
     api_docs
+    user_management
     api_namespaces/loci
     api_namespaces/species
     api_namespaces/sequences
