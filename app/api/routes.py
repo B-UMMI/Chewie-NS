@@ -572,7 +572,8 @@ class RefreshToken(Resource):
         """
 
         # Create the new access token
-        current_user = get_jwt_identity()
+        current_user_id = get_jwt_identity()
+        current_user = User.query.get_or_404(current_user_id)
         access_token = create_access_token(identity=current_user)
 
         # Set the access JWT and CSRF double submit protection cookies
@@ -1197,9 +1198,13 @@ class DownloadCompressedSchemas(Resource):
     def get(self, species_id, schema_id, timestamp):
         """ Get the compressed schema. """
 
-        compressed_schema_filename = "{0}_{1}_{2}.zip".format(
-            str(species_id), str(schema_id), str(timestamp))
+        filename = "{0}_{1}.zip".format(
+            str(species_id), str(schema_id))
 
+        for f_name in os.listdir("compressed_schemas"):
+            if f_name.startswith(filename):
+                compressed_schema_filename = f_name
+                
         response = make_response()
 
         # Set response Headers
