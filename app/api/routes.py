@@ -1198,13 +1198,13 @@ class DownloadCompressedSchemas(Resource):
     def get(self, species_id, schema_id, timestamp):
         """ Get the compressed schema. """
 
-        filename = "{0}_{1}.zip".format(
+        filename = "{0}_{1}".format(
             str(species_id), str(schema_id))
 
         for f_name in os.listdir("compressed_schemas"):
             if f_name.startswith(filename):
                 compressed_schema_filename = f_name
-                
+
         response = make_response()
 
         # Set response Headers
