@@ -24,7 +24,7 @@ size distribution between 800 and 899 base pairs.
 .. figure:: ../resources/locus_details_hist.png
     :align: center
 
-    Figure 2: Number of alleles (12) that have a sequence size distribution of 800-899 (bp).
+    Figure 2: Number of alleles (744) that have a sequence size distribution of 5595-5599 (bp).
 
 
 Scatter
@@ -38,7 +38,7 @@ For example, **Figure 2** shows that allele 12 has a sequence size of 897 base p
 .. figure:: ../resources/locus_details_scatter.png
     :align: center
 
-    Figure 3: Sequence size (897 bp) of allele 12.
+    Figure 3: Sequence size (5232 bp) of allele 1677.
 
 
 Details table

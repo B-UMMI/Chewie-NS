@@ -64,13 +64,13 @@ contain a **number of different alleles (x-axis)**.
 .. figure:: ../resources/allele_numbers_fig1.png
     :align: center
 
-    Figure 5: Number of loci (935) that contain 1 allele.
+    Figure 5: Number of loci (2973) that contain between no alleles (0) and 49 alleles.
 
 
 .. figure:: ../resources/allele_numbers_fig2.png
     :align: center
 
-    Figure 6: Number of loci (632) that contain 2 alleles.
+    Figure 6: Number of loci (1030) that contain between 50 and 99 alleles.
 
 
 Allele Length Analysis
@@ -82,7 +82,7 @@ allele mode size (x-axis)** contained by a **number of loci (y-axis)**.
 .. figure:: ../resources/allele_len.png
     :align: center
 
-    Figure 7: Number of loci (326) that have an allele mode size 200-299 (bp).
+    Figure 7: Number of loci (556) that have an allele mode size 200-249 (bp).
 
    
 Locus Statistics
@@ -101,7 +101,7 @@ the allele size is between 2000-3000 base pairs.
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 8: Locus 15441 statistics.
+    Figure 8: Locus 16801 statistics.
    
 
 Annotations 
