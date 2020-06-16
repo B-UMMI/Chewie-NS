@@ -33,10 +33,7 @@ export const fetchDescriptions = (species_id, schema_id) => {
           "/description?request_type=check"
       )
       .then((res) => {
-        console.log(res);
         let desc = res.data.description;
-        // desc.push({ descriptions: res.data.description });
-        console.log(desc);
         dispatch(fetchDescriptionsSuccess(desc));
       })
       .catch((err) => {
