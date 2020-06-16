@@ -612,7 +612,6 @@ class Schema extends Component {
       </MuiThemeProvider>
     );
 
-    console.log(this.props.descriptions);
     schema_description = (
       <div>
         <div style={{ marginTop: "40px" }}>
