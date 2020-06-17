@@ -49,32 +49,32 @@ right corner of the Swagger documentation page.
     Figure 3: Access token field with the pasted token.
 
 
-.. Refresh token
-.. ^^^^^^^^^^^^^
+Refresh token
+^^^^^^^^^^^^^
 
-.. By default access tokens have an **expiry period of 3 hours** (which can be modified in Chewie-NS's configurations)
-.. and after that time a new toke must requested to from Chewie-NS.
-.. This is when the **refresh token** comes in, as it allows the user to request a new access token.
+By default access tokens have an **expiry period of 3 hours** (which can be modified in Chewie-NS's configurations)
+and after that time a new toke must requested to from Chewie-NS.
+This is when the **refresh token** comes in, as it allows the user to request a new access token.
 
-.. The process is very similar to the access token refered above, as it requires the user to copy the
-.. **refresh token** from the authentication response and paste it in the authorize button at the top
-.. right corner of the Swagger documentation page.
+The process is very similar to the access token refered above, as it requires the user to copy the
+**refresh token** from the authentication response and paste it in the authorize button at the top
+right corner of the Swagger documentation page.
 
-.. .. note:: The expiry period of refresh tokens is 30 days. This setting can also be configured in Chewie-NS's configurations.
+.. note:: The expiry period of refresh tokens is 30 days. This setting can also be configured in Chewie-NS's configurations.
 
 
-.. .. figure:: ../resources/user_auth_refresh_token_pasted.png
-..     :align: center
+.. figure:: ../resources/user_auth_refresh_token_pasted.png
+    :align: center
 
-..     Figure 4: Refresh token field with the pasted token.
+    Figure 4: Refresh token field with the pasted token.
 
-.. After pasting the refresh token in the authorize button, the user simply needs to access the **auth/refresh**
-.. endpoint and press the **Execute** button.
+After pasting the refresh token in the authorize button, the user simply needs to access the **auth/refresh**
+endpoint and press the **Execute** button.
 
-.. .. figure:: ../resources/user_auth_new_access_token.png
-..     :align: center
+.. figure:: ../resources/user_auth_new_access_token.png
+    :align: center
 
-..     Figure 5: New access token obtained from the refresh endpoint.
+    Figure 5: New access token obtained from the refresh endpoint.
 
 
 User operations
@@ -108,7 +108,7 @@ and click on the **Execute** button.
 .. figure:: ../resources/register_user.png
     :align: center
 
-    Figure 4: Register user endpoint.
+    Figure 6: Register user endpoint.
 
 
 /user/users
