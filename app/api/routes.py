@@ -17,6 +17,7 @@ import os
 import jwt
 import sys
 import time
+import shutil
 import pickle
 import zipfile
 import hashlib
@@ -2209,9 +2210,8 @@ class SpeciesListAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
+             security=[])
     @w.use_kwargs(api, parser)
-    # @jwt_required
     def get(self, **kwargs):
         """ Get a list of all species on Typon """
 
@@ -2308,8 +2308,7 @@ class SpeciesAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
-    @jwt_required
+             security=[])
     def get(self, species_id):
         """ Returns the species corresponding to the given id """
 
@@ -2496,8 +2495,7 @@ class SchemaListAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
-    @jwt_required
+             security=[])
     def get(self, species_id):
         """ Get the schemas for a particular species ID """
 
@@ -2665,8 +2663,7 @@ class SchemaAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
-    @jwt_required
+             security=[])
     def get(self, species_id, schema_id):
         """Return a particular schema for a particular species"""
 
@@ -2805,8 +2802,7 @@ class SchemaModDateAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
-    @jwt_required
+             security=[])
     def get(self, species_id, schema_id):
         """Get last modification date of the schema with the given identifier."""
 
@@ -2939,8 +2935,7 @@ class SchemaLockAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=["access_token"])
-    @jwt_required
+             security=[])
     def get(self, species_id, schema_id):
         """Get the locking state of the schema with the given identifier."""
 
@@ -2972,7 +2967,7 @@ class SchemaLockAPItypon(Resource):
                         406: 'Not acceptable'},
              security=['access_token'])
     @api.expect(schema_lock_model, validate=True)
-    @w.admin_contributor_required
+    @jwt_required
     def post(self, species_id, schema_id):
         """Change the locking state of the schema with the given identifier."""
 
@@ -3033,10 +3028,8 @@ class SchemaLockAPItypon(Resource):
                 return {'message': 'Schema already unlocked.'}, 201
             else:
                 # verify user identity and role
-                permission = enforce_locking(
-                    user_role, user_url, lock_state)
-                if permission[0] is not True:
-                    return permission[1], 403
+                if user_role != 'Admin' and user_url != lock_state:
+                    return {'Not authorized': 'Only Admin or user that locked the schema may unlock it.'}, 403
 
                 # first delete Schema_lock property value
                 delprop_query = (sq.DELETE_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'],
@@ -3072,7 +3065,7 @@ class SchemaPtfAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=[""])
+             security=[])
     def get(self, species_id, schema_id):
         """Download the Prodigal training file for the specified schema."""
 
@@ -3150,7 +3143,7 @@ class SchemaZipAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=[""])
+             security=[])
     @w.use_kwargs(api, parser)
     def get(self, species_id, schema_id, request_type):
         """Checks existence of or downloads zip archive of the specified schema."""
@@ -3251,7 +3244,7 @@ class SchemaDescriptionAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=[""])
+             security=[])
     @w.use_kwargs(api, parser)
     def get(self, species_id, schema_id, request_type):
         """Downloads file with the description for the specified schema."""
@@ -3356,9 +3349,8 @@ class SchemaLociAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not Found'},
-             security=['access_token'])
+             security=[])
     @w.use_kwargs(api, parser)
-    @jwt_required
     def get(self, species_id, schema_id, **kwargs):
         """ Returns the loci of a particular schema from a particular species """
 
@@ -3876,7 +3868,7 @@ class SchemaLociUpdateAPItypon(Resource):
                         404: 'Not Found',
                         406: 'Not acceptable'},
              security=['access_token'])
-    @w.admin_contributor_required
+    @jwt_required
     def post(self, species_id, schema_id, loci_id):
 
         c_user = get_jwt_identity()
@@ -3898,10 +3890,8 @@ class SchemaLociUpdateAPItypon(Resource):
 
             user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, user_uri, locking_status)
-
-            if allow[0] is False:
-                return allow[1], 403
+            if user_role != 'Admin' and user_uri != locking_status:
+                return {'Not authorized': 'Only Admin or user that locked the schema may send data.'}, 403
 
         root_dir = os.path.abspath(current_app.config['SCHEMA_UP'])
 
@@ -3937,7 +3927,17 @@ class SchemaLociUpdateAPItypon(Resource):
 
             inserted = [result.ready(), result.get()]
 
-        return {'OK': 'Received file with data to insert new alleles.'}, 201
+            # read file with results
+            identifiers_file = os.path.join(temp_dir, 'identifiers')
+            with open(identifiers_file, 'rb') as rf:
+                results = pickle.load(rf)
+
+            # remove temp directory
+            shutil.rmtree(temp_dir)
+
+            return results, 201
+
+        return {'OK': 'Received data.'}, 201
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<int:loci_id>/lengths')
@@ -3951,7 +3951,7 @@ class SchemaLociLengthsAPItypon(Resource):
                         404: 'Not Found',
                         406: 'Not acceptable'},
              security=['access_token'])
-    @w.admin_contributor_required
+    @jwt_required
     def post(self, species_id, schema_id, loci_id):
 
         c_user = get_jwt_identity()
@@ -3973,10 +3973,8 @@ class SchemaLociLengthsAPItypon(Resource):
 
             user_role = result['results']['bindings'][0]['role']['value']
 
-            allow = enforce_locking(user_role, user_uri, locking_status)
-
-            if allow[0] is False:
-                return allow[1], 403
+            if user_role != 'Admin' and user_uri != locking_status:
+                return {'Not authorized': 'Only Admin or user that locked schema can send data.'}, 403
 
         locus_uri = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
 
@@ -4057,9 +4055,8 @@ class LociListAPItypon(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated',
                         404: 'Not found'},
-             security=["access_token"])
+             security=[])
     @w.use_kwargs(api, parser)
-    @jwt_required
     def get(self, species_id, **kwargs):
         """ Lists the loci of a particular species """
 

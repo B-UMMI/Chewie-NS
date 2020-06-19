@@ -54,6 +54,67 @@ logging.basicConfig(level=logging.INFO,
 thread_local = threading.local()
 
 
+def fasta_sequences(locus, local_sparql, virtuoso_graph):
+    """ Get the DNA sequences of all alleles of a locus.
+
+        Parameters
+        ----------
+        locus : str
+            The URI of the locus in the Chewie-NS.
+        date : str
+            Last modification date of the schema in
+            the format YYYY-MM-DDTHH:MM:SS.f.
+
+        Returns
+        -------
+        fasta_seqs : list of dict
+            A list with one dictionary per allele.
+            Each dictionary has the identifier and the DNA
+            sequence of an allele.
+    """
+
+    # setting [SPARQL] ResultSetMaxRows = 400000 in virtuoso.ini
+    # is important to return all sequences at once
+    fasta_result = aux.get_data(SPARQLWrapper(local_sparql),
+                                (sq.SELECT_LOCUS_FASTA.format(virtuoso_graph, locus)))
+
+    # virtuoso returned an error because request length exceeded maximum value of Temp Col
+    # get each allele separately
+    try:
+        fasta_seqs = fasta_result['results']['bindings']
+    # virtuoso returned an error
+    # probably because sequence/request length exceeded maximum value
+    except:
+        logging.warning('Could not retrieve FASTA records for locus {0}\n'
+                        'Response content:\n{1}\nTrying to get each sequence '
+                        'separately...\n'.format(locus, fasta_result))
+        # get each allele separately
+        result = aux.get_data(SPARQLWrapper(local_sparql),
+                              (sq.SELECT_LOCUS_SEQS.format(virtuoso_graph, locus)))
+        try:
+            fasta_seqs = result['results']['bindings']
+            if len(fasta_seqs) == 0:
+                logging.warning('Locus {0} has 0 sequences.'.format(locus))
+                return False
+        except:
+            logging.warning('Could not retrieve sequences hashes '
+                            'for locus {0}.'.format(locus))
+            return False
+
+        total = 0
+        hashes = []
+        for s in range(len(fasta_seqs)):
+            # get the sequence corresponding to the hash
+            result2 = aux.get_data(SPARQLWrapper(local_sparql),
+                                   (sq.SELECT_SEQ_FASTA.format(virtuoso_graph, fasta_seqs[s]['sequence']['value'])))
+            hashes.append(fasta_seqs[s]['sequence']['value'])
+
+            fasta_seqs[s]['nucSeq'] = result2['results']['bindings'][0]['nucSeq']
+            total += 1
+
+    return fasta_seqs
+
+
 def change_date(schema_uri, date_type, date_value, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
 	"""
 	"""
@@ -101,7 +162,7 @@ def change_lock(schema_uri, action, virtuoso_graph, local_sparql, virtuoso_user,
 									virtuoso_pass)
 
 
-def create_single_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph):
+def create_single_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph, attributed):
 	"""
 	"""
 
@@ -123,13 +184,14 @@ def create_single_insert(alleles, species, locus_uri, user_uri, start_id, base_u
 													  locus_uri, insert_date,
 													  allele_id))
 		queries.append(query)
+		attributed[sequence_hash] = allele_id
 
 		allele_id += 1
 
-	return queries
+	return [queries, attributed]
 
 
-def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph):
+def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph, attributed):
 	"""
 	"""
 
@@ -137,7 +199,7 @@ def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id, base
 	allele_id = start_id
 	allele_set = []
 	max_alleles = 100
-	for a in alleles:
+	for i, a in enumerate(alleles):
 		sequence = a
 		# determine hash
 		sequence_hash = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
@@ -156,29 +218,33 @@ def create_multiple_insert(alleles, species, locus_uri, user_uri, start_id, base
 													 '<{0}>'.format(locus_uri),
 													 '"{0}"^^xsd:dateTime'.format(insert_date),
 													 '"{0}"^^xsd:integer'.format(allele_id)))
+		attributed[sequence_hash] = allele_id
 
-		if len(allele_set) == max_alleles:
+		if len(allele_set) == max_alleles or i == (len(alleles)-1):
 			query = (sq.MULTIPLE_INSERT_NEW_SEQUENCE.format(virtuoso_graph, ' '.join(allele_set)))
 			queries.append(query)
 			allele_set = []
 
 		allele_id += 1
 
-	if len(allele_set) > 0:
-		query = (sq.MULTIPLE_INSERT_NEW_SEQUENCE.format(virtuoso_graph, ' '.join(allele_set)))
-		queries.append(query)
-
-	return queries
+	return [queries, attributed]
 
 
 def create_queries(locus_file, virtuoso_graph, local_sparql, base_url):
 	"""
 	"""
 
+	# get sequences sent by user
 	with open(locus_file, 'rb') as f:
 		locus_data = pickle.load(f)
 
 	locus_url = locus_data[0]
+	locus_id = locus_url.split('/')[-1]
+
+	# get sequences in the NS
+	sequences = fasta_sequences(locus_url, local_sparql, virtuoso_graph)
+	ns_seqs = fasta_seqs = {f['nucSeq']['value']: f['allele_id']['value'] for f in sequences}
+
 	# count number of alleles for locus
 	count_query = (sq.COUNT_LOCUS_ALLELES.format(virtuoso_graph,
 											  	 locus_url))
@@ -191,21 +257,28 @@ def create_queries(locus_file, virtuoso_graph, local_sparql, base_url):
 	spec_name = locus_data[1]
 	user_url = locus_data[2]
 	alleles = locus_data[3]
-	# compute mean length
-	max_length = max([len(a) for a in alleles])
+	novel = [a for a in alleles if a not in ns_seqs]
+	repeated = {hashlib.sha256(a.encode('utf-8')).hexdigest(): ns_seqs[a] for a in alleles if a in ns_seqs}
+	
+	attributed = {}
+	if len(novel) > 0:
+		max_length = max([len(a) for a in novel])
+		if max_length < 7000:
+			queries, attributed = create_multiple_insert(novel, spec_name, locus_url,
+				                                         user_url, start_id, base_url,
+				                                         virtuoso_graph, attributed)
+		else:
+			queries, attributed = create_single_insert(novel, spec_name, locus_url,
+				                                       user_url, start_id, base_url,
+				                                       virtuoso_graph, attributed)
 
-	if max_length < 7000:
-		queries = create_multiple_insert(alleles, spec_name,
-									   	 locus_url, user_url, start_id, base_url, virtuoso_graph)
+		queries_file = '{0}_queries'.format(locus_file.split('alleles')[0])
+		with open(queries_file, 'wb') as qf:
+			pickle.dump(queries, qf)
+
+		return [queries_file, locus_id, repeated, attributed]
 	else:
-		queries = create_single_insert(alleles, spec_name,
-									   locus_url, user_url, start_id, base_url, virtuoso_graph)
-
-	queries_file = '{0}_queries'.format(locus_file.split('alleles')[0])
-	with open(queries_file, 'wb') as qf:
-		pickle.dump(queries, qf)
-
-	return queries_file
+		return [None, locus_id, repeated, attributed]
 
 
 def get_session():
@@ -319,8 +392,6 @@ def parse_arguments():
 
 
 def main(temp_dir, graph, sparql, base_url, user, password):
-	"""
-	"""
 
 	start = time.time()
 
@@ -342,15 +413,23 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 		schema_files.append(locus_file)
 
 	# create SPARQL multiple INSERT queries
+	identifiers = {}
 	queries_files = []
 	with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
 		for res in executor.map(create_queries, schema_files, repeat(graph), repeat(sparql), repeat(base_url)):
-			queries_files.append(res)
+			if res[0] is not None:
+				queries_files.append(res[0])
+			identifiers[res[1]] = [res[2], res[3]]
 
 	start = time.time()
 	# insert data
 	# sort reponses to include summary in log file
 	post_results = send_alleles(queries_files, sparql, user, password)
+
+	# create file with identifiers
+	identifiers_file = os.path.join(temp_dir, 'identifiers')
+	with open(identifiers_file, 'wb') as rf:
+		pickle.dump(identifiers, rf)
 
 	end = time.time()
 	delta = end - start
