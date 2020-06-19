@@ -459,7 +459,7 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 		        graph, sparql, user, password)
 
 	# remove temp directory
-	shutil.rmtree(temp_dir)
+	#shutil.rmtree(temp_dir)
 
 
 if __name__ == '__main__':
