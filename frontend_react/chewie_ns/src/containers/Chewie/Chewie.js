@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
+// Assets imports
 import INCDlogo from "../../assets/images/INCD-small.png";
 import UMMIlogo from "../../assets/images/ummi1small2.png";
 import IMMlogo from "../../assets/images/iMM_JLA_medium2.png";
@@ -13,8 +14,9 @@ import Button from "@material-ui/core/Button";
 import { mdiAlert } from "@mdi/js";
 
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-// import * as actions from '../../store/actions/index';
+
 import axios from "../../axios-backend";
+
 import classes from "./Chewie.module.css";
 
 class Chewie extends Component {

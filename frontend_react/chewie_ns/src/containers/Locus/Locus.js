@@ -13,15 +13,19 @@ import SvgIcon from "@material-ui/core/SvgIcon";
 import { mdiOpenInNew } from "@mdi/js";
 
 // Material-UI components
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Button from "@material-ui/core/Button";
-import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import Box from "@material-ui/core/Box";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
+
+// Material-UI ExpansionPanel related components
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Typography from "@material-ui/core/Typography";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+
+// Chewie imports
 import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
 
 // Material-UI Datatables
@@ -440,7 +444,6 @@ class Locus extends Component {
           <div id="homeFooter" style={{ display: "block" }}>
             <div>
               <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-              {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
         </footer>

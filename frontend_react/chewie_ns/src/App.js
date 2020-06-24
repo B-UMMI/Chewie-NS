@@ -28,8 +28,8 @@ import * as actions from "./store/actions/index";
 import MuiLink from "@material-ui/core/Link";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 
+
 function SimpleBreadcrumbs() {
-  // const homeMatches = useRouteMatch("/");
   const aboutMatches = useRouteMatch("/about");
   const statsMatches = useRouteMatch("/stats");
   const sequencesMatches = useRouteMatch("/sequences");
@@ -50,16 +50,10 @@ function SimpleBreadcrumbs() {
   const spd = JSON.parse(localStorage.getItem("speciesD"));
   const schemaName = localStorage.getItem("schemaName");
 
+  // Breadcrumbs generation
   return (
     <>
       <Breadcrumbs>
-        {/* {homeMatches && (
-          <div style={{ display: "flex", marginRight: "60px" }}>
-            <MuiLink component={Link} to="/" style={styles.breadcrumb}>
-              Home
-            </MuiLink>
-          </div>
-        )} */}
         {aboutMatches && (
           <div>
             <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
@@ -115,6 +109,7 @@ class App extends Component {
   }
 
   render() {
+    // Define common app routes
     let routes = (
       <Aux>
         <SimpleBreadcrumbs />
@@ -140,6 +135,7 @@ class App extends Component {
     );
 
     if (this.props.isAuthenticated) {
+      // Defines user authenticated routes
       routes = (
         <Switch>
           <Route path="/logout" component={Logout} />

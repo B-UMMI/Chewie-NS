@@ -101,10 +101,6 @@ class Sequences extends Component {
     if (!this.props.loading) {
       let seqData = this.props.sequence_data;
 
-      // console.log(seqData);
-
-      // let schemas_url = seqData.
-
       const columns = [
         {
           name: "schemas_url",

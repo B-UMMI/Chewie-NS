@@ -7,10 +7,10 @@ import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -21,11 +21,6 @@ import Plot from "react-plotly.js";
 
 class Species extends Component {
   componentDidMount() {
-    // console.log("[this.props Stats]")
-    // console.log(this.props.history)
-    // console.log("[PATH NAME]")
-    //console.log(this.props.location.pathname);
-
     let species_url = this.props.location.pathname;
 
     let species_url_array = species_url.split("/");
@@ -38,26 +33,10 @@ class Species extends Component {
 
   clickPlotHandler = (event) => {
     console.log(event.points[0]);
-    // console.log("[Schema ID]");
-    // console.log(event.points[0].data.name.slice(-1));
-    // console.log("[Locus ID]");
-    // console.log(event.points[0].hovertext);
-
-    // const species_id = this.props.location.pathname[
-    //   this.props.location.pathname.length - 1
-    // ];
-
-    // console.log(this.props.location.pathname)
-
-    // const species_id = this.props.location.pathname;
 
     const schema_id = event.points[0].data.name.slice(-1);
 
     const locus_id = event.points[0].text;
-    // console.log(schema_id)
-    // console.log(locus_id)
-
-    // console.log(this.props.match);
 
     this.props.history.push({
       pathname:
@@ -70,15 +49,9 @@ class Species extends Component {
   };
 
   rowClickHandler = (tableMeta) => {
-    // console.log("[RowClick]");
-    // console.log("rowData: ", rowData.slice(0, -1));
-
     const schema_id = tableMeta.rowData[0];
 
     localStorage.setItem("schemaName", tableMeta.rowData[1]);
-    // console.log(this.props.match)
-    // this.setState({ schema: schema_id})
-    // console.log(this.props.match);
 
     const tableData = [];
 
@@ -203,10 +176,6 @@ class Species extends Component {
     );
 
     const spd = JSON.parse(localStorage.getItem("speciesD"));
-
-    // this.setState({
-    //   species_name: this.props.location.state.species_name
-    // })
 
     if (!this.props.loading) {
       const columns = [
@@ -524,7 +493,6 @@ class Species extends Component {
             xaxis: {
               title: { text: "Loci" },
               showticklabels: false,
-              // range: [0, 500]
             },
             yaxis: {
               title: { text: "Number of alleles" },
@@ -560,7 +528,6 @@ class Species extends Component {
           <div id="homeFooter" style={{ display: "block" }}>
             <div>
               <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-              {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
         </footer>

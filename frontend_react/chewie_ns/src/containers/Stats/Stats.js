@@ -6,13 +6,11 @@ import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import Aux from "../../hoc/Aux/Aux";
 import * as actions from "../../store/actions/index";
-// import Spinner from "../../components/UI/Spinner/Spinner";
 
 // Material-UI components
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-// import Box from "@material-ui/core/Box";
+import Typography from "@material-ui/core/Typography";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
@@ -20,23 +18,18 @@ import MUIDataTable from "mui-datatables";
 
 class Stats extends Component {
   componentDidMount() {
-    // console.log("[this.props Stats]")
-    // console.log(this.props)
-    // this.props.onFetchStats();
     this.props.onFetchSpeciesStats();
   }
 
-  rowClickHandler = species_id => {
+  rowClickHandler = (species_id) => {
     console.log("[RowClick]");
 
     console.log(species_id);
 
     console.log(species_id[0].props.children.props.children);
 
-    // console.log("species_id: ", species_id);
-    // console.log(this.props.match);
     this.props.history.push({
-      pathname: "/species/" + species_id[2]
+      pathname: "/species/" + species_id[2],
     });
   };
 
@@ -45,15 +38,15 @@ class Stats extends Component {
       overrides: {
         MuiTableRow: {
           root: {
-            cursor: "pointer"
-          }
+            cursor: "pointer",
+          },
         },
         MUIDataTableHeadCell: {
           fixedHeaderCommon: {
-            backgroundColor: "#ccc"
-          }
-        }
-      }
+            backgroundColor: "#ccc",
+          },
+        },
+      },
     });
 
   render() {
@@ -66,44 +59,44 @@ class Stats extends Component {
           label: "Species",
           options: {
             filter: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => (
               <Aux>
                 <i>{value}</i>
               </Aux>
-            )
-          }
+            ),
+          },
         },
         {
           name: "nr_schemas",
           label: "Schemas available",
           options: {
             filter: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
+            },
+          },
         },
         {
           name: "Schema Details",
           options: {
             filter: false,
             empty: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
             },
             customBodyRender: (value, tableMeta, updateValue) => {
@@ -118,8 +111,8 @@ class Stats extends Component {
                   Schema Details
                 </Button>
               );
-            }
-          }
+            },
+          },
         },
         {
           name: "species_id",
@@ -128,22 +121,22 @@ class Stats extends Component {
             filter: false,
             sort: true,
             display: true,
-            setCellHeaderProps: value => {
+            setCellHeaderProps: (value) => {
               return {
                 style: {
-                  fontWeight: "bold"
-                }
+                  fontWeight: "bold",
+                },
               };
-            }
-          }
-        }
+            },
+          },
+        },
       ];
 
       const options = {
         textLabels: {
           body: {
-            noMatch: <CircularProgress />
-          }
+            noMatch: <CircularProgress />,
+          },
         },
         responsive: "scrollMaxHeight",
         selectableRowsHeader: false,
@@ -154,7 +147,6 @@ class Stats extends Component {
         search: false,
         filter: false,
         viewColumns: false,
-        //onRowClick: rowData => this.rowClickHandler(rowData)
       };
 
       stats = (
@@ -167,7 +159,7 @@ class Stats extends Component {
         </MuiThemeProvider>
       );
     }
-    
+
     return (
       <div style={{ marginLeft: "5%", marginRight: "5%" }}>
         <div>
@@ -181,7 +173,7 @@ class Stats extends Component {
             left: "0",
             backgroundColor: "#ccc",
             width: "100%",
-            textAlign: "center"
+            textAlign: "center",
           }}
         >
           <div id="homeFooter" style={{ display: "block" }}>
@@ -195,18 +187,18 @@ class Stats extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     stats: state.stats.stats,
     loading: state.stats.loading,
-    error: state.stats.error
+    error: state.stats.error,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onFetchStats: () => dispatch(actions.fetchStats()),
-    onFetchSpeciesStats: () => dispatch(actions.fetchStatsSpecies())
+    onFetchSpeciesStats: () => dispatch(actions.fetchStatsSpecies()),
   };
 };
 

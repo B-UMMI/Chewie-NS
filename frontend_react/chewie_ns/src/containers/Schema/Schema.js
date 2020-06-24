@@ -8,24 +8,20 @@ import classes from "./Schema.module.css";
 
 import classNames from "classnames";
 
-// Markdown component
+// Chewie Markdown component
 import Markdown from "../../components/Markdown/Markdown";
 
 // Material-UI components
+import Button from "@material-ui/core/Button";
+import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+// Material-UI ExpansionPanel components
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-
-import Typography from "@material-ui/core/Typography";
-
-import Button from "@material-ui/core/Button";
-
-// import Box from "@material-ui/core/Box";
-
-import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -43,17 +39,7 @@ class Schema extends Component {
     const species_id = this.props.match.params.species_id;
     const schema_id = this.props.match.params.schema_id;
 
-    // const query =
-    //   "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
-
-    // const query_hits = localStorage.getItem(query);
-
-    //if (query_hits) {
-    //  this.setState({ hits: JSON.parse(query_hits) });
-    //} else {
-    //  this.props.onFetchSchemaAlleleMode(species_id, schema_id);
-    //}
-
+    // fetch schema allele modes
     this.props.onFetchSchemaAlleleMode(species_id, schema_id);
 
     // fetch schema annotations
@@ -79,8 +65,6 @@ class Schema extends Component {
   };
 
   clickScatterPlotHandler = (event) => {
-    // console.log(event.points[0]);
-
     const schema_id = this.props.match.params.schema_id;
 
     const locus_id = event.points[0].text;
@@ -187,13 +171,10 @@ class Schema extends Component {
               title: { text: "Allele size in bp" },
               showgrid: true,
               zeroline: false,
-              // tick0: 1,
-              // dtick: 1000
             },
             yaxis: {
               title: { text: "Number of alleles" },
               zeroline: false,
-              // tick0: 0
             },
             hovermode: "closest",
           }}
@@ -243,9 +224,7 @@ class Schema extends Component {
               let link = value;
 
               if (link === "N/A") {
-                return (
-                  <div>{link}</div>
-                )
+                return <div>{link}</div>;
               } else {
                 return (
                   <a href={link} target="_blank" rel="noopener noreferrer">
@@ -640,9 +619,6 @@ class Schema extends Component {
           <h1 style={{ textAlign: "center" }}>
             Schema Evaluation and Annotation
           </h1>
-          {/* <p style={{ textAlign: "center" }}>
-            {this.props.speciesDict[this.props.match.params.species_id]}
-          </p> */}
         </div>
         <div style={{ marginTop: "40px" }}>{schema_table}</div>
         <div>{schema_description}</div>
@@ -705,9 +681,6 @@ class Schema extends Component {
             {annotations}
           </div>
         </div>
-        {/* <div style={{marginBottom: "5%"}}>
-          {annotations}
-        </div> */}
         <footer
           style={{
             position: "fixed",
@@ -721,7 +694,6 @@ class Schema extends Component {
           <div id="homeFooter" style={{ display: "block" }}>
             <div>
               <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-              {/* <p>© UMMI 2020</p> */}
             </div>
           </div>
         </footer>

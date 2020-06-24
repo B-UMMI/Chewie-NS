@@ -6,17 +6,17 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 import * as actions from "../../../store/actions/index";
 
 // Material Ui imports
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
+import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
-import InputAdornment from "@material-ui/core/InputAdornment";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import { withStyles } from "@material-ui/core/styles";
 
 // Material UI icon imports
 import Visibility from "@material-ui/icons/Visibility";
@@ -129,7 +129,6 @@ class SignUp extends Component {
           organization: this.state.organization,
         })
         .then((res) => {
-          console.log(res);
           if (res.status === 200) {
             alert("You have registered successfully.");
             this.props.history.push({
@@ -184,9 +183,6 @@ class SignUp extends Component {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          {/* <Typography component="h1" variant="h5">
-            Sign up
-          </Typography> */}
           {authRedirect}
           {errorMessage}
           <form

@@ -3,31 +3,33 @@ import { connect } from "react-redux";
 import clsx from "clsx";
 
 // Material UI imports
-import { withStyles } from "@material-ui/core/styles";
-import Drawer from "@material-ui/core/Drawer";
-import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
+import Button from "@material-ui/core/Button";
+import Drawer from "@material-ui/core/Drawer";
 import Toolbar from "@material-ui/core/Toolbar";
+import Divider from "@material-ui/core/Divider";
+import SvgIcon from "@material-ui/core/SvgIcon";
+import Typography from "@material-ui/core/Typography";
+import IconButton from "@material-ui/core/IconButton";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { withStyles } from "@material-ui/core/styles";
+
+// Material UI List related imports
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
-import Typography from "@material-ui/core/Typography";
-import Divider from "@material-ui/core/Divider";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import SvgIcon from "@material-ui/core/SvgIcon";
 
-// Material UI  icon imports
+// Material UI icon imports
+import HomeIcon from "@material-ui/icons/Home";
+import InfoIcon from "@material-ui/icons/Info";
 import MenuIcon from "@material-ui/icons/Menu";
+import GitHubIcon from "@material-ui/icons/GitHub";
+import SearchIcon from "@material-ui/icons/Search";
+import DescriptionIcon from "@material-ui/icons/Description";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import HomeIcon from "@material-ui/icons/Home";
-import DescriptionIcon from "@material-ui/icons/Description";
-import InfoIcon from "@material-ui/icons/Info";
-import GitHubIcon from "@material-ui/icons/GitHub";
 import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
-import SearchIcon from "@material-ui/icons/Search";
 
 // Material Design Icon import
 import { mdiApi } from "@mdi/js";
@@ -57,7 +59,6 @@ const styles = (theme) => ({
     }),
   },
   menuButton: {
-    // marginRight: theme.spacing(2)
     marginRight: 36,
   },
   hide: {
@@ -90,9 +91,6 @@ const styles = (theme) => ({
       width: theme.spacing(9) + 1,
     },
   },
-  // drawerPaper: {
-  //   width: drawerWidth
-  // },
   drawerHeader: {
     display: "flex",
     alignItems: "center",
@@ -104,19 +102,7 @@ const styles = (theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
     marginTop: "10px",
-    // transition: theme.transitions.create("margin", {
-    //   easing: theme.transitions.easing.sharp,
-    //   duration: theme.transitions.duration.leavingScreen
-    // }),
-    // marginLeft: -drawerWidth
   },
-  // contentShift: {
-  //   transition: theme.transitions.create("margin", {
-  //     easing: theme.transitions.easing.easeOut,
-  //     duration: theme.transitions.duration.enteringScreen
-  //   }),
-  //   marginLeft: 0
-  // },
   title: {
     flexGrow: 1,
   },
@@ -206,8 +192,6 @@ class PersistentDrawerLeft extends Component {
         <Drawer
           variant="permanent"
           open={this.state.open}
-          //onMouseEnter={() => this.scheduleMouseOver()}
-          //onMouseLeave={() => this.cancelMouseOver()}
           className={clsx(classes.drawer, {
             [classes.drawerOpen]: this.state.open,
             [classes.drawerClose]: !this.state.open,

@@ -5,35 +5,35 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 import * as actions from "../../../store/actions/index";
 
 // Material UI imports
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
-import Typography from "@material-ui/core/Typography";
+import Grid from "@material-ui/core/Grid";
+import Link from "@material-ui/core/Link";
+import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
+import TextField from "@material-ui/core/TextField";
+import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
+import CssBaseline from "@material-ui/core/CssBaseline";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import { withStyles } from "@material-ui/core/styles";
 
 // Material UI icon imports
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
-const styles = theme => ({
+const styles = (theme) => ({
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
     flexDirection: "column",
-    alignItems: "center"
+    alignItems: "center",
   },
   form: {
     width: "100%",
-    marginTop: theme.spacing(1)
+    marginTop: theme.spacing(1),
   },
   submit: {
-    margin: theme.spacing(3, 0, 2)
+    margin: theme.spacing(3, 0, 2),
   },
   buttonRoot: {
     boxShadow: "none",
@@ -47,42 +47,42 @@ const styles = theme => ({
     borderColor: "#3b3b3b",
     "&:hover": {
       backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b"
+      borderColor: "#3b3b3b",
     },
     "&:active": {
       boxShadow: "none",
       backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b"
+      borderColor: "#3b3b3b",
     },
     "&:focus": {
-      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)"
-    }
+      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
+    },
   },
   linkRoot: {
-    color: "#b26046"
-  }
+    color: "#b26046",
+  },
 });
 
 const CssTextField = withStyles({
   root: {
     "& label.Mui-focused": {
-      color: "#b26046"
+      color: "#b26046",
     },
     "& .MuiInput-underline:after": {
-      borderBottomColor: "#b26046"
+      borderBottomColor: "#b26046",
     },
     "& .MuiOutlinedInput-root": {
       "& fieldset": {
-        borderColor: "black"
+        borderColor: "black",
       },
       "&:hover fieldset": {
-        borderColor: "black"
+        borderColor: "black",
       },
       "&.Mui-focused fieldset": {
-        borderColor: "#b26046"
-      }
-    }
-  }
+        borderColor: "#b26046",
+      },
+    },
+  },
 })(TextField);
 
 class SignIn extends Component {
@@ -90,7 +90,7 @@ class SignIn extends Component {
     email: "",
     password: "",
     showPassword: false,
-    isSignup: false
+    isSignup: false,
   };
 
   componentDidMount() {
@@ -103,11 +103,11 @@ class SignIn extends Component {
     this.setState({ showPassword: !this.state.showPassword });
   };
 
-  handleMouseDownPassword = event => {
+  handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
 
-  onSubmitHandler = event => {
+  onSubmitHandler = (event) => {
     event.preventDefault();
     this.props.onAuth(
       this.state.email,
@@ -131,8 +131,8 @@ class SignIn extends Component {
       <InputAdornment position="end">
         <IconButton
           aria-label="toggle password visibility"
-          onClick={e => this.handleClickShowPassword(e)}
-          onMouseDown={e => this.handleMouseDownPassword(e)}
+          onClick={(e) => this.handleClickShowPassword(e)}
+          onMouseDown={(e) => this.handleMouseDownPassword(e)}
         >
           {this.state.showPassword ? <Visibility /> : <VisibilityOff />}
         </IconButton>
@@ -154,15 +154,12 @@ class SignIn extends Component {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          {/* <Typography component="h1" variant="h5">
-            Sign in
-          </Typography> */}
           {authRedirect}
           {errorMessage}
           <form
             className={classes.form}
             noValidate
-            onSubmit={e => this.onSubmitHandler(e)}
+            onSubmit={(e) => this.onSubmitHandler(e)}
           >
             <CssTextField
               variant="outlined"
@@ -174,7 +171,7 @@ class SignIn extends Component {
               name="email"
               autoComplete="email"
               autoFocus
-              onInput={e => this.setState({ email: e.target.value })}
+              onInput={(e) => this.setState({ email: e.target.value })}
             />
             <CssTextField
               variant="outlined"
@@ -186,12 +183,12 @@ class SignIn extends Component {
               type="password"
               id="password"
               autoComplete="current-password"
-              onInput={e => this.setState({ password: e.target.value })}
+              onInput={(e) => this.setState({ password: e.target.value })}
               InputProps={{
                 id: "standard-adornment-password",
                 type: this.state.showPassword ? "text" : "password",
                 value: this.state.password,
-                endAdornment: visibilityIcon
+                endAdornment: visibilityIcon,
               }}
             />
             <Button
@@ -200,7 +197,7 @@ class SignIn extends Component {
               variant="contained"
               className={classes.submit}
               classes={{
-                root: classes.buttonRoot
+                root: classes.buttonRoot,
               }}
             >
               SIGN IN
@@ -234,20 +231,20 @@ class SignIn extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
     error: state.auth.error,
     isAuthenticated: state.auth.token !== null,
-    authRedirectPath: state.auth.authRedirectPath
+    authRedirectPath: state.auth.authRedirectPath,
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   return {
     onAuth: (email, password, isSignup) =>
       dispatch(actions.auth(email, password, isSignup)),
-    onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath("/"))
+    onSetAuthRedirectPath: () => dispatch(actions.setAuthRedirectPath("/")),
   };
 };
 
