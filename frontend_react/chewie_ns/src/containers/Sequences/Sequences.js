@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 import * as actions from "../../store/actions/index";
+import Copyright from "../../components/Copyright/Copyright";
 
 // Material UI component imports
 import Button from "@material-ui/core/Button";
@@ -223,6 +224,7 @@ class Sequences extends Component {
         </div>
         <div>{errorMessage}</div>
         <div>{sequenceTable}</div>
+        <Copyright />
       </div>
     );
   }

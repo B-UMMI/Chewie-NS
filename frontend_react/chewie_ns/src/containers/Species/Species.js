@@ -2,9 +2,10 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import * as actions from "../../store/actions/index";
 import Spinner from "../../components/UI/Spinner/Spinner";
+import Copyright from "../../components/Copyright/Copyright";
+import * as actions from "../../store/actions/index";
+import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
@@ -515,22 +516,7 @@ class Species extends Component {
         </div>
         <div style={{ marginTop: "40px" }}>{species}</div>
         <div style={{ marginTop: "40px" }}>{species_plot}</div>
-        <footer
-          style={{
-            position: "fixed",
-            bottom: "0",
-            left: "0",
-            backgroundColor: "#ccc",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div id="homeFooter" style={{ display: "block" }}>
-            <div>
-              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-            </div>
-          </div>
-        </footer>
+        <Copyright />
       </div>
     );
   }

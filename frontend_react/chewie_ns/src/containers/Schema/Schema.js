@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import * as actions from "../../store/actions/index";
 import classes from "./Schema.module.css";
-
+import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
+import * as actions from "../../store/actions/index";
+import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 // Chewie Markdown component
 import Markdown from "../../components/Markdown/Markdown";
@@ -681,22 +681,7 @@ class Schema extends Component {
             {annotations}
           </div>
         </div>
-        <footer
-          style={{
-            position: "fixed",
-            bottom: "0",
-            left: "0",
-            backgroundColor: "#ccc",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div id="homeFooter" style={{ display: "block" }}>
-            <div>
-              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-            </div>
-          </div>
-        </footer>
+        <Copyright />
       </div>
     );
   }

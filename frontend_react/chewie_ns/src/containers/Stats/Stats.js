@@ -2,10 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 
-import axios from "../../axios-backend";
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import Aux from "../../hoc/Aux/Aux";
+import axios from "../../axios-backend";
+import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
+import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
@@ -166,22 +167,7 @@ class Stats extends Component {
           <h1 style={{ textAlign: "center" }}>Overview</h1>
         </div>
         <div>{stats}</div>
-        <footer
-          style={{
-            position: "fixed",
-            bottom: "0",
-            left: "0",
-            backgroundColor: "#ccc",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div id="homeFooter" style={{ display: "block" }}>
-            <div>
-              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-            </div>
-          </div>
-        </footer>
+        <Copyright />
       </div>
     );
   }

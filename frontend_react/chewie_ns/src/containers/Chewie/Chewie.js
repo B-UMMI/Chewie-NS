@@ -29,7 +29,7 @@ class Chewie extends Component {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            marginTop: "-50px"
+            marginTop: "-50px",
           }}
         >
           <div id="immLogoDiv">
@@ -63,6 +63,13 @@ class Chewie extends Component {
               analyses locally with chewBBACA, and, if they so wish, to submit
               their novel results to the web service through a REST API to
               ensure that a common nomenclature is maintained.
+            </p>
+            <p>
+              For any issues or requests contact the development team at{" "}
+              <a href="mailto:imm-bioinfo@medicina.ulisboa.pt">
+                imm-bioinfo@medicina.ulisboa.pt
+              </a>
+              .
             </p>
           </div>
         </div>

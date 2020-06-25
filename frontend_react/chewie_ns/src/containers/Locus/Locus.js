@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 
 import axios from "../../axios-backend";
+import classes from "./Locus.module.css";
+import Copyright from "../../components/Copyright/Copyright";
+import classNames from "classnames";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/index";
-import classes from "./Locus.module.css";
-
-import classNames from "classnames";
 
 // Import Icons from Material UI and Material Design
 import SvgIcon from "@material-ui/core/SvgIcon";
@@ -276,9 +276,7 @@ class Locus extends Component {
               let link = value;
 
               if (link === "N/A") {
-                return (
-                  <div>{link}</div>
-                )
+                return <div>{link}</div>;
               } else {
                 return (
                   <a href={link} target="_blank" rel="noopener noreferrer">
@@ -431,22 +429,7 @@ class Locus extends Component {
 
         <div>{this.state.showSnack ? <AlertSnackbar /> : null}</div>
 
-        <footer
-          style={{
-            position: "fixed",
-            bottom: "0",
-            left: "0",
-            backgroundColor: "#ccc",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div id="homeFooter" style={{ display: "block" }}>
-            <div>
-              <Typography style={{ fontSize: "10" }}>© UMMI 2020</Typography>
-            </div>
-          </div>
-        </footer>
+        <Copyright />
       </div>
     );
   }
