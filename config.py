@@ -7,7 +7,7 @@ class Config(object):
     """ Configuration settings for the application """
 
     SECRET_KEY = os.environ.get(
-        'SECRET_KEY') or 'you-will-never-guess'  # only for debug
+        'SECRET_KEY') or os.urandom(32)
 
     # Postgres setup
     SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:test@172.19.1.2:5432/ref_ns_sec'
@@ -28,7 +28,7 @@ class Config(object):
     SECURITY_DEPRECATED_HASHING_SCHEMES = []
 
     # JWT Config
-    JWT_SECRET_KEY = 'super-secret'  # CHANGE THIS!!!
+    JWT_SECRET_KEY = os.urandom(32)
     JWT_TOKEN_LOCATION = ['headers']
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=3)
     JWT_HEADER_NAME = 'Authorization'

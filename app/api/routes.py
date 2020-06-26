@@ -398,16 +398,6 @@ def add_profile(rdf_2_ins):
 
 user_datastore = datastore_cheat
 
-# @blueprint.before_request
-# def before_request():
-#     """ Replaces http with https.
-#     """
-#     scheme = request.headers.get('X-Forwarded-Proto')
-#     if scheme and scheme == 'http' and request.url.startswith('http://'):
-#         url = request.url.replace('http://', 'https://', 1)
-#         code = 301
-#         return redirect(url, code=code)
-
 # Create a default admin user on Postgres and Virtuoso
 # This runs every time this file reloads
 @blueprint.before_app_first_request
@@ -498,12 +488,6 @@ auth_model = api.model('LoginModel',
                                                   )
                         })
 
-# refresh_model = api.model("RefreshModel", {
-#     'refresh_token': fields.String(required=True,
-#                                    description="refresh token")
-# })
-
-
 @auth_conf.route("/login")
 class UserLoginAPI(Resource):
     """User login resource"""
@@ -541,9 +525,6 @@ class UserLoginAPI(Resource):
                         'access_token': auth_token,
                         'refresh_token': auth_refresh_token
                     }
-                    # Front-end communicating with back-end?
-                    # set_access_cookies(jsonify(response_object), auth_token)
-                    # set_refresh_cookies(jsonify(response_object), auth_refresh_token)
                     return response_object, 200
             else:
                 response_object = {
@@ -580,9 +561,6 @@ class RefreshToken(Resource):
         # Set the access JWT and CSRF double submit protection cookies
         # in this response
         resp = {'access_token': access_token}
-
-        #resp = {'refresh': True}
-        #set_access_cookies(resp, access_token)
 
         return resp, 200
 

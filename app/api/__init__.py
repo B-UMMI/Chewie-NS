@@ -3,15 +3,6 @@ from flask_restplus import Api
 
 blueprint = Blueprint("api", __name__, url_prefix='/NS/api')
 
-# API authorizations
-# authorizations = {
-#     'apikey' : {
-#         'type' : 'apiKey',
-#         'in' : 'header',
-#         'name' : 'X-API-KEY'
-#     }
-# }
-
 authorizations = {
     'access_token': {
         'type': 'apiKey',
@@ -24,8 +15,6 @@ authorizations = {
         'name': 'Authorization'
     },
 }
-
-#security = {}
 
 class Custom_API(Api):
     @property

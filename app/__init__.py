@@ -2,7 +2,6 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-# from flask_bootstrap import Bootstrap
 from flask_security import Security, SQLAlchemyUserDatastore, user_registered
 from flask_restplus import Api, marshal_with
 from flask_cors import CORS
@@ -88,9 +87,6 @@ def create_app(config_class=Config):
     # Setup login manager
     login_manager.init_app(app)
 
-    # Setup bootstrap
-    # bootstrap.init_app(app)
-
     # Setup SQLAlchemy datastore
     datastore = SQLAlchemyUserDatastore(db, models.User, models.Role)
 
@@ -110,9 +106,6 @@ def create_app(config_class=Config):
     from app.api import blueprint as api_bp
     app.register_blueprint(api_bp)
     
-    # from app.front_end import front_end_blueprint
-    # app.register_blueprint(front_end_blueprint)
-
     @user_registered.connect_via(app)
     def user_registered_sighandler(app, user, confirm_token, **extra):
         print("User created successfully ")
