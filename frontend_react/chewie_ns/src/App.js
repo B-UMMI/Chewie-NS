@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import { connect } from "react-redux";
 
-// Chewie Components
+// Chewie local components imports
 import Aux from "./hoc/Aux/Aux";
 import Stats from "./containers/Stats/Stats";
 import About from "./containers/About/About";

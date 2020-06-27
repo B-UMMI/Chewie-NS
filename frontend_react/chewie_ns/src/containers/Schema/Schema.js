@@ -1,15 +1,14 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+// Chewie local imports
 import axios from "../../axios-backend";
 import classes from "./Schema.module.css";
+import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-
-// Chewie Markdown component
-import Markdown from "../../components/Markdown/Markdown";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";

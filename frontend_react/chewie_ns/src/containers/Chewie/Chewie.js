@@ -13,11 +13,10 @@ import Button from "@material-ui/core/Button";
 // Material Design import
 import { mdiAlert } from "@mdi/js";
 
-import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-
+// Chewie local imports
 import axios from "../../axios-backend";
-
 import classes from "./Chewie.module.css";
+import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 class Chewie extends Component {
   render() {

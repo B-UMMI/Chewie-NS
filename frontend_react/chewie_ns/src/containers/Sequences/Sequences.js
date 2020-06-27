@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+// Chewie local imports
 import * as actions from "../../store/actions/index";
 import Copyright from "../../components/Copyright/Copyright";
 
@@ -77,7 +78,7 @@ class Sequences extends Component {
   onSubmitHandler = (event) => {
     event.preventDefault();
 
-    console.log(this.state.seq);
+    // console.log(this.state.seq);
 
     this.props.onFetchSequence(this.state.seq);
   };

@@ -1,10 +1,12 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+// Chewie local imports
 import axios from "../../axios-backend";
 import classes from "./Locus.module.css";
 import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
+import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/index";
 
@@ -24,9 +26,6 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-
-// Chewie imports
-import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";

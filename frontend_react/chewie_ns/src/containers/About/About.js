@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import axios from "../../axios-backend";
 
-// Chewie components imports
+// Chewie local imports
 import text from "../../components/data/about_md";
 import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";

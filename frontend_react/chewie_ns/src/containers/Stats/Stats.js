@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link as RouterLink } from "react-router-dom";
 
+// Chewie local imports
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import Copyright from "../../components/Copyright/Copyright";
@@ -10,7 +11,6 @@ import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 

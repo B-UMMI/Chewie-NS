@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+// Chewie local imports
 import axios from "../../axios-backend";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import Copyright from "../../components/Copyright/Copyright";
@@ -9,7 +10,6 @@ import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
