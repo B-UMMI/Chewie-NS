@@ -1,10 +1,11 @@
 Installation
 ============
-
+While you can access public repositories at `chewBBACA.online <https://chewBBACA.online>`_,
+you may want to setup a private instance of Chewie-NS.
 The deployment of local instances of Chewie-NS can be easily achieved through the
 use of Docker Compose.
 
-Chewie-NS is available for cloning from it's Github 
+Chewie-NS is available for cloning from its Github 
 `repository <https://github.com/B-UMMI/Nomenclature_Server_docker_compose>`_. ::
 
     git clone https://github.com/B-UMMI/Nomenclature_Server_docker_compose.git
@@ -15,7 +16,7 @@ Container engine
 ----------------
 
 All components of Chewie-NS are executed in `docker`_ containers and are 
-orchestrated by `docker-compose`_, which means that you’ll need to install 
+orchestrated by `docker-compose`_, which means that you will need to install 
 this container engine.
 
 Docker
@@ -23,7 +24,7 @@ Docker
 
 Docker can be installed following the instructions on the website:
 https://www.docker.com/community-edition#/download.
-To run docker as anon-root user, you'll need to following the instructions
+To run docker as a non-root user, you will need to follow the instructions
 on the website: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user.
 
 
@@ -31,14 +32,14 @@ Docker-compose
 ::::::::::::::
 
 To install docker-compose, you need to have installed docker beforehand. 
-The installation instructions can be followed here: https://docs.docker.com/compose/install/
+The installation instructions for Docker-compose can be found here: https://docs.docker.com/compose/install/
 
 
 Create self-signed certificates
 -------------------------------
 
 A local instance of Chewie-NS will have `SSL <https://www.ssl.com/faqs/faq-what-is-ssl/>`_ 
-support, just like the public website, which means that, at the bare minimum, we need 
+support, just like the public website, which means that at least we need 
 to generate self-signed certificates.
 
 For starters, create a new directory on the root of the repo named "self-certs". ::
@@ -92,7 +93,7 @@ directory, ``key.pem``, ``cert.pem`` and ``dhparam.pem``.
 Build Chewie-NS
 ---------------
 
-.. important:: Make sure that the ports (HOST:CONTAINER) specified in the docker-compose services are not being currently used by other applications! If they are, docker-compose will not be able to build Chewie-NS. To solve this issue, map the HOST port to an available one.
+.. important:: Make sure that the ports (HOST:CONTAINER) specified in the docker-compose services are not being currently used by other applications! If they are, docker-compose will not be able to build Chewie-NS. To solve this issue, map the HOST port to an available port.
 
 
 After completing the previous steps, you only need to run this command::
