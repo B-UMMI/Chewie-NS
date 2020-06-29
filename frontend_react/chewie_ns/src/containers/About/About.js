@@ -6,6 +6,7 @@ import text from "../../components/data/about_md";
 import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import classes from "./About.module.css";
 
 class About extends Component {
   render() {
