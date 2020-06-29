@@ -15,19 +15,20 @@ Welcome!
 Chewie-NS is a web-based wg/cgMLST allele Nomenclature Server, based on the 
 `TypOn ontology <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_,
 that integrates with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_
-to provide a centralized service to **download or update schemas**, allowing the 
+to provide a centralized service to **share, download or update schemas**, allowing the 
 **easy sharing of results**, while ensuring the **reproducibility and consistency** 
 of these steps. 
 
 Chewie-NS is developed by the `Molecular Microbiology and Infection Unit (UMMI) 
 <http://darwin.phyloviz.net/wiki/doku.php>`_ at the 
 `Instituto de Medicina Molecular João Lobo Antunes 
-<https://imm.medicina.ulisboa.pt/>`_.
+<https://imm.medicina.ulisboa.pt/>`_ and `Faculdade de Medicina, Universidade de Lisboa 
+<https://www.medicina.ulisboa.pt/>`_.
 
 Goals
 :::::
 
-With this service we have following main goals:
+With this service we have the following main goals:
 
 1. Providing a public and centralised web service to manage typing schemas.
 2. Establish a common nomenclature for allele calling.
