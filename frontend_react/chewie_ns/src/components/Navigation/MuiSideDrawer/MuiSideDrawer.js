@@ -33,6 +33,7 @@ import ChromeReaderModeIcon from "@material-ui/icons/ChromeReaderMode";
 
 // Material Design Icon import
 import { mdiApi } from "@mdi/js";
+import { mdiTestTube } from "@mdi/js";
 
 // React Router Dom import
 import { Link } from "react-router-dom";
@@ -281,6 +282,21 @@ class PersistentDrawerLeft extends Component {
                 </SvgIcon>
               </ListItemIcon>
               <ListItemText primary={"API"} />
+            </ListItem>
+            <ListItem
+              button
+              component="a"
+              href={"https://tutorial.chewbbaca.online/"}
+              target={"_blank"}
+              rel="noopener noreferrer"
+            >
+              <ListItemIcon>
+                <SvgIcon fontSize="large" htmlColor="#ffffff">
+                  {" "}
+                  <path d={mdiTestTube} />{" "}
+                </SvgIcon>
+              </ListItemIcon>
+              <ListItemText primary={"Tutorial"} />
             </ListItem>
           </List>
         </Drawer>
