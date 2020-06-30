@@ -25,6 +25,14 @@ With this service we have following main goals:
 2. Establish a common nomenclature for allele calling.
 3. Ensure the reproducibility and consistency of wg/cgMLST analysis.
 
+Tutorial
+::::::::
+
+Chewie-NS has a tutorial website at `<https://tutorial.chewbbaca.online/>`_!
+The tutorial will allow users to learn how to interact with Chewie-NS.
+
+Tutorial instructions will be available very soon!
+
 Licensing
 :::::::::
 
@@ -41,10 +49,5 @@ open an issue at the Chewie-NS Github `repository <https://github.com/B-UMMI/Nom
 
 .. Citation
 .. ::::::::
-
-.. If you use this service, please cite “Vila-Cerqueira P, Mamede R, Silva M, 
-.. Carriço JA, Ramirez M, Chewie-NS available at 
-.. https://github.com/B-UMMI/Nomenclature_Server_docker_compose”
-
 
 .. Acknoledgements

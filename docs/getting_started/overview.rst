@@ -40,7 +40,7 @@ Implementation
 --------------
 
 Chewie-NS provides a public and centralised web service, separated into 
-a backend to handle command line and server requests and a front end that 
+a backend to handle command line and server requests and a frontend that 
 allows a user-friendly interaction with the service.
 
 A diagram of the implementation of Chewie-NS is displayed below:

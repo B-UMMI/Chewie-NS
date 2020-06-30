@@ -8,6 +8,3 @@ Bioinformatic Open Days 2020
 
 - **Abstract**: `Conference Book <https://www.bioinformaticsopendays.com/files/Livro_Resumos_BOD_2020.pdf>`_ 
 
-
-To know More
-------------
