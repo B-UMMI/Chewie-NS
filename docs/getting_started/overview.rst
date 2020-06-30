@@ -40,7 +40,7 @@ Implementation
 --------------
 
 Chewie-NS provides a public and centralised web service, separated into 
-a back end to handle command line and server requests and a front end that 
+a backend to handle command line and server requests and a front end that 
 allows a user-friendly interaction with the service.
 
 A diagram of the implementation of Chewie-NS is displayed below:
@@ -54,7 +54,7 @@ A diagram of the implementation of Chewie-NS is displayed below:
 Backend
 :::::::
 
-The back-end of the service uses Virtuoso, a triple store database management system,
+The backend of the service uses Virtuoso, a triple store database management system,
 based on the `TypOn ontology <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
 
 
@@ -68,10 +68,10 @@ Frontend
 ::::::::
 
 A user-friendly interface, built using the `ReactJS <https://reactjs.org/>`_ web 
-framework, will simplify access for all types of users, provide a clear listing 
-of available schemas per species, displays relevant schema and loci statistics. 
-Access to compressed versions of the available schemas is provided, 
-allowing their direct download.
+framework, simplifies access for all types of users, providing a listing 
+of available schemas per species and displaying relevant schema and loci statistics. 
+Access to compressed versions of the available schemas is available, 
+allowing their direct download for local use.
 
 `Chewie-NS Homepage <https://chewbbaca.online/>`_
 
@@ -79,8 +79,7 @@ Data Privacy
 ------------
 
 Chewie-NS provides a distinct approach when compared with other publicly available 
-web services due to it's integration with the chewBBACA suite, which enables local 
-analyses and has the potential to considerably expedite results generation, while 
-also **providing the option to share newly identified alleles** and respect data 
-privacy concerns.
-
+web services due to its' integration with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_, which enables local 
+analyses and has the potential to considerably expedite the generation of results, while 
+also **providing the option to share newly identified alleles** still respecting data 
+privacy and ownership concerns.

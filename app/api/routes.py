@@ -1319,7 +1319,7 @@ class StatsSpeciesId(Resource):
             return json_data
         elif schema_id is not None:
             schema_data = [s for s in json_data['message']
-                           if s['schema']['value'].split('/')[-1] == schema_id]
+                           if s['uri'].split('/')[-1] == schema_id]
             return schema_data
 
 
@@ -1355,7 +1355,7 @@ class StatsSpeciesSchemas(Resource):
             return json_data
         elif schema_id is not None:
             schema_data = [s for s in json_data['message']
-                           if s['schema']['value'].split('/')[-1] == schema_id]
+                           if s['schema'].split('/')[-1] == schema_id]
             return schema_data
 
 

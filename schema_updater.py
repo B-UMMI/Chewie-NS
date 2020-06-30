@@ -413,6 +413,7 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 		schema_files.append(locus_file)
 
 	# create SPARQL multiple INSERT queries
+	new_seqs = 0
 	identifiers = {}
 	queries_files = []
 	with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
@@ -420,6 +421,7 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 			if res[0] is not None:
 				queries_files.append(res[0])
 			identifiers[res[1]] = [res[2], res[3]]
+			new_seqs += len(res[3])
 
 	start = time.time()
 	# insert data
@@ -435,24 +437,25 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 	delta = end - start
 	print('Insertion: {0}'.format(delta), flush=True)
 
-	# change dateEntered and last_modified dates
-	modification_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-	change_date(schema_uri, 'last_modified', modification_date,
-		                     graph, sparql, user, password)
+	# change last_modified date
+	if new_seqs > 0:
+		modification_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
+		change_date(schema_uri, 'last_modified', modification_date, graph,
+					sparql, user, password)
 
-	# create pre-computed frontend files
-	os.system('python schema_totals.py -m single_schema '
-		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-		      ''.format(species_id, schema_id, graph, sparql, base_url))
-	os.system('python loci_totals.py -m single_schema '
-		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-		      ''.format(species_id, schema_id, graph, sparql, base_url))
-	os.system('python loci_mode.py -m single_schema '
-		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-		      ''.format(species_id, schema_id, graph, sparql, base_url))
-	os.system('python annotations.py -m single_schema '
-		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-		      ''.format(species_id, schema_id, graph, sparql, base_url))
+		# create pre-computed frontend files
+		os.system('python schema_totals.py -m single_schema '
+			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+			      ''.format(species_id, schema_id, graph, sparql, base_url))
+		os.system('python loci_totals.py -m single_schema '
+			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+			      ''.format(species_id, schema_id, graph, sparql, base_url))
+		os.system('python loci_mode.py -m single_schema '
+			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+			      ''.format(species_id, schema_id, graph, sparql, base_url))
+		os.system('python annotations.py -m single_schema '
+			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+			      ''.format(species_id, schema_id, graph, sparql, base_url))
 
 	# unlock schema
 	change_lock(schema_uri, 'Unlocked',
