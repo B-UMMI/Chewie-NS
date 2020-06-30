@@ -3,10 +3,10 @@ import axios from "../../axios-backend";
 
 // Chewie local imports
 import text from "../../components/data/about_md";
+import classes from "./About.module.css";
 import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import classes from "./About.module.css";
 
 class About extends Component {
   render() {
