@@ -1,14 +1,14 @@
 # Nomenclature_Server_docker_compose :whale2: :package:
 
-:warning:WORK IN PROGRESS:warning:
-
 Docker-compose for the [Nomenclature Server](https://github.com/B-UMMI/Nomenclature_Server) webapp.
 It uses the following docker images: 
 * postgres: `postgres:10`
 * virtuoso: `openlink/virtuoso-opensource-7:7.2`
 * redis: `redis:5.0.6`  
 * nginx: `nginx:1.17`
-* NS webapp: [this dockerfile](https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/Dockerfile)
+* node: `node:13`
+* NS API: [this dockerfile](https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/Dockerfile)
+* NS UI: [this dockerfile](https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/frontend_react/chewie_ns/Dockerfile.prod)
 
 
 ## Starting the compose 
@@ -27,5 +27,4 @@ Make sure that these ports are not already in use by other services. More info a
 
 
 ## Contacts 
-* Pedro Vila-Cerqueira (pedro.cerqueira@medicina.ulisboa.pt)
-* Rafael Mamede (rmamede@medicina.ulisboa.pt)
+* Chewie-NS development team (imm-bioinfo@medicina.ulisboa.pt)
