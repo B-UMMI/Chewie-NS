@@ -148,7 +148,7 @@ Script Usage
 
     Load schema with non-default parameters:
       chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sn <schema_name>
-                              -lp <loci_prefix> --thr <threads> --ns_url <nomenclature_server_url>
+                              -lp <loci_prefix> --thr <threads> --ns <nomenclature_server_url>
 
     Continue schema upload that was interrupted or aborted:
       chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sn <schema_name>
@@ -157,49 +157,46 @@ Script Usage
     This program uploads a schema to the NS.
 
     positional arguments:
-      LoadSchema                        This program loads a schema to the NS.
-                                        
+      LoadSchema                This program loads a schema to the NS.
+                                
 
     optional arguments:
-      -h, --help                        show this help message and exit
-                                        
-      -i SCHEMA_DIRECTORY               Path to the directory of the schema to
-                                        upload. (default: None)
-                                        
-      -sp SPECIES_ID                    The integer identifier or name of the
-                                        species that the schema will be associated
-                                        to in the NS. (default: None)
-                                        
-      -sn SCHEMA_NAME                   A brief and meaningful name that should
-                                        help understand the type and content of
-                                        the schema. (default: None)
-                                        
-      -lp LOCI_PREFIX                   Prefix included in the name of each locus
-                                        of the schema. (default: None)
-                                        
-      --df DESCRIPTION_FILE             Path to a text file with a description
-                                        about the schema. Markdown syntax is
-                                        supported in order to allow greater
-                                        customizability of the rendered
-                                        description in the Frontend (default: )
-                                        
-      --a ANNOTATIONS                   Path to a TSV file with loci annotations.
-                                        The first column has loci identifiers (w/o
-                                        .fasta extension), the second has user
-                                        annotations and the third has custom
-                                        annotations. (default: None)
-                                        
-      --cpu CPU_CORES                   Number of CPU cores that will be used in
-                                        the Schema Pre-processing step. (default:
-                                        1)
-                                        
-      --thr THREADS                     Number of threads to use to search for
-                                        annotations on UniProt (default: 20)
-                                        
-      --ns_url NOMENCLATURE_SERVER_URL  The base URL for the Nomenclature Server.
-                                        (default: https://chewbbaca.online/api/NS/api/)
-                                        
-      --continue_up                     If the process should check if the schema
-                                        upload was interrupted and try to finish
-                                        it. (default: False)
+      -h, --help                show this help message and exit
+                                
+      -i SCHEMA_DIRECTORY       Path to the directory of the schema to upload.
+                                (default: None)
+                                
+      -sp SPECIES_ID            The integer identifier or name of the species that
+                                the schema will be associated to in the NS.
+                                (default: None)
+                                
+      -sn SCHEMA_NAME           A brief and meaningful name that should help
+                                understand the type and content of the schema.
+                                (default: None)
+                                
+      -lp LOCI_PREFIX           Prefix included in the name of each locus of the
+                                schema. (default: None)
+                                
+      --df DESCRIPTION_FILE     Path to a text file with a description about the
+                                schema. Markdown syntax is supported in order to
+                                allow greater customizability of the rendered
+                                description in the Frontend (default: )
+                                
+      --a ANNOTATIONS           Path to a TSV file with loci annotations. The
+                                first column has loci identifiers (w/o .fasta
+                                extension), the second has user annotations and
+                                the third has custom annotations. (default: None)
+                                
+      --cpu CPU_CORES           Number of CPU cores that will be used in the
+                                Schema Pre-processing step. (default: 1)
+                                
+      --thr THREADS             Number of threads to use to search for annotations
+                                on UniProt (default: 20)
+                                
+      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
+                                (default: main)
+                                
+      --continue_up             If the process should check if the schema upload
+                                was interrupted and try to finish it. (default:
+                                False)
 
