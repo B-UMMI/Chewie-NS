@@ -61,22 +61,22 @@ Example
 
 To download a schema of *Escherichia coli* we need to provide the ID of the species and the ID of the schema that we want to download::
 
-    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder
+    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder
 
 To download a sanpshot of the schema at a given date::
 
-    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --date 2020-06-30T19:10:37
+    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --date 2020-06-30T19:10:37
 
 To retrieve the latest version of the schema::
 
-    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --latest 
+    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --latest 
 
 Script Usage
-:::::
+::::::::::::
 
 ::
 
-    $ python chewBBACA.py DownloadSchema -h
+    $ chewBBACA.py DownloadSchema -h
 
     chewBBACA version: 2.5.0
     Authors: Mickael Silva, Pedro Cerqueira, Rafael Mamede

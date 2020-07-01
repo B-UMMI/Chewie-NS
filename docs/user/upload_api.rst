@@ -38,13 +38,13 @@ To upload a schema to the Chewie-NS it is at least necessary to provide:
     `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
     process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
     query the ``/species/list`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
-    command (``curl -X GET "https://chewbbaca.online/NS/api/species/list" 
+    command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/list" 
     -H  "accept: application/json"``).
   - e.g.: ``9`` or ``Escherichia coli``.
 
 - A **name** for the schema.
 
-  - The name should be short and concise. The name must be unique among the set of names for 
+  - The name should be short and concise. The name **must be unique** among the set of names for 
     the schemas of the same species.
   - e.g.: ``Project_cgMLST``, ``SRA_wgMLST``, ``Organization_cgMLST`` ...
 
@@ -112,16 +112,16 @@ Example
 
 To upload a schema for *Escherichia coli*, we could run the following command::
 
-    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95
+    $ chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95
 
 To upload a schema and provide a description and annotations::
 
-    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --df description.txt --a annotations.tsv
+    $ chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --df description.txt --a annotations.tsv
 
 To continue an upload that was interrupted or that aborted, we should provide the command used in 
 the process that failed and add the ``--continue_up`` argument::
 
-    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --continue_up
+    $ chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --continue_up
 
 .. important:: **If you cannot complete schema upload or if the information in the
                  website is incorrect or missing, please contact us via e-mail:**
@@ -132,7 +132,7 @@ Script Usage
 
 ::
 
-    $ python chewBBACA.py LoadSchema -h
+    $ chewBBACA.py LoadSchema -h
 
     chewBBACA version: 2.5.0
     Authors: Mickael Silva, Pedro Cerqueira, Rafael Mamede

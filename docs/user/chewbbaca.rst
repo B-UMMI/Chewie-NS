@@ -12,3 +12,4 @@ These scripts allow users to:
     upload_api
     download_api
     synchronize_api
+    nsstats_api
