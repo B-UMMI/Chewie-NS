@@ -1,32 +1,89 @@
-Download a schema from Chewie-NS
-================================
+Download a schema from the Chewie-NS
+====================================
 
-The API contains a ``download`` namespace, as mentioned in :doc:`api_docs`, however, these endpoints are to be used exclusively by the user-interface.
-
-Instead, we take advantage of the integration with the chewBBACA suite and use the 
+Compressed versions of every schema in the Chewie-NS are available for download through the 
+`Website <https://chewbbaca.online/>`_ or through the ``/species/{species_id}/schemas/{schema_id}/zip``
+API endpoint in `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or with a simple curl command
+(``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1/schemas/1/zip?request_type=download" -H  "accept: application/json"``).
+We can also take advantage of the integration with the chewBBACA suite and use the 
 `download_schema.py <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/down_schema.py>`_ script.
+
+.. note:: Compressed versions are ZIP archives that contain ready-to-use schemas. Simply extract
+          and you can start performing allele call.
+
+.. important:: The Chewie-NS generates new compressed versions of each schema every 24h, if the
+               schemas were updated since the last compression date. This means that the compressed
+               version is not always the latest. If that is the case, the integration with
+               chewBBACA allows to quickly get the latest version.
+
+To download a schema with the chewBBACA suite, it is necessary to provide:
+
+- The **ID** of the species that the schema is associated to and the **ID** of
+  the schema.
+
+  - To know the **ID** of a species you can consult the `Overview <https://chewbbaca.online/stats>`_ 
+    table in the Chewie-NS website. To know the **ID** of the schema you want to download,
+    you can click the ``SCHEMA DETAILS`` button to get a list with all the schemas for a
+    species. Alternatively, you can use the 
+    `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
+    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
+    query the ``/species/{species_id}`` API endpoints through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
+    command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1" -H  "accept: application/json"``).
+  - e.g.: species ID = ``9`` and schema ID = ``1``.
+
+- Path to the output directory that will store the schema.
+
+  - If the directory does not exist, the process will create it (will not create
+    parent directories that do not exist). If the directory exists, it **must be empty**
+    or the process will exit without downloading the schema.
+
+The integration with the chewBBACA suite provides the option to download a schema snapshot
+at a given date. The date should be in the format ``Y-m-dTH:M:S`` (e.g.: ``2020-06-30T19:10:37``).
+It also allows users to request for the latest version of a schema, if the compressed version that
+is available is not the latest. An alternative approach that can be applied to get the latest 
+version of the schema, if the compressed version does not provide it, is to download the compressed 
+version that is available and run the 
+`SyncSchema <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/sync_schema.py>`_ 
+process to retrieve the alleles that were added to the schema after the compression date.
+
+.. note:: The DownloadSchema process will download the compressed version that is available
+          by default. If the provided date matches the date of the latest compressed version,
+          it will download the compressed version, otherwise it will download the FASTA files
+          and construct the schema locally.
+
+.. important:: It is strongly advised that users adjust the value of the ``--cpu`` argument
+               if they antecipate that the process will have to construct the schema locally.
+               Schema adaptation is relatively fast but will greatly benefit if it can distribute
+               work to several CPU cores.
 
 Example
 :::::::
 
-For example, if we want to download a schema of *Yersinia pestis* we need to go provide 
-the internal ID of the species (in this case it's 1), and the schema ID that we want to download. ::
+To download a schema of *Escherichia coli* we need to provide the ID of the species and the ID of the schema that we want to download::
 
-    python chewBBACA.py DownloadSchema -sc 1 -sp 1 -o path/to/download/folder
+    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder
 
-Usage
+To download a sanpshot of the schema at a given date::
+
+    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --date 2020-06-30T19:10:37
+
+To retrieve the latest version of the schema::
+
+    $ python chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --latest 
+
+Script Usage
 :::::
 
-This script downloads a schema from Chewie-NS and its usage is as follows::
+::
 
-    python chewBBACA.py DownloadSchema -h
+    $ python chewBBACA.py DownloadSchema -h
 
-    chewBBACA version: 2.1.0
+    chewBBACA version: 2.5.0
     Authors: Mickael Silva, Pedro Cerqueira, Rafael Mamede
     Github: https://github.com/B-UMMI/chewBBACA
     Wiki: https://github.com/B-UMMI/chewBBACA/wiki
     Tutorial: https://github.com/B-UMMI/chewBBACA_tutorial
-    Contacts: imm-bioinfo@medicina.ulisboa.pt, rmamede@medicina.ulisboa.pt, pedro.cerqueira@medicina.ulisboa.pt
+    Contacts: imm-bioinfo@medicina.ulisboa.pt
 
     usage: 
     Download schema:
@@ -34,45 +91,42 @@ This script downloads a schema from Chewie-NS and its usage is as follows::
 
     Download schema with non-default parameters:
     chewBBACA.py DownloadSchema -sc <schema_id> -sp <species_id> -o <download_folder>
-                                --cpu <cpu_cores> --ns_url <nomenclature_server_url> 
+                                --cpu <cpu_cores> --ns <nomenclature_server_url> 
 
-    This program downloads a schema from Chewie-NS.
+    This program downloads a schema from the NS.
 
     positional arguments:
-    DownloadSchema                    This program downloads a schema from the
-                                        NS.
-                                        
+    DownloadSchema            This program downloads a schema from the NS.
+                                
 
     optional arguments:
-    -h, --help                        show this help message and exit
-                                        
-    -sc SCHEMA_ID                     The URI, integer identifier or description
-                                        of the schema to download from the NS.
-                                        (default: None)
-                                        
-    -sp SPECIES_ID                    The integer identifier or name of the
-                                        species that the schema is associated to
-                                        in the NS. (default: None)
-                                        
-    -o DOWNLOAD_FOLDER                Output folder to which the schema will be
-                                        saved. (default: None)
-                                        
-    --cpu CPU_CORES                   Number of CPU cores that will be passed to
-                                        the PrepExternalSchema process to
-                                        determine representatives and create the
-                                        final schema. (default: 1)
-                                        
-    --ns_url NOMENCLATURE_SERVER_URL  The base URL for the Nomenclature Server.
-                                        (default: http://127.0.0.1:5000/NS/api/)
-                                        
-    --d DATE                          Download schema with state from specified
-                                        date. Must be in the format "Y-m-dTH:M:S".
-                                        (default: None)
-                                        
-    --latest                          If the compressed version that is
-                                        available is not the latest, downloads all
-                                        loci and constructs schema locally.
-                                        (default: False)
+    -h, --help                show this help message and exit
+                                
+    -sc SCHEMA_ID             The URI, integer identifier or description of the
+                                schema to download from the NS. (default: None)
+                                
+    -sp SPECIES_ID            The integer identifier or name of the species that
+                                the schema is associated to in the NS. (default:
+                                None)
+                                
+    -o DOWNLOAD_FOLDER        Output folder to which the schema will be saved.
+                                (default: None)
+                                
+    --cpu CPU_CORES           Number of CPU cores that will be passed to the
+                                PrepExternalSchema process to determine
+                                representatives and create the final schema.
+                                (default: 1)
+                                
+    --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
+                                (default: main)
+                                
+    --d DATE                  Download schema with state from specified date.
+                                Must be in the format "Y-m-dTH:M:S". (default:
+                                None)
+                                
+    --latest                  If the compressed version that is available is not
+                                the latest, downloads all loci and constructs
+                                schema locally. (default: False)
 
 
 
