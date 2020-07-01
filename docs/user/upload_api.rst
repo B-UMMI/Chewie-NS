@@ -1,84 +1,205 @@
-Upload a schema to Chewie-NS
-============================
+Upload a schema to the Chewie-NS
+================================
 
-To upload schemas generated with the chewBBACA suite to Chewie-NS we make use of
-chewBBACA's `load_schema.py <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/load_schema.py>`_ script.
+The `LoadSchema <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/load_schema.py>`_ 
+process of the chewBBACA suite enables the upload of schemas to the Chewie-NS.
+
+.. important:: **You need to be a registered user with Contributor privileges to 
+                 be able to upload schemas!**
+
+                 If you have registered and want to contribute with new schemas please contact us 
+                 via e-mail at: imm-bioinfo@medicina.ulisboa.pt
+
+To upload a schema to the Chewie-NS it is at least necessary to provide:
+
+- The **path** to the local schema.
+
+  - The schema must have been created or converted with chewBBACA v2.5.0. If your schema was created with
+    an older version, please adapt the schema with the ``PrepExternalSchema`` process or run the 
+    ``AlleleCall`` process to convert the schema.
+
+.. warning:: **Only schemas that have been used with a single valid
+             value per parameter can be uploaded (this restriction applies
+             to the BLAST Score Ratio, Prodigal training file, minimum 
+             sequence length, genetic code and sequence size variation 
+             threshold parameters).**
+             
+             Invalid or multiple values
+             for a single parameter can lead to inconsistent results; thus,
+             it is strongly advised to always perform allele calling with
+             the same set of parameters and refrain from altering the initial
+             set of parameters values defined in the schema creation or
+             adaptation processes.
+
+- The **ID** or **scientific name** of the species that the schema will be associated to.
+  
+  - To know the **ID** of a species you can consult the `Overview <https://chewbbaca.online/stats>`_ 
+    table in the Chewie-NS website. Alternatively, you can use the 
+    `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
+    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
+    query the ``/species/list`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
+    command (``curl -X GET "https://chewbbaca.online/NS/api/species/list" 
+    -H  "accept: application/json"``).
+  - e.g.: ``9`` or ``Escherichia coli``.
+
+- A **name** for the schema.
+
+  - The name should be short and concise. The name must be unique among the set of names for 
+    the schemas of the same species.
+  - e.g.: ``Project_cgMLST``, ``SRA_wgMLST``, ``Organization_cgMLST`` ...
+
+- A **prefix** for the loci identifiers to facilitate the identification of the schema they belong to.
+
+  - You may use the name of the schema as prefix to ensure prefix uniqueness for the loci
+    of a schema.
+
+Users may provide a description about the schema. The file with the description 
+will be sent to the Chewie-NS and displayed in the schema's page in the Chewie-NS website. Markdown syntax is 
+supported in order to allow greater customizability of the rendered description.
+
+Sample description::
+
+    $ cat description.txt
+
+    # Whole-genome MLST schema for Species name
+
+    This schema was created with [chewBBACA 2.5.0](https://github.com/B-UMMI/chewBBACA).
+
+    ## Schema creation and validation
+
+    A total of 100 *Species name* genomes were used to create this wgMLST schema.
+    (Add more information that might be relevant to reproduce the process.)
+
+    ## Dataset
+
+    All raw reads from SRA annotated as *Species name* were assembled into 100 genomes.
+    (Add more information about dataset creation/collection. Include date of data download.)
+
+    ## Citations
+
+    (Add any relevant citations)
+
+    For more information please access [external page](https://external/page)
+    (If there is any external source with more information, link it here)
+
+
+
+The LoadSchema process will query UniProt's SPARQL endpoint to retrieve annotations for the loci 
+in the schema. The user that uploads the schema can provide a TSV file with annotations for some or all 
+loci in the schema. The file with annotations must have the following structure:
+
+- first column: locus identifier (name of locus file without ``.fasta`` extension).
+- second column: user annotation (name commonly attributed by the user).
+- third column: custom annotation (another term that the user might want to attribute).
+
+.. rst-class:: align-center
+
+  +----------+---------------------------------------------------+--------------+
+  | loci_1   | Chromosomal replication  initiator protein DnaA   |     dnaA     |
+  +----------+---------------------------------------------------+--------------+
+  | loci_2   |       DNA primase                                 |     dnaG     |
+  +----------+---------------------------------------------------+--------------+
+  | loci_3   | RNA-directed DNA polymerase                       |              |
+  +----------+---------------------------------------------------+--------------+
+  | loci_4   |                                                   |      pbp     |
+  +----------+---------------------------------------------------+--------------+
+
+It is not necessary to provide both annotation types for each locus and the file should not have 
+a header.
 
 Example
 :::::::
 
-.. important:: **You need to be registered in Chewie-NS and have the correct credentials to be to upload a schema!**
+To upload a schema for *Escherichia coli*, we could run the following command::
 
-To upload a schema generated with chewBBACA to Chewie-NS we need to provide some important information:
+    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95
 
-- the **ID** of the species that the schema will be associated to.
-- a **description** of the schema to help understand its content.
-- a **prefix** for the loci to facilitate the identification of the schema they belong to.
+To upload a schema and provide a description and annotations::
 
-So if we want to add a schema for *Yersinia pestis*, we need to run the following command::
+    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --df description.txt --a annotations.tsv
 
-    python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 1 -sd cgMLST_95 -lp cgMLST_95
+To continue an upload that was interrupted or that aborted, we should provide the command used in 
+the process that failed and add the ``--continue_up`` argument::
 
-Usage
-:::::
+    $ python chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95 --continue_up
 
-The usage of this script is as follows::
+.. important:: **If you cannot complete schema upload or if the information in the
+                 website is incorrect or missing, please contact us via e-mail:**
+                 imm-bioinfo@medicina.ulisboa.pt
 
-    python chewBBACA.py LoadSchema -h
+Script Usage
+::::::::::::
 
-    chewBBACA version: 2.1.0
+::
+
+    $ python chewBBACA.py LoadSchema -h
+
+    chewBBACA version: 2.5.0
     Authors: Mickael Silva, Pedro Cerqueira, Rafael Mamede
     Github: https://github.com/B-UMMI/chewBBACA
     Wiki: https://github.com/B-UMMI/chewBBACA/wiki
     Tutorial: https://github.com/B-UMMI/chewBBACA_tutorial
-    Contacts: imm-bioinfo@medicina.ulisboa.pt, rmamede@medicina.ulisboa.pt, pedro.cerqueira@medicina.ulisboa.pt
+    Contacts: imm-bioinfo@medicina.ulisboa.pt
 
     usage: 
     Load schema:
-    chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sd <schema_description>
-                            -lp <loci_prefix> 
+      chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sn <schema_name>
+                              -lp <loci_prefix> 
 
     Load schema with non-default parameters:
-    chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sd <schema_description>
-                            -lp <loci_prefix> --thr <threads> --ns_url <nomenclature_server_url>
+      chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sn <schema_name>
+                              -lp <loci_prefix> --thr <threads> --ns_url <nomenclature_server_url>
 
     Continue schema upload that was interrupted or aborted:
-    chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sd <schema_description>
-                            --continue_up
+      chewBBACA.py LoadSchema -i <schema_directory> -sp <species_id> -sn <schema_name>
+                              --continue_up
 
     This program uploads a schema to the NS.
 
     positional arguments:
-    LoadSchema                        This program loads a schema to the NS.
+      LoadSchema                        This program loads a schema to the NS.
                                         
 
     optional arguments:
-    -h, --help                        show this help message and exit
+      -h, --help                        show this help message and exit
                                         
-    -i SCHEMA_DIRECTORY               Path to the directory with the local
-                                        schema files. (default: None)
+      -i SCHEMA_DIRECTORY               Path to the directory of the schema to
+                                        upload. (default: None)
                                         
-    -sp SPECIES_ID                    The integer identifier or name of the
+      -sp SPECIES_ID                    The integer identifier or name of the
                                         species that the schema will be associated
                                         to in the NS. (default: None)
                                         
-    -sd SCHEMA_DESCRIPTION            A brief and meaningful description that
-                                        should help understand the type and
-                                        content of the schema. (default: None)
+      -sn SCHEMA_NAME                   A brief and meaningful name that should
+                                        help understand the type and content of
+                                        the schema. (default: None)
                                         
-    -lp LOCI_PREFIX                   Prefix included in the name of each locus
+      -lp LOCI_PREFIX                   Prefix included in the name of each locus
                                         of the schema. (default: None)
                                         
-    --cpu CPU_CORES                   Number of CPU cores that will be used in
-                                        multiprocessing steps. (default: 1)
+      --df DESCRIPTION_FILE             Path to a text file with a description
+                                        about the schema. Markdown syntax is
+                                        supported in order to allow greater
+                                        customizability of the rendered
+                                        description in the Frontend (default: )
                                         
-    --thr THREADS                     Number of threads to use to upload the
-                                        alleles of the schema. (default: 20)
+      --a ANNOTATIONS                   Path to a TSV file with loci annotations.
+                                        The first column has loci identifiers (w/o
+                                        .fasta extension), the second has user
+                                        annotations and the third has custom
+                                        annotations. (default: None)
                                         
-    --ns_url NOMENCLATURE_SERVER_URL  The base URL for the Nomenclature Server.
-                                        (default: http://127.0.0.1:5000/NS/api/)
+      --cpu CPU_CORES                   Number of CPU cores that will be used in
+                                        the Schema Pre-processing step. (default:
+                                        1)
                                         
-    --continue_up                     If the process should check if the schema
+      --thr THREADS                     Number of threads to use to search for
+                                        annotations on UniProt (default: 20)
+                                        
+      --ns_url NOMENCLATURE_SERVER_URL  The base URL for the Nomenclature Server.
+                                        (default: https://chewbbaca.online/api/NS/api/)
+                                        
+      --continue_up                     If the process should check if the schema
                                         upload was interrupted and try to finish
                                         it. (default: False)
 
