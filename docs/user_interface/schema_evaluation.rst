@@ -61,16 +61,10 @@ Allele Numbers Analysis
 In this plot, **hovering** above the bars will show **how many loci (y-axis)**
 exibit a **number of different alleles (x-axis)** within the range shown.
 
-.. figure:: ../resources/allele_numbers_fig1.png
-    :align: center
-
-    Figure 5: Number of loci (2973) that have between no alleles (0) and 49 alleles.
-
-
 .. figure:: ../resources/allele_numbers_fig2.png
     :align: center
 
-    Figure 6: Number of loci (1030) that contain between 50 and 99 alleles.
+    Figure 5: Number of loci (1030) that contain between 50 and 99 alleles.
 
 
 Allele Length Analysis
@@ -82,7 +76,7 @@ having an **allele mode size (x-axis)** within the range shown.
 .. figure:: ../resources/allele_len.png
     :align: center
 
-    Figure 7: Number of loci (556) that have an allele mode size in the range 200-249 (bp).
+    Figure 6: Number of loci (556) that have an allele mode size in the range 200-249 (bp).
 
    
 Locus Statistics
@@ -101,7 +95,7 @@ that the central tendency measures of allele length are similar are over 5500 ba
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 8: Locus 16801. Clicking on this point will open a page with the details of locus 16801
+    Figure 7: Locus 16801. Clicking on this point will open a page with the details of locus 16801
    
 
 Annotations 
@@ -123,6 +117,6 @@ The columns of the table are the following:
 .. figure:: ../resources/annotations_table.png
     :align: center
 
-    Figure 9: Annotations table.
+    Figure 8: Annotations table.
 
    
