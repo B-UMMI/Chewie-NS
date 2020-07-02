@@ -73,3 +73,12 @@ Below the Locus Details table, there are 3 buttons |buttons| allowing the follow
 .. |buttons| image:: /resources/locus_details_buttons.png
     :align: middle
     :scale: 80%
+
+
+.. note::
+    The BLAST search will only occur if the first allele of the selected locus has a **sequence length < 8000 bps**.
+    If an allele has more than 8000 bps, the following warning will appear.
+
+    .. figure:: ../resources/sequence_alert.png
+        :align: center
+
