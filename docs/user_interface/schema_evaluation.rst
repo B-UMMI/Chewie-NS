@@ -23,6 +23,12 @@ provided by the user (in Markdown format) during the schema upload.
 If the user does not provide a description file, the name of the schema
 will be used as the schema description.
 
+An example file is available at 
+`Chewie-NS' repository <https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/docs/example_files/markdown_example.md>`_.
+
+For more information on the Markdown specification accepted by Chewie-NS please visit the
+`Github Flavored Markdown Specification page <https://github.github.com/gfm/>`_.
+
 .. note::
     The Schema Description panel is **by default expanded**. It can be collapsed by clicking on the **arrow icon** on the
     upper-right corner of the panel.
