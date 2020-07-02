@@ -12,4 +12,4 @@ The **Overview** page displays a table with all the species present in Chewie-NS
     :align: center
     :scale: 80%
 
-Clicking on the **Schema Details** button will take to the :doc:`schema_overview` page where more detailed information on the schemas of each species is preented.
+Clicking on the **Schema Details** button will take to the :doc:`schema_overview` page where more detailed information on the schemas of each species is presented.
