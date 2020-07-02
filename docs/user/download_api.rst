@@ -27,7 +27,7 @@ To download a schema with the chewBBACA suite, it is necessary to provide:
     species. Alternatively, you can use the 
     `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
     process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
-    query the ``/species/{species_id}`` API endpoints through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
+    query the ``/species/{species_id}`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
     command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1" -H  "accept: application/json"``).
   - e.g.: species ID = ``9`` and schema ID = ``1``.
 
@@ -63,7 +63,7 @@ To download a schema of *Escherichia coli* we need to provide the ID of the spec
 
     $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder
 
-To download a sanpshot of the schema at a given date::
+To download a snapshot of the schema at a given date::
 
     $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --date 2020-06-30T19:10:37
 
