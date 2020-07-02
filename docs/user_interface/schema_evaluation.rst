@@ -59,12 +59,12 @@ Allele Numbers Analysis
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 In this plot, **hovering** above the bars will show **how many loci (y-axis)**
-contain a **number of different alleles (x-axis)**.
+exibit a **number of different alleles (x-axis)** within the range shown.
 
 .. figure:: ../resources/allele_numbers_fig1.png
     :align: center
 
-    Figure 5: Number of loci (2973) that contain between no alleles (0) and 49 alleles.
+    Figure 5: Number of loci (2973) that have between no alleles (0) and 49 alleles.
 
 
 .. figure:: ../resources/allele_numbers_fig2.png
@@ -76,32 +76,32 @@ contain a **number of different alleles (x-axis)**.
 Allele Length Analysis
 ^^^^^^^^^^^^^^^^^^^^^^
 
-In this plot, **hovering** above the bars will display the **distribution of
-allele mode size (x-axis)** contained by a **number of loci (y-axis)**.
+In this plot, **hovering** above the bars will display the **number of loci (y-axis)**
+having an **allele mode size (x-axis)** within the range shown.
 
 .. figure:: ../resources/allele_len.png
     :align: center
 
-    Figure 7: Number of loci (556) that have an allele mode size 200-249 (bp).
+    Figure 7: Number of loci (556) that have an allele mode size in the range 200-249 (bp).
 
    
 Locus Statistics
 ^^^^^^^^^^^^^^^^
 
-This plot displays locus statistics such as the **mean**, **median** and **mode** of each locus.
+This plot displays the the number of alleles and the central tendency measures **mean**, **median** and **mode** of the length of each locus.
 
-The **x-axis** represents the **number of alleles contained in each locus** while the 
-**y-axis represents the size of the alleles in base pairs**.
+The **y-axis** represents the **number of alleles in the locus** while the 
+**y-axis** represents the **central tendency measures of the length of the alleles in base pairs**.
 
-For example, **Figure 4** shows that Locus 15441 has more than 60 alleles (y-axis) and 
-the allele size is between 2000-3000 base pairs.
+For example, **Figure 8** shows that Locus 16801 has more than 1500 alleles (y-axis) and 
+that the central tendency measures of allele length are similar are over 5500 base pairs.
 
 .. important:: **Clicking** on the plot's data points will take you the :doc:`locus_details` page of that locus!
 
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 8: Locus 16801 statistics.
+    Figure 8: Locus 16801. Clicking on this point will open a page with the details of locus 16801
    
 
 Annotations 
@@ -112,7 +112,7 @@ The annotations table contains annotations for each locus of the schema.
 The columns of the table are the following:
 
 - **Uniprot Label**: the Uniprot annotation.
-- **Uniprot URI**: the URI of the Uniprot annotation. Clicking on the URI will open the page of the Uniprot annotation.
+- **Uniprot URI**: the URI of the Uniprot annotation. Clicking on the URI will open the page of the relevant Uniprot annotation.
 - **User Annotation**: an annotation provided by the user during the schema upload.
 - **Custom Annotation**: a custom annotation also provided by the user during the schema upload.
 - **Locus ID**: the ID of the locus. Clicking on the ID will take you to the :doc:`locus_details` page.
