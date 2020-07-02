@@ -3,10 +3,10 @@ Schemas
 
 The **Schemas** button on the sidebar is the entrypoint to explore the schemas available in Chewie-NS.
 
-Overview
---------
+Summary table
+-------------
 
-The **Overview** page displays a table with all the species present in Chewie-NS with an indication of how many schemas are available for each.
+The **Summary** page displays a table summarizing all the species present in Chewie-NS and information on how many schemas are available for each.
 
 .. figure:: ../resources/chewiens_overview.png
     :align: center
