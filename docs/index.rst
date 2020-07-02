@@ -34,6 +34,14 @@ With this service we have the following main goals:
 2. Establish a common nomenclature for allele calling.
 3. Ensure the reproducibility and consistency of wg/cgMLST analysis.
 
+Tutorial
+::::::::
+
+Chewie-NS has a tutorial website at `<https://tutorial.chewbbaca.online/>`_!
+The tutorial will allow users to learn how to interact with Chewie-NS.
+
+Tutorial instructions will be available very soon!
+
 Licensing
 :::::::::
 
