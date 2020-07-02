@@ -28,7 +28,7 @@ class Config(object):
     SECURITY_DEPRECATED_HASHING_SCHEMES = []
 
     # JWT Config
-    JWT_SECRET_KEY = os.urandom(32)
+    #JWT_SECRET_KEY = os.urandom(32)
     JWT_TOKEN_LOCATION = ['headers']
     JWT_ACCESS_TOKEN_EXPIRES = datetime.timedelta(hours=3)
     JWT_HEADER_NAME = 'Authorization'
