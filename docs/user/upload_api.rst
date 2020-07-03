@@ -7,24 +7,24 @@ process of the chewBBACA suite enables the upload of schemas to the Chewie-NS.
 .. important:: **You need to be a registered user with Contributor privileges to 
                  be able to upload schemas!**
 
-                 If you have registered and want to contribute with new schemas please contact us 
+                 If you have registered at the `chewie-NS public website <https://chewbbaca.online/auth>`_ and want to contribute new schemas please contact us 
                  via e-mail at: imm-bioinfo@medicina.ulisboa.pt
 
-To upload a schema to the Chewie-NS it is at least necessary to provide:
+To upload a schema to Chewie-NS it is at least necessary to provide:
 
 - The **path** to the local schema.
 
-  - The schema must have been created or converted with chewBBACA v2.5.0. If your schema was created with
+  - The schema must have been created with chewBBACA v2.5.0 or a later version. If your schema was created with
     an older version, please adapt the schema with the ``PrepExternalSchema`` process or run the 
-    ``AlleleCall`` process to convert the schema.
+    ``AlleleCall`` process with chewBBACA v2.5.0 to automatically convert the schema.
 
-.. warning:: **Only schemas that have been used with a single valid
+.. warning:: **Only schemas that have been used with the same valid
              value per parameter can be uploaded (this restriction applies
              to the BLAST Score Ratio, Prodigal training file, minimum 
              sequence length, genetic code and sequence size variation 
              threshold parameters).**
              
-             Invalid or multiple values
+             Invalid or multiple values used in different ``AlleleCall`` runs
              for a single parameter can lead to inconsistent results; thus,
              it is strongly advised to always perform allele calling with
              the same set of parameters and refrain from altering the initial
@@ -33,10 +33,10 @@ To upload a schema to the Chewie-NS it is at least necessary to provide:
 
 - The **ID** or **scientific name** of the species that the schema will be associated to.
   
-  - To know the **ID** of a species you can consult the `Overview <https://chewbbaca.online/stats>`_ 
-    table in the Chewie-NS website. Alternatively, you can use the 
+  - There are 3 ways to know the **ID** of a species: 1) you can consult the `Overview <https://chewbbaca.online/stats>`_ 
+    table in the Chewie-NS website; 2) you can use the 
     `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
-    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
+    process in the  chewBBACA suite to directly obtain information about the species and schemas in Chewie-NS or; 3) you can 
     query the ``/species/list`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
     command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/list" 
     -H  "accept: application/json"``).
@@ -45,8 +45,8 @@ To upload a schema to the Chewie-NS it is at least necessary to provide:
 - A **name** for the schema.
 
   - The name should be short and concise. The name **must be unique** among the set of names for 
-    the schemas of the same species.
-  - e.g.: ``Project_cgMLST``, ``SRA_wgMLST``, ``Organization_cgMLST`` ...
+    schemas of the same species (this means that the using the same name of an existing schema will lead to an error).
+  - e.g.: ``Project_cgMLST``, ``SRA_wgMLST``, ``Organization_cgMLST`` .
 
 - A **prefix** for the loci identifiers to facilitate the identification of the schema they belong to.
 
@@ -61,19 +61,21 @@ Sample description::
 
     $ cat description.txt
 
-    # Whole-genome MLST schema for Species name
+    # Whole-genome MLST schema for *Species name*
 
     This schema was created with [chewBBACA 2.5.0](https://github.com/B-UMMI/chewBBACA).
 
     ## Schema creation and validation
 
     A total of 100 *Species name* genomes were used to create this wgMLST schema.
-    (Add more information that might be relevant to reproduce the process.)
+    (Add more information that might be relevant to reproduce the process.
+    For instance the assembly pipeline used or links to relevant external data repositories)
 
     ## Dataset
 
     All raw reads from SRA annotated as *Species name* were assembled into 100 genomes.
-    (Add more information about dataset creation/collection. Include date of data download.)
+    (Add more information about dataset creation/collection. Include date of data download.
+    A list of accession numbers or links to relevant external data repositories maybe useful)
 
     ## Citations
 
@@ -92,6 +94,8 @@ loci in the schema. The file with annotations must have the following structure:
 - second column: user annotation (name commonly attributed by the user).
 - third column: custom annotation (another term that the user might want to attribute).
 
+However, no headers are necessary.
+
 .. rst-class:: align-center
 
   +----------+---------------------------------------------------+--------------+
@@ -104,8 +108,8 @@ loci in the schema. The file with annotations must have the following structure:
   | loci_4   |                                                   |      pbp     |
   +----------+---------------------------------------------------+--------------+
 
-It is not necessary to provide both annotation types for each locus and the file should not have 
-a header.
+It is not necessary to provide both annotation types for each locus nor for every locus.
+If no information is provided N/A will be automatically shown in the :doc:`locus_details` page.
 
 Example
 :::::::
