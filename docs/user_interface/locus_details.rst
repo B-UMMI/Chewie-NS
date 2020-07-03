@@ -81,4 +81,5 @@ Below the Locus Details table, there are 3 buttons |buttons| allowing the follow
 
     .. figure:: ../resources/sequence_alert.png
         :align: center
-
+    
+    In this case you should download the fasta file with the allele sequences and perform the query using your favorite interface.
