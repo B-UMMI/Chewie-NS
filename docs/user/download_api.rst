@@ -2,49 +2,48 @@ Download a schema from the Chewie-NS
 ====================================
 
 Compressed versions of every schema in the Chewie-NS are available for download through the 
-`Website <https://chewbbaca.online/>`_ or through the ``/species/{species_id}/schemas/{schema_id}/zip``
+`Chewie-NS public website <https://chewbbaca.online/>`_ or through the ``/species/{species_id}/schemas/{schema_id}/zip``
 API endpoint in `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or with a simple curl command
 (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1/schemas/1/zip?request_type=download" -H  "accept: application/json"``).
-We can also take advantage of the integration with the chewBBACA suite and use the 
+You can also take advantage of the integration with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_ and use the 
 `download_schema.py <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/down_schema.py>`_ script.
 
 .. note:: Compressed versions are ZIP archives that contain ready-to-use schemas. Simply extract
-          and you can start performing allele call.
+          and you can start performing allele calls using the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_.
 
-.. important:: The Chewie-NS generates new compressed versions of each schema every 24h, if the
+.. important:: Chewie-NS generates new compressed versions of each schema every 24h, if the
                schemas were updated since the last compression date. This means that the compressed
                version is not always the latest. If that is the case, the integration with
-               chewBBACA allows to quickly get the latest version.
+               chewBBACA allows to quickly update your local version with  the latest information
+               by using the process described at :docs:`synchronize_api`.
 
-To download a schema with the chewBBACA suite, it is necessary to provide:
+To download a schema with the chewBBACA suite (``chewBBACA.py DownloadSchema``), it is necessary to provide:
 
-- The **ID** of the species that the schema is associated to and the **ID** of
-  the schema.
+- The **ID of the species** that the schema is associated with and the **ID of the schema**.
 
-  - To know the **ID** of a species you can consult the `Overview <https://chewbbaca.online/stats>`_ 
-    table in the Chewie-NS website. To know the **ID** of the schema you want to download,
-    you can click the ``SCHEMA DETAILS`` button to get a list with all the schemas for a
-    species. Alternatively, you can use the 
+  - To know the **ID of a species** you can consult the `Overview <https://chewbbaca.online/stats>`_ 
+    table in the Chewie-NS public website. To know the **ID of the schema** you want to download,
+    you can click the ``SCHEMA DETAILS`` button to get a list with all the schemas and their **IDs** for a
+    given species. Alternatively, you can use the 
     `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
-    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS or 
-    query the ``/species/{species_id}`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or a simple curl 
+    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS, 
+    query the ``/species/{species_id}`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_, or a simple curl 
     command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1" -H  "accept: application/json"``).
   - e.g.: species ID = ``9`` and schema ID = ``1``.
 
-- Path to the output directory that will store the schema.
+- **Path to the output directory** that will store the schema.
 
   - If the directory does not exist, the process will create it (will not create
     parent directories that do not exist). If the directory exists, it **must be empty**
     or the process will exit without downloading the schema.
 
-The integration with the chewBBACA suite provides the option to download a schema snapshot
-at a given date. The date should be in the format ``Y-m-dTH:M:S`` (e.g.: ``2020-06-30T19:10:37``).
-It also allows users to request for the latest version of a schema, if the compressed version that
-is available is not the latest. An alternative approach that can be applied to get the latest 
-version of the schema, if the compressed version does not provide it, is to download the compressed 
-version that is available and run the 
+The chewBBACA suite provides the option to download a schema snapshot
+at a given date. The date should be in the format ``yyyy-mm-ddThh:mm:ss`` (e.g.: ``2020-06-30T19:10:37``).
+It also allows users to request the latest version of a schema (``--latest``), if the compressed version that
+is available compressed is outdated. An alternative and more efficient approach that can be applied to get the latest 
+version of the schema is to download the compressed version available and run the 
 `SyncSchema <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/sync_schema.py>`_ 
-process to retrieve the alleles that were added to the schema after the compression date.
+process to retrieve the alleles that were added to the schema after the creation of the compressed file.
 
 .. note:: The DownloadSchema process will download the compressed version that is available
           by default. If the provided date matches the date of the latest compressed version,
