@@ -6,6 +6,7 @@ import clsx from "clsx";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";
 import Drawer from "@material-ui/core/Drawer";
+import Hidden from "@material-ui/core/Hidden";
 import Toolbar from "@material-ui/core/Toolbar";
 import Divider from "@material-ui/core/Divider";
 import SvgIcon from "@material-ui/core/SvgIcon";
@@ -78,6 +79,9 @@ const styles = (theme) => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+    [theme.breakpoints.up("md")]: {
+      position: "relative",
+    },
   },
   drawerClose: {
     backgroundColor: "#3b3b3b",
@@ -91,6 +95,11 @@ const styles = (theme) => ({
     [theme.breakpoints.up("sm")]: {
       width: theme.spacing(9) + 1,
     },
+  },
+  drawerPaper: {
+    width: drawerWidth,
+    backgroundColor: "#3b3b3b",
+    color: "white",
   },
   drawerHeader: {
     display: "flex",
@@ -152,67 +161,9 @@ class PersistentDrawerLeft extends Component {
   render() {
     const { classes } = this.props;
 
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="fixed"
-          className={clsx(classes.appBar, {
-            [classes.appBarShift]: this.state.open,
-          })}
-          color="primary"
-          style={{ backgroundColor: "#3b3b3b" }}
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={() => this.handleDrawerOpen()}
-              edge="start"
-              className={clsx(
-                classes.menuButton,
-                this.state.open && classes.hide
-              )}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" className={classes.title}>
-              Chewie-NS
-            </Typography>
-            {!this.props.isAuthenticated ? (
-              <Button color="inherit" component={Link} to="/auth">
-                Login
-              </Button>
-            ) : (
-              <Button color="inherit" component={Link} to="/logout">
-                Logout
-              </Button>
-            )}
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          open={this.state.open}
-          className={clsx(classes.drawer, {
-            [classes.drawerOpen]: this.state.open,
-            [classes.drawerClose]: !this.state.open,
-          })}
-          classes={{
-            paper: clsx({
-              [classes.drawerOpen]: this.state.open,
-              [classes.drawerClose]: !this.state.open,
-            }),
-          }}
-        >
-          <div className={classes.drawerHeader}>
-            <IconButton onClick={() => this.handleDrawerClose()}>
-              {this.props.theme.direction === "ltr" ? (
-                <ChevronLeftIcon style={{ color: "white" }} />
-              ) : (
-                <ChevronRightIcon style={{ color: "white" }} />
-              )}
-            </IconButton>
-          </div>
+    const drawer = (
+      <div>
+        <div className={classes.toolbar}>
           <Divider />
           <List>
             <ListItem button component={Link} to="/">
@@ -299,7 +250,104 @@ class PersistentDrawerLeft extends Component {
               <ListItemText primary={"Tutorial"} />
             </ListItem>
           </List>
-        </Drawer>
+        </div>
+      </div>
+    );
+
+    const container =
+      window !== undefined ? () => window.document.body : undefined;
+
+    return (
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar
+          position="fixed"
+          className={clsx(classes.appBar, {
+            [classes.appBarShift]: this.state.open,
+          })}
+          color="primary"
+          style={{ backgroundColor: "#3b3b3b" }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={() => this.handleDrawerOpen()}
+              edge="start"
+              className={clsx(
+                classes.menuButton,
+                this.state.open && classes.hide
+              )}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" className={classes.title}>
+              Chewie-NS
+            </Typography>
+            {!this.props.isAuthenticated ? (
+              <Button color="inherit" component={Link} to="/auth">
+                Login
+              </Button>
+            ) : (
+              <Button color="inherit" component={Link} to="/logout">
+                Logout
+              </Button>
+            )}
+          </Toolbar>
+        </AppBar>
+        <Hidden smUp implementation="css">
+          <Drawer
+            container={container}
+            variant="temporary"
+            anchor={this.props.theme.direction === "rtl" ? "right" : "left"}
+            open={this.state.open}
+            onClose={() => this.handleDrawerClose()}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+            ModalProps={{
+              keepMounted: true, // Better open performance on mobile.
+            }}
+          >
+            <div className={classes.drawerHeader}>
+              <IconButton onClick={() => this.handleDrawerClose()}>
+                {this.props.theme.direction === "ltr" ? (
+                  <ChevronLeftIcon style={{ color: "white" }} />
+                ) : (
+                  <ChevronRightIcon style={{ color: "white" }} />
+                )}
+              </IconButton>
+            </div>
+            {drawer}
+          </Drawer>
+        </Hidden>
+        <Hidden xsDown implementation="css">
+          <Drawer
+            variant="permanent"
+            open={this.state.open}
+            className={clsx(classes.drawer, {
+              [classes.drawerOpen]: this.state.open,
+              [classes.drawerClose]: !this.state.open,
+            })}
+            classes={{
+              paper: clsx({
+                [classes.drawerOpen]: this.state.open,
+                [classes.drawerClose]: !this.state.open,
+              }),
+            }}
+          >
+            <div className={classes.drawerHeader}>
+              <IconButton onClick={() => this.handleDrawerClose()}>
+                {this.props.theme.direction === "ltr" ? (
+                  <ChevronLeftIcon style={{ color: "white" }} />
+                ) : (
+                  <ChevronRightIcon style={{ color: "white" }} />
+                )}
+              </IconButton>
+            </div>
+            {drawer}
+          </Drawer>
+        </Hidden>
         <main className={classes.content}>
           <div className={classes.drawerHeader} />
           {this.props.children}
