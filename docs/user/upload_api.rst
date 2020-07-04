@@ -31,9 +31,9 @@ To upload a schema to Chewie-NS it is at least necessary to provide:
              set of parameters values defined in the schema creation or
              adaptation processes.
 
-- The **ID** or **scientific name** of the species that the schema will be associated to.
+- The **species ID** or **scientific name** of the species that the schema will be associated to.
   
-  - There are 3 ways to know the **ID** of a species: 1) you can consult the `Overview <https://chewbbaca.online/stats>`_ 
+  - There are 3 ways to know the **species ID** of a species: 1) you can consult the `Overview <https://chewbbaca.online/stats>`_ 
     table in the Chewie-NS website; 2) you can use the 
     `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
     process in the  chewBBACA suite to directly obtain information about the species and schemas in Chewie-NS or; 3) you can 
@@ -45,7 +45,8 @@ To upload a schema to Chewie-NS it is at least necessary to provide:
 - A **name** for the schema.
 
   - The name should be short and concise. The name **must be unique** among the set of names for 
-    schemas of the same species (this means that the using the same name of an existing schema will lead to an error).
+    schemas of the same species (this means that the using the same name of an existing schema will lead to an error)
+    and should not include spaces.
   - e.g.: ``Project_cgMLST``, ``SRA_wgMLST``, ``Organization_cgMLST`` .
 
 - A **prefix** for the loci identifiers to facilitate the identification of the schema they belong to.

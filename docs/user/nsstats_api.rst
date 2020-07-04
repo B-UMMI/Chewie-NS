@@ -2,8 +2,8 @@ Retrieve basic information
 ================================
 
 The `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_
-process included in the chewBBACA suite enables the retrieval of information/stats from the Chewie-NS. 
-Its main objective is to provide information about the list of species and schemas in the Chewie-NS, 
+process included in the chewBBACA suite enables the retrieval of information from Chewie-NS public server. 
+Its main objective is to provide information about the list of species and schemas in Chewie-NS, 
 so that users can quickly identify a schema of interest and download it.
 
 Retrieve the list of species and the total number of schemas, loci and alleles per species::
@@ -35,7 +35,7 @@ Retrieve the list of schemas for a species and the total number of loci and alle
     INNUENDO_cgMLST                     2          8558      2830016  
     ------------------------------------------------------------------
 
-Retrieve properties values for a schema::
+Retrieve property values for a schema::
 
     $ chewBBACA.py NSStats -m schemas --sp 4 --sc 2
 
@@ -77,10 +77,10 @@ Script Usage
     List species and totals:
       chewBBACA.py NSStats -m species 
 
-    List all schemas for a species:
+    List all schemas for a species and associated information:
       chewBBACA.py NSStats -m schemas --sp <species_id> 
 
-    Get information about a single schema:
+    Get information about a particular schema:
       chewBBACA.py NSStats -m schemas --sp <species_id> --sc <schema_id>
 
     Retrieve basic information about the species and schemas in the Chewie-NS.
