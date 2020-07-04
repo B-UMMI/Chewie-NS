@@ -60,6 +60,22 @@ class Chewie extends Component {
               ensure that a common nomenclature is maintained.
             </p>
             <p>
+              Please visit the <b>Tutorial</b> site at{" "}
+              <a href="https://tutorial.chewbbaca.online/">
+                https://tutorial.chewbbaca.online/
+              </a>{" "}
+              or by clicking on the test tube icon on the sidebar! The
+              <b>Tutorial</b> instructions will be available soon at{" "}
+              <a
+                href={"https://chewie-ns.readthedocs.io/en/latest/index.html"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                Chewie-NS' Read The Docs
+              </a>
+              .
+            </p>
+            <p>
               For any issues or requests contact the development team at{" "}
               <a href="mailto:imm-bioinfo@medicina.ulisboa.pt">
                 imm-bioinfo@medicina.ulisboa.pt
