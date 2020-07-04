@@ -75,8 +75,24 @@ class Stats extends Component {
           },
         },
         {
+          name: "species_id",
+          label: "Species ID",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "nr_schemas",
-          label: "Schemas available",
+          label: "No. Schemas available",
           options: {
             filter: true,
             setCellHeaderProps: (value) => {
@@ -89,7 +105,7 @@ class Stats extends Component {
           },
         },
         {
-          name: "Schema Details",
+          name: "Schemas Details",
           options: {
             filter: false,
             empty: true,
@@ -112,22 +128,6 @@ class Stats extends Component {
                   Schema Details
                 </Button>
               );
-            },
-          },
-        },
-        {
-          name: "species_id",
-          label: "Species ID",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
             },
           },
         },
