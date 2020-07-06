@@ -122,8 +122,8 @@ class Stats extends Component {
                   variant="contained"
                   color="default"
                   component={RouterLink}
-                  to={"/species/" + tableMeta.rowData[3]}
-                  onClick={() => console.log(tableMeta.rowData[3])}
+                  to={"/species/" + tableMeta.rowData[1]}
+                  onClick={() => console.log(tableMeta.rowData[1])}
                 >
                   Schema Details
                 </Button>
