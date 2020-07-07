@@ -77,10 +77,10 @@ Script Usage
     List species and totals:
       chewBBACA.py NSStats -m species 
 
-    List all schemas for a species:
+    List all schemas for a species and associated information:
       chewBBACA.py NSStats -m schemas --sp <species_id> 
 
-    Get information about a single schema:
+    Get information about a particular schema:
       chewBBACA.py NSStats -m schemas --sp <species_id> --sc <schema_id>
 
     Retrieve basic information about the species and schemas in the Chewie-NS.
