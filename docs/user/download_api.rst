@@ -4,7 +4,7 @@ Download a schema from the Chewie-NS
 Compressed versions of every schema in the Chewie-NS are available for download through the 
 `Chewie-NS public website <https://chewbbaca.online/>`_ or through the ``/species/{species_id}/schemas/{schema_id}/zip``
 API endpoint in `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or with a simple curl command
-(``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1/schemas/1/zip?request_type=download" -H  "accept: application/json"``).
+(``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/9/schemas/1/zip?request_type=download" -H  "accept: application/json"``).
 You can also take advantage of the integration with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_ and use the 
 `download_schema.py <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/down_schema.py>`_ script.
 
@@ -60,15 +60,15 @@ Example
 
 To download a schema of *Escherichia coli* we need to provide the ID of the species and the ID of the schema that we want to download::
 
-    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder
+    $ chewBBACA.py DownloadSchema -sp 9 -sc 1 -o path/to/download/folder
 
 To download a snapshot of the schema at a given date::
 
-    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --date 2020-06-30T19:10:37
+    $ chewBBACA.py DownloadSchema -sp 9 -sc 1 -o path/to/download/folder --date 2020-06-30T19:10:37
 
 To retrieve the latest version of the schema::
 
-    $ chewBBACA.py DownloadSchema -sc 1 -sp 9 -o path/to/download/folder --latest 
+    $ chewBBACA.py DownloadSchema -sp 9 -sc 1 -o path/to/download/folder --latest 
 
 Script Usage
 ::::::::::::
@@ -86,10 +86,10 @@ Script Usage
 
     usage: 
     Download schema:
-    chewBBACA.py DownloadSchema -sc <schema_id> -sp <species_id> -o <download_folder> 
+    chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder> 
 
     Download schema with non-default parameters:
-    chewBBACA.py DownloadSchema -sc <schema_id> -sp <species_id> -o <download_folder>
+    chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder>
                                 --cpu <cpu_cores> --ns <nomenclature_server_url> 
 
     This program downloads a schema from the NS.
@@ -101,12 +101,12 @@ Script Usage
     optional arguments:
     -h, --help                show this help message and exit
                                 
-    -sc SCHEMA_ID             The URI, integer identifier or description of the
-                                schema to download from the NS. (default: None)
-                                
     -sp SPECIES_ID            The integer identifier or name of the species that
                                 the schema is associated to in the NS. (default:
                                 None)
+    
+    -sc SCHEMA_ID             The URI, integer identifier or name of the
+                                schema to download from the NS. (default: None)
                                 
     -o DOWNLOAD_FOLDER        Output folder to which the schema will be saved.
                                 (default: None)
