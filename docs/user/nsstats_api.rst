@@ -86,22 +86,27 @@ Script Usage
     Retrieve basic information about the species and schemas in the Chewie-NS.
 
     positional arguments:
-    NSStats
+      NSStats
 
     optional arguments:
-    -h, --help                show this help message and exit
+      -h, --help                show this help message and exit
                                 
-    -m {species,schemas}      The process can retrieve the list of species
+      -m {species,schemas}      The process can retrieve the list of species
                                 ("species" option) in the Chewie-NS or the list of
                                 schemas for a species ("schemas" option).
                                 (default: None)
                                 
-    --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
-                                (default: main)
+      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server. The
+                                default value, "main", will establish a connection
+                                to "https://chewbbaca.online/", "tutorial" to
+                                "https://tutorial.chewbbaca.online/" and "local"
+                                to "http://127.0.0.1:5000/NS/api/" (localhost).
+                                You can also provide the IP adress to other
+                                Chewie-NS instances. (default: main)
                                 
-    --sp SPECIES_ID           The integer identifier of a species in the Chewie-
+      --sp SPECIES_ID           The integer identifier of a species in the Chewie-
                                 NS. (default: None)
                                 
-    --sc SCHEMA_ID            The integer identifier of a schema in the Chewie-
+      --sc SCHEMA_ID            The integer identifier of a schema in the Chewie-
                                 NS. (default: None)
 

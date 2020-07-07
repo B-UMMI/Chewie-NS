@@ -101,24 +101,29 @@ Script Usage
     This program syncs a local schema with NS
 
     positional arguments:
-    SyncSchema                Synchronize a local schema, previously downloaded
+      SyncSchema                Synchronize a local schema, previously downloaded
                                 from the NS, with its latest version in the NS.
                                 
 
     optional arguments:
-    -h, --help                show this help message and exit
+      -h, --help                show this help message and exit
                                 
-    -sc SCHEMA_DIRECTORY      Path to the directory with the schema to besynced.
+      -sc SCHEMA_DIRECTORY      Path to the directory with the schema to besynced.
                                 (default: None)
                                 
-    --cpu CPU_CORES           Number of CPU cores that will be used to determine
+      --cpu CPU_CORES           Number of CPU cores that will be used to determine
                                 new representatives if the process downloads new
                                 alleles from the Chewie-NS. (default: 1)
                                 
-    --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
-                                (default: main)
+      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server. The
+                                default value, "main", will establish a connection
+                                to "https://chewbbaca.online/", "tutorial" to
+                                "https://tutorial.chewbbaca.online/" and "local"
+                                to "http://127.0.0.1:5000/NS/api/" (localhost).
+                                You can also provide the IP adress to other
+                                Chewie-NS instances. (default: main)
                                 
-    --submit                  If the process should identify new alleles in the
+      --submit                  If the process should identify new alleles in the
                                 local schema and send them to the NS. (only users
                                 with permissons level of Contributor can submit
                                 new alleles). (default: False)

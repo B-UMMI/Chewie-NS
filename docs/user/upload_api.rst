@@ -184,8 +184,10 @@ Script Usage
                                 
       --df DESCRIPTION_FILE     Path to a text file with a description about the
                                 schema. Markdown syntax is supported in order to
-                                allow greater customizability of the rendered
-                                description in the Frontend (default: )
+                                offer greater customizability of the rendered
+                                description in the Frontend. Will default to the
+                                schema's name if the user does not provide a valid
+                                path for a file. (default: None)
                                 
       --a ANNOTATIONS           Path to a TSV file with loci annotations. The
                                 first column has loci identifiers (w/o .fasta
@@ -198,10 +200,16 @@ Script Usage
       --thr THREADS             Number of threads to use to search for annotations
                                 on UniProt (default: 20)
                                 
-      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
-                                (default: main)
+      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server. The
+                                default value, "main", will establish a connection
+                                to "https://chewbbaca.online/", "tutorial" to
+                                "https://tutorial.chewbbaca.online/" and "local"
+                                to "http://127.0.0.1:5000/NS/api/" (localhost).
+                                You can also provide the IP adress to other
+                                Chewie-NS instances. (default: main)
                                 
       --continue_up             If the process should check if the schema upload
                                 was interrupted and try to finish it. (default:
                                 False)
+
 
