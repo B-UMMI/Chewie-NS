@@ -32,6 +32,8 @@ export const fetchSequence = (sequence) => {
         for (let key in res.data.result) {
           let species_id = res.data.result[key].schemas.value.split("/")[6];
 
+          let species_name = res.data.result[key].name.value;
+
           let schema_id = res.data.result[key].schemas.value.substring(
             res.data.result[key].schemas.value.lastIndexOf("/") + 1
           );
@@ -55,6 +57,8 @@ export const fetchSequence = (sequence) => {
               "/locus/" +
               locusId,
             locus_id: locusId,
+            species_name: species_name,
+            alleles: res.data.number_alleles_loci,
           });
         }
 
