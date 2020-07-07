@@ -5239,9 +5239,18 @@ class SequencesAPItypon(Resource):
                                   (sq.SELECT_SEQUENCE_INFO_BY_DNA.format(current_app.config['DEFAULTHGRAPH'], seq_url, query_part)))
 
             sequence_info = result['results']['bindings']
+            locus_url = sequence_info[0]["locus"]["value"]
+            
+            locus_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                      (sq.COUNT_LOCUS_ALLELES.format(current_app.config['DEFAULTHGRAPH'], locus_url)))
+                      
+            number_alleles_loci = int(
+                locus_result["results"]["bindings"][0]['count']['value'])
+
             if sequence_info != []:
                 return {'result': sequence_info,
-                        'sequence_uri': seq_url}, 200
+                        'sequence_uri': seq_url,
+                        'number_alleles_loci': number_alleles_loci}, 200
             else:
                 return {'NOT FOUND': 'Could not find provided DNA sequence in the NS.'}, 404
         # if sequence hash is provided
