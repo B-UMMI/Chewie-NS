@@ -116,12 +116,15 @@ Script Usage
                                 alleles from the Chewie-NS. (default: 1)
                                 
       --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server. The
-                                default value, "main", will establish a connection
-                                to "https://chewbbaca.online/", "tutorial" to
+                                default option will get the base URL from the
+                                schema's URI. It is also possible to specify other
+                                options that are available in chewBBACA's configs,
+                                such as: "main" will establish a connection to
+                                "https://chewbbaca.online/", "tutorial" to
                                 "https://tutorial.chewbbaca.online/" and "local"
                                 to "http://127.0.0.1:5000/NS/api/" (localhost).
-                                You can also provide the IP adress to other
-                                Chewie-NS instances. (default: main)
+                                Users may also provide the IP address to other
+                                Chewie-NS instances. (default: None)
                                 
       --submit                  If the process should identify new alleles in the
                                 local schema and send them to the NS. (only users

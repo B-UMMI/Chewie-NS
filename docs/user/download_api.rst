@@ -124,7 +124,7 @@ Script Usage
                                 to "https://chewbbaca.online/", "tutorial" to
                                 "https://tutorial.chewbbaca.online/" and "local"
                                 to "http://127.0.0.1:5000/NS/api/" (localhost).
-                                You can also provide the IP adress to other
+                                Users may also provide the IP address to other
                                 Chewie-NS instances. (default: main)
                                 
       --d DATE                  Download schema with state from specified date.
