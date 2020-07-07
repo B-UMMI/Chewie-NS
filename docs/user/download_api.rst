@@ -22,13 +22,16 @@ To download a schema with the chewBBACA suite (``chewBBACA.py DownloadSchema``),
 - The **ID of the species** that the schema is associated with and the **ID of the schema**.
 
   - To know the **ID of a species** you can consult the `Overview <https://chewbbaca.online/stats>`_ 
-    table in the Chewie-NS public website. To know the **ID of the schema** you want to download,
-    you can click the ``SCHEMA DETAILS`` button to get a list with all the schemas and their **IDs** for a
-    given species. Alternatively, you can use the 
-    `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
-    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS, 
-    query the ``/species/{species_id}`` API endpoint through  `Swagger <https://chewbbaca.online/api/NS/api/docs>`_, or a simple curl 
-    command (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1" -H  "accept: application/json"``).
+    table in the Chewie-NS public website, query the ``/species/list`` API endpoint through  
+    `Swagger <https://chewbbaca.online/api/NS/api/docs>`_, or a simple curl command 
+    (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/list" -H  "accept: application/json"``).
+    To know the **ID of the schema** you want to download, you can click the ``SCHEMA DETAILS`` button 
+    in the `Overview <https://chewbbaca.online/stats>`_ table to get a list with all the schemas and their 
+    **IDs** for a given species, query the ``/species/{species_id}`` API endpoint through  
+    `Swagger <https://chewbbaca.online/api/NS/api/docs>`_, or a simple curl command 
+    (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/1" -H  "accept: application/json"``).
+    Alternatively, you can use the `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_ 
+    process in the  chewBBACA suite to get information about species and schemas in the Chewie-NS
   - e.g.: species ID = ``9`` and schema ID = ``1``.
 
 - **Path to the output directory** that will store the schema.
