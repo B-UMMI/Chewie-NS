@@ -89,44 +89,49 @@ Script Usage
 
     usage: 
     Download schema:
-    chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder> 
+      chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder> 
 
     Download schema with non-default parameters:
-    chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder>
-                                --cpu <cpu_cores> --ns <nomenclature_server_url> 
+      chewBBACA.py DownloadSchema -sp <species_id> -sc <schema_id> -o <download_folder>
+                                  --cpu <cpu_cores> --ns <nomenclature_server_url> 
 
     This program downloads a schema from the NS.
 
     positional arguments:
-    DownloadSchema            This program downloads a schema from the NS.
+      DownloadSchema            This program downloads a schema from the NS.
                                 
 
     optional arguments:
-    -h, --help                show this help message and exit
+      -h, --help                show this help message and exit
                                 
-    -sp SPECIES_ID            The integer identifier or name of the species that
+      -sp SPECIES_ID            The integer identifier or name of the species that
                                 the schema is associated to in the NS. (default:
                                 None)
-    
-    -sc SCHEMA_ID             The URI, integer identifier or name of the
-                                schema to download from the NS. (default: None)
                                 
-    -o DOWNLOAD_FOLDER        Output folder to which the schema will be saved.
+      -sc SCHEMA_ID             The URI, integer identifier or name of the schema
+                                to download from the NS. (default: None)
+                                
+      -o DOWNLOAD_FOLDER        Output folder to which the schema will be saved.
                                 (default: None)
                                 
-    --cpu CPU_CORES           Number of CPU cores that will be passed to the
+      --cpu CPU_CORES           Number of CPU cores that will be passed to the
                                 PrepExternalSchema process to determine
                                 representatives and create the final schema.
                                 (default: 1)
                                 
-    --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server.
-                                (default: main)
+      --ns NOMENCLATURE_SERVER  The base URL for the Nomenclature Server. The
+                                default value, "main", will establish a connection
+                                to "https://chewbbaca.online/", "tutorial" to
+                                "https://tutorial.chewbbaca.online/" and "local"
+                                to "http://127.0.0.1:5000/NS/api/" (localhost).
+                                You can also provide the IP adress to other
+                                Chewie-NS instances. (default: main)
                                 
-    --d DATE                  Download schema with state from specified date.
+      --d DATE                  Download schema with state from specified date.
                                 Must be in the format "Y-m-dTH:M:S". (default:
                                 None)
                                 
-    --latest                  If the compressed version that is available is not
+      --latest                  If the compressed version that is available is not
                                 the latest, downloads all loci and constructs
                                 schema locally. (default: False)
 
