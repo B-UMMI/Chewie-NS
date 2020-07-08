@@ -1407,6 +1407,29 @@ class StatsAnnotations(Resource):
         return json_data
 
 
+@stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/lengthStats")
+class StatsLengthStats(Resource):
+    """ Get the five-number summary and mean for the set of loci of any schema. """
+
+    @api.doc(responses={200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found'},
+             security=[])
+    def get(self, species_id, schema_id):
+        """ Get the five-number summary and mean for all loci in a particular schema. """
+
+        precomputed_data_file = os.path.join(
+            os.getcwd(), 'pre-computed-data/boxplot_{0}_{1}.json'.format(species_id, schema_id))
+
+        with open(precomputed_data_file, 'r') as json_file:
+            json_data = json.load(json_file)
+
+        return json_data
+
+
 # Loci Routes
 
 # Namespace for Loci operations
