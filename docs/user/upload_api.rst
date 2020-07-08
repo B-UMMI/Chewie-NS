@@ -99,15 +99,15 @@ However, no headers are necessary.
 
 .. rst-class:: align-center
 
-  +----------+---------------------------------------------------+--------------+
-  | loci_1   | Chromosomal replication  initiator protein DnaA   |     dnaA     |
-  +----------+---------------------------------------------------+--------------+
-  | loci_2   |       DNA primase                                 |     dnaG     |
-  +----------+---------------------------------------------------+--------------+
-  | loci_3   | RNA-directed DNA polymerase                       |              |
-  +----------+---------------------------------------------------+--------------+
-  | loci_4   |                                                   |      pbp     |
-  +----------+---------------------------------------------------+--------------+
+  +----------+--------------+---------------------------------------------------+
+  | locus_1  |     dnaA     |  Chromosomal replication  initiator protein DnaA  |
+  +----------+--------------+---------------------------------------------------+
+  | locus_2  |     dnaG     |                    DNA primase                    |
+  +----------+--------------+---------------------------------------------------+
+  | locus_3  |              |            RNA-directed DNA polymerase            |
+  +----------+--------------+---------------------------------------------------+
+  | locus_4  |     pbp      |                                                   |
+  +----------+--------------+---------------------------------------------------+
 
 It is not necessary to provide both annotation types for each locus nor for every locus.
 If no information is provided N/A will be automatically shown in the :doc:`locus_details` page.
@@ -115,9 +115,13 @@ If no information is provided N/A will be automatically shown in the :doc:`locus
 Example
 :::::::
 
-To upload a schema for *Escherichia coli*, we could run the following command::
+To upload a schema for *Escherichia coli*, we could run one of the following commands::
 
+  Providing the species ID:
     $ chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp 9 -sn cgMLST_95 -lp cgMLST_95
+
+  Providing the species name:
+    $ chewBBACA.py LoadSchema -i path/to/schema/to/be/sent -sp "Escherichia coli" -sn cgMLST_95 -lp cgMLST_95
 
 To upload a schema and provide a description and annotations::
 
