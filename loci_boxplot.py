@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-
 """
 
 
@@ -51,7 +50,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
     with open(current_file, 'r') as json_file:
         json_data = json.load(json_file)
 
-    loci_list = json_data['traces']
+    loci_list = json_data['loci']
 
     # get schema loci
     loci = aux.get_data(SPARQLWrapper(local_sparql),
@@ -62,53 +61,63 @@ def fast_update(schema, last_modified, file, lengths_dir,
     if len(loci_list) == 0:
         length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
 
-        tracers_data = []
+        loci_list = []
+        loci_min = []
+        loci_q1 = []
+        loci_median = []
+        loci_q3 = []
+        loci_max = []
+        loci_mean = []
+        loci_sd = []
 
         for locus_file in length_files:
             with open(locus_file, 'rb') as lf:
                 locus_data = pickle.load(lf)
 
-            data = {}
-
             locus_uri = list(locus_data.keys())[0]
 
             # get name of locus
             locus_name = loci_names[locus_uri]
-            data['loci'] = locus_name
+            loci_list.append(locus_name)
             alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
             alleles_lengths.sort()
             nr_alleles = len(alleles_lengths)
             # minimum and maximum values
-            data['min'] = min(alleles_lengths)
-            data['max'] = max(alleles_lengths)
+            loci_min.append(min(alleles_lengths))
+            loci_max.append(max(alleles_lengths))
             # standard deviation
             if nr_alleles > 1:
                 locus_sd = statistics.stdev(alleles_lengths)
             else:
                 locus_sd = 0.0
-            data['sd'] = locus_sd
+            loci_sd.append(locus_sd)
             # mean
             locus_mean = round(sum(alleles_lengths)/nr_alleles)
-            data['mean'] = locus_mean
+            loci_mean.append(locus_mean)
             # median
             locus_median = round(statistics.median(alleles_lengths))
-            data['median'] = locus_median
+            loci_median.append(locus_median)
             # q1 and q3
             if nr_alleles > 1:
                 half = int(nr_alleles//2)
-                q1 = statistics.median(alleles_lengths[-half:])
-                q3 = statistics.median(alleles_lengths[:half])
+                q1 = statistics.median(alleles_lengths[:half])
+                q3 = statistics.median(alleles_lengths[-half:])
             else:
                 q1 = alleles_lengths[0]
                 q3 = alleles_lengths[0]
-            data['q1'] = q1
-            data['q3'] = q3
-
-            tracers_data.append(data)
+            loci_q1.append(q1)
+            loci_q3.append(q3)
 
         json_to_file = {'schema': schema,
                         'last_modified': last_modified,
-                        'traces': tracers_data}
+                        'loci': loci_list,
+                        'min': loci_min,
+                        'q1': loci_q1,
+                        'median': loci_median,
+                        'q3': loci_q3,
+                        'max': loci_max,
+                        'mean': loci_mean,
+                        'sd': loci_sd}
 
         with open(file, 'w') as json_outfile:
             json.dump(json_to_file, json_outfile)
@@ -129,47 +138,49 @@ def fast_update(schema, last_modified, file, lengths_dir,
                 with open(locus_file, 'rb') as f:
                     locus_data = pickle.load(f)
 
-                data = {}
-
                 locus_uri = list(locus_data.keys())[0]
-
                 # get name of locus
                 locus_name = loci_names[locus_uri]
-                data['loci'] = locus_name
+                loci_list.append(locus_name)
                 alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
                 alleles_lengths.sort()
                 nr_alleles = len(alleles_lengths)
                 # minimum and maximum values
-                data['min'] = min(alleles_lengths)
-                data['max'] = max(alleles_lengths)
+                loci_min.append(min(alleles_lengths))
+                loci_max.append(max(alleles_lengths))
                 # standard deviation
                 if nr_alleles > 1:
                     locus_sd = statistics.stdev(alleles_lengths)
                 else:
                     locus_sd = 0.0
-                data['sd'] = locus_sd
+                loci_sd.append(locus_sd)
                 # mean
                 locus_mean = round(sum(alleles_lengths)/nr_alleles)
-                data['mean'] = locus_mean
+                loci_mean.append(locus_mean)
                 # median
                 locus_median = round(statistics.median(alleles_lengths))
-                data['median'] = locus_median
+                loci_median.append(locus_median)
                 # q1 and q3
                 if nr_alleles > 1:
                     half = int(nr_alleles//2)
-                    q1 = statistics.median(alleles_lengths[-half:])
-                    q3 = statistics.median(alleles_lengths[:half])
+                    q1 = statistics.median(alleles_lengths[:half])
+                    q3 = statistics.median(alleles_lengths[-half:])
                 else:
                     q1 = alleles_lengths[0]
                     q3 = alleles_lengths[0]
-                data['q1'] = q1
-                data['q3'] = q3
-
-                tracers_data.append(data)
+                loci_q1.append(q1)
+                loci_q3.append(q3)
 
             json_to_file = {'schema': schema,
                             'last_modified': last_modified,
-                            'traces': tracers_data}
+                            'loci': loci_list,
+                            'min': loci_min,
+                            'q1': loci_q1,
+                            'median': loci_median,
+                            'q3': loci_q3,
+                            'max': loci_max,
+                            'mean': loci_mean,
+                            'sd': loci_sd}
 
             with open(file, 'w') as json_outfile:
                 json.dump(json_to_file, json_outfile)
@@ -287,7 +298,9 @@ def single_species(species_id, virtuoso_graph, local_sparql, base_url):
 
             last_modified = schema_properties[0]['last_modified']['value']
             if len(schema_files) == 0:
-                create_file(schema_file, {'schema': [], 'last_modified': [], 'traces': []})
+                create_file(schema_file, {'loci': [], 'min': [], 'q1': [],
+                                          'median': [], 'q3': [], 'max': [],
+                                          'mean': [], 'sd': []})
 
             lengths_dir = '{0}_{1}_lengths'.format(species_id, schema_id)
             if lengths_dir in computed_files:
@@ -346,7 +359,9 @@ def single_schema(species_id, schema_id, virtuoso_graph, local_sparql, base_url)
     schema_file = os.path.join(computed_dir, '{0}.json'.format(schema_prefix))
 
     if len(schema_files) == 0:
-        create_file(schema_file, {'schema': [], 'last_modified': [], 'traces': []})
+        create_file(schema_file, {'loci': [], 'min': [], 'q1': [],
+                                  'median': [], 'q3': [], 'max': [],
+                                  'mean': [], 'sd': []})
 
     if lengths_dir in computed_files:
         lengths_dir = os.path.join(computed_dir, lengths_dir)
@@ -370,4 +385,4 @@ if __name__ == '__main__':
     elif args[0] == 'single_species':
         single_species(args[1], args[3], args[4], args[5])
     elif args[0] == 'single_schema':
-        single_schema(args[1], args[2], args[3], args[4], args[5])
+        single_schema(args[1], args[2], args[3], args[4], args[5]) 
