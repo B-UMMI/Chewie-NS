@@ -163,6 +163,8 @@ export const fetchLocusUniprot = (locus_id) => {
           uniprot_label: res.data[0].UniprotLabel.value,
           uniprot_submitted_name: res.data[0].UniprotName.value,
           uniprot_uri: res.data[0].UniprotURI.value,
+          user_annotation: res.data[0].UserAnnotation.value,
+          custom_annotation: res.data[0].CustomAnnotation.value,
         });
         console.log("Uniprot annot");
         console.log(uniprot_annot);

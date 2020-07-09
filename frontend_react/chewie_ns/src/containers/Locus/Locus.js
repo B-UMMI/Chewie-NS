@@ -226,6 +226,38 @@ class Locus extends Component {
           },
         },
         {
+          name: "user_annotation",
+          label: "User locus name",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "custom_annotation",
+          label: "Custom Annotation",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "uniprot_label",
           label: "Uniprot Label",
           options: {
