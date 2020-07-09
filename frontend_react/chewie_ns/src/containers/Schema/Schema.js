@@ -212,13 +212,11 @@ class Schema extends Component {
             xaxis: {
               showticklabels: false,
             },
-            hovermode: "closest",
+            boxgap: 0.8,
+            boxgapgroup: 0.8,
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
-          line={{
-            width: 1,
-          }}
           onClick={(e) => this.clickBoxPlotHandler(e)}
         />
       );
