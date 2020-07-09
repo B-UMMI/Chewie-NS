@@ -23,8 +23,10 @@ is rendered with a message indicating that no matches were found.
 
 **If the allele exists** in the Chewie-NS database, the table will contain the following columns:
 
+- **Species**: the name of the species that the allele sequence belongs to.
 - **Schema**: the ID of the schema the allele corresponding to that sequence belongs to. Clicking on the Schema ID will take you to the :doc:`schema_evaluation` page.
 - **Locus ID**: the ID of the locus the allele corresponding to that sequence belongs to. Clicking on the Locus ID will take you to the :doc:`locus_details` page.
+- **Number of alleles**: the number of alleles of the loci the sequence matched to.
 
 .. figure:: ../resources/sequences_filled.png
     :align: center
