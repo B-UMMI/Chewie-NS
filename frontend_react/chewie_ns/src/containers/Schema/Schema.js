@@ -212,8 +212,8 @@ class Schema extends Component {
             xaxis: {
               showticklabels: false,
             },
-            boxgap: 0.8,
-            boxgapgroup: 0.8,
+            boxgap: 0.05,
+            boxgapgroup: 0.05,
           }}
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
