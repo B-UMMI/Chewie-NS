@@ -46,6 +46,9 @@ class Schema extends Component {
 
     // fetch schema description
     this.props.onFetchDescriptions(species_id, schema_id);
+
+    // fetch schema boxplot data
+    this.props.onFetchBoxplotData(species_id, schema_id);
   }
 
   getMuiTheme = () =>
@@ -71,6 +74,14 @@ class Schema extends Component {
     this.props.history.push(schema_id + "/locus/" + locus_id);
   };
 
+  clickBoxPlotHandler = (event) => {
+    const schema_id = this.props.match.params.schema_id;
+
+    const locus_id = event.points[0].x.split("-")[1];
+
+    this.props.history.push(schema_id + "/locus/" + locus_id);
+  };
+
   render() {
     const style = {
       buttonBar: {
@@ -90,6 +101,7 @@ class Schema extends Component {
     let annotations = <CircularProgress />;
     let schema_table = <CircularProgress />;
     let schema_description = <div />;
+    let schema_boxplot = <CircularProgress />;
 
     const spd = JSON.parse(localStorage.getItem("speciesD"));
     const tableData = JSON.parse(localStorage.getItem("tableData"));
@@ -183,6 +195,31 @@ class Schema extends Component {
             width: 1,
           }}
           onClick={(e) => this.clickScatterPlotHandler(e)}
+        />
+      );
+    }
+
+    if (!this.props.loading_boxplot) {
+      let boxplot_data = this.props.boxplotData;
+
+      schema_boxplot = (
+        <Plot
+          data={boxplot_data}
+          layout={{
+            title: {
+              text: "Loci Size Variation",
+            },
+            xaxis: {
+              showticklabels: false,
+            },
+            hovermode: "closest",
+          }}
+          useResizeHandler={true}
+          style={{ width: "100%", height: "100%" }}
+          line={{
+            width: 1,
+          }}
+          onClick={(e) => this.clickBoxPlotHandler(e)}
         />
       );
     }
@@ -668,10 +705,22 @@ class Schema extends Component {
                     >
                       Locus Statistics
                     </Button>
+                    <Button
+                      style={style.button}
+                      className={classNames(
+                        this.state.tabValue === 3 && classes.tabButton
+                      )}
+                      onClick={() => {
+                        this.plotChangeHandler(3);
+                      }}
+                    >
+                      Loci Size Variation
+                    </Button>
                   </div>
                   {this.state.tabValue === 0 && total_allele_plot}
                   {this.state.tabValue === 1 && mode_plot}
                   {this.state.tabValue === 2 && scatter_plot}
+                  {this.state.tabValue === 3 && schema_boxplot}
                 </div>
               </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -701,6 +750,9 @@ const mapStateToProps = (state) => {
     loading_descriptions: state.descriptions.loading,
     error_descriptions: state.descriptions.error,
     species: state.species.species,
+    boxplotData: state.schemaBox.boxplotData,
+    loading_boxplot: state.schemaBox.loading,
+    error_boxplot: state.schemaBox.error,
     // token: state.auth.token
   };
 };
@@ -713,6 +765,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(actions.fetchAnnotations(species_id, schema_id)),
     onFetchDescriptions: (species_id, schema_id) =>
       dispatch(actions.fetchDescriptions(species_id, schema_id)),
+    onFetchBoxplotData: (species_id, schema_id) =>
+      dispatch(actions.fetchSchemaBox(species_id, schema_id)),
   };
 };
 
