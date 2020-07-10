@@ -124,8 +124,6 @@ class Species extends Component {
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
 
-    let schemaTimestamp = "";
-
     // get schema timestamp from the API
     axios({
       method: "get",
@@ -137,7 +135,16 @@ class Species extends Component {
         "/zip?request_type=check",
     }).then((res) => {
       console.log(res);
-      schemaTimestamp = res.data.zip[0].split("_")[2];
+      const schemaTimestamp = res.data.zip[0].split("_")[2];
+      let speciesName1 = spd[this.props.match.params.species_id];
+      const fileName1 =
+        speciesName1.replace(" ", "_") +
+        "_" +
+        schemaName +
+        "_" +
+        schemaTimestamp;
+
+      localStorage.setItem("timestamp", fileName1);
     });
 
     // make a request to the download endpoint
@@ -148,19 +155,23 @@ class Species extends Component {
       console.log(res);
     });
 
-    let speciesName = spd[this.props.match.params.species_id];
+    console.log(localStorage.getItem("timestamp"));
 
-    const fileName =
-      speciesName.replace(" ", "_") + "_" + schemaName + "_" + schemaTimestamp;
+    let speciesName2 = spd[this.props.match.params.species_id];
+
+    const fileName2 =
+      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + schemaTimestamp;
 
     // create download element
     const link = document.createElement("a");
     link.href =
       "https://chewbbaca.online/api/NS/api/download/compressed_schemas/" +
       endpointVariables;
-    link.setAttribute("download", fileName);
+    link.setAttribute("download", fileName2);
     document.body.appendChild(link);
     link.click();
+    
+    localStorage.removeItem("timestamp")
   };
 
   getMuiTheme = () =>
