@@ -94,7 +94,7 @@ class Chewie extends Component {
             </p>
             <p>
               If you wish to submit schemas to Chewie-NS you need to register
-              first at the Register page.
+              first at the <Link to={"/register"}>Register</Link> page.
             </p>
             <p>
               Chewie-NS is developed by the{" "}
