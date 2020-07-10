@@ -56,6 +56,22 @@ class Stats extends Component {
     if (!this.props.loading) {
       const columns = [
         {
+          name: "species_id",
+          label: "Species ID",
+          options: {
+            filter: false,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "species_name",
           label: "Species",
           options: {
@@ -72,22 +88,6 @@ class Stats extends Component {
                 <i>{value}</i>
               </Aux>
             ),
-          },
-        },
-        {
-          name: "species_id",
-          label: "Species ID",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
           },
         },
         {
@@ -122,8 +122,8 @@ class Stats extends Component {
                   variant="contained"
                   color="default"
                   component={RouterLink}
-                  to={"/species/" + tableMeta.rowData[1]}
-                  onClick={() => console.log(tableMeta.rowData[1])}
+                  to={"/species/" + tableMeta.rowData[0]}
+                  onClick={() => console.log(tableMeta.rowData[0])}
                 >
                   Schema Details
                 </Button>
