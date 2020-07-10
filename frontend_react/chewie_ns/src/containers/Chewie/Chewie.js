@@ -93,6 +93,36 @@ class Chewie extends Component {
               .
             </p>
             <p>
+              If you wish to submit schemas to Chewie-NS you need to register
+              first at the Register page.
+            </p>
+            <p>
+              Chewie-NS is developed by the{" "}
+              <a
+                href={"http://darwin.phyloviz.net/wiki/doku.php"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                Molecular Microbiology and Infection Unit (UMMI)
+              </a>
+              at the{" "}
+              <a
+                href={"https://imm.medicina.ulisboa.pt/"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                Instituto de Medicina Molecular João Lobo Antunes
+              </a>
+              and{" "}
+              <a
+                href={"https://www.medicina.ulisboa.pt/"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                Faculdade de Medicina of Universidade de Lisboa
+              </a>
+            </p>
+            <p>
               For any issues or requests contact the development team at{" "}
               <a href="mailto:imm-bioinfo@medicina.ulisboa.pt">
                 imm-bioinfo@medicina.ulisboa.pt
@@ -118,7 +148,13 @@ class Chewie extends Component {
             <p className={classes.resourcesText}>
               <b>Resources provided by</b>
             </p>
-            <img src={INCDlogo} alt="Resources provided by" />
+            <a
+              href={"https://www.incd.pt/"}
+              target={"_blank"}
+              rel={"noopener noreferrer"}
+            >
+              <img src={INCDlogo} alt="Resources provided by" />
+            </a>
           </div>
         </div>
       </div>
