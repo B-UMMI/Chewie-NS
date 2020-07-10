@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import INCDlogo from "../../assets/images/INCD-small.png";
 import UMMIlogo from "../../assets/images/ummi1small2.png";
 import IMMlogo from "../../assets/images/iMM_JLA_medium2.png";
+import FMULlogo from "../../assets/images/fmul_logo.png";
 
 // Material UI import
 import Button from "@material-ui/core/Button";
@@ -24,15 +25,31 @@ class Chewie extends Component {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
+            justifyContent: "center",
             marginTop: "-50px",
           }}
         >
-          <div id="immLogoDiv">
+          <a
+            href={"https://imm.medicina.ulisboa.pt/"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <img src={IMMlogo} alt="IMM" />
-          </div>
-          <div id="ummiLogoDiv" className={classes.ummiLogoDiv}>
+          </a>
+          <a
+            href={"https://www.medicina.ulisboa.pt/"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img src={FMULlogo} alt="FM" />
+          </a>
+          <a
+            href={"http://darwin.phyloviz.net/wiki/doku.php?id=start"}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <img src={UMMIlogo} alt="UMMI!" />
-          </div>
+          </a>
         </div>
         <div id="titleDIv" className={classes.titleDiv}>
           <h2>
@@ -64,7 +81,7 @@ class Chewie extends Component {
               <a href="https://tutorial.chewbbaca.online/">
                 https://tutorial.chewbbaca.online/
               </a>{" "}
-              or by clicking on the test tube icon on the sidebar! The
+              or by clicking on the test tube icon on the sidebar! The{" "}
               <b>Tutorial</b> instructions will be available soon at{" "}
               <a
                 href={"https://chewie-ns.readthedocs.io/en/latest/index.html"}
