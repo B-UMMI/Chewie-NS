@@ -124,6 +124,22 @@ class Species extends Component {
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
 
+    let schemaTimestamp = "";
+
+    // get schema timestamp from the API
+    axios({
+      method: "get",
+      url:
+        "/species/" +
+        speciesId +
+        "/schemas/" +
+        schemaId +
+        "/zip?request_type=check",
+    }).then((res) => {
+      console.log(res);
+      schemaTimestamp = res.data.zip[0].split("_")[2];
+    });
+
     // make a request to the download endpoint
     axios({
       method: "get",
@@ -135,12 +151,7 @@ class Species extends Component {
     let speciesName = spd[this.props.match.params.species_id];
 
     const fileName =
-      speciesName.replace(" ", "_") +
-      "_" +
-      schemaName +
-      "_" +
-      lastModifiedDate +
-      ".zip";
+      speciesName.replace(" ", "_") + "_" + schemaName + "_" + schemaTimestamp;
 
     // create download element
     const link = document.createElement("a");
