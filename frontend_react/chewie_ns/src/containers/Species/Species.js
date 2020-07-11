@@ -144,7 +144,7 @@ class Species extends Component {
         "_" +
         schemaTimestamp;
 
-      localStorage.setItem("timestamp", fileName1);
+      // localStorage.setItem("timestamp", fileName1);
     });
 
     // make a request to the download endpoint
@@ -155,14 +155,14 @@ class Species extends Component {
       console.log(res);
     });
 
-    console.log(localStorage.getItem("timestamp"));
+    // console.log(localStorage.getItem("timestamp"));
 
     let speciesName2 = spd[this.props.match.params.species_id];
 
     // const schemaTimestamp2 = "";
 
     const fileName2 =
-      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + lastModifiedDate;
+      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + lastModifiedDate + ".zip";
 
     // create download element
     const link = document.createElement("a");
