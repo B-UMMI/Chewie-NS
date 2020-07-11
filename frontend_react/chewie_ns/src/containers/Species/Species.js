@@ -159,8 +159,10 @@ class Species extends Component {
 
     let speciesName2 = spd[this.props.match.params.species_id];
 
+    // const schemaTimestamp2 = "";
+
     const fileName2 =
-      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + schemaTimestamp;
+      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + lastModifiedDate;
 
     // create download element
     const link = document.createElement("a");
