@@ -65,9 +65,15 @@ class Chewie extends Component {
               download or update cg/wgMLST schemas, allowing the easy sharing of
               results, while ensuring the reproducibility and consistency of
               these steps. It has an integration with the previously proposed{" "}
-              <b>chewBBACA</b>, a suite that allows the creation of gene-by-gene
-              schemas and determination of allelic profiles from assembled draft
-              genomes.
+              <a
+                href={"https://github.com/B-UMMI/chewBBACA"}
+                target={"_blank"}
+                rel="noopener noreferrer"
+              >
+                chewBBACA
+              </a>
+              , a suite that allows the creation of gene-by-gene schemas and
+              determination of allelic profiles from assembled draft genomes.
             </p>
             <p>
               <b>Chewie-NS</b> is an easy way for users worldwide to download
@@ -104,7 +110,7 @@ class Chewie extends Component {
                 rel="noopener noreferrer"
               >
                 Molecular Microbiology and Infection Unit (UMMI)
-              </a>
+              </a>{" "}
               at the{" "}
               <a
                 href={"https://imm.medicina.ulisboa.pt/"}
@@ -112,7 +118,7 @@ class Chewie extends Component {
                 rel="noopener noreferrer"
               >
                 Instituto de Medicina Molecular João Lobo Antunes
-              </a>
+              </a>{" "}
               and{" "}
               <a
                 href={"https://www.medicina.ulisboa.pt/"}
@@ -121,6 +127,7 @@ class Chewie extends Component {
               >
                 Faculdade de Medicina of Universidade de Lisboa
               </a>
+              .
             </p>
             <p>
               For any issues or requests contact the development team at{" "}
