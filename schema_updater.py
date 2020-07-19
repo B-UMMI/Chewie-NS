@@ -50,6 +50,7 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%dT%H:%M:%S',
                     filename=logfile)
 
+sync_lock = './schema_insertion_temp/sync_lock'
 
 thread_local = threading.local()
 
@@ -426,7 +427,12 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 	start = time.time()
 	# insert data
 	# sort reponses to include summary in log file
+	# create lock file
+	with open(sync_lock, 'w') as lf:
+		lf.write('{0}\n{1}'.format(temp_dir, user))
 	post_results = send_alleles(queries_files, sparql, user, password)
+	# remove lock file after insertion
+	os.remove(sync_lock)
 
 	# create file with identifiers
 	identifiers_file = os.path.join(temp_dir, 'identifiers')
@@ -454,6 +460,9 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
 			      ''.format(species_id, schema_id, graph, sparql, base_url))
 		os.system('python annotations.py -m single_schema '
+			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+			      ''.format(species_id, schema_id, graph, sparql, base_url))
+		os.system('python loci_boxplot.py -m single_schema '
 			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
 			      ''.format(species_id, schema_id, graph, sparql, base_url))
 

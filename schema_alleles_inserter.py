@@ -57,6 +57,7 @@ logging.basicConfig(level=logging.INFO,
                     datefmt='%Y-%m-%dT%H:%M:%S',
                     filename=logfile)
 
+sync_lock = './schema_insertion_temp/sync_lock'
 
 thread_local = threading.local()
 
@@ -368,6 +369,10 @@ def post_alleles(input_file, local_sparql, virtuoso_user, virtuoso_pass):
 		max_wait = 5
 		valid = False
 		while valid is False and tries < max_tries:
+			# check if there is a Sync process
+			while os.path.isfile(sync_lock) is True:
+				time.sleep(5)
+			# insert alleles
 			with session.post(local_sparql, data=q, headers=headers,
 				              auth=requests.auth.HTTPBasicAuth(virtuoso_user, virtuoso_pass)) as response:
 				status_code = response.status_code
@@ -558,6 +563,9 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
 		      ''.format(species_id, schema_id, graph, sparql, base_url))
 	os.system('python annotations.py -m single_schema '
+		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+		      ''.format(species_id, schema_id, graph, sparql, base_url))
+	os.system('python loci_boxplot.py -m single_schema '
 		      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
 		      ''.format(species_id, schema_id, graph, sparql, base_url))
 

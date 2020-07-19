@@ -60,6 +60,8 @@ def fast_update(schema, last_modified, file, lengths_dir,
 
     if len(loci_list) == 0:
         length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+        # sort by locus id
+        length_files = sorted(length_files, key= lambda x: x.split('_')[-1])
 
         loci_list = []
         loci_min = []
@@ -133,6 +135,17 @@ def fast_update(schema, last_modified, file, lengths_dir,
 
         elif json_date != virtuoso_date:
             length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
+            # sort by locus id
+            length_files = sorted(length_files, key= lambda x: x.split('_')[-1])
+
+            loci_list = []
+            loci_min = []
+            loci_q1 = []
+            loci_median = []
+            loci_q3 = []
+            loci_max = []
+            loci_mean = []
+            loci_sd = []
 
             for locus_file in length_files:
                 with open(locus_file, 'rb') as f:

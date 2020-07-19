@@ -18,7 +18,7 @@ RUN pip install -r requirements.txt
 
 # install BLAST+
 RUN mkdir /blast
-RUN cd ../blast; wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.0+-x64-linux.tar.gz \
+RUN cd ../blast; wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.10.0/ncbi-blast-2.10.0+-x64-linux.tar.gz \
 && tar -xzvf ncbi-blast-2.10.0+-x64-linux.tar.gz && rm ncbi-blast-2.10.0+-x64-linux.tar.gz
 ENV PATH="/blast/ncbi-blast-2.10.0+/bin:${PATH}"
 

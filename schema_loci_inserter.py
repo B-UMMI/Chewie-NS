@@ -197,13 +197,13 @@ def assign_identifiers(loci_data, schema_hashes, loci_prefix, start_id, base_url
         # locus is new
         if inserted is False:
             locus_uri = '{0}loci/{1}'.format(base_url, start_id)
-            locus_prefix = '{0}-{1}'.format(loci_prefix, '{:06d}'.format(start_id))
+            locus_prefix = '{0}-{1}'.format(loci_prefix, '{:08d}'.format(start_id))
             # increment for next locus
             start_id += 1
         # locus was previously inserted, do not assign new identifier
         else:
             locus_uri = inserted
-            locus_prefix = '{0}-{1}'.format(loci_prefix, '{:06d}'.format(locus_uri.split('/')[-1]))
+            locus_prefix = '{0}-{1}'.format(loci_prefix, '{:08d}'.format(locus_uri.split('/')[-1]))
 
         locus.append(locus_uri)
         locus.append(locus_prefix)
@@ -474,13 +474,18 @@ def main(temp_dir, graph, sparql, base_url, user, password):
                         'Aborting\n\n'.format(loci_file))
         sys.exit(1)
 
-    # determine total number of loci in the NS
-    # result = aux.get_data(SPARQLWrapper(local_sparql),
-    #                       (sq.COUNT_TOTAL_LOCI.format(virtuoso_graph)))
+    # determine locus with highest identifier
     result = aux.get_data(SPARQLWrapper(sparql),
-                          (sq.COUNT_TOTAL_LOCI.format(graph)))
+                          (sq.SELECT_HIGHEST_LOCUS.format(graph)))
 
-    total_loci = int(result['results']['bindings'][0]['count']['value'])
+    highest_locus = result['results']['bindings']
+    # if there are no loci
+    if highest_locus != []:
+        highest_locus = highest_locus[0]['locus']['value']
+        highest_id = int(highest_locus.split('/')[-1])
+        start_id = highest_id + 1
+    elif highest_locus == []:
+        start_id = 1
 
     # define path to file with schema upload status data
     hashes_file = os.path.join(temp_dir,
@@ -495,7 +500,6 @@ def main(temp_dir, graph, sparql, base_url, user, password):
         sys.exit(1)
 
     # assign identifiers to new loci based on the total number of loci in the Chewie-NS
-    start_id = total_loci + 1
     response, hash_to_uri, loci_data, = assign_identifiers(loci_data, schema_hashes,
                                                            loci_prefix, start_id,
                                                            base_url)
@@ -505,7 +509,7 @@ def main(temp_dir, graph, sparql, base_url, user, password):
     logging.info('{0} loci to insert out of {1} total loci '
                  'in schema.'.format(insert, len(loci_data)))
     logging.info('Loci integer identifiers interval: [{0} .. {1}]'
-                 ''.format(total_loci+1, total_loci+insert))
+                 ''.format(start_id, start_id+insert))
 
     # insert data to create loci
     if len(insert_queries) > 0:

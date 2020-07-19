@@ -593,7 +593,7 @@ def parse_arguments():
 
     return [args.mode, args.species_id, args.schema_id,
             args.virtuoso_graph, args.local_sparql, args.base_url,
-            args.virtuoso_graph, args.virtuoso_pass]
+            args.virtuoso_user, args.virtuoso_pass]
 
 
 def global_compressor(graph, sparql, base_url):
