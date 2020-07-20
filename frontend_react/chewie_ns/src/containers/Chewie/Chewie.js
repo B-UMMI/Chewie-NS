@@ -44,7 +44,7 @@ class Chewie extends Component {
             <img src={FMULlogo} alt="FM" />
           </a>
           <a
-            href={"http://darwin.phyloviz.net/wiki/doku.php?id=start"}
+            href={"http://im.fm.ul.pt"}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -105,7 +105,7 @@ class Chewie extends Component {
             <p>
               Chewie-NS is developed by the{" "}
               <a
-                href={"http://darwin.phyloviz.net/wiki/doku.php"}
+                href={"http://im.fm.ul.pt"}
                 target={"_blank"}
                 rel="noopener noreferrer"
               >

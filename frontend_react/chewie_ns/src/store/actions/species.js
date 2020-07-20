@@ -61,6 +61,7 @@ export const fetchSpecies = (spec_id) => {
             ptf: res.data.message[key].prodigal_training_file,
             tl_table: res.data.message[key].translation_table,
             minLen: res.data.message[key].minimum_locus_length,
+            sizeThresh: res.data.message[key].size_threshold,
             nr_loci: res.data.message[key].nr_loci,
             nr_allele: res.data.message[key].nr_alleles,
             id: key,

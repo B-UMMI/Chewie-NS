@@ -7,7 +7,7 @@ Chewie-NS is a web-based Nomenclature Server, based on the
 [TypOn ontology](https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43),
 that integrates with the [chewBBACA suite](https://github.com/B-UMMI/chewBBACA) to provide a centralized service to download or update schemas, allowing the easy sharing of results, while ensuring the reproducibility and consistency of these steps.
 
-Chewie-NS is developed by the [Molecular Microbiology and Infection Unit (UMMI)](http://darwin.phyloviz.net/wiki/doku.php) at the [Instituto de Medicina Molecular João Lobo Antunes](https://imm.medicina.ulisboa.pt/).
+Chewie-NS is developed by the [Molecular Microbiology and Infection Unit (UMMI)](http://im.fm.ul.pt) at the [Instituto de Medicina Molecular João Lobo Antunes](https://imm.medicina.ulisboa.pt/) and [Faculdade de Medicina of Universidade de Lisboa](https://www.medicina.ulisboa.pt/).
 
 ## Goals
 
@@ -19,11 +19,11 @@ With this service we have following main goals:
 
 ## Licensing
 
-This project is licensed under the [GPLv3 license](https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/LICENSE).
-The source code of Chewie-NS is available at https://github.com/B-UMMI/Nomenclature_Server_docker_compose and the webservice is available at https://chewbbaca.online/.
+This project is licensed under the [GPLv3 license](https://github.com/B-UMMI/Chewie-NS/blob/master/LICENSE).
+The source code of Chewie-NS is available at https://github.com/B-UMMI/Chewie-NS and the webservice is available at https://chewbbaca.online/.
 
 ## Contacts
 
-For any issues contact the development team at [imm-bioinfo@medicina.ulisboa.pt](mailto:imm-bioinfo@medicina.ulisboa.pt) or open an issue at the Chewie-NS Github [repository](https://github.com/B-UMMI/Nomenclature_Server_docker_compose>).`;
+For any issues contact the development team at [imm-bioinfo@medicina.ulisboa.pt](mailto:imm-bioinfo@medicina.ulisboa.pt) or open an issue at the Chewie-NS Github [repository](https://github.com/B-UMMI/Chewie-NS).`;
 
 export default text;

@@ -144,7 +144,7 @@ class Species extends Component {
         "_" +
         schemaTimestamp;
 
-      // localStorage.setItem("timestamp", fileName1);
+      localStorage.setItem("timestamp", fileName1);
     });
 
     // make a request to the download endpoint
@@ -155,7 +155,9 @@ class Species extends Component {
       console.log(res);
     });
 
-    // console.log(localStorage.getItem("timestamp"));
+    const ts = localStorage.getItem("timestamp");
+    console.log(ts);
+    localStorage.removeItem("timestamp")
 
     let speciesName2 = spd[this.props.match.params.species_id];
 
@@ -377,6 +379,21 @@ class Species extends Component {
         {
           name: "minLen",
           label: "Minimum Length (bp)",
+          options: {
+            filter: false,
+            sort: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "sizeThresh",
+          label: "Size Threshold",
           options: {
             filter: false,
             sort: true,

@@ -197,7 +197,7 @@ class PersistentDrawerLeft extends Component {
               button
               component="a"
               href={
-                "https://github.com/B-UMMI/Nomenclature_Server_docker_compose"
+                "https://github.com/B-UMMI/Chewie-NS"
               }
               target={"_blank"}
               rel="noopener noreferrer"
