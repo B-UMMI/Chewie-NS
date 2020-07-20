@@ -6,7 +6,7 @@ This page displays information on all schemas available for a given species.
 .. figure:: ../resources/schemas_overview_full.png
     :align: center
 
-    Figure 1: Schema Overview page.
+    Figure 1.1: Schema Overview page.
 
 Parameters table
 ----------------
@@ -17,7 +17,7 @@ to create each schema are displayed on the following table:
 .. figure:: ../resources/schemas_overview_table.png
     :align: center
 
-    Figure 2: Parameters table.
+    Figure 2.1: Parameters table.
 
 The top-right buttons |buttons| of the table allow the user to:
 
@@ -55,7 +55,7 @@ each individual locus (x-axis), ordered by decreasing number of alleles in each 
 .. figure:: ../resources/schemas_overview_plot.png
     :align: center
 
-    Figure 3:
+    Figure 3.1: Bar plots for available schemas.
 
 .. important:: 
     Each bar represents a locus and by **hovering** on a bar, a popup will display the **locus ID** and the **number of alleles** of that locus.
@@ -65,6 +65,6 @@ each individual locus (x-axis), ordered by decreasing number of alleles in each 
 .. figure:: ../resources/schemas_overview_bars.png
     :align: center
 
-    Figure 4: Plot bars display the Locus ID and the number of alleles. 
+    Figure 3.2: Plot bars display the Locus ID and the number of alleles. 
 
 

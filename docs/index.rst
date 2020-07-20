@@ -20,7 +20,7 @@ to provide a centralized service to **share, download or update schemas**, allow
 of these steps. 
 
 Chewie-NS is developed by the `Molecular Microbiology and Infection Unit (UMMI) 
-<http://darwin.phyloviz.net/wiki/doku.php>`_ at the 
+<http://im.fm.ul.pt>`_ at the 
 `Instituto de Medicina Molecular João Lobo Antunes 
 <https://imm.medicina.ulisboa.pt/>`_ and `Faculdade de Medicina, Universidade de Lisboa 
 <https://www.medicina.ulisboa.pt/>`_.
@@ -47,14 +47,14 @@ Licensing
 
 This project is licensed under the `GPLv3 license 
 <https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/LICENSE>`_.
-The source code of Chewie-NS is available at `<https://github.com/B-UMMI/Nomenclature_Server_docker_compose>`_
+The source code of Chewie-NS is available at `<https://github.com/B-UMMI/Chewie-NS>`_
 and the webservice is available at `<https://chewbbaca.online/>`_.
 
 Contacts
 ::::::::
 
 For any issues contact the development team at imm-bioinfo@medicina.ulisboa.pt or 
-open an issue at the Chewie-NS Github `repository <https://github.com/B-UMMI/Nomenclature_Server_docker_compose>`_.
+open an issue at the Chewie-NS Github `repository <https://github.com/B-UMMI/Chewie-NS>`_.
 
 .. toctree::
    :maxdepth: 1

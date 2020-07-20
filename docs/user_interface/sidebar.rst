@@ -11,17 +11,17 @@ will open a sidebar contaning eight buttons:
 .. figure:: ../resources/sidebar_closed.png
     :align: center
 
-    Figure 1: Sidebar closed.
+    Figure 1.1: Sidebar closed.
 
 .. figure:: ../resources/sidebar_open.png
     :align: center
 
-    Figure 2: Sidebar open.
+    Figure 1.2: Sidebar open.
 
 .. figure:: ../resources/sidebar.png
     :align: center
 
-    Figure 3: Sidebar menu.
+    Figure 1.3: Sidebar menu.
 
 Home
 ----
@@ -47,7 +47,7 @@ contributions for the development of the service.
 Github
 ------
 
-**Github** will take to Chewie-NS' Github repository.
+**Github** will take to Chewie-NS' `Github repository <https://github.com/B-UMMI/Chewie-NS>`_.
 
 Read the Docs
 -------------
@@ -60,6 +60,6 @@ API
 **API** will take you to Chewie-NS' `API <https://194.210.120.209/api/NS/api/docs>`_.
 
 Tutorial
----
+--------
 
 **Tutorial** will take you to Chewie-NS `Tutorial server <https://tutorial.chewbbaca.online/>`_ which will allow you to experiment with a public Chewie-NS server requiring no sign-in for all operations.

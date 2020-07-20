@@ -18,7 +18,7 @@ Fill the email and password fields with the credentials for the admin user and c
 .. figure:: ../resources/user_auth.png
     :align: center
 
-    Figure 1: Admin user authentication.
+    Figure 1.1: Admin user authentication.
 
 If the creadentials are correct Chewie-NS will return a response containing a message informing
 the user that the authentication was successful and, more importantly, it will return an 
@@ -27,7 +27,7 @@ the user that the authentication was successful and, more importantly, it will r
 .. figure:: ../resources/user_tokens.png
     :align: center
 
-    Figure 2: Successful authentication response with tokens.
+    Figure 1.2: Successful authentication response with tokens.
 
 Access token 
 ^^^^^^^^^^^^
@@ -46,7 +46,7 @@ right corner of the Swagger documentation page.
 .. figure:: ../resources/user_auth_access_token_pasted.png
     :align: center
 
-    Figure 3: Access token field with the pasted token.
+    Figure 2.1: Access token field with the pasted token.
 
 
 Refresh token
@@ -66,7 +66,7 @@ right corner of the Swagger documentation page.
 .. figure:: ../resources/user_auth_refresh_token_pasted.png
     :align: center
 
-    Figure 4: Refresh token field with the pasted token.
+    Figure 3.1: Refresh token field with the pasted token.
 
 After pasting the refresh token in the authorize button, the user simply needs to access the **auth/refresh**
 endpoint and press the **Execute** button.
@@ -74,7 +74,7 @@ endpoint and press the **Execute** button.
 .. figure:: ../resources/user_auth_new_access_token.png
     :align: center
 
-    Figure 5: New access token obtained from the refresh endpoint.
+    Figure 3.2: New access token obtained from the refresh endpoint.
 
 
 User operations
@@ -108,7 +108,7 @@ and click on the **Execute** button.
 .. figure:: ../resources/register_user.png
     :align: center
 
-    Figure 6: Register user endpoint.
+    Figure 4.1: Register user endpoint.
 
 
 /user/users

@@ -6,9 +6,9 @@ The deployment of local instances of Chewie-NS can be easily achieved through th
 use of Docker Compose.
 
 Chewie-NS is available for cloning from its Github 
-`repository <https://github.com/B-UMMI/Nomenclature_Server_docker_compose>`_. ::
+`repository <https://github.com/B-UMMI/Chewie-NS>`_. ::
 
-    git clone https://github.com/B-UMMI/Nomenclature_Server_docker_compose.git
+    git clone https://github.com/B-UMMI/Chewie-NS.git
 
 You will also need a container engine (see `Container engine`_ below)
 

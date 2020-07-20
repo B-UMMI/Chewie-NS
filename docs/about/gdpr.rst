@@ -40,7 +40,7 @@ How is data stored?
 :::::::::::::::::::
 
 Your user account data is stored in a relational database with strict access only to 
-Chewie-NS developers and system administrators at the `Molecular Microbiology and Infection Unit (UMMI) <http://darwin.phyloviz.net/wiki/doku.php>`_. 
+Chewie-NS developers and system administrators at the `Molecular Microbiology and Infection Unit (UMMI) <http://im.fm.ul.pt>`_. 
 These data are not readily accessible outside of the UMMI Unit.
 
 All passwords are hashed and encrypted. We have no way to read your original password.

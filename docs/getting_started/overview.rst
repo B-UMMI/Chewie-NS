@@ -11,7 +11,7 @@ consistency of these steps.
 .. figure:: ../resources/ontology_adapted2.png
     :align: center
 
-    Figure 1: TypOn ontology. Adapted from `Vaz et al, 2014 <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
+    Figure 1.1: TypOn ontology. Adapted from `Vaz et al, 2014 <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
 
    
 
@@ -49,7 +49,7 @@ A diagram of the implementation of Chewie-NS is displayed below:
     :scale: 80%
     :align: center
 
-    Figure 2: Chewie-NS implementation.
+    Figure 2.1: Chewie-NS implementation.
 
 Backend
 :::::::

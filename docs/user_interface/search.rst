@@ -14,7 +14,7 @@ with the **DNA sequence** of the allele.
 .. figure:: ../resources/sequences_empty.png
     :align: center
 
-    Figure 1: Empty Allele Sequence box. 
+    Figure 1.1: Empty Allele Sequence box. 
 
 
 By default when that particular sequence not exist in any Chewie-NS database, a table 
@@ -31,4 +31,4 @@ is rendered with a message indicating that no matches were found.
 .. figure:: ../resources/sequences_filled.png
     :align: center
 
-    Figure 2: Allele Sequence box with a sequence that matched two loci in different schemas. This could be because there are two schemas for the same species containing the same allele.
+    Figure 1.2: Allele Sequence box with a sequence that matched two loci in different schemas. This could be because there are two schemas for the same species containing the same allele.

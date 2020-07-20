@@ -27,10 +27,16 @@ Example::
       "alleles": {
         "type": "uri",
         "value": "https://127.0.0.1/NS/api/loci/15441/alleles/1"
+      },
+      "name": {
+        "type": "typed-literal",
+        "datatype": "http://www.w3.org/2001/XMLSchema#string",
+        "value": "Species name"
       }
     }
     ],
-    "sequence_uri": "https://127.0.0.1/NS/api/sequences/<uri>"
+    "sequence_uri": "https://127.0.0.1/NS/api/sequences/<uri>",
+    "number_alleles_loci": 1000
     }
 
 

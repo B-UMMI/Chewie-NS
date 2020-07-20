@@ -10,7 +10,7 @@ This page displays details about a single locus.
 .. figure:: ../resources/locus_details_overview.png
     :align: center
 
-    Figure 1: Locus Details page.
+    Figure 1.1: Locus Details page.
 
 Histogram
 ---------
@@ -24,7 +24,7 @@ vary in length between 5595 and 5599 base pairs (bp).
 .. figure:: ../resources/locus_details_hist.png
     :align: center
 
-    Figure 2: Number of alleles (744) that have a length in the range of 5595-5599 (bp).
+    Figure 2.1: Number of alleles (744) that have a length in the range of 5595-5599 (bp).
 
 
 Scatter
@@ -38,7 +38,7 @@ For example, **Figure 3** shows that allele 1877 of locus INNUENDO_cgMLST-016801
 .. figure:: ../resources/locus_details_scatter.png
     :align: center
 
-    Figure 3: Length (5232 bp) of allele 1677.
+    Figure 3.1: Length (5232 bp) of allele 1677.
 
 
 Details table
@@ -57,7 +57,7 @@ The locus details table displays the following information about the locus:
 .. figure:: ../resources/locus_details_table.png
     :align: center
 
-    Figure 4: Locus Details table.
+    Figure 4.1: Locus Details table.
 
 
 Interactive Buttons

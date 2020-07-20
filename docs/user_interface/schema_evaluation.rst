@@ -6,7 +6,7 @@ This page displays details about a single schema.
 .. figure:: ../resources/schema_evaluation_overview.png
     :align: center
 
-    Figure 1: Schema Evaluation and Annotation page.
+    Figure 1.1: Schema Evaluation and Annotation page.
 
 Parameters table
 ----------------
@@ -24,7 +24,7 @@ If the user does not provide a description file, the name of the schema
 will be used as the schema description.
 
 An example file is available at 
-`Chewie-NS' repository <https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/docs/example_files/markdown_example.md>`_.
+`Chewie-NS' repository <https://github.com/B-UMMI/Chewie-NS/blob/master/docs/example_files/markdown_example.md>`_.
 
 For more information on the Markdown specification accepted by Chewie-NS please visit the
 `Github Flavored Markdown Specification page <https://github.github.com/gfm/>`_.
@@ -37,7 +37,7 @@ For more information on the Markdown specification accepted by Chewie-NS please 
 .. figure:: ../resources/schema_description.png
     :align: center
 
-    Figure 2: Schema Description panel.
+    Figure 2.1: Schema Description panel.
 
 
 Schema Evaluation
@@ -53,12 +53,12 @@ The plots are displayed by clicking on the corrresponding buttons.
 .. figure:: ../resources/schema_evaluation_expanded.png
     :align: center
 
-    Figure 3: Expanded Schema Evaluation panel.
+    Figure 3.1: Expanded Schema Evaluation panel.
 
 .. figure:: ../resources/schema_evaluation_collapsed.png
     :align: center
 
-    Figure 4: Collapsed Schema Evaluation panel.
+    Figure 3.2: Collapsed Schema Evaluation panel.
 
 
 Allele Numbers Analysis
@@ -70,7 +70,7 @@ exibit a **number of different alleles (x-axis)** within the range shown.
 .. figure:: ../resources/allele_numbers_fig2.png
     :align: center
 
-    Figure 5: Number of loci (1030) that contain between 50 and 99 alleles.
+    Figure 4.1: Number of loci (1030) that contain between 50 and 99 alleles.
 
 
 Allele Length Analysis
@@ -82,7 +82,7 @@ having an **allele mode size (x-axis)** within the range shown.
 .. figure:: ../resources/allele_len.png
     :align: center
 
-    Figure 6: Number of loci (556) that have an allele mode size in the range 200-249 (bp).
+    Figure 5.1: Number of loci (556) that have an allele mode size in the range 200-249 (bp).
 
    
 Locus Statistics
@@ -101,7 +101,7 @@ that the central tendency measures of allele length are similar are over 5500 ba
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 7: Locus 16801. Clicking on this point will open a page with the details of locus 16801
+    Figure 6.1: Locus 16801. Clicking on this point will open a page with the details of locus 16801
    
 
 Annotations 
@@ -123,6 +123,6 @@ The columns of the table are the following:
 .. figure:: ../resources/annotations_table.png
     :align: center
 
-    Figure 8: Annotations table.
+    Figure 7.1: Annotations table.
 
    
