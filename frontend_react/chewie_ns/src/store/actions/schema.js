@@ -31,7 +31,7 @@ export const fetchSchemaAlleleMode = (species_id, schema_id) => {
       .get("stats/species/" + species_id + "/schema/" + schema_id + "/modes")
       .then(res => {
         console.log(res.data);
-        let query = "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
+        // let query = "stats/species/" + species_id + "/schema/" + schema_id + "/modes";
         let allele_mode = [];
         let locus_name = [];
         let mode_data = [];
