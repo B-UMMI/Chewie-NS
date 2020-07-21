@@ -67,7 +67,7 @@ function SimpleBreadcrumbs() {
           </MuiLink>
         )}
         {statsMatches && (
-          <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/sequences" style={styles.breadcrumb}>
             Schemas
           </MuiLink>
         )}
