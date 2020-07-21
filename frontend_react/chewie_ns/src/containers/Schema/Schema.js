@@ -77,7 +77,7 @@ class Schema extends Component {
   clickBoxPlotHandler = (event) => {
     const schema_id = this.props.match.params.schema_id;
 
-    const locus_id = event.points[0].x.split("-")[1];
+    const locus_id = parseInt(event.points[0].x.split("-")[1]);
 
     this.props.history.push(schema_id + "/locus/" + locus_id);
   };
