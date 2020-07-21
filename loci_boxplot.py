@@ -61,7 +61,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
     if len(loci_list) == 0:
         length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
         # sort by locus id
-        length_files = sorted(length_files, key= lambda x: x.split('_')[-1])
+        length_files = sorted(length_files, key= lambda x: int(x.split('_')[-1]))
 
         loci_list = []
         loci_min = []
@@ -71,6 +71,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
         loci_max = []
         loci_mean = []
         loci_sd = []
+        alleles_counts = []
 
         for locus_file in length_files:
             with open(locus_file, 'rb') as lf:
@@ -84,6 +85,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
             alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
             alleles_lengths.sort()
             nr_alleles = len(alleles_lengths)
+            alleles_counts.append(nr_alleles)
             # minimum and maximum values
             loci_min.append(min(alleles_lengths))
             loci_max.append(max(alleles_lengths))
@@ -119,7 +121,8 @@ def fast_update(schema, last_modified, file, lengths_dir,
                         'q3': loci_q3,
                         'max': loci_max,
                         'mean': loci_mean,
-                        'sd': loci_sd}
+                        'sd': loci_sd,
+                        'nr_alleles': alleles_counts}
 
         with open(file, 'w') as json_outfile:
             json.dump(json_to_file, json_outfile)
@@ -136,7 +139,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
         elif json_date != virtuoso_date:
             length_files = [os.path.join(lengths_dir, f) for f in os.listdir(lengths_dir)]
             # sort by locus id
-            length_files = sorted(length_files, key= lambda x: x.split('_')[-1])
+            length_files = sorted(length_files, key= lambda x: int(x.split('_')[-1]))
 
             loci_list = []
             loci_min = []
@@ -146,6 +149,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
             loci_max = []
             loci_mean = []
             loci_sd = []
+            alleles_counts = []
 
             for locus_file in length_files:
                 with open(locus_file, 'rb') as f:
@@ -158,6 +162,7 @@ def fast_update(schema, last_modified, file, lengths_dir,
                 alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
                 alleles_lengths.sort()
                 nr_alleles = len(alleles_lengths)
+                alleles_counts.append(nr_alleles)
                 # minimum and maximum values
                 loci_min.append(min(alleles_lengths))
                 loci_max.append(max(alleles_lengths))
@@ -193,7 +198,8 @@ def fast_update(schema, last_modified, file, lengths_dir,
                             'q3': loci_q3,
                             'max': loci_max,
                             'mean': loci_mean,
-                            'sd': loci_sd}
+                            'sd': loci_sd,
+                            'nr_alleles': alleles_counts}
 
             with open(file, 'w') as json_outfile:
                 json.dump(json_to_file, json_outfile)
