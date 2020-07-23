@@ -43,7 +43,7 @@ For more information on the Markdown specification accepted by Chewie-NS please 
 Schema Evaluation
 -----------------
 
-The Schema Evaluation panel contains 3 plots displaying basic statistics about the schema.
+The Schema Evaluation panel contains 4 plots displaying basic statistics about the schema.
 The plots are displayed by clicking on the corrresponding buttons.
 
 .. note::
@@ -88,10 +88,10 @@ having an **allele mode size (x-axis)** within the range shown.
 Locus Statistics
 ^^^^^^^^^^^^^^^^
 
-This plot displays the the number of alleles and the central tendency measures **mean**, **median** and **mode** of the length of each locus.
+This plot displays the number of alleles and the central tendency measures **mean**, **median** and **mode** of the length of each locus.
 
 The **y-axis** represents the **number of alleles in the locus** while the 
-**y-axis** represents the **central tendency measures of the length of the alleles in base pairs**.
+**x-axis** represents the **central tendency measures of the length of the alleles in base pairs**.
 
 For example, **Figure 8** shows that Locus 16801 has more than 1500 alleles (y-axis) and 
 that the central tendency measures of allele length are similar are over 5500 base pairs.
@@ -101,8 +101,28 @@ that the central tendency measures of allele length are similar are over 5500 ba
 .. figure:: ../resources/locus_statistics.png
     :align: center
 
-    Figure 6.1: Locus 16801. Clicking on this point will open a page with the details of locus 16801
-   
+    Figure 6.1: Locus 16801. Clicking on this point will open a page with the details of locus 16801.
+
+Loci Size Variation
+^^^^^^^^^^^^^^^^^^^
+
+This plot displays the size variation of all the loci in the schema.
+
+The **y-axis** represents the **central tendency measures of the length of the alleles in base pairs**
+and the **x-axis** represents the each loci.
+
+.. important:: **Clicking** on the plot's data points will take you the :doc:`locus_details` page of that locus!
+
+.. figure:: ../resources/locus_size_variation_overview.png
+    :align: center
+
+    Figure 7.1: Loci size variation overview.
+
+.. figure:: ../resources/locus_size_variation_zoom.png
+    :align: center
+
+    Figure 7.2: Locus 15030. Clicking on this point will open a page with the details of locus 15030.
+
 
 Annotations 
 -----------
@@ -123,6 +143,6 @@ The columns of the table are the following:
 .. figure:: ../resources/annotations_table.png
     :align: center
 
-    Figure 7.1: Annotations table.
+    Figure 8.1: Annotations table.
 
    
