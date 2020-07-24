@@ -618,12 +618,13 @@ def global_compressor(graph, sparql, base_url):
     for species in species_list:
         schemas = species_schemas(species, schemas, sparql, graph)
         if len(schemas) > 0:
-            current_schemas = schemas[species]
-            current_schemas_strs = ['{0}, {1}'.format(s[0], s[1]) for s in current_schemas]
-            logging.info('Found {0} schemas for {1} ({2}): {3}'.format(len(current_schemas),
-                                                                       species,
-                                                                       species_list[species],
-                                                                       ';'.join(current_schemas_strs)))
+            current_schemas = schemas.get(species, None)
+            if current_schemas is not None:
+                current_schemas_strs = ['{0}, {1}'.format(s[0], s[1]) for s in current_schemas]
+                logging.info('Found {0} schemas for {1} ({2}): {3}'.format(len(current_schemas),
+                                                                           species,
+                                                                           species_list[species],
+                                                                           ';'.join(current_schemas_strs)))
 
     if len(schemas) == 0:
         logging.warning('Could not find schemas for any species.\n\n')
