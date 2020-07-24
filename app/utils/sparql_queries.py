@@ -13,6 +13,11 @@ COUNT_SCHEMA_LOCI = ('SELECT (COUNT(?parts) AS ?count) '
                      'FROM <{0}>'
                      'WHERE {{ <{1}> typon:hasSchemaPart ?parts .}}')
 
+COUNT_SPECIES_LOCI = ('SELECT (COUNT(?locus) AS ?count) '
+                      'FROM <{0}>'
+                      'WHERE {{ ?locus a typon:Locus;'
+                              ' typon:isOfTaxon <{1}> .}}')
+
 COUNT_SCHEMAS = ('SELECT (COUNT(?schemas) AS ?count) '
                  'FROM <{0}> '
                  'WHERE '

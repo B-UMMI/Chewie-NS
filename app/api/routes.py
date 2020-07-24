@@ -3567,7 +3567,7 @@ class SchemaLociAPItypon(Resource):
 class SchemaLociDataAPItypon(Resource):
 
     @api.hide
-    @api.doc(responses={200: 'OK',
+    @api.doc(responses={201: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
                         403: 'Unauthorized',
@@ -3578,6 +3578,9 @@ class SchemaLociDataAPItypon(Resource):
     def get(self, species_id, schema_id):
         """
         """
+
+        species_uri = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         schema_uri = '{0}species/{1}/schemas/{2}'.format(
             current_app.config['BASE_URL'], species_id, schema_id)
@@ -3598,16 +3601,42 @@ class SchemaLociDataAPItypon(Resource):
         if os.path.isdir(temp_dir) is False:
             return {'message': 'There is no temp folder for specified schema.'}, 404
 
+        # count number of loci in Chewie-NS
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                    (sq.COUNT_TOTAL_LOCI.format(current_app.config['DEFAULTHGRAPH'])))
+        nr_loci = result['results']['bindings'][0]['count']['value']
+        # links to species
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                    (sq.COUNT_SPECIES_LOCI.format(current_app.config['DEFAULTHGRAPH'], species_uri)))
+        sp_loci = result['results']['bindings'][0]['count']['value']
+        # links to schema
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                    (sq.COUNT_SCHEMA_LOCI.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        sc_loci = result['results']['bindings'][0]['count']['value']
+
         filename = os.path.join(temp_dir, '{0}_{1}_hashes'.format(species_id, schema_id))
         file_path = os.path.join(temp_dir, filename)
         # check if file with schema files hashes exists
         if os.path.isfile(file_path) is False:
-            return {'message': 'Missing temp file with schema files hashes.'}, 404
+            return {'Not found': 'Could not find file with schema hashes.'}, 404
         else:
             with open(file_path, 'rb') as hf:
                 schema_hashes = pickle.load(hf)
 
-            return {'message': schema_hashes}, 200
+            inserted = []
+            for k, v in schema_hashes.items():
+                inserted.extend(v[1])
+
+            inserted = set(inserted)
+            if False not in inserted:
+                return {'message': schema_hashes,
+                        'nr_loci': nr_loci,
+                        'sp_loci': sp_loci,
+                        'sc_loci': sc_loci}, 201
+            else:
+                return {'nr_loci': nr_loci,
+                        'sp_loci': sp_loci,
+                        'sc_loci': sc_loci}, 201
 
     @api.hide
     @api.doc(responses={201: 'OK', 
@@ -3622,6 +3651,9 @@ class SchemaLociDataAPItypon(Resource):
     def post(self, species_id, schema_id):
 
         c_user = get_jwt_identity()
+
+        species_uri = '{0}species/{1}'.format(
+            current_app.config['BASE_URL'], species_id)
 
         schema_uri = '{0}species/{1}/schemas/{2}'.format(
             current_app.config['BASE_URL'], species_id, schema_id)
@@ -3693,6 +3725,19 @@ class SchemaLociDataAPItypon(Resource):
             return {'message': 'Loci list sent does not match schema loci list.'}, 400
         elif len(valid) == 0:
 
+            # count number of loci in Chewie-NS
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                        (sq.COUNT_TOTAL_LOCI.format(current_app.config['DEFAULTHGRAPH'])))
+            nr_loci = result['results']['bindings'][0]['count']['value']
+            # links to species
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                        (sq.COUNT_SPECIES_LOCI.format(current_app.config['DEFAULTHGRAPH'], species_uri)))
+            sp_loci = result['results']['bindings'][0]['count']['value']
+            # links to schema
+            result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                        (sq.COUNT_SCHEMA_LOCI.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+            sc_loci = result['results']['bindings'][0]['count']['value']
+
             # delete ZIP
             os.remove(file_path)
 
@@ -3705,32 +3750,10 @@ class SchemaLociDataAPItypon(Resource):
                                                            current_app.config['VIRTUOSO_USER'],
                                                            current_app.config['VIRTUOSO_PASS']))
 
-            # set time limit for task completion (seconds)
-            time_limit = 720
-            current_time = 0
-            while (loci_insertion.ready() is False) and (current_time < time_limit):
-                time.sleep(5)
-                current_time += 5
-
-            inserted = [loci_insertion.ready(), loci_insertion.get()]
-
-            # determine if loci were properly inserted
-            with open(hashes_file, 'rb') as hf:
-                loci_hashes = pickle.load(hf)
-                # determine incomplete cases
-                loci_hashes = {k:v for k, v in loci_hashes.items() if False in v[1]}
-
-            if len(loci_hashes) > 0:
-                return {'message': loci_hashes}, 400
-            else:
-                # read file with response
-                response_file = os.path.join(temp_dir, '{0}_{1}_loci_response'.format(species_id, schema_id))
-                with open(response_file, 'rb') as rf:
-                    response_data = pickle.load(rf)
-
-                os.remove(response_file)
-
-                return response_data, 201
+        return {'message': 'Received file.',
+                'nr_loci': nr_loci,
+                'sp_loci': sp_loci,
+                'sc_loci': sc_loci}, 201
 
 
 @species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<string:loci_id>')
@@ -3959,6 +3982,9 @@ class SchemaStatusAPItypon(Resource):
             (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
         locking_status = locking_status_query['results']['bindings'][0]['Schema_lock']['value']
 
+        if locking_status != 'Unlocked':
+            locking_status = 'LOCKED'
+
         # determine last modification date
         date_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
             (sq.SELECT_SCHEMA_DATE.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
@@ -3983,68 +4009,91 @@ class SchemaStatusAPItypon(Resource):
         else:
             compressed_schema = 'N/A'
 
-        # schema is unlocked
-        if locking_status == 'Unlocked':
-            return {'Status': 'Ready',
-                    'nr_alleles': nr_alleles,
-                    'nr_loci': nr_loci,
-                    'last_modified': modification_date,
-                    'compressed': compressed_schema}, 201
-        elif locking_status != 'Unlocked':
-            # schema is being uploaded
-            if modification_date == 'singularity':
-                return {'Status': 'Uploading',
-                        'nr_alleles': nr_alleles,
-                        'nr_loci': nr_loci,
-                        'last_modified': 'N/A',
-                        'compressed': compressed_schema}, 201
-            elif user_uri != locking_status:
-                return {'Status': 'Updating',
-                        'nr_alleles': nr_alleles,
-                        'nr_loci': nr_loci,
-                        'last_modified': modification_date,
-                        'compressed': compressed_schema}, 201
-            # locked because a user is submitting alleles
-            elif user_uri == locking_status:
-                root_dir = os.path.abspath(current_app.config['SCHEMA_UP'])
-
-                # folder to hold files with alleles to insert
-                temp_dir = os.path.join(root_dir, '{0}_{1}'.format(species_id, schema_id))
-
-                # read file with results
-                identifiers_file = os.path.join(temp_dir, 'identifiers')
-                if os.path.isfile(identifiers_file) is True:
-                    # determine if file has been fully written
-                    start_size = os.stat(identifiers_file).st_size
-                    written = False
-                    while written is False:
-                        time.sleep(2)
-                        current_size = os.stat(identifiers_file).st_size
-                        if current_size == start_size:
-                            written = True
-                        else:
-                            start_size = current_size
-
-                    # get alleles insertion response
-                    with open(identifiers_file, 'rb') as rf:
-                        results = pickle.load(rf)
-
-                    # remove temp directory
-                    shutil.rmtree(temp_dir)
-
-                    return {'Status': 'Complete',
-                            'nr_alleles': nr_alleles,
-                            'Identifiers': results}, 201
-                else:
-                    return {'Status': 'Updating',
-                            'nr_alleles': nr_alleles,
-                            'nr_loci': nr_loci,
-                            'last_modified': modification_date,
-                            'compressed': compressed_schema}, 201
+        return {'status': locking_status,
+                'nr_alleles': nr_alleles,
+                'nr_loci': nr_loci,
+                'last_modified': modification_date,
+                'compressed': compressed_schema}, 201
 
 
-@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<int:loci_id>/update')
+@species_conf.route('/<int:species_id>/schemas/<int:schema_id>/loci/<string:loci_id>/update')
 class SchemaLociUpdateAPItypon(Resource):
+
+    @api.hide
+    @api.doc(responses={201: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found',
+                        406: 'Not acceptable'},
+             security=['access_token'])
+    @jwt_required
+    def get(self, species_id, schema_id, loci_id):
+
+        c_user = get_jwt_identity()
+
+        user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], c_user)
+
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            (sq.SELECT_USER.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+
+        user_role = result['results']['bindings'][0]['role']['value']
+
+        schema_uri = '{0}species/{1}/schemas/{2}'.format(
+            current_app.config['BASE_URL'], species_id, schema_id)
+
+        # check if schema exists
+        schema_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            (sq.ASK_SCHEMA.format(schema_uri)))
+        if schema_query['boolean'] is False:
+            return {'Not found': 'Could not find a schema with specified ID.'}, 404
+
+        # determine if schema is locked
+        locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            (sq.SELECT_SCHEMA_LOCK.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        locking_status = locking_status_query['results']['bindings'][0]['Schema_lock']['value']
+
+        # count number of alleles
+        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+            (sq.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], schema_uri)))
+        nr_alleles = result['results']['bindings'][0]['nr_alleles']['value']
+
+        if user_uri == locking_status:
+            root_dir = os.path.abspath(current_app.config['SCHEMA_UP'])
+
+            # folder to hold files with alleles to insert
+            temp_dir = os.path.join(root_dir, '{0}_{1}'.format(species_id, schema_id))
+
+            # read file with results
+            identifiers_file = os.path.join(temp_dir, 'identifiers')
+            if os.path.isfile(identifiers_file) is True:
+                # determine if file has been fully written
+                start_size = os.stat(identifiers_file).st_size
+                written = False
+                while written is False:
+                    time.sleep(2)
+                    current_size = os.stat(identifiers_file).st_size
+                    if current_size == start_size:
+                        written = True
+                    else:
+                        start_size = current_size
+
+                # get alleles insertion response
+                with open(identifiers_file, 'rb') as rf:
+                    results = pickle.load(rf)
+
+                # remove temp directory
+                shutil.rmtree(temp_dir)
+
+                return {'message': 'Complete',
+                        'nr_alleles': nr_alleles,
+                        'identifiers': results}, 201
+            else:
+                return {'nr_alleles': nr_alleles}, 201
+        else:
+            return {'Not authorized': 'Only Admin or user that is updating '
+                    'the schema may retrieve this data.'}, 403
 
     @api.hide
     @api.doc(responses={201: 'OK',
@@ -4062,6 +4111,15 @@ class SchemaLociUpdateAPItypon(Resource):
 
         schema_uri = '{0}species/{1}/schemas/{2}'.format(
             current_app.config['BASE_URL'], species_id, schema_id)
+
+        locus_uri = '{0}loci/{1}'.format(current_app.config['BASE_URL'], loci_id)
+
+        # check if locus is linked to schema
+        schema_locus = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                                    sq.ASK_SCHEMA_LOCUS.format(schema_uri, locus_uri))
+
+        if schema_locus['boolean'] is False:
+            return {'Not Found': 'Schema has no locus with provided ID.'}
 
         # determine if schema is locked
         locking_status_query = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
@@ -4112,7 +4170,7 @@ class SchemaLociUpdateAPItypon(Resource):
                                                       current_app.config['VIRTUOSO_USER'],
                                                       current_app.config['VIRTUOSO_PASS']))
 
-            return {'Updating': nr_alleles}, 201
+            return {'nr_alleles': nr_alleles}, 201
 
         return {'OK': 'Received data.'}, 201
 

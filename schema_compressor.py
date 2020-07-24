@@ -494,7 +494,7 @@ def compress_schema(schema, old_zip, local_sparql, virtuoso_graph):
     logging.info('Adapting schema {0} ({1})'.format(schema[0], schema[-2]))
     output_directory = os.path.join(Config.SCHEMAS_ZIP, '{0}_{1}'.format(schema[-3], schema[1]))
     adapted = PrepExternalSchema.main(temp_dir, output_directory, 6,
-                                      float(schema[2]), int(schema[3]),
+                                      float(schema[2]), 0,
                                       int(schema[4]), schema[5],
                                       None, os.path.join('/app', logfile))
 
