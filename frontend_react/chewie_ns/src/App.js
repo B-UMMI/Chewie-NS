@@ -53,7 +53,7 @@ function SimpleBreadcrumbs() {
   // Breadcrumbs generation
   return (
     <>
-      <Breadcrumbs>
+      <Breadcrumbs aria-label="breadcrumb">
         {aboutMatches && (
           <div>
             <MuiLink component={Link} to="/about" style={styles.breadcrumb}>
@@ -62,12 +62,12 @@ function SimpleBreadcrumbs() {
           </div>
         )}
         {sequencesMatches && (
-          <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/sequences" style={styles.breadcrumb}>
             Search
           </MuiLink>
         )}
         {statsMatches && (
-          <MuiLink component={Link} to="/sequences" style={styles.breadcrumb}>
+          <MuiLink component={Link} to="/stats" style={styles.breadcrumb}>
             Schemas
           </MuiLink>
         )}
