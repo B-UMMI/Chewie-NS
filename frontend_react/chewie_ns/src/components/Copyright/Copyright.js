@@ -2,6 +2,13 @@ import React from "react";
 
 // Material Ui import
 import Typography from "@material-ui/core/Typography";
+import { withStyles } from "@material-ui/core/styles";
+
+const WhiteTextTypography = withStyles({
+  root: {
+    color: "#FFFFFF",
+  },
+})(Typography);
 
 const Copyright = () => {
   return (
@@ -10,16 +17,16 @@ const Copyright = () => {
         position: "fixed",
         bottom: "0",
         left: "0",
-        backgroundColor: "#ccc",
+        backgroundColor: "#3b3b3b",
         width: "100%",
         textAlign: "center",
       }}
     >
       <div id="homeFooter" style={{ display: "block" }}>
         <div>
-          <Typography style={{ fontSize: "10" }}>
+          <WhiteTextTypography style={{ fontSize: "10" }}>
             © UMMI {new Date().getFullYear()}
-          </Typography>
+          </WhiteTextTypography>
         </div>
       </div>
     </footer>
