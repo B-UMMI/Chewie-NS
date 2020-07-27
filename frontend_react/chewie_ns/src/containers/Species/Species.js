@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 
 // Chewie local imports
+import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import Copyright from "../../components/Copyright/Copyright";
@@ -155,16 +157,21 @@ class Species extends Component {
       console.log(res);
     });
 
-    const ts = localStorage.getItem("timestamp");
-    console.log(ts);
-    localStorage.removeItem("timestamp")
+    //const ts = localStorage.getItem("timestamp");
+    //console.log(ts);
+    localStorage.removeItem("timestamp");
 
     let speciesName2 = spd[this.props.match.params.species_id];
 
     // const schemaTimestamp2 = "";
 
     const fileName2 =
-      speciesName2.replace(" ", "_") + "_" + schemaName + "_" + lastModifiedDate + ".zip";
+      speciesName2.replace(" ", "_") +
+      "_" +
+      schemaName +
+      "_" +
+      lastModifiedDate +
+      ".zip";
 
     // create download element
     const link = document.createElement("a");
@@ -174,8 +181,6 @@ class Species extends Component {
     link.setAttribute("download", fileName2);
     document.body.appendChild(link);
     link.click();
-    
-    localStorage.removeItem("timestamp")
   };
 
   getMuiTheme = () =>
@@ -551,14 +556,26 @@ class Species extends Component {
       );
     }
     return (
-      <div style={{ marginLeft: "5%", marginRight: "5%" }}>
-        <div>
-          <h1 style={{ textAlign: "center" }}>Schemas Overview</h1>
+      <Aux>
+        <div id="schemasAvailable" style={{ float: "right" }}>
+          <Button
+            variant="contained"
+            color="default"
+            component={Link}
+            to="/stats"
+          >
+            Back to Available Schemas
+          </Button>
         </div>
-        <div style={{ marginTop: "40px" }}>{species}</div>
-        <div style={{ marginTop: "40px" }}>{species_plot}</div>
-        <Copyright />
-      </div>
+        <div style={{ marginLeft: "5%", marginRight: "5%" }}>
+          <div>
+            <h1 style={{ textAlign: "center" }}>Schemas Overview</h1>
+          </div>
+          <div style={{ marginTop: "40px" }}>{species}</div>
+          <div style={{ marginTop: "40px" }}>{species_plot}</div>
+          <Copyright />
+        </div>
+      </Aux>
     );
   }
 }

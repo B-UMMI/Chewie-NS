@@ -1,7 +1,9 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 
 // Chewie local imports
+import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import classes from "./Locus.module.css";
 import Copyright from "../../components/Copyright/Copyright";
@@ -392,76 +394,88 @@ class Locus extends Component {
       );
     }
     return (
-      <div
-        style={{
-          marginLeft: "5%",
-          marginRight: "5%",
-          marginBottom: "2%",
-          marginTop: "2%",
-        }}
-      >
-        <div>
-          <ExpansionPanel defaultExpanded>
-            <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h5" className={classes.title}>
-                Locus Details
-              </Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <div
-                className={classes.mainPaper}
-                style={{ width: "100%", height: "100%" }}
-              >
-                <div style={style.buttonBar}>
-                  <Button
-                    style={style.button}
-                    className={classNames(
-                      this.state.tabValue === 0 && classes.tabButton
-                    )}
-                    onClick={() => {
-                      this.plotChangeHandler(0);
-                    }}
-                  >
-                    Histogram
-                  </Button>
-                  <Button
-                    style={style.button}
-                    className={classNames(
-                      this.state.tabValue === 1 && classes.tabButton
-                    )}
-                    onClick={() => {
-                      this.plotChangeHandler(1);
-                    }}
-                  >
-                    Scatter
-                  </Button>
-                </div>
-                {this.state.tabValue === 0 && fasta_data}
-                {this.state.tabValue === 1 && scatter_data}
-              </div>
-            </ExpansionPanelDetails>
-          </ExpansionPanel>
+      <Aux>
+        <div id="schemasAvailable" style={{ float: "right" }}>
+          <Button
+            variant="contained"
+            color="default"
+            component={Link}
+            to="/stats"
+          >
+            Back to Available Schemas
+          </Button>
         </div>
-
-        <div style={{ marginTop: "40px" }}>{uniprot_data}</div>
-
-        <Box
+        <div
           style={{
-            height: 80,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            marginLeft: "5%",
+            marginRight: "5%",
+            marginBottom: "2%",
+            marginTop: "3%",
           }}
         >
-          {downloadFasta}
-          {blastx}
-          {blastn}
-        </Box>
+          <div>
+            <ExpansionPanel defaultExpanded>
+              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h5" className={classes.title}>
+                  Locus Details
+                </Typography>
+              </ExpansionPanelSummary>
+              <ExpansionPanelDetails>
+                <div
+                  className={classes.mainPaper}
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <div style={style.buttonBar}>
+                    <Button
+                      style={style.button}
+                      className={classNames(
+                        this.state.tabValue === 0 && classes.tabButton
+                      )}
+                      onClick={() => {
+                        this.plotChangeHandler(0);
+                      }}
+                    >
+                      Histogram
+                    </Button>
+                    <Button
+                      style={style.button}
+                      className={classNames(
+                        this.state.tabValue === 1 && classes.tabButton
+                      )}
+                      onClick={() => {
+                        this.plotChangeHandler(1);
+                      }}
+                    >
+                      Scatter
+                    </Button>
+                  </div>
+                  {this.state.tabValue === 0 && fasta_data}
+                  {this.state.tabValue === 1 && scatter_data}
+                </div>
+              </ExpansionPanelDetails>
+            </ExpansionPanel>
+          </div>
 
-        <div>{this.state.showSnack ? <AlertSnackbar /> : null}</div>
+          <div style={{ marginTop: "40px" }}>{uniprot_data}</div>
 
-        <Copyright />
-      </div>
+          <Box
+            style={{
+              height: 80,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {downloadFasta}
+            {blastx}
+            {blastn}
+          </Box>
+
+          <div>{this.state.showSnack ? <AlertSnackbar /> : null}</div>
+
+          <Copyright />
+        </div>
+      </Aux>
     );
   }
 }

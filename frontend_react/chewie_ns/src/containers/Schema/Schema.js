@@ -1,7 +1,9 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 import { connect } from "react-redux";
 
 // Chewie local imports
+import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import classes from "./Schema.module.css";
 import Markdown from "../../components/Markdown/Markdown";
@@ -648,87 +650,99 @@ class Schema extends Component {
     );
 
     return (
-      <div style={{ marginLeft: "5%", marginRight: "5%" }}>
-        <div>
-          <h1 style={{ textAlign: "center" }}>
-            Schema Evaluation and Annotation
-          </h1>
+      <Aux>
+        <div id="schemasAvailable" style={{ float: "right" }}>
+          <Button
+            variant="contained"
+            color="default"
+            component={Link}
+            to="/stats"
+          >
+            Back to Available Schemas
+          </Button>
         </div>
-        <div style={{ marginTop: "40px" }}>{schema_table}</div>
-        <div>{schema_description}</div>
-        <div>
-          <div style={{ marginTop: "40px" }}>
-            <ExpansionPanel defaultExpanded>
-              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h5" className={classes.title}>
-                  Schema Evaluation
-                </Typography>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
-                <div
-                  className={classes.mainPaper}
-                  style={{ width: "100%", height: "100%" }}
-                >
-                  <div style={style.buttonBar}>
-                    <Button
-                      style={style.button}
-                      className={classNames(
-                        this.state.tabValue === 0 && classes.tabButton
-                      )}
-                      onClick={() => {
-                        this.plotChangeHandler(0);
-                      }}
-                    >
-                      Allele Numbers Analysis
-                    </Button>
-                    <Button
-                      style={style.button}
-                      className={classNames(
-                        this.state.tabValue === 1 && classes.tabButton
-                      )}
-                      onClick={() => {
-                        this.plotChangeHandler(1);
-                      }}
-                    >
-                      Allele Length Analysis
-                    </Button>
-                    <Button
-                      style={style.button}
-                      className={classNames(
-                        this.state.tabValue === 2 && classes.tabButton
-                      )}
-                      onClick={() => {
-                        this.plotChangeHandler(2);
-                      }}
-                    >
-                      Locus Statistics
-                    </Button>
-                    <Button
-                      style={style.button}
-                      className={classNames(
-                        this.state.tabValue === 3 && classes.tabButton
-                      )}
-                      onClick={() => {
-                        this.plotChangeHandler(3);
-                      }}
-                    >
-                      Loci Size Variation
-                    </Button>
+        <div style={{ marginLeft: "5%", marginRight: "5%" }}>
+          <div>
+            <h1 style={{ textAlign: "center" }}>
+              Schema Evaluation and Annotation
+            </h1>
+          </div>
+          <div style={{ marginTop: "40px" }}>{schema_table}</div>
+          <div>{schema_description}</div>
+          <div>
+            <div style={{ marginTop: "40px" }}>
+              <ExpansionPanel defaultExpanded>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                  <Typography variant="h5" className={classes.title}>
+                    Schema Evaluation
+                  </Typography>
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                  <div
+                    className={classes.mainPaper}
+                    style={{ width: "100%", height: "100%" }}
+                  >
+                    <div style={style.buttonBar}>
+                      <Button
+                        style={style.button}
+                        className={classNames(
+                          this.state.tabValue === 0 && classes.tabButton
+                        )}
+                        onClick={() => {
+                          this.plotChangeHandler(0);
+                        }}
+                      >
+                        Allele Numbers Analysis
+                      </Button>
+                      <Button
+                        style={style.button}
+                        className={classNames(
+                          this.state.tabValue === 1 && classes.tabButton
+                        )}
+                        onClick={() => {
+                          this.plotChangeHandler(1);
+                        }}
+                      >
+                        Allele Length Analysis
+                      </Button>
+                      <Button
+                        style={style.button}
+                        className={classNames(
+                          this.state.tabValue === 2 && classes.tabButton
+                        )}
+                        onClick={() => {
+                          this.plotChangeHandler(2);
+                        }}
+                      >
+                        Locus Statistics
+                      </Button>
+                      <Button
+                        style={style.button}
+                        className={classNames(
+                          this.state.tabValue === 3 && classes.tabButton
+                        )}
+                        onClick={() => {
+                          this.plotChangeHandler(3);
+                        }}
+                      >
+                        Loci Size Variation
+                      </Button>
+                    </div>
+                    {this.state.tabValue === 0 && total_allele_plot}
+                    {this.state.tabValue === 1 && mode_plot}
+                    {this.state.tabValue === 2 && scatter_plot}
+                    {this.state.tabValue === 3 && schema_boxplot}
                   </div>
-                  {this.state.tabValue === 0 && total_allele_plot}
-                  {this.state.tabValue === 1 && mode_plot}
-                  {this.state.tabValue === 2 && scatter_plot}
-                  {this.state.tabValue === 3 && schema_boxplot}
-                </div>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
+                </ExpansionPanelDetails>
+              </ExpansionPanel>
+            </div>
+            <div style={{ marginTop: "40px", marginBottom: "40px" }}>
+              {annotations}
+            </div>
           </div>
-          <div style={{ marginTop: "40px", marginBottom: "40px" }}>
-            {annotations}
-          </div>
+          <Copyright />
         </div>
-        <Copyright />
-      </div>
+      </Aux>
     );
   }
 }
