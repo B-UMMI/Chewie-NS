@@ -54,7 +54,8 @@ In this file the **BASE_URL** variable needs to be changed to your localhost. ::
       - FLASK_ENV=development
       - BASE_URL=http://127.0.0.1:5000/NS/api/
 
-### NS API Dockerfile
+NS API Dockerfile
+^^^^^^^^^^^^^^^^^
 
 In this Dockerfile, the number of **workers** and **threads** provided to the *gunicorn* command should be adequate to your machines resources.
 An example command could be: ::
