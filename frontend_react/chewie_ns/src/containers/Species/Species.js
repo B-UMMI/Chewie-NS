@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 // Chewie local imports
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
-import Spinner from "../../components/UI/Spinner/Spinner";
+// import Spinner from "../../components/UI/Spinner/Spinner";
 import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
@@ -200,7 +200,7 @@ class Species extends Component {
     });
 
   render() {
-    let species = <Spinner />;
+    let species = <CircularProgress />;
     let species_plot = (
       <div style={{ textAlign: "center" }}>
         <CircularProgress />
