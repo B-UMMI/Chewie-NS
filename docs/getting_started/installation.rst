@@ -46,7 +46,7 @@ In order to install and build Chewie-NS locally the following files need to be m
 - `Frontend Left Menu Component API URL <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js>`_
 
 Docker compose configuration file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------
 
 In this file the **BASE_URL** variable needs to be changed to your localhost. ::
 
@@ -55,7 +55,7 @@ In this file the **BASE_URL** variable needs to be changed to your localhost. ::
       - BASE_URL=http://127.0.0.1:5000/NS/api/
 
 NS API Dockerfile
-^^^^^^^^^^^^^^^^^
+-----------------
 
 In this Dockerfile, the number of **workers** and **threads** provided to the *gunicorn* command should be adequate to your machines resources.
 An example command could be: ::
@@ -63,7 +63,7 @@ An example command could be: ::
     CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "4", "--threads=2", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
 
 NGINX configuration file
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 The NGINX configuration file has been written to work on a server that requires the use of port 80 (HTTP) and 443 (HTTPS).
 On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), so the server block code must commented out or deleted. ::
@@ -99,7 +99,7 @@ More information about the creation of the self-signed certifcates below. ::
 Finally, the last server block that redirects the IP to the domain name should be commented to avoid redirects to the main Chewie-NS website.
 
 Axios configuration file
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 `Axios <https://github.com/axios/axios>`_ is a Promise based HTTP client that is used to perform requests to Chewie-NS' API.
 
@@ -112,7 +112,7 @@ needs to be changed to the localhost API in order to perform requests to the loc
     });
 
 Frontend Left Menu Component API URL
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------
 
 The left menu of Chewie-NS' user interface contains a button that redirects the user to the Swagger interface, in order to interact with the API.
 The URL needs to be changed to the localhost.
