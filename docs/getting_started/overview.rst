@@ -8,11 +8,13 @@ to provide a centralized service to download and or update gene-by-gene schemas,
 allowing the easy sharing of results, while ensuring the reproducibility and 
 consistency of these steps.
 
-.. figure:: ../resources/ontology_adapted2.png
+A diagram of the implementation of Chewie-NS is displayed below:
+
+.. figure:: ../resources/chewie_ns.png
+    :scale: 80%
     :align: center
 
-    Figure 1.1: TypOn ontology. Adapted from `Vaz et al, 2014 <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
-
+    Figure 1.1: Chewie-NS implementation.
    
 
 Motivation
@@ -43,19 +45,16 @@ Chewie-NS provides a public and centralised web service, separated into
 a backend to handle command line and server requests and a frontend that 
 allows a user-friendly interaction with the service.
 
-A diagram of the implementation of Chewie-NS is displayed below:
-
-.. figure:: ../resources/chewie_ns.png
-    :scale: 80%
-    :align: center
-
-    Figure 2.1: Chewie-NS implementation.
-
 Backend
 :::::::
 
 The backend of the service uses Virtuoso, a triple store database management system,
 based on the `TypOn ontology <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
+
+.. figure:: ../resources/ontology_adapted2.png
+    :align: center
+
+    Figure 2.1: TypOn ontology. Adapted from `Vaz et al, 2014 <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_.
 
 
 A `REST API <https://restfulapi.net/>`_, built with `Flask <https://flask.palletsprojects.com/en/1.1.x/>`_, 
