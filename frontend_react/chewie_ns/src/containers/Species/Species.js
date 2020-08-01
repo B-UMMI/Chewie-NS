@@ -120,11 +120,20 @@ class Species extends Component {
     // get the Schema Name
     const schemaName = tableMeta.rowData[1];
 
-    console.log(this.props.species);
-    console.log(this.props.species[schemaId - 1]);
-    
     // get last modification date
-    const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
+    let lastModifiedDate = "";
+
+    for (let scheID in this.props.species) {
+      console.log(this.props.species[scheID]);
+      if (schemaId === this.props.species[scheID].schema_id) {
+        lastModifiedDate = this.props.species[scheID].lastModifiedISO;
+      } else {
+        lastModifiedDate = this.props.species[0].lastModifiedISO;
+      }
+    }
+
+    // get last modification date
+    // const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
 
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
