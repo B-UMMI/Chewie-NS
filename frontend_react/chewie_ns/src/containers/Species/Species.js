@@ -120,6 +120,9 @@ class Species extends Component {
     // get the Schema Name
     const schemaName = tableMeta.rowData[1];
 
+    console.log(this.props.species);
+    console.log(this.props.species[schemaId - 1]);
+    
     // get last modification date
     const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
 
@@ -127,27 +130,27 @@ class Species extends Component {
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
 
     // get schema timestamp from the API
-    axios({
-      method: "get",
-      url:
-        "/species/" +
-        speciesId +
-        "/schemas/" +
-        schemaId +
-        "/zip?request_type=check",
-    }).then((res) => {
-      console.log(res);
-      const schemaTimestamp = res.data.zip[0].split("_")[2];
-      let speciesName1 = spd[this.props.match.params.species_id];
-      const fileName1 =
-        speciesName1.replace(" ", "_") +
-        "_" +
-        schemaName +
-        "_" +
-        schemaTimestamp;
+    // axios({
+    //   method: "get",
+    //   url:
+    //     "/species/" +
+    //     speciesId +
+    //     "/schemas/" +
+    //     schemaId +
+    //     "/zip?request_type=check",
+    // }).then((res) => {
+    //   console.log(res);
+    //   const schemaTimestamp = res.data.zip[0].split("_")[2];
+    //   let speciesName1 = spd[this.props.match.params.species_id];
+    //   const fileName1 =
+    //     speciesName1.replace(" ", "_") +
+    //     "_" +
+    //     schemaName +
+    //     "_" +
+    //     schemaTimestamp;
 
-      localStorage.setItem("timestamp", fileName1);
-    });
+    //   localStorage.setItem("timestamp", fileName1);
+    // });
 
     // make a request to the download endpoint
     axios({
@@ -159,7 +162,7 @@ class Species extends Component {
 
     //const ts = localStorage.getItem("timestamp");
     //console.log(ts);
-    localStorage.removeItem("timestamp");
+    // localStorage.removeItem("timestamp");
 
     let speciesName2 = spd[this.props.match.params.species_id];
 
