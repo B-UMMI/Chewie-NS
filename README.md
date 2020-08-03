@@ -93,7 +93,7 @@ const instance = axios.create({
 });
 ```
 
-### Frontend Left Menu Component API URL
+### Frontend Menu Component API URL
 
 The left menu of Chewie-NS' user interface contains a button that redirects the user to the Swagger interface, in order to interact with the API.
 The URL needs to be changed to the localhost.
