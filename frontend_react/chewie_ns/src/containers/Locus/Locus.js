@@ -164,6 +164,22 @@ class Locus extends Component {
     if (!this.props.loading) {
       const columns = [
         {
+          name: "locus_ID",
+          label: "Locus ID",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "locus_label",
           label: "Locus Label",
           options: {
@@ -202,6 +218,38 @@ class Locus extends Component {
             filter: true,
             sort: true,
             display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "min",
+          label: "Minimum size (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: false,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "max",
+          label: "Maximum size (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: false,
             setCellHeaderProps: (value) => {
               return {
                 style: {

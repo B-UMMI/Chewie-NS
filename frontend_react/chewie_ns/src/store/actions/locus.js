@@ -96,6 +96,8 @@ export const fetchLocusFasta = (locus_id) => {
         basic_stats.push({
           num_alleles: nucSeqLen.length,
           size_range: min_len.toString() + "-" + max_len.toString(),
+          min: min_len,
+          max: max_len,
           median: median_len,
         });
 
@@ -159,6 +161,7 @@ export const fetchLocusUniprot = (locus_id) => {
         console.log(res.data[0]);
         let uniprot_annot = [];
         uniprot_annot.push({
+          locus_ID: locus_id,
           locus_label: res.data[0].name.value,
           uniprot_label: res.data[0].UniprotLabel.value,
           uniprot_submitted_name: res.data[0].UniprotName.value,
