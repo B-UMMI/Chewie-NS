@@ -25,10 +25,12 @@ Code documentation
 import os
 import sys
 import csv
+import json
 import pickle
 import shutil
 import logging
 import argparse
+import subprocess
 import datetime as dt
 from SPARQLWrapper import SPARQLWrapper
 
@@ -196,6 +198,7 @@ def rm_schema(identifier, species_id, virtuoso_graph, local_sparql,
 
 	schema_result = schema_result['results']['bindings']
 
+	results = [0, 0, 0, 0, 0]
 	if len(schema_result) == 0:
 		logging.info('{0} has no loci.'.format(schema_uri))
 	else:
@@ -204,15 +207,85 @@ def rm_schema(identifier, species_id, virtuoso_graph, local_sparql,
 		print('Loci to delete: {0}\n'.format(len(loci_uris)))
 		logging.info('{0} loci to delete'.format(len(loci_uris)))
 
-	# collapse all loci (sequences are not deleted)
-	results = collapse_loci(loci_uris, virtuoso_graph, local_sparql,
-                            virtuoso_user, virtuoso_pass)
-	total_triples += results[0]
+		# collapse all loci (sequences are not deleted)
+		results = collapse_loci(loci_uris, virtuoso_graph, local_sparql,
+								virtuoso_user, virtuoso_pass)
+		total_triples += results[0]
+
+	# delete description
+	schema_desc = aux.get_data(SPARQLWrapper(local_sparql),
+                                (sq.SELECT_SCHEMA_DESCRIPTION.format(virtuoso_graph, schema_uri)))
+
+	schema_desc = schema_desc['results']['bindings'][0]['description']['value']
+	desc_file = '{0}/{1}'.format(Config.PRE_COMPUTE, schema_desc)
+	if os.path.isfile(desc_file) is True:
+		subprocess.call(['rm', desc_file])
+
+	# delete compressed version
+	zip_file = [f for f in os.listdir(Config.SCHEMAS_ZIP) if f.startswith('{0}_{1}'.format(species_id, identifier))]
+	if len(zip_file) > 0:
+		zip_file = '{0}/{1}'.format(Config.SCHEMAS_ZIP, zip_file[0])
+		subprocess.call(['rm', zip_file])
+		print('Deleted compressed version ({0})'.format(zip_file))
+		logging.info('Deleted compressed version ({0})'.format(zip_file))
+
+	# delete pre-computed files
+	length_files = '{0}/{1}_{2}_lengths'.format(Config.PRE_COMPUTE, species_id, identifier)
+	if os.path.isdir(length_files) is True:
+		subprocess.call(['rm', '-rf', length_files])
+		print('Deleted directory with length values ({0})'.format(length_files))
+		logging.info('Deleted directory with length values ({0})'.format(length_files))
+
+	annotation_file = '{0}/annotations_{1}_{2}.json'.format(Config.PRE_COMPUTE, species_id, identifier)
+	if os.path.isfile(annotation_file) is True:
+		subprocess.call(['rm', annotation_file])
+		print('Deleted pre-computed annotations ({0})'.format(annotation_file))
+		logging.info('Deleted pre-computed annotations ({0})'.format(annotation_file))
+
+	mode_file = '{0}/mode_{1}_{2}.json'.format(Config.PRE_COMPUTE, species_id, identifier)
+	if os.path.isfile(mode_file) is True:
+		subprocess.call(['rm', mode_file])
+		print('Deleted pre-computed modes ({0})'.format(mode_file))
+		logging.info('Deleted pre-computed modes ({0})'.format(mode_file))
+
+	boxplot_file = '{0}/boxplot_{1}_{2}.json'.format(Config.PRE_COMPUTE, species_id, identifier)
+	if os.path.isfile(boxplot_file) is True:
+		subprocess.call(['rm', boxplot_file])
+		print('Deleted pre-computed boxplot values ({0})'.format(boxplot_file))
+		logging.info('Deleted pre-computed boxplot values ({0})'.format(boxplot_file))
+
+	# remove schema data from pre-computed files
+	loci_file = '{0}/loci_{1}.json'.format(Config.PRE_COMPUTE, species_id)
+	if os.path.isfile(loci_file) is True:
+		with open(loci_file, 'r') as json_file:
+			json_data = json.load(json_file)
+
+		schemas = json_data['message']
+		schemas = [s for s in schemas if s['schema'] != schema_uri]
+		json_data['message'] = schemas
+		with open(loci_file, 'w') as json_outfile:
+			json.dump(json_data, json_outfile)
+		print('Deleted pre-computed values from file with loci values ({0})'.format(loci_file))
+		logging.info('Deleted pre-computed values from file with loci values ({0})'.format(loci_file))
+
+	totals_file = '{0}/totals_{1}.json'.format(Config.PRE_COMPUTE, species_id)
+	if os.path.isfile(totals_file) is True:
+		with open(totals_file, 'r') as json_file:
+			json_data = json.load(json_file)
+
+		schemas = json_data['message']
+		schemas = [s for s in schemas if s['uri'] != schema_uri]
+		json_data['message'] = schemas
+		with open(totals_file, 'w') as json_outfile:
+			json.dump(json_data, json_outfile)
+		print('Deleted pre-computed values from file with schema totals ({0})'.format(totals_file))
+		logging.info('Deleted pre-computed values from file with schema totals ({0})'.format(totals_file))
 
 	# delete schema
 	status_code, message = single_delete(sq.DELETE_SCHEMA, [schema_uri],
 		                                  virtuoso_graph, local_sparql,
 		                                  virtuoso_user, virtuoso_pass)
+
 	schema_triples = int(extract_triples(message))
 	schema_del = 0
 	if status_code in [200, 201]:
