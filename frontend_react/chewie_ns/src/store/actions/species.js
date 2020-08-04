@@ -44,18 +44,30 @@ export const fetchSpecies = (spec_id) => {
             schema_name: res.data.message[key].name,
             user: res.data.message[key].user,
             chewie: res.data.message[key].chewBBACA_version,
-            dateEntered: new Date(
-              dateEnteredFormatted.getTime() -
-                dateEnteredFormatted.getTimezoneOffset() * 6000
-            )
-              .toISOString()
-              .split("T")[0],
-            lastModified: new Date(
-              lastModifiedDateFormatted.getTime() -
-                lastModifiedDateFormatted.getTimezoneOffset() * 6000
-            )
-              .toISOString()
-              .split("T")[0],
+            dateEntered:
+              new Date(
+                dateEnteredFormatted.getTime() -
+                  dateEnteredFormatted.getTimezoneOffset() * 6000
+              )
+                .toISOString()
+                .split("T")[0] +
+              " " +
+              new Date(
+                dateEnteredFormatted.getTime() -
+                  dateEnteredFormatted.getTimezoneOffset() * 6000
+              ).toLocaleTimeString([], { hour12: false }),
+            lastModified:
+              new Date(
+                lastModifiedDateFormatted.getTime() -
+                  lastModifiedDateFormatted.getTimezoneOffset() * 6000
+              )
+                .toISOString()
+                .split("T")[0] +
+              " " +
+              new Date(
+                lastModifiedDateFormatted.getTime() -
+                  lastModifiedDateFormatted.getTimezoneOffset() * 6000
+              ).toLocaleTimeString([], { hour12: false }),
             lastModifiedISO: res.data.message[key].last_modified,
             bsr: res.data.message[key].bsr,
             ptf: res.data.message[key].prodigal_training_file,

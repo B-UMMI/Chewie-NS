@@ -584,7 +584,9 @@ class Species extends Component {
             <h1 style={{ textAlign: "center" }}>Schemas Overview</h1>
           </div>
           <div style={{ marginTop: "40px" }}>{species}</div>
-          <div style={{ marginTop: "40px" }}>{species_plot}</div>
+          <div style={{ marginTop: "40px", marginBottom: "40px" }}>
+            {species_plot}
+          </div>
           <Copyright />
         </div>
       </Aux>
