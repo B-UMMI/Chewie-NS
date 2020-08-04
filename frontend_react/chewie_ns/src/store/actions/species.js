@@ -115,98 +115,61 @@ export const fetchSpeciesAnnot = (spec_id) => {
       .get("stats/species/" + spec_id + "/schema/loci/nr_alleles")
       .then((res) => {
         console.log(res);
-        const fetchedSpeciesAnnot2 = [];
-        let x_val = 0;
-        let y_val = 0;
-        let locus_id = 0;
-        let ola2 = {};
-        let ola3 = {};
-        let ola4 = {};
-        let ola22 = [];
-        let olaLocus = {};
+        // reference: https://www.sitepoint.com/sort-an-array-of-objects-in-javascript/
+        function compareValues(key, order = "asc") {
+          return function innerSort(a, b) {
+            if (!a.hasOwnProperty(key) || !b.hasOwnProperty(key)) {
+              // property doesn't exist on either object
+              return 0;
+            }
 
-        // let curSchemaId = res.data.message[0].schema.substring(
-        //   res.data.message[0].schema.lastIndexOf("/") + 1
-        // );
+            const varA =
+              typeof a[key] === "string" ? a[key].toUpperCase() : a[key];
+            const varB =
+              typeof b[key] === "string" ? b[key].toUpperCase() : b[key];
+
+            let comparison = 0;
+            if (varA > varB) {
+              comparison = 1;
+            } else if (varA < varB) {
+              comparison = -1;
+            }
+            return order === "desc" ? comparison * -1 : comparison;
+          };
+        }
+
+        const fetchedSpeciesAnnot2 = [];
 
         let schema_ids = [...Array(res.data.message.length).keys()];
 
         for (let id in schema_ids) {
           let curSchemaId = parseInt(id) + 1;
 
-          for (let key in res.data.message[id].loci) {
-            locus_id = res.data.message[id].loci[key].locus.substring(
-              res.data.message[id].loci[key].locus.lastIndexOf("/") + 1
+          let x_val = [];
+          let y_val = [];
+          let locus_id = [];
+
+          for (let key in res.data.message[id].loci.sort(
+            compareValues("nr_alleles", "desc")
+          )) {
+            locus_id.push(
+              res.data.message[id].loci[key].locus.substring(
+                res.data.message[id].loci[key].locus.lastIndexOf("/") + 1
+              )
             );
-
-            x_val += 1;
-
-            y_val = res.data.message[id].loci[key].nr_alleles;
-
-            if (curSchemaId in ola2) {
-              ola2[curSchemaId][[x_val]] = y_val;
-              olaLocus[curSchemaId][[x_val]] = locus_id;
-              ola3[curSchemaId].push(y_val);
-              ola4[curSchemaId][[locus_id]] = y_val;
-            } else if (!(curSchemaId in ola2)) {
-              // console.log("works2")
-              // console.log(curSchemaId)
-              ola2[curSchemaId] = {
-                [x_val]: y_val,
-              };
-
-              ola22.push(y_val);
-
-              ola3[curSchemaId] = ola22;
-
-              ola4[curSchemaId] = {
-                [locus_id]: y_val,
-              };
-
-              // ola22.push(
-              //   {[x_val]: y_val}
-              // )
-              olaLocus[curSchemaId] = {
-                [x_val]: locus_id,
-                // [locus_id]: y_val
-              };
-              x_val = 0;
-              locus_id = 0;
-              ola22 = [];
-            }
+            x_val.push(parseInt(key) + 1);
+            y_val.push(res.data.message[id].loci[key].nr_alleles);
           }
-        }
-        console.log("[OLA4]");
-        console.log(ola4);
-
-        for (let idx in ola4) {
-          // console.log(ola4[idx])
-
-          let sorted = _(ola4[idx])
-            .toPairs()
-            .value()
-            .sort((a, b) => b[1] - a[1]);
-
-          let s_loci_id = sorted.map((arr2) => arr2[0]);
-
-          let s_nr_alleles = sorted.map((arr2) => arr2[1]);
-
-          // console.log(s_loci_id)
-          // console.log(s_nr_alleles)
 
           fetchedSpeciesAnnot2.push({
-            x: Object.keys(ola2[idx]),
-            y: s_nr_alleles,
+            x: x_val,
+            y: y_val,
             type: "bar",
-            name: "Schema " + idx,
+            name: "Schema " + curSchemaId,
             hovertemplate:
               "<b>Number of Alleles</b>: %{y}" +
               "<br><b>Locus_ID</b>: %{text}</br>",
-            text: s_loci_id,
-            //hoverinfo: "y+text"
-            // line: {
-            //   width: 1
-            // }
+            text: locus_id,
           });
         }
         dispatch(fetchSpeciesAnnotSuccess(fetchedSpeciesAnnot2));
