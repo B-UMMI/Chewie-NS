@@ -103,7 +103,9 @@ def length_stats(loci_data):
 		  	  len(v),
 		  	  Counter(v).most_common()[0][0],
 		  	  round(sum(v)/len(v)),
-		  	  round(statistics.median(v)))
+		  	  round(statistics.median(v)),
+		  	  min(v),
+		  	  max(v))
 		  	  for k, v in loci_data.items()]
 
 	return stats
@@ -138,6 +140,8 @@ def get_scatter_data(loci_stats):
 					 'nr_alleles': s[2],
 					 'alleles_mean': s[4],
 					 'alleles_median': s[5],
+					 'alleles_min': s[6],
+					 'alleles_max': s[7],
 					 'alleles_mode': s[3]}
 					 for s in loci_stats]
 
@@ -211,9 +215,12 @@ def fast_update(schema, last_modified, file, lengths_dir,
 			locus_mode = Counter(alleles_lengths).most_common()[0][0]
 			locus_mean = round(sum(alleles_lengths)/nr_alleles)
 			locus_median = round(statistics.median(alleles_lengths))
+			locus_min = min(alleles_lengths)
+			locus_max = max(alleles_lengths)
 
 			loci_stats.append((locus_name, locus_id, nr_alleles,
-							   locus_mode, locus_mean, locus_median))
+							   locus_mode, locus_mean, locus_median,
+							   locus_min, locus_max))
 
 		modes = determine_modes(loci_stats)
 		total_alleles = loci_total_alleles(loci_stats)
@@ -254,9 +261,12 @@ def fast_update(schema, last_modified, file, lengths_dir,
 				locus_mode = Counter(alleles_lengths).most_common()[0][0]
 				locus_mean = round(sum(alleles_lengths)/nr_alleles)
 				locus_median = round(statistics.median(alleles_lengths))
+				locus_min = min(alleles_lengths)
+				locus_max = max(alleles_lengths)
 
 				loci_stats.append((locus_name, locus_id, nr_alleles,
-								   locus_mode, locus_mean, locus_median))
+								   locus_mode, locus_mean, locus_median,
+								   locus_min, locus_max))
 
 			modes = determine_modes(loci_stats)
 			total_alleles = loci_total_alleles(loci_stats)
