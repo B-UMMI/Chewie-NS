@@ -47,26 +47,26 @@ export const fetchSpecies = (spec_id) => {
             dateEntered:
               new Date(
                 dateEnteredFormatted.getTime() -
-                  dateEnteredFormatted.getTimezoneOffset() * 6000
+                  dateEnteredFormatted.getTimezoneOffset()
               )
                 .toISOString()
                 .split("T")[0] +
               " " +
               new Date(
                 dateEnteredFormatted.getTime() -
-                  dateEnteredFormatted.getTimezoneOffset() * 6000
+                  dateEnteredFormatted.getTimezoneOffset()
               ).toLocaleTimeString([], { hour12: false }),
             lastModified:
               new Date(
                 lastModifiedDateFormatted.getTime() -
-                  lastModifiedDateFormatted.getTimezoneOffset() * 6000
+                  lastModifiedDateFormatted.getTimezoneOffset()
               )
                 .toISOString()
                 .split("T")[0] +
               " " +
               new Date(
                 lastModifiedDateFormatted.getTime() -
-                  lastModifiedDateFormatted.getTimezoneOffset() * 6000
+                  lastModifiedDateFormatted.getTimezoneOffset()
               ).toLocaleTimeString([], { hour12: false }),
             lastModifiedISO: res.data.message[key].last_modified,
             bsr: res.data.message[key].bsr,
