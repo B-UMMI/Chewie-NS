@@ -9,7 +9,7 @@ Searching for an allele
 In order to search for an allele, the user needs to fill the **Allele Sequence** box
 with the **DNA sequence** of the allele.
 
-.. important:: You can only search for **one** allele at a time. Only exact matches will be found.
+.. important:: You can only search for **one** allele at a time. **Only exact matches will be found**.
 
 .. figure:: ../resources/sequences_empty.png
     :align: center
