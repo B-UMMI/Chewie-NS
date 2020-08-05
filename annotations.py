@@ -140,7 +140,6 @@ def loci_stats(loci_data):
 	return [total_alleles, modes, min_len, max_len]
 
 
-
 def generate_info(schema, last_modified, virtuoso_graph, local_sparql):
 	"""
 	"""
@@ -217,7 +216,6 @@ def fast_update(schema, last_modified, file, lengths_dir,
 			a['min'] = loci_stats[locus][2]
 			a['max'] = loci_stats[locus][3]
 
-
 		json_to_file = {'schema': schema,
 						'last_modified': last_modified,
 						'message': annotations}
@@ -247,13 +245,17 @@ def fast_update(schema, last_modified, file, lengths_dir,
 				alleles_lengths = [v for k, v in locus_data[locus_uri].items()]
 				total_alleles = len(alleles_lengths)
 				locus_mode = Counter(alleles_lengths).most_common()[0][0]
-				loci_stats[locus_name] = [locus_mode, total_alleles]
+				locus_min = min(alleles_lengths)
+				locus_max = max(alleles_lengths)
+				loci_stats[locus_name] = [locus_mode, total_alleles, locus_min, locus_max]
 
 			annotations = loci_annotations(schema, virtuoso_graph, local_sparql)
 			for a in annotations:
 				locus = a['name']
 				a['mode'] = loci_stats[locus][0]
 				a['nr_alleles'] = loci_stats[locus][1]
+				a['min'] = loci_stats[locus][2]
+				a['max'] = loci_stats[locus][3]
 
 			json_to_file = {'schema': schema,
 							'last_modified': last_modified,
@@ -291,7 +293,7 @@ def full_update(schema, last_modified, file, virtuoso_graph, local_sparql):
 		virtuoso_date = last_modified
 
 		if json_date == virtuoso_date:
-			logging.info('Information about number  for schema {0} is up-to-date.'.format(schema))
+			logging.info('Information about schema {0} is up-to-date.'.format(schema))
 
 		elif json_date != virtuoso_date:
 			json_to_file = generate_info(schema, last_modified,
