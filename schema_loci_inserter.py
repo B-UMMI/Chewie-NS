@@ -416,27 +416,27 @@ def parse_arguments():
                              'for schema insertion.')
 
     parser.add_argument('--g', type=str,
-                        dest='virtuoso_graph', required=True,
+                        dest='virtuoso_graph', required=False,
                         default=os.environ.get('DEFAULTHGRAPH'),
                         help='')
 
     parser.add_argument('--s', type=str,
-                        dest='local_sparql', required=True,
+                        dest='local_sparql', required=False,
                         default=os.environ.get('LOCAL_SPARQL'),
                         help='')
 
     parser.add_argument('--b', type=str,
-                        dest='base_url', required=True,
+                        dest='base_url', required=False,
                         default=os.environ.get('BASE_URL'),
                         help='')
 
     parser.add_argument('--u', type=str,
-                        dest='virtuoso_user', required=True,
+                        dest='virtuoso_user', required=False,
                         default=os.environ.get('VIRTUOSO_USER'),
                         help='')
 
     parser.add_argument('--p', type=str,
-                        dest='virtuoso_pass', required=True,
+                        dest='virtuoso_pass', required=False,
                         default=os.environ.get('VIRTUOSO_PASS'),
                         help='')
 
