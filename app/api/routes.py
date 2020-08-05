@@ -3629,12 +3629,15 @@ class SchemaLociDataAPItypon(Resource):
 
             inserted = set(inserted)
             if False not in inserted:
-                return {'message': schema_hashes,
+                return {'status': 'complete',
+                        'hashes': schema_hashes,
                         'nr_loci': nr_loci,
                         'sp_loci': sp_loci,
                         'sc_loci': sc_loci}, 201
             else:
-                return {'nr_loci': nr_loci,
+                return {'status': 'incomplete',
+                        'hashes': schema_hashes,
+                        'nr_loci': nr_loci,
                         'sp_loci': sp_loci,
                         'sc_loci': sc_loci}, 201
 
