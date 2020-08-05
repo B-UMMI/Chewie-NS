@@ -285,6 +285,9 @@ class Schema extends Component {
                 },
               };
             },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return <Markdown markdown={value} />;
+            },
           },
         },
         {
@@ -300,6 +303,9 @@ class Schema extends Component {
                   fontWeight: "bold",
                 },
               };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return <Markdown markdown={value} />;
             },
           },
         },
@@ -367,6 +373,54 @@ class Schema extends Component {
             filter: true,
             sort: true,
             display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "size_range",
+          label: "Size Range (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "min",
+          label: "Minimum size (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: false,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
+          name: "max",
+          label: "Maximum size (bp)",
+          options: {
+            filter: true,
+            sort: true,
+            display: false,
             setCellHeaderProps: (value) => {
               return {
                 style: {

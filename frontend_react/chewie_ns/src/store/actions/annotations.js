@@ -45,6 +45,12 @@ export const fetchAnnotations = (species_id, schema_id) => {
             locus_name: res.data.message[key].name,
             alleles_mode: parseInt(res.data.message[key].mode),
             nr_alleles: parseInt(res.data.message[key].nr_alleles),
+            min: parseInt(res.data.message[key].min),
+            max: parseInt(res.data.message[key].max),
+            size_range:
+              res.data.message[key].min.toString() +
+              "-" +
+              res.data.message[key].max.toString(),
           });
         }
         // console.log(annotTableData)

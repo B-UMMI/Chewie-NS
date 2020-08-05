@@ -6,6 +6,7 @@ import { connect } from "react-redux";
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import classes from "./Locus.module.css";
+import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
 import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
@@ -289,6 +290,9 @@ class Locus extends Component {
                 },
               };
             },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return <Markdown markdown={value} />;
+            },
           },
         },
         {
@@ -304,6 +308,9 @@ class Locus extends Component {
                   fontWeight: "bold",
                 },
               };
+            },
+            customBodyRender: (value, tableMeta, updateValue) => {
+              return <Markdown markdown={value} />;
             },
           },
         },
