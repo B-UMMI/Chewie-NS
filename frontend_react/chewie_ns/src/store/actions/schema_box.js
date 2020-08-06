@@ -35,7 +35,7 @@ export const fetchSchemaBox = (species_id, schema_id) => {
 
         boxplotData.push({
           type: "box",
-          name: "Loci Size Variation",
+          name: "Locus Size Variation",
           x: serverData.loci,
           q1: serverData.q1,
           median: serverData.median,
