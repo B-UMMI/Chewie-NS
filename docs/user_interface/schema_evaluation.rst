@@ -88,10 +88,10 @@ having an **allele mode size (x-axis)** within the range shown.
 Locus Statistics
 ^^^^^^^^^^^^^^^^
 
-This plot displays the number of alleles and the central tendency measures **mean**, **median** and **mode** of the length of each locus.
+This plot displays the number of alleles, the **median**  and the **size range (minimum and maximum)** of the length of each locus.
 
 The **y-axis** represents the **number of alleles in the locus** while the 
-**x-axis** represents the **central tendency measures of the length of the alleles in base pairs**.
+**x-axis** represents the **median**  and the **size range (minimum and maximum) of the length of the alleles in base pairs**.
 
 For example, **Figure 8** shows that Locus 16801 has more than 1500 alleles (y-axis) and 
 that the central tendency measures of allele length are similar are over 5500 base pairs.
@@ -139,6 +139,7 @@ The columns of the table are the following:
 - **Locus Label**: the Chewie-NS label assigned to the locus.
 - **Total Number of Alelles**: the total number of alleles of that locus.
 - **Alleles Mode**: the mode of the size of alleles.
+- **Size Range (bp)**: the range of sequence lengths of the alleles in base pairs.
 
 .. figure:: ../resources/annotations_table.png
     :align: center
