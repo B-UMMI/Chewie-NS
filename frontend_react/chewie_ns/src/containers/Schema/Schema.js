@@ -779,7 +779,7 @@ class Schema extends Component {
                           this.plotChangeHandler(3);
                         }}
                       >
-                        Loci Size Variation
+                        Locus Size Variation
                       </Button>
                     </div>
                     {this.state.tabValue === 0 && total_allele_plot}
