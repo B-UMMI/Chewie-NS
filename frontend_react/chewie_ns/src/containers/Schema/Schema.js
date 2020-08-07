@@ -209,7 +209,7 @@ class Schema extends Component {
           data={boxplot_data}
           layout={{
             title: {
-              text: "Loci Size Variation",
+              text: "Locus Size Variation",
             },
             xaxis: {
               showticklabels: false,
