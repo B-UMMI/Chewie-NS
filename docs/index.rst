@@ -40,7 +40,7 @@ Tutorial
 Chewie-NS has a tutorial website at `<https://tutorial.chewbbaca.online/>`_!
 The tutorial will allow users to learn how to interact with Chewie-NS.
 
-Tutorial instructions will be available very soon!
+Tutorial instructions are available at the :doc:`user/tutorial`!
 
 Licensing
 :::::::::
