@@ -415,7 +415,7 @@ def parse_arguments():
             args.virtuoso_user, args.virtuoso_pass]
 
 
-def main(temp_dir, graph, sparql, base_url, user, password):
+def main(graph, sparql, base_url, user, password):
 
 	start = time.time()
 
