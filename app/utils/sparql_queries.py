@@ -737,6 +737,8 @@ INSERT_SCHEMA_DEPRECATE = ('INSERT DATA IN GRAPH <{0}> '
 
 DELETE_SCHEMA_LOCK = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Schema_lock ?Schema_lock .}} }}')
 
+DELETE_SCHEMA_VERSION = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:chewBBACA_version ?chewBBACA_version .}} }}')
+
 DELETE_SCHEMA_DATE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:{2} ?{2} .}} }}')
 
 INSERT_SCHEMA_LOCK = ('INSERT DATA IN GRAPH <{0}> '
@@ -744,6 +746,9 @@ INSERT_SCHEMA_LOCK = ('INSERT DATA IN GRAPH <{0}> '
 
 INSERT_SCHEMA_DATE = ('INSERT DATA IN GRAPH <{0}> '
                       '{{ <{1}> typon:{2} "{3}"^^xsd:dateTime .}}')
+
+INSERT_SCHEMA_VERSION = ('INSERT DATA IN GRAPH <{0}> '
+                      '{{ <{1}> typon:chewBBACA_version "{2}"^^xsd:string .}}')
 
 COUNT_SEQUENCES = ('SELECT (COUNT(?seq) AS ?count) '
                    'FROM <{0}> '

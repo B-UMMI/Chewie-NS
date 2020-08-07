@@ -162,6 +162,29 @@ def change_lock(schema_uri, action, virtuoso_graph, local_sparql, virtuoso_user,
 									virtuoso_user,
 									virtuoso_pass)
 
+def change_schema_version(schema_uri, schema_version, virtuoso_graph, local_sparql, virtuoso_user, virtuoso_pass):
+	"""
+	"""
+
+	del_version_query = (sq.DELETE_SCHEMA_VERSION.format(virtuoso_graph,
+															   schema_uri))
+
+	del_version_result = aux.send_data(del_version_query,
+									local_sparql,
+									virtuoso_user,
+									virtuoso_pass)
+
+	# insert new value
+	add_version_query = (sq.INSERT_SCHEMA_VERSION.format(virtuoso_graph,
+															   schema_uri,
+															   schema_version))
+
+	add_version_result = aux.send_data(add_version_query,
+									local_sparql,
+									virtuoso_user,
+									virtuoso_pass)
+
+
 
 def create_single_insert(alleles, species, locus_uri, user_uri, start_id, base_url, virtuoso_graph, attributed):
 	"""
@@ -352,13 +375,13 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
 
-    parser.add_argument('-i', type=str,
-                        dest='input_dir', required=True,
-                        help='Temporary directory that '
-                             'receives the data necessary '
-                             'for schema insertion. It must '
-                             'contain the ZIP archives with the '
-                             'data to insert alleles.')
+    # parser.add_argument('-i', type=str,
+    #                     dest='input_dir', required=True,
+    #                     help='Temporary directory that '
+    #                          'receives the data necessary '
+    #                          'for schema insertion. It must '
+    #                          'contain the ZIP archives with the '
+    #                          'data to insert alleles.')
 
     parser.add_argument('--g', type=str,
                         dest='virtuoso_graph', required=True,
@@ -387,7 +410,7 @@ def parse_arguments():
 
     args = parser.parse_args()
 
-    return [args.input_dir, args.virtuoso_graph,
+    return [args.virtuoso_graph,
             args.local_sparql, args.base_url,
             args.virtuoso_user, args.virtuoso_pass]
 
@@ -397,74 +420,77 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 	start = time.time()
 
 	# get species and schema identifiers
-	species_id = os.path.basename(temp_dir).split('_')[0]
-	schema_id = os.path.basename(temp_dir).split('_')[1]
+	species_id = "1"
+	schema_id = "1"
 
 	# create schema URI
 	schema_uri = '{0}species/{1}/schemas/{2}'.format(base_url, species_id, schema_id)
 
-	post_files = [os.path.join(temp_dir, file) for file in os.listdir(temp_dir)]
+	# post_files = [os.path.join(temp_dir, file) for file in os.listdir(temp_dir)]
 
-	# extract files
-	schema_files = []
-	for file in post_files:
-		dest_dir = os.path.dirname(file)
-		locus_file = unzip(file, dest_dir)
-		locus_file = os.path.join(temp_dir, locus_file)
-		schema_files.append(locus_file)
+	# # extract files
+	# schema_files = []
+	# for file in post_files:
+	# 	dest_dir = os.path.dirname(file)
+	# 	locus_file = unzip(file, dest_dir)
+	# 	locus_file = os.path.join(temp_dir, locus_file)
+	# 	schema_files.append(locus_file)
 
-	# create SPARQL multiple INSERT queries
-	new_seqs = 0
-	identifiers = {}
-	queries_files = []
-	with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-		for res in executor.map(create_queries, schema_files, repeat(graph), repeat(sparql), repeat(base_url)):
-			if res[0] is not None:
-				queries_files.append(res[0])
-			identifiers[res[1]] = [res[2], res[3]]
-			new_seqs += len(res[3])
+	# # create SPARQL multiple INSERT queries
+	# new_seqs = 0
+	# identifiers = {}
+	# queries_files = []
+	# with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+	# 	for res in executor.map(create_queries, schema_files, repeat(graph), repeat(sparql), repeat(base_url)):
+	# 		if res[0] is not None:
+	# 			queries_files.append(res[0])
+	# 		identifiers[res[1]] = [res[2], res[3]]
+	# 		new_seqs += len(res[3])
 
-	start = time.time()
-	# insert data
-	# sort reponses to include summary in log file
-	# create lock file
-	with open(sync_lock, 'w') as lf:
-		lf.write('{0}\n{1}'.format(temp_dir, user))
-	post_results = send_alleles(queries_files, sparql, user, password)
-	# remove lock file after insertion
-	os.remove(sync_lock)
+	# start = time.time()
+	# # insert data
+	# # sort reponses to include summary in log file
+	# # create lock file
+	# with open(sync_lock, 'w') as lf:
+	# 	lf.write('{0}\n{1}'.format(temp_dir, user))
+	# post_results = send_alleles(queries_files, sparql, user, password)
+	# # remove lock file after insertion
+	# os.remove(sync_lock)
 
-	# create file with identifiers
-	identifiers_file = os.path.join(temp_dir, 'identifiers')
-	with open(identifiers_file, 'wb') as rf:
-		pickle.dump(identifiers, rf)
+	# # create file with identifiers
+	# identifiers_file = os.path.join(temp_dir, 'identifiers')
+	# with open(identifiers_file, 'wb') as rf:
+	# 	pickle.dump(identifiers, rf)
 
-	end = time.time()
-	delta = end - start
-	print('Insertion: {0}'.format(delta), flush=True)
+	# end = time.time()
+	# delta = end - start
+	# print('Insertion: {0}'.format(delta), flush=True)
 
 	# change last_modified date
-	if new_seqs > 0:
-		modification_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
-		change_date(schema_uri, 'last_modified', modification_date, graph,
-					sparql, user, password)
+	# if new_seqs > 0:
+	modification_date = str(dt.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f'))
+	change_date(schema_uri, 'last_modified', modification_date, graph,
+				sparql, user, password)
 
-		# create pre-computed frontend files
-		os.system('python schema_totals.py -m single_schema '
-			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-			      ''.format(species_id, schema_id, graph, sparql, base_url))
-		os.system('python loci_totals.py -m single_schema '
-			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-			      ''.format(species_id, schema_id, graph, sparql, base_url))
-		os.system('python loci_mode.py -m single_schema '
-			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-			      ''.format(species_id, schema_id, graph, sparql, base_url))
-		os.system('python annotations.py -m single_schema '
-			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-			      ''.format(species_id, schema_id, graph, sparql, base_url))
-		os.system('python loci_boxplot.py -m single_schema '
-			      '--sp {0} --sc {1} --g {2} --s {3} --b {4}'
-			      ''.format(species_id, schema_id, graph, sparql, base_url))
+	change_schema_version(schema_uri, '2.5.1',
+			graph, sparql, user, password)
+
+	# create pre-computed frontend files
+	os.system('python schema_totals.py -m single_schema '
+				'--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+				''.format(species_id, schema_id, graph, sparql, base_url))
+	os.system('python loci_totals.py -m single_schema '
+				'--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+				''.format(species_id, schema_id, graph, sparql, base_url))
+	os.system('python loci_mode.py -m single_schema '
+				'--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+				''.format(species_id, schema_id, graph, sparql, base_url))
+	os.system('python annotations.py -m single_schema '
+				'--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+				''.format(species_id, schema_id, graph, sparql, base_url))
+	os.system('python loci_boxplot.py -m single_schema '
+				'--sp {0} --sc {1} --g {2} --s {3} --b {4}'
+				''.format(species_id, schema_id, graph, sparql, base_url))
 
 	# unlock schema
 	change_lock(schema_uri, 'Unlocked',
@@ -479,4 +505,4 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     main(args[0], args[1], args[2],
-         args[3], args[4], args[5])
+         args[3], args[4])
