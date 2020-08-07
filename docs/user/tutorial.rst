@@ -31,7 +31,9 @@ directory structure::
     sagalactiae_tutorial
     ├── sagalactiae_genomes
     │   ├── subset1
+    │   │   └── ...
     │   └── subset2
+    │       └── ...
     ├── sagalactiae_schema
     │   ├── short
     │   │   ├── sagalactiae_protein1_short.fasta
@@ -188,6 +190,11 @@ Local analysis with subset1
 
 ::
 
+    >tut-00000001_1
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+
+::
+
     $ chewBBACA.py AlleleCall -i subset1/ -g sagalactiae_ns/sagalactiae_tut/ -o subset1_results 
 
     ==========================
@@ -269,6 +276,26 @@ Local analysis with subset1
     Sending allelic profiles to SQLite database...done.
     Inserted 12 profiles (12 total, 12 total unique).
 
+::
+
+    >tut-00000001_1
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000007265.1-ASM726v1-genomic.fna_07/08/2020T21:00:08_*2
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000012705.1-ASM1270v1-genomic.fna_07/08/2020T21:00:08_*3
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000196055.1-ASM19605v1-genomic.fna_07/08/2020T21:00:08_*4
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000302475.2-ASM30247v2-genomic.fna_07/08/2020T21:00:08_*5
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000427055.1-ILRI112-genomic.fna_07/08/2020T21:00:08_*6
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000427075.1-ILRI005-genomic.fna_07/08/2020T21:00:08_*7
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000599965.1-ASM59996v1-genomic.fna_07/08/2020T21:00:08_*8
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_S_GCA-000689235.1-GBCO-p1-genomic.fna_07/08/2020T21:00:08_*9
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
 
 Syncing schema
@@ -278,13 +305,123 @@ Syncing schema
 
     $ chewBBACA.py SyncSchema -sc sagalactiae_ns/sagalactiae_tut/ --submit
 
+    ==========================
+      chewBBACA - SyncSchema
+    ==========================
+
+    Schema id: 1
+    Schema name: tut
+    Schema's species: Streptococcus agalactiae (id=1)
+    Last synced: 2020-08-07T22:46:52.406869
+
+    Remote schema was last modified on: 2020-08-07T22:46:52.406869
+
+    Retrieving alleles added to remote schema after 2020-08-07T22:46:52.406869...
+    Retrieved 0 alleles for 0 loci.
+    Local schema has 47 novel alleles for 7 loci.
+    Collecting data and creating files to submit local alleles...
+    Sending and inserting new alleles...
+        Sent data for alleles of 7/7 loci.
+        Inserted 47 alleles.
+    The Chewie-NS inserted 47 new alleles and detected 0 repeated alleles.
+
+    Updating local allele identifiers...
+    Updated 12 profiles.
+
+    Adapting schema in the following directory:
+    sagalactiae_ns/temp
+    Prodigal training file:
+
+    Number of cores: 1
+    BLAST Score Ratio: 0.6
+    Translation table: 11
+    Minimum accepted sequence length: 201
+    Size threshold: None
+    Number of genes to adapt: 7
+
+    Started at: 23:57:12-07/08/2020
+    Determining the total number of alleles and allele mean length per gene...
+
+    Adapting 7 genes...
+
+    [===] 100%
+
+    Number of invalid genes: 0
+    Number of invalid alleles: 0
+
+    Successfully adapted 7/7 genes present in the external schema.
+    Finished at: 23:57:13-07/08/2020
+    Done! Took 0m1s.
+    Received 0 new alleles for 7 loci and sent 47 for 7 loci. 
+
+::
+
+    >tut-00000001_1
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_2
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_3
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_4
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_5
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_6
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_7
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_8
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_9
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+
 
 Getting schema snapshot
 :::::::::::::::::::::::
 
 ::
 
-    $ chewBBACA.py DownloadSchema -sp 1 -sc 1 -o sagalactiae_snapshot --ns tutorial --d "2020-06-07T20:20:20"
+    $ chewBBACA.py DownloadSchema -sp 1 -sc 1 -o sagalactiae_snapshot --ns tutorial --d "2020-08-07T22:47:52"
+
+    ==============================
+      chewBBACA - DownloadSchema
+    ==============================
+
+    Schema id: 1
+    Schema name: tut
+    Schema's species: Streptococcus agalactiae (id=1)
+
+    Downloading schema FASTA files...
+    Number of loci to download: 10
+    Downloading schema files...
+    Downloaded: 10/10
+    Downloaded and wrote FASTA files for 10/10 loci
+    Failed download for 0 loci.
+
+    Adapting schema in the following directory:
+    sagalactiae_snapshot
+    Prodigal training file:
+    sagalactiae_snapshot/Streptococcus_agalactiae.trn
+    Number of cores: 1
+    BLAST Score Ratio: 0.6
+    Translation table: 11
+    Minimum accepted sequence length: 201
+    Size threshold: None
+    Number of genes to adapt: 10
+
+    Determining the total number of alleles and allele mean length per gene...
+
+    Adapting 10 genes...
+
+    [==========] 100%
+
+    Number of invalid genes: 0
+    Number of invalid alleles: 0
+
+    Successfully adapted 10/10 genes present in the external schema.
+
+    Schema is now available at: sagalactiae_snapshot/sagalactiae_tut
+
 
 
 Local analysis with subset2
@@ -294,11 +431,37 @@ Local analysis with subset2
 
     $ chewBBACA.py AlleleCall -i subset2/ -g sagalactiae_snapshot/sagalactiae_tut/ -o subset2_results 
 
+    ...
+
+    ------------------------------------------------------------------------------------------
+    Genome                                      EXC    INF    LNF   PLOT   NIPH    ALM    ASM 
+    ------------------------------------------------------------------------------------------
+    GCA_000782855.1_ASM78285v1_genomic.fna       0      6      4      0      0      0      0  
+    GCA_000831105.1_ASM83110v1_genomic.fna       1      6      3      0      0      0      0  
+    GCA_000831125.1_ASM83112v1_genomic.fna       4      3      3      0      0      0      0  
+    GCA_000831145.1_ASM83114v1_genomic.fna       5      2      3      0      0      0      0  
+    GCA_001026925.1_ASM102692v1_genomic.fna      0      6      3      0      0      0      1  
+    GCA_001190865.1_ASM119086v1_genomic.fna      0      5      5      0      0      0      0  
+    GCA_001190885.1_ASM119088v1_genomic.fna      1      5      4      0      0      0      0  
+    GCA_001266635.1_ASM126663v1_genomic.fna      1      5      4      0      0      0      0  
+    GCA_001275545.2_ASM127554v2_genomic.fna      3      3      4      0      0      0      0  
+    GCA_001448985.1_ASM144898v1_genomic.fna      5      2      3      0      0      0      0  
+    GCA_001655175.1_ASM165517v1_genomic.fna      0      5      5      0      0      0      0  
+    GCA_001683515.1_ASM168351v1_genomic.fna      5      1      4      0      0      0      0  
+    ------------------------------------------------------------------------------------------
+
+    ...
+
 Syncing schema
 ::::::::::::::
 
 ::
 
-    $ chewBBACA.py SyncSchema -sc sagalactiae_ns/sagalactiae_tut/ --submit
+    $ chewBBACA.py SyncSchema -sc sagalactiae_snapshot/sagalactiae_tut/ --submit
 
+    ...
+
+    Received 47 new alleles for 7 loci and sent 33 for 7 loci.
+
+    ...
 
