@@ -57,7 +57,7 @@ Read the Docs
 API
 ---
 
-**API** will take you to Chewie-NS' `API <https://194.210.120.209/api/NS/api/docs>`_.
+**API** will take you to Chewie-NS' `API <https://chewbbaca.online/api/NS/api/docs>`_.
 
 Tutorial
 --------
