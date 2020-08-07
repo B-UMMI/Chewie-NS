@@ -1,5 +1,7 @@
 # Chewie-NS :whale2: :package:
 
+[![Documentation Status](https://readthedocs.org/projects/chewie-ns/badge/?version=latest)](https://chewie-ns.readthedocs.io/en/latest/?badge=latest)
+
 Docker-compose for the [Nomenclature Server](https://github.com/B-UMMI/Nomenclature_Server) webapp.
 It uses the following docker images:
 
@@ -10,6 +12,10 @@ It uses the following docker images:
 - node: `node:13`
 - NS API: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/Dockerfile)
 - NS UI: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/Dockerfile.prod)
+
+## Chewie-NS Documentation
+
+Chewie-NS has all its documentations available at [Chewie-NS' Read The Docs](https://chewie-ns.readthedocs.io/en/latest/).
 
 ## Local installation
 
