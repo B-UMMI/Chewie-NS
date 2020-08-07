@@ -57,6 +57,8 @@ To upload a schema to Chewie-NS it is at least necessary to provide:
 Users may provide a description about the schema. The file with the description 
 will be sent to the Chewie-NS and displayed in the schema's page in the Chewie-NS website. Markdown syntax is 
 supported in order to allow greater customizability of the rendered description.
+For more information on the Markdown specification accepted by Chewie-NS please visit the
+`Github Flavored Markdown Specification page <https://github.github.com/gfm/>`_.
 
 Sample description::
 
