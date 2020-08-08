@@ -182,7 +182,7 @@ Downloading the schema
 
     Downloading compressed version...
     Decompressing schema...
-    Schema is now available at: /home/rfm/Desktop/NS_tutorial_data/tutorial_data/tests/sagalactiae_ns/sagalactiae_tut
+    Schema is now available at: sagalactiae_ns/sagalactiae_tut
 
 
 Local analysis with subset1
@@ -212,7 +212,7 @@ Local analysis with subset1
     Checking if genome files exist...
     Checking if gene files exist...
 
-    Starting Prodigal at: 21:00:02-07/08/2020
+    Starting Prodigal at: ...
     done prodigal run on:GCA_000012705.1_ASM1270v1_genomic.fna
     done prodigal run on:GCA_000007265.1_ASM726v1_genomic.fna
     done prodigal run on:GCA_000302475.2_ASM30247v2_genomic.fna
@@ -225,7 +225,7 @@ Local analysis with subset1
     done prodigal run on:GCA_000689235.1_GBCO_p1_genomic.fna
     done prodigal run on:GCA_000730255.1_ASM73025v1_genomic.fna
     done prodigal run on:GCA_000730215.2_ASM73021v2_genomic.fna
-    Finishing Prodigal at: 21:00:05-07/08/2020
+    Finishing Prodigal at: ...
 
     Checking if Prodigal created all the necessary files...
     All files were created.
@@ -233,9 +233,9 @@ Local analysis with subset1
     Translating genomes...
     Creating Blast databases for all genomes...
 
-    Starting Allele Calling at: 21:00:07-07/08/2020
-    Processing tut-00000002.fasta. Start 21:00:08-07/08/2020 Locus 9 of 10. Done 90%.
-    Finished Allele Calling at: 21:00:09-07/08/2020
+    Starting Allele Calling at: ...
+    Processing tut-00000002.fasta. Start ... Locus 9 of 10. Done 90%.
+    Finished Allele Calling at: ...
 
     Wrapping up the results...
     ##################################################
@@ -339,19 +339,17 @@ Syncing schema
     Size threshold: None
     Number of genes to adapt: 7
 
-    Started at: 23:57:12-07/08/2020
     Determining the total number of alleles and allele mean length per gene...
 
     Adapting 7 genes...
 
-    [===] 100%
+    [==========] 100%
 
     Number of invalid genes: 0
     Number of invalid alleles: 0
 
     Successfully adapted 7/7 genes present in the external schema.
-    Finished at: 23:57:13-07/08/2020
-    Done! Took 0m1s.
+
     Received 0 new alleles for 7 loci and sent 47 for 7 loci. 
 
 ::
