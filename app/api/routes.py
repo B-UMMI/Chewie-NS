@@ -604,6 +604,32 @@ class LogoutAPI(Resource):
             }
             return response_object, 403
 
+@auth_conf.route("/check")
+class CheckAuth(Resource):
+    """ Permissions check """
+
+    @api.hide
+    @api.doc(responses={200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated'},
+             security=['access_token'])
+    @jwt.required
+    def get(self):
+        """ Check if a user is authorized to submit """
+
+        # Get user ID
+        c_user = get_jwt_identity()
+
+        # get list of authorized users
+        with open("authorized_users", "rb") as au:
+            auth_list = pickle.load(au)
+
+        if c_user not in auth_list:
+            return {'message': 'Unauthorized'}, 403
+        else:
+            return {'message': 'Authorized'}, 200
 
 # Users Routes
 
