@@ -1,7 +1,7 @@
 Locus Details
 =============
 
-This page displays details about a single locus.
+This page displays details about a single locus. It also contains a button |back| to return to the :doc:`schemas` page.
 
 .. note::
     The Locus Details panel is **by default expanded**. It can be collapsed by clicking on the **arrow icon** on the
@@ -11,6 +11,9 @@ This page displays details about a single locus.
     :align: center
 
     Figure 1.1: Locus Details page.
+
+.. |back| image:: ../resources/back_button.png
+    :align: middle
 
 Histogram
 ---------

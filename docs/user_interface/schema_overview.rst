@@ -1,12 +1,15 @@
 Schema Overview
 ===============
 
-This page displays information on all schemas available for a given species.
+This page displays information on all schemas available for a given species. It also contains a button |back| to return to the :doc:`schemas` page.
 
 .. figure:: ../resources/schemas_overview_full.png
     :align: center
 
     Figure 1.1: Schema Overview page.
+
+.. |back| image:: ../resources/back_button.png
+    :align: middle
 
 Parameters table
 ----------------

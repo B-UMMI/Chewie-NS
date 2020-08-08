@@ -1,12 +1,15 @@
 Schema Evaluation and Annotation
 ================================
 
-This page displays details about a single schema.
+This page displays details about a single schema. It also contains a button |back| to return to the :doc:`schemas` page.
 
 .. figure:: ../resources/schema_evaluation_overview.png
     :align: center
 
     Figure 1.1: Schema Evaluation and Annotation page.
+
+.. |back| image:: ../resources/back_button.png
+    :align: middle
 
 Parameters table
 ----------------
