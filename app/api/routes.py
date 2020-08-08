@@ -4060,7 +4060,15 @@ class SchemaLociUpdateAPItypon(Resource):
     @jwt_required
     def get(self, species_id, schema_id, loci_id):
 
+        # Get user ID
         c_user = get_jwt_identity()
+
+        # get list of authorized users
+        with open("authorized_users", "rb") as au:
+            auth_list = pickle.load(au)
+
+        if c_user not in auth_list:
+            return {'message': 'Unauthorized'}, 403
 
         user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], c_user)
 
