@@ -615,7 +615,7 @@ class CheckAuth(Resource):
                         403: 'Unauthorized',
                         401: 'Unauthenticated'},
              security=['access_token'])
-    @jwt.required
+    @jwt_required
     def get(self):
         """ Check if a user is authorized to submit """
 
