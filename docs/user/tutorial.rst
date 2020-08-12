@@ -228,6 +228,8 @@ that have the following header structure:
 
 ::
 
+    $ cat tut-00000001.fasta
+
     >tut-00000001_1
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
@@ -328,6 +330,8 @@ before the allele calling, you will notice that new alleles have been added to t
 
 ::
 
+    $ cat tut-00000001.fasta
+
     >tut-00000001_1
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
     >tut-00000001_S_GCA-000007265.1-ASM726v1-genomic.fna_07/08/2020T21:00:08_*2
@@ -352,8 +356,8 @@ include a ``*`` before the allele identifer (e.g.: ``*4``). The ``*`` serves to 
 the alleles were identified locally and that it has not been verified if those alleles exist in
 the chewie-NS and what is the identifier that chewie-NS attributed.
 
-Syncing schema
-::::::::::::::
+Schema synchronization
+::::::::::::::::::::::
 
 To verify if newly identified alleles exist in chewie-NS, and submit those alleles if they are
 not in chewie-NS, we will need to run the ``SyncSchema`` process. This process will retrieve
@@ -428,11 +432,13 @@ The ``SyncSchema`` process will reassign allele identifiers to local alleles bas
 identifiers attributed by chewie-NS and re-determine representative sequences for the loci
 that were altered. The schema had not been altered since its upload and chewie-NS attributed
 the same allele identifiers that were already being used in the local schema. Thus, the sequence
-headers will be shorten and the synchronization process will simply remove the ``*`` from the 
-headers. The file structure will be chaged to (we have included the mapping between th old 
+headers will be shortened and the synchronization process will simply remove the ``*`` from the 
+headers. The file structure will be changed to (we have included the mapping between th old 
 identifiers with ``*`` and the new identifers without):
 
 ::
+
+    $ cat tut-00000001.fasta
 
     >tut-00000001_1
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
@@ -455,6 +461,14 @@ identifiers with ``*`` and the new identifers without):
 
 Getting schema snapshot
 :::::::::::::::::::::::
+
+To demonstrate a synchronization process that will need to perform more complicated reassignments
+to ensure that local and remote schemas share the same identifiers, we will start by using a 
+feature that allows users to download a snapshot of any schema. Quickly consult the ``Schemas Overview``
+table and copy the ``Last Change Date``. We will subtract 2 minutes from that date and slightly 
+modify the date format so that it matches the ``yyyy-mm-ddThh:mm:ss`` format.
+
+A sample command would be:
 
 ::
 
@@ -499,7 +513,11 @@ Getting schema snapshot
 
     Schema is now available at: sagalactiae_snapshot/sagalactiae_tut
 
-
+This will download all FASTA files for all loci in the schema and construct the schema locally.
+Since we have requested for the schema in a state prior to its ``Last Change Date``, we will
+retrieve a schema that does not include all alleles in the latest version of the remote schema
+and is outdated. We will use this schema to demonstrate what would happen if you performed allele
+call and wanted to synchronize your local schema with the remote schema.
 
 Local analysis - subset2
 :::::::::::::::::::::::::::
@@ -540,8 +558,20 @@ genomes we do not know if the set of alleles that were added to the schema are i
 nor if the alleles that are common to both schemas have been attributed the same identifiers (in this
 case they have not and it is very unlikely that different sets of genomes lead to the same modifications).
 
-Syncing schema
-::::::::::::::
+Schema synchronization
+::::::::::::::::::::::
+
+In the final step we will synchronize our schema with the remote schema. This process will retrieve
+alleles that are in the remote schema and add them to our schema with the identifier they have in
+chewie-NS. The alleles that are not in chewie-NS will be shifted to the end of the FASTA files and
+assigned sequential identifiers with ``*``, in the order they were added to the schema. This ensures
+that there are no conflicts between remote and strictly local identifiers. Local alleles with ``*``
+in their identifiers will be sent to chewie-NS and inserted into the schema's database. The ``SyncSchema``
+process wil retrieve the identifiers attributed by chewie-NS and assign them to the local sequences
+that still had no global identifier, ensuring that all alleles have the correct identifier and that
+there is a common and global nomenclature.
+
+Execute the following command:
 
 ::
 
@@ -552,4 +582,40 @@ Syncing schema
     Received 47 new alleles for 7 loci and sent 33 for 7 loci.
 
     ...
+
+
+The synchronization process will retrieve the 47 alleles that were inferred from subset1
+and send 33 local alleles that were inferred from subset2. Identifier reassignmnent results
+in the following file structure:
+
+::
+
+    $ cat tut-00000001.fasta
+
+    >tut-00000001_1
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_2 <----- *7
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_3 <----- *5
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_4
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_5 <----- *9
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_6 <----- *8
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_7
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_8 <----- *6
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_9
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_10 <----- *2
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_11 <----- *3
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+    >tut-00000001_12 <----- *4
+    ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+
+
 
