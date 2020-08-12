@@ -215,13 +215,27 @@ but the chewie-NS has attributed new identifiers that will help to unmistakably 
 those loci and alleles and facilitate results comparison for anyone that is using the same
 schema.
 
-Local analysis with subset1
+Local analysis - subset1
 :::::::::::::::::::::::::::
+
+You can use the schema you have downloaded to perform allele call and determine the allelic
+profiles of a set of genomes. Allele calling is performed locally and privately, without the
+need to provide any data or private information. You can learn more about the ``AlleleCall``
+process in its `wiki page <https://github.com/B-UMMI/chewBBACA/wiki/2.-Allele-Calling>`_.
+
+If you open any FASTA file in the schema that you have downloaded, you will find sequences
+that have the following header structure:
 
 ::
 
     >tut-00000001_1
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
+
+Headers start with the loci prefix (``tut``) followed by the loci integer identifier (``00000001``)
+and the allele identifier (``1``).
+
+To perform allele call and determine the allelic profiles of the genomes in the subset1, run
+the following command:
 
 ::
 
@@ -306,6 +320,12 @@ Local analysis with subset1
     Sending allelic profiles to SQLite database...done.
     Inserted 12 profiles (12 total, 12 total unique).
 
+The ``AlleleCall`` process will print a table with the summary of the results to the standard
+output. For the purpose of this tutorial, the ``INF`` cases are the most relevant. The alleles
+that received this classification correspond to new alleles that have been inferred during the 
+process and were added to the schema FASTA files. If we inspect the same file that was opened
+before the allele calling, you will notice that new alleles have been added to that file.
+
 ::
 
     >tut-00000001_1
@@ -327,9 +347,27 @@ Local analysis with subset1
     >tut-00000001_S_GCA-000689235.1-GBCO-p1-genomic.fna_07/08/2020T21:00:08_*9
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
+New alleles added to loci files that belong to a schema that was downloaded from chewie-NS will
+include a ``*`` before the allele identifer (e.g.: ``*4``). The ``*`` serves to indicate that
+the alleles were identified locally and that it has not been verified if those alleles exist in
+the chewie-NS and what is the identifier that chewie-NS attributed.
 
 Syncing schema
 ::::::::::::::
+
+To verify if newly identified alleles exist in chewie-NS, and submit those alleles if they are
+not in chewie-NS, we will need to run the ``SyncSchema`` process. This process will retrieve
+alleles added to the remote schema in chewie-NS since the last time we synchronized the local
+and remote schemas and offers the option to submit novel alleles that have been identified in
+local analyses and are not in chewie-NS. To learn more about the ``SyncSchema`` process, please
+visit the :doc:`synchronize_api` page.
+
+Running the ``SyncSchema`` process is fairly simple. To retrieve new alleles added to the remote
+schema since the last synchronization process, we only need to provide the path to the directory
+with the schema files. We also want to submit any novel alleles that our local schema might have,
+so we include the ``--submit`` argument (there is no need to include ``--ns tutorial`` because
+the ``SyncSchema`` process automatically detects what is the chewie-NS instance the schema was 
+downloaded from).
 
 ::
 
@@ -382,27 +420,38 @@ Syncing schema
 
     Received 0 new alleles for 7 loci and sent 47 for 7 loci. 
 
+Since the schema has not been changed since its upload, the synchronization process will not
+retrieve alleles from chewie-NS. Our local schema includes alleles that are not in chewie-NS
+and the synchronization process will send those alleles to chewie-NS, waiting for the insertion 
+process to finish and receiving the set of identifiers that were attributed to the novel alleles.
+The ``SyncSchema`` process will reassign allele identifiers to local alleles based on the 
+identifiers attributed by chewie-NS and re-determine representative sequences for the loci
+that were altered. The schema had not been altered since its upload and chewie-NS attributed
+the same allele identifiers that were already being used in the local schema. Thus, the sequence
+headers will be shorten and the synchronization process will simply remove the ``*`` from the 
+headers. The file structure will be chaged to (we have included the mapping between th old 
+identifiers with ``*`` and the new identifers without):
+
 ::
 
     >tut-00000001_1
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_2
+    >tut-00000001_2 <----- *2
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_3
+    >tut-00000001_3 <----- *3
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_4
+    >tut-00000001_4 <----- *4
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_5
+    >tut-00000001_5 <----- *5
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_6
+    >tut-00000001_6 <----- *6
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_7
+    >tut-00000001_7 <----- *7
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_8
+    >tut-00000001_8 <----- *8
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-    >tut-00000001_9
+    >tut-00000001_9 <----- *9
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
-
 
 Getting schema snapshot
 :::::::::::::::::::::::
@@ -452,8 +501,13 @@ Getting schema snapshot
 
 
 
-Local analysis with subset2
+Local analysis - subset2
 :::::::::::::::::::::::::::
+
+We will perform allele call with the genomes in subset2 to demonstrate how the ``SyncSchema``
+process would behave if the remote schema had already been altered by another user and the
+sequences and allele identifiers in our local schema and in the remote schema did not fully
+match.
 
 ::
 
@@ -479,6 +533,12 @@ Local analysis with subset2
     ------------------------------------------------------------------------------------------
 
     ...
+
+Once again, we verify that the ``AlleleCall`` process inferred some alleles during its execution
+and that those alleles have been added to the local schema. Since we have used a different set of
+genomes we do not know if the set of alleles that were added to the schema are in the remote schema,
+nor if the alleles that are common to both schemas have been attributed the same identifiers (in this
+case they have not and it is very unlikely that different sets of genomes lead to the same modifications).
 
 Syncing schema
 ::::::::::::::
