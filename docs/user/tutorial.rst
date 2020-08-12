@@ -642,5 +642,13 @@ in the following file structure:
     >tut-00000001_12 <----- *4
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
+-------------------------------------------------------------------------------------------
 
+Reading the documentation and completing the tutorial should provide a good overview of
+how chewie-NS works and how you can interact with it through the chewBBACA suite. You can 
+head to chewie-NS' main instance website to explore available schema data for several species
+and download data through the website or using the chewBBACA modules that were used in the 
+tutorial. Schema upload and allele submission during synchronization in chewie-NS' main instance
+are only possible to users that have received authorization. If you want to submit data or provide
+any type of feedback, please contact us through imm-bioinfo@medicina.ulisboa.pt.
 
