@@ -10,6 +10,13 @@ while also promoting the exploration of data uploaded to the chewie-NS tutorial 
 `website <https://tutorial.chewbbaca.online/>`_ and a better understanding of how it is
 possible to interact with the API.
 
+.. important:: This tutorial includes sample commands that you'll have to run to upload,
+               download and synchronize schemas. To connect to the correct chewie-NS instance, you
+               should always check if the sample commands include ``--ns tutorial`` at the 
+               end and also include that parameter at the end of your commands. If you do
+               not do this, the processes will try to connect to the main chewie-NS instance
+               and simply fail.
+
 Getting started - tutorial datasets
 :::::::::::::::::::::::::::::::::::
 
@@ -37,24 +44,10 @@ directory structure::
     ├── sagalactiae_schema
     │   ├── short
     │   │   ├── sagalactiae_protein1_short.fasta
-    │   │   ├── sagalactiae_protein2_short.fasta
-    │   │   ├── sagalactiae_protein3_short.fasta
-    │   │   ├── sagalactiae_protein4_short.fasta
-    │   │   ├── sagalactiae_protein5_short.fasta
-    │   │   ├── sagalactiae_protein6_short.fasta
-    │   │   ├── sagalactiae_protein7_short.fasta
-    │   │   ├── sagalactiae_protein8_short.fasta
-    │   │   ├── sagalactiae_protein9_short.fasta
+    │   │   ├── ...
     │   │   └── sagalactiae_protein10_short.fasta
     │   ├── sagalactiae_protein1.fasta
-    │   ├── sagalactiae_protein2.fasta
-    │   ├── sagalactiae_protein3.fasta
-    │   ├── sagalactiae_protein4.fasta
-    │   ├── sagalactiae_protein5.fasta
-    │   ├── sagalactiae_protein6.fasta
-    │   ├── sagalactiae_protein7.fasta
-    │   ├── sagalactiae_protein8.fasta
-    │   ├── sagalactiae_protein9.fasta
+    │   ├── ...
     │   ├── sagalactiae_protein10.fasta
     │   └── Streptococcus_agalactiae.trn
     ├── sagalactiae_annotations.tsv
@@ -79,19 +72,33 @@ chewBBACA installation
 By taking advantage of chewie-NS’ API, chewBBACA is capable of handling not only the schema creation,
 but also its upload, synchronization and download. The set of modules to interact with chewie-NS
 included in the chewBBACA suite provide a simple and automatic solution for the main procedures
-users will want to perform.
+that users will want to perform.
 
 You can install `chewBBACA <https://github.com/B-UMMI/chewBBACA>`_ through 
 `conda <https://anaconda.org/bioconda/chewbbaca>`_ or `pip <https://pypi.org/project/chewBBACA/>`_.
 chewBBACA has dependencies that will not be included if you install it through pip. If you install
-through pip you need to ensure that you have Prodigal 2.6.0 and BLAST 2.9.0 or greater.
+through pip you need to ensure that you have Prodigal 2.6.0 and BLAST 2.9.0 or greater. Please
+visit `chewBBACA's <https://github.com/B-UMMI/chewBBACA>`_ homepage for detailed instructions on how 
+to install it.
 
-.. important:: Do not use a BLAST version older that 2.9.0 as it does not include functionalities
+.. important:: We recommend using BLAST 2.9.0. Older versions might not include functionalities
                used in the latest version of chewBBACA.
 
 
 Uploading the tutorial schema
 :::::::::::::::::::::::::::::
+
+To upload schemas to the main instance of chewie-NS it is necessary to have Contributor privileges, but
+in the chewie-NS tutorial instance schema upload is available to anyone that wishes to test it.
+Before uploading the schema please visit the :doc:`upload_api` documentation page to learn more about 
+how to run it.
+
+.. important:: The name attributed to the schema needs to be unique. You will not be able to upload
+               a new schema if the schema's name has already been attributed to a schema that is
+               available in the chewie-NS.
+
+To upload the schema included in the *Streptococcus agalactiae* dataset, you can run the following command 
+(do not forget to include ``--ns tutorial`` at the end!):
 
 ::
 
@@ -108,7 +115,7 @@ Uploading the tutorial schema
 
     -- Parameters Validation --
     Local schema: sagalactiae_schema
-    Schema's species: Streptococcus agalactiae (id=1)
+    Schema's species: Streptococcus agalactiae (id=1)  ------> Species ID <------
     Number of loci: 10
     Number of alleles: 10
 
@@ -142,7 +149,7 @@ Uploading the tutorial schema
     User provided valid annotations for 10 loci.
 
     -- Schema Upload --
-    Created schema with name tut (id=1).
+    Created schema with name tut (id=1).  ------> Schema ID <------
 
     Loci data:
       Collecting loci data...
@@ -165,8 +172,26 @@ Uploading the tutorial schema
 
     Removing intermediate files...
 
+
+We have included an example with the information that is written to the standard output
+during the process.
+When the `LoadSchema` process finishes, the chewie-NS will insert the data that was sent 
+into its database and unlock the schema to make it available for download. You can find
+the schema you have uploaded listed in the ``Schemas Overview`` table for the species.
+You should remember the unique identifier that the chewie-NS attributed to the schema you 
+have uploaded (the lines with the schema and species identifiers are highlighted in the
+standard output).
+
 Downloading the schema
 ::::::::::::::::::::::
+
+In order to use a schema you have uploaded to the chewie-NS, you will have to download it.
+
+To know more about the ``DownloadSchema`` process, please visit the :doc:`download_api` page
+in the documentation.
+
+To download the schema you have uploaded, please run the following command (substitute the
+species and schema IDs values, ``-sp`` and ``-sc``):
 
 ::
 
@@ -184,6 +209,11 @@ Downloading the schema
     Decompressing schema...
     Schema is now available at: sagalactiae_ns/sagalactiae_tut
 
+The process will download a ready-to-use schema to the output directory you have specified.
+The loci and alleles included in the schema are the same that were in the original schema,
+but the chewie-NS has attributed new identifiers that will help to unmistakably identify
+those loci and alleles and facilitate results comparison for anyone that is using the same
+schema.
 
 Local analysis with subset1
 :::::::::::::::::::::::::::
