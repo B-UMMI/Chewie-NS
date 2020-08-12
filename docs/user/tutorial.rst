@@ -6,7 +6,7 @@ sandbox-style environment where anyone can test functionalities. This tutorial i
 testing with simple cases that were specially designed to demonstrate how users can use
 `chewBBACA modules <https://github.com/B-UMMI/chewBBACA/tree/master/CHEWBBACA/CHEWBBACA_NS>`_
 specifically designed to interact with chewie-NS to download, upload and synchronize schemas,
-while also promoting the exploration of data uploaded to the chewie-NS tutorial in its 
+while also promoting the exploration of data uploaded to the chewie-NS tutorial instance in its 
 `website <https://tutorial.chewbbaca.online/>`_ and a better understanding of how it is
 possible to interact with the API.
 
@@ -14,8 +14,30 @@ possible to interact with the API.
                download and synchronize schemas. To connect to the correct chewie-NS instance, you
                should always check if the sample commands include ``--ns tutorial`` at the 
                end and also include that parameter at the end of your commands. If you do
-               not do this, the processes will try to connect to the main chewie-NS instance
-               and simply fail.
+               not do this, the processes will try to connect to the main chewie-NS instance (it 
+               may download data if the identifiers you have chosen match any record but will 
+               not upload any data to the main instance).
+
+The tutorial has 9 steps:
+
+- Getting started - tutorial datasets: brief description of the general structure of the tutorial
+  datasets that are available.
+- chewBBACA installation: links to external resources that explain how to install the chewBBACA
+  suite and its dependencies.
+- Uploading the tutorial schema: example on how to upload a tutorial schema to the chewie-NS 
+  tutorial instance.
+- Downloading the schema: download the schema uploaded to the chewie-NS tutorial instance in the 
+  previous step.
+- Local analysis - subset1: perform allele call to populate the downloaded schema with new alleles.
+- Schema synchronization: submit novel alleles that were identified in the local analysis to
+  chewie-NS to update the remote schema.
+- Getting schema snapshot: download the uploaded schema in a state prior to the synchronization
+  process.
+- Local analysis - subset2: perform allele call with the second set of genomes.
+- Schema synchronization - conflicting identifiers: synchronize local schema and remote schema to reassign local allele 
+  identifiers that are conflicting with identifiers in chewie-NS and submit novel alleles 
+  inferred from the second subset of genomes.
+
 
 Getting started - tutorial datasets
 :::::::::::::::::::::::::::::::::::
@@ -29,7 +51,7 @@ Currently, there are datasets for the following species:
   (`sagalactiae.zip <https://github.com/B-UMMI/Chewie-NS_tutorial/blob/master/tutorial_data/sagalactiae_tutorial.zip?raw=true>`_)
 
 In this tutorial we will provide step-by-step instructions that use the
-*Streptococcus agalactiae* tutorial dataset, but the procedure is valid for any schema that
+*Streptococcus agalactiae* tutorial dataset, but the procedure is valid for any dataset that
 we make available.
 
 You will have to extract the contents in the archive. Tutorial datasets have the following
@@ -71,15 +93,16 @@ chewBBACA installation
 
 By taking advantage of chewie-NS’ API, chewBBACA is capable of handling not only the schema creation,
 but also its upload, synchronization and download. The set of modules to interact with chewie-NS
-included in the chewBBACA suite provide a simple and automatic solution for the main procedures
+included in the chewBBACA suite provide a simple and automatic solution for the main tasks
 that users will want to perform.
 
 You can install `chewBBACA <https://github.com/B-UMMI/chewBBACA>`_ through 
 `conda <https://anaconda.org/bioconda/chewbbaca>`_ or `pip <https://pypi.org/project/chewBBACA/>`_.
 chewBBACA has dependencies that will not be included if you install it through pip. If you install
-through pip you need to ensure that you have Prodigal 2.6.0 and BLAST 2.9.0 or greater. Please
-visit `chewBBACA's <https://github.com/B-UMMI/chewBBACA>`_ homepage for detailed instructions on how 
-to install it.
+through pip you need to ensure that you have `Prodigal <https://github.com/hyattpd/Prodigal>`_ 
+and `BLAST <https://www.ncbi.nlm.nih.gov/books/NBK279671/>`_ installed and added to PATH. 
+Please visit `chewBBACA's <https://github.com/B-UMMI/chewBBACA>`_ homepage for detailed 
+instructions on how to install it.
 
 .. important:: We recommend using BLAST 2.9.0. Older versions might not include functionalities
                used in the latest version of chewBBACA.
@@ -90,12 +113,12 @@ Uploading the tutorial schema
 
 To upload schemas to the main instance of chewie-NS it is necessary to have Contributor privileges, but
 in the chewie-NS tutorial instance schema upload is available to anyone that wishes to test it.
-Before uploading the schema please visit the :doc:`upload_api` documentation page to learn more about 
-how to run it.
+Before uploading the schema please visit the :doc:`upload_api` documentation page to learn more about the
+whole process.
 
 .. important:: The name attributed to the schema needs to be unique. You will not be able to upload
                a new schema if the schema's name has already been attributed to a schema that is
-               available in the chewie-NS.
+               available in chewie-NS.
 
 To upload the schema included in the *Streptococcus agalactiae* dataset, you can run the following command 
 (do not forget to include ``--ns tutorial`` at the end!):
@@ -173,25 +196,28 @@ To upload the schema included in the *Streptococcus agalactiae* dataset, you can
     Removing intermediate files...
 
 
-We have included an example with the information that is written to the standard output
-during the process.
-When the `LoadSchema` process finishes, the chewie-NS will insert the data that was sent 
-into its database and unlock the schema to make it available for download. You can find
-the schema you have uploaded listed in the ``Schemas Overview`` table for the species.
-You should remember the unique identifier that the chewie-NS attributed to the schema you 
+We have included the command and the information that the process prints to the standard output.
+It is important to know the unique identifier that chewie-NS attributed to the schema you 
 have uploaded (the lines with the schema and species identifiers are highlighted in the
 standard output).
+When the `LoadSchema` process finishes, the chewie-NS will insert the data that was sent 
+into its database and unlock the schema to make it available for download. You can find
+the schema you have uploaded listed in the ``Schemas Overview`` page for the species 
+(`Schemas Overview page for *Streptococcus agalactiae* <https://tutorial.chewbbaca.online/species/1>`_).
+
+.. important:: Schemas that are uploaded to the chewie-NS tutorial instance are deleted after 48h.
 
 Downloading the schema
 ::::::::::::::::::::::
 
-In order to use a schema you have uploaded to the chewie-NS, you will have to download it.
+In order to use a schema you have uploaded to chewie-NS, you will have to download it.
 
 To know more about the ``DownloadSchema`` process, please visit the :doc:`download_api` page
 in the documentation.
 
 To download the schema you have uploaded, please run the following command (substitute the
-species and schema IDs values, ``-sp`` and ``-sc``):
+species and schema ID values, ``-sp`` and ``-sc``, by the values that serve to identify the 
+schema you have uploaded):
 
 ::
 
@@ -211,7 +237,7 @@ species and schema IDs values, ``-sp`` and ``-sc``):
 
 The process will download a ready-to-use schema to the output directory you have specified.
 The loci and alleles included in the schema are the same that were in the original schema,
-but the chewie-NS has attributed new identifiers that will help to unmistakably identify
+but chewie-NS has attributed new identifiers that will help to unmistakably identify
 those loci and alleles and facilitate results comparison for anyone that is using the same
 schema.
 
@@ -234,7 +260,7 @@ that have the following header structure:
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
 Headers start with the loci prefix (``tut``) followed by the loci integer identifier (``00000001``)
-and the allele identifier (``1``).
+and end with the allele identifier (``1``).
 
 To perform allele call and determine the allelic profiles of the genomes in the subset1, run
 the following command:
@@ -325,7 +351,7 @@ the following command:
 The ``AlleleCall`` process will print a table with the summary of the results to the standard
 output. For the purpose of this tutorial, the ``INF`` cases are the most relevant. The alleles
 that received this classification correspond to new alleles that have been inferred during the 
-process and were added to the schema FASTA files. If we inspect the same file that was opened
+process and were added to the schema FASTA files. If we inspect the same file that we looked into
 before the allele calling, you will notice that new alleles have been added to that file.
 
 ::
@@ -354,7 +380,7 @@ before the allele calling, you will notice that new alleles have been added to t
 New alleles added to loci files that belong to a schema that was downloaded from chewie-NS will
 include a ``*`` before the allele identifer (e.g.: ``*4``). The ``*`` serves to indicate that
 the alleles were identified locally and that it has not been verified if those alleles exist in
-the chewie-NS and what is the identifier that chewie-NS attributed.
+chewie-NS and, if they exist, what was the identifier that chewie-NS attributed.
 
 Schema synchronization
 ::::::::::::::::::::::
@@ -424,17 +450,17 @@ downloaded from).
 
     Received 0 new alleles for 7 loci and sent 47 for 7 loci. 
 
-Since the schema has not been changed since its upload, the synchronization process will not
-retrieve alleles from chewie-NS. Our local schema includes alleles that are not in chewie-NS
+Since the schema has not been modified since the upload date, the synchronization process 
+will not retrieve alleles from chewie-NS. Our local schema includes alleles that are not in chewie-NS
 and the synchronization process will send those alleles to chewie-NS, waiting for the insertion 
-process to finish and receiving the set of identifiers that were attributed to the novel alleles.
+process to finish and return the set of identifiers that were attributed to the novel alleles.
 The ``SyncSchema`` process will reassign allele identifiers to local alleles based on the 
 identifiers attributed by chewie-NS and re-determine representative sequences for the loci
 that were altered. The schema had not been altered since its upload and chewie-NS attributed
 the same allele identifiers that were already being used in the local schema. Thus, the sequence
 headers will be shortened and the synchronization process will simply remove the ``*`` from the 
-headers. The file structure will be changed to (we have included the mapping between th old 
-identifiers with ``*`` and the new identifers without):
+headers. The file structure will be changed to (we have included the mapping between the new 
+identifiers and the old identifiers with ``*``):
 
 ::
 
@@ -516,14 +542,13 @@ A sample command would be:
 This will download all FASTA files for all loci in the schema and construct the schema locally.
 Since we have requested for the schema in a state prior to its ``Last Change Date``, we will
 retrieve a schema that does not include all alleles in the latest version of the remote schema
-and is outdated. We will use this schema to demonstrate what would happen if you performed allele
-call and wanted to synchronize your local schema with the remote schema.
+and is outdated.
 
 Local analysis - subset2
 :::::::::::::::::::::::::::
 
 We will perform allele call with the genomes in subset2 to demonstrate how the ``SyncSchema``
-process would behave if the remote schema had already been altered by another user and the
+process would behave if the remote schema had already been modified by another user and the
 sequences and allele identifiers in our local schema and in the remote schema did not fully
 match.
 
@@ -556,22 +581,23 @@ Once again, we verify that the ``AlleleCall`` process inferred some alleles duri
 and that those alleles have been added to the local schema. Since we have used a different set of
 genomes we do not know if the set of alleles that were added to the schema are in the remote schema,
 nor if the alleles that are common to both schemas have been attributed the same identifiers (in this
-case they have not and it is very unlikely that different sets of genomes lead to the same modifications).
+case they have not and it is very unlikely that different sets of genomes will lead to the same results
+and schema modifications).
 
-Schema synchronization
-::::::::::::::::::::::
+Schema synchronization - conflicting identifiers
+::::::::::::::::::::::::::::::::::::::::::::::::
 
 In the final step we will synchronize our schema with the remote schema. This process will retrieve
 alleles that are in the remote schema and add them to our schema with the identifier they have in
 chewie-NS. The alleles that are not in chewie-NS will be shifted to the end of the FASTA files and
-assigned sequential identifiers with ``*``, in the order they were added to the schema. This ensures
-that there are no conflicts between remote and strictly local identifiers. Local alleles with ``*``
-in their identifiers will be sent to chewie-NS and inserted into the schema's database. The ``SyncSchema``
-process wil retrieve the identifiers attributed by chewie-NS and assign them to the local sequences
-that still had no global identifier, ensuring that all alleles have the correct identifier and that
-there is a common and global nomenclature.
+assigned sequential identifiers with ``*`` at the end and in the same order as they were added to the 
+schema. This ensures that there are no conflicts between remote and strictly local identifiers. Local 
+alleles with ``*`` in their identifiers will be sent to chewie-NS and inserted into the schema's database. 
+The ``SyncSchema`` process wil receive the identifiers attributed by chewie-NS and assign them to 
+the local sequences that still had no global identifier, ensuring that all alleles have the correct 
+identifier and that there is a common and global nomenclature.
 
-Execute the following command:
+To perform this last synchronization, execute:
 
 ::
 
@@ -583,8 +609,7 @@ Execute the following command:
 
     ...
 
-
-The synchronization process will retrieve the 47 alleles that were inferred from subset1
+The synchronization process will retrieve 47 alleles that were inferred from subset1
 and send 33 local alleles that were inferred from subset2. Identifier reassignmnent results
 in the following file structure:
 
