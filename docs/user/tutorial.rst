@@ -18,7 +18,7 @@ possible to interact with the API.
                may download data if the identifiers you have chosen match any record but will 
                not upload any data to the main instance).
 
-The tutorial has 9 steps:
+The tutorial is divided into 9 steps:
 
 - Getting started - tutorial datasets: brief description of the general structure of the tutorial
   datasets that are available.
@@ -88,6 +88,12 @@ and the ``sagalactiae_description.md`` file is a sample description for the sche
 field in the annotations file and the description file support markdown syntax. You may change the
 contents of the files before uploading the schema if you wish.
 
+.. important:: The sample commands provided in this tutorial include relative paths that assume that the 
+               working directory is the root of the tutorial directory (the topmost level in the directory 
+               structure of the tutorial dataset, ``sagalactiae_tutorial``). It is strongly advised 
+               that you run the commands from that directory to ensure that you can use the commands exactly 
+               as provided and obtain the same results.
+
 chewBBACA installation
 ::::::::::::::::::::::
 
@@ -121,7 +127,8 @@ whole process.
                available in chewie-NS.
 
 To upload the schema included in the *Streptococcus agalactiae* dataset, you can run the following command 
-(do not forget to include ``--ns tutorial`` at the end!):
+(do not forget to set you working directory to the topmost level of the directory structure of the tutorial 
+dataset and to include ``--ns tutorial`` at the end):
 
 ::
 
@@ -267,7 +274,7 @@ the following command:
 
 ::
 
-    $ chewBBACA.py AlleleCall -i subset1/ -g sagalactiae_ns/sagalactiae_tut/ -o subset1_results 
+    $ chewBBACA.py AlleleCall -i sagalactiae_genomes/subset1/ -g sagalactiae_ns/sagalactiae_tut/ -o subset1_results 
 
     ==========================
       chewBBACA - AlleleCall
@@ -554,7 +561,7 @@ match.
 
 ::
 
-    $ chewBBACA.py AlleleCall -i subset2/ -g sagalactiae_snapshot/sagalactiae_tut/ -o subset2_results 
+    $ chewBBACA.py AlleleCall -i sagalactiae_genomes/subset2/ -g sagalactiae_snapshot/sagalactiae_tut/ -o subset2_results 
 
     ...
 
