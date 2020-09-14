@@ -42,6 +42,7 @@ const store = createStore(
   composeEnhancers(applyMiddleware(thunk))
 );
 
+// Define the application
 const app = (
   <Provider store={store}>
     <BrowserRouter>

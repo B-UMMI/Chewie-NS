@@ -28,7 +28,7 @@ import * as actions from "./store/actions/index";
 import MuiLink from "@material-ui/core/Link";
 import Breadcrumbs from "@material-ui/core/Breadcrumbs";
 
-
+// Determine URL matches for Breadcrumb generation
 function SimpleBreadcrumbs() {
   const aboutMatches = useRouteMatch("/about");
   const statsMatches = useRouteMatch("/stats");
