@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
+// Chewie local imports
 import axios from "../../axios-backend";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import Aux from "../../hoc/Aux/Aux"
@@ -91,22 +92,6 @@ class Annotations extends Component {
             )
           }
         },
-        // {
-        //   name: "schema",
-        //   label: "Schema ID",
-        //   options: {
-        //     filter: true,
-        //     sort: true,
-        //     display: true,
-        //     setCellHeaderProps: value => {
-        //       return {
-        //         style: {
-        //           fontWeight: "bold"
-        //         }
-        //       };
-        //     }
-        //   }
-        // },
         {
           name: "locus",
           label: "Locus ID",

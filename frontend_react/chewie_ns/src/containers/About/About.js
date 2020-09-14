@@ -14,12 +14,15 @@ class About extends Component {
   render() {
     return (
       <Aux>
+        {/* Load the Altmetric badge */}
         <ReactDependentScript
           loadingComponent={<div></div>}
           scripts={["https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"]}
         >
           <div></div>
         </ReactDependentScript>
+        
+        {/* Load the Dimensions badge */}
         <ReactDependentScript
           loadingComponent={<div></div>}
           scripts={["https://badge.dimensions.ai/badge.js"]}
