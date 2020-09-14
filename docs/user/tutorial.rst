@@ -498,8 +498,10 @@ Getting schema snapshot
 To demonstrate a synchronization process that will need to perform more complicated reassignments
 to ensure that local and remote schemas share the same identifiers, we will start by using a 
 feature that allows users to download a snapshot of any schema. Quickly consult the ``Schemas Overview``
-table and copy the ``Last Change Date``. We will subtract 2 minutes from that date and slightly 
-modify the date format so that it matches the ``yyyy-mm-ddThh:mm:ss`` format.
+table and copy the ``Last Change Date`` of the schema that you have uploaded. We will subtract 2 minutes 
+from that date and slightly modify the date format so that it matches the ``yyyy-mm-ddThh:mm:ss`` format 
+(if the ``Last Change Date`` is ``2020-08-07T22:49:52``, the date that you should include in the command 
+is ``2020-08-07T22:47:52``).
 
 A sample command would be:
 
