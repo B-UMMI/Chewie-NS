@@ -302,7 +302,7 @@ class Species extends Component {
         },
         {
           name: "chewie",
-          label: "chewBBACA version",
+          label: "Software",
           options: {
             filter: false,
             sort: false,
