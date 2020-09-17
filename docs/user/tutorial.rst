@@ -1,12 +1,12 @@
 Step-by-step Tutorial
 =====================
 
-We prepared a `chewie-NS instance <https://tutorial.chewbbaca.online/>`_ that provides a
+We prepared a `chewie-NS tutorial instance <https://tutorial.chewbbaca.online/>`_ that provides a
 sandbox-style environment where anyone can test functionalities. This tutorial instance enables
-testing with simple cases that were specially designed to demonstrate how users can use
+testing with simple cases that were specially designed to demonstrate how users can leverage the
 `chewBBACA modules <https://github.com/B-UMMI/chewBBACA/tree/master/CHEWBBACA/CHEWBBACA_NS>`_
-specifically designed to interact with chewie-NS to download, upload and synchronize schemas,
-while also promoting the exploration of data uploaded to the chewie-NS tutorial instance in its 
+specifically designed to interact with chewie-NS to download, upload and synchronize schemas.
+The tutorial also provides clues for the exploration of data uploaded to the chewie-NS tutorial instance in its 
 `website <https://tutorial.chewbbaca.online/>`_ and a better understanding of how it is
 possible to interact with the API.
 
@@ -78,14 +78,14 @@ directory structure::
 The ``subset1`` and ``subset2`` directories inside the ``sagalactiae_genomes`` directory contain two
 sets of genomes that will be used at different steps of the tutorial.
 
-The ``sagalactiae_schema`` directory contains a schema with 10 genes. The ``short`` directory contained
-in the schema's directory has the set of FASTA files with representative sequences for each gene in the
+The ``sagalactiae_schema`` directory contains a schema with 10 loci. The ``short`` directory contained
+in the schema's directory has the set of FASTA files with representative sequences for each locus in the
 schema. The ``Streptococcus_agalactiae.trn`` file is the Prodigal training file used to predict coding
 sequences from input genomes.
 
 The ``sagalactiae_annotations.tsv`` file contains User and Custom annotations for the loci in the schema
 and the ``sagalactiae_description.md`` file is a sample description for the schema. The Custom annotation
-field in the annotations file and the description file support markdown syntax. You may change the
+field in the annotations file and the description file support `markdown syntax <https://github.github.com/gfm/>`_. You may change the
 contents of the files before uploading the schema if you wish.
 
 .. important:: The sample commands provided in this tutorial include relative paths that assume that the 
@@ -207,7 +207,7 @@ We have included the command and the information that the process prints to the 
 It is important to know the unique identifier that chewie-NS attributed to the schema you 
 have uploaded (the lines with the schema and species identifiers are highlighted in the
 standard output).
-When the `LoadSchema` process finishes, the chewie-NS will insert the data that was sent 
+When the `LoadSchema` process finishes, chewie-NS will insert the data that was sent 
 into its database and unlock the schema to make it available for download. You can find
 the schema you have uploaded listed in the ``Schemas Overview`` page for the species 
 (`Schemas Overview page for *Streptococcus agalactiae* <https://tutorial.chewbbaca.online/species/1>`_).
@@ -222,9 +222,9 @@ In order to use a schema you have uploaded to chewie-NS, you will have to downlo
 To know more about the ``DownloadSchema`` process, please visit the :doc:`download_api` page
 in the documentation.
 
-To download the schema you have uploaded, please run the following command (substitute the
-species and schema ID values, ``-sp`` and ``-sc``, by the values that serve to identify the 
-schema you have uploaded):
+To download the schema you have uploaded, please run the following command:
+
+.. important:: substitute the species and schema ID values, ``-sp`` and ``-sc``, by the values that serve to identify the schema you have uploaded)
 
 ::
 
@@ -356,7 +356,8 @@ the following command:
     Inserted 12 profiles (12 total, 12 total unique).
 
 The ``AlleleCall`` process will print a table with the summary of the results to the standard
-output. For the purpose of this tutorial, the ``INF`` cases are the most relevant. The alleles
+output. You can see a  `detailed description <https://github.com/B-UMMI/chewBBACA/wiki/2.-Allele-Calling>`_ 
+of each category but for the purpose of this tutorial, the ``INF`` cases are the most relevant. The alleles
 that received this classification correspond to new alleles that have been inferred during the 
 process and were added to the schema FASTA files. If we inspect the same file that we looked into
 before the allele calling, you will notice that new alleles have been added to that file.
@@ -385,7 +386,7 @@ before the allele calling, you will notice that new alleles have been added to t
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
 New alleles added to loci files that belong to a schema that was downloaded from chewie-NS will
-include a ``*`` before the allele identifer (e.g.: ``*4``). The ``*`` serves to indicate that
+include a ``*`` before the allele number in the end of the sequence identifier (e.g.: ``*4``). The ``*`` serves to indicate that
 the alleles were identified locally and that it has not been verified if those alleles exist in
 chewie-NS and, if they exist, what was the identifier that chewie-NS attributed.
 
@@ -395,7 +396,7 @@ Schema synchronization
 To verify if newly identified alleles exist in chewie-NS, and submit those alleles if they are
 not in chewie-NS, we will need to run the ``SyncSchema`` process. This process will retrieve
 alleles added to the remote schema in chewie-NS since the last time we synchronized the local
-and remote schemas and offers the option to submit novel alleles that have been identified in
+and remote schemas and offer the option to submit novel alleles that have been identified in
 local analyses and are not in chewie-NS. To learn more about the ``SyncSchema`` process, please
 visit the :doc:`synchronize_api` page.
 
@@ -501,7 +502,9 @@ feature that allows users to download a snapshot of any schema. Quickly consult 
 table and copy the ``Last Change Date`` of the schema that you have uploaded. We will subtract 2 minutes 
 from that date and slightly modify the date format so that it matches the ``yyyy-mm-ddThh:mm:ss`` format 
 (if the ``Last Change Date`` is ``2020-08-07T22:49:52``, the date that you should include in the command 
-is ``2020-08-07T22:47:52``).
+is ``2020-08-07T22:47:52`` as indicated in the example shown).
+
+.. important:: substitute the data and time below with the time you have calculated, do NOT simply copy the command!
 
 A sample command would be:
 
@@ -655,9 +658,8 @@ in the following file structure:
 
 Reading the documentation and completing the tutorial should provide a good overview of
 how chewie-NS works and how you can interact with it through the chewBBACA suite. You can 
-head to chewie-NS' main instance website to explore available schema data for several species
+head to `chewie-NS' main instance website <https://chewbbaca.online/>`_ to explore available schema data for several species
 and download data through the website or using the chewBBACA modules that were used in the 
 tutorial. Schema upload and allele submission during synchronization in chewie-NS' main instance
-are only possible to users that have received authorization. If you want to submit data or provide
+are only possible to authorized users. If you want to submit data or provide
 any type of feedback, please contact us through imm-bioinfo@medicina.ulisboa.pt.
-
