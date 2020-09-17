@@ -9,12 +9,13 @@ schemas to **get the latest alleles added to Chewie-NS and to ensure that a comm
 **schemas**. We also provide the option to **submit novel alleles**, that were identified locally
 and are not present in Chewie-NS.
 
-.. important:: **Only users registered at the Chewie-NS public server can submit new local alleles to update remote schemas, although all users can download schemas and novel alleles from the Chewie-NS public server**
+.. important:: **Only users registered at the Chewie-NS public server can submit new local alleles to update remote schemas, 
+               although all users can download schemas and novel alleles from the Chewie-NS public server**
 
 To synchronize a local schema with its remote Chewie-NS public server version it is only necessary to provide the path
 to the schema directory. The simplicity of the process is ensured by a configuration file,
-present in all schemas downloaded from the Chewie-NS, that contains the identifier of the
-schema in the Chewie-NS and the last modification date of the schema.
+present in all schemas downloaded from Chewie-NS, that contains the identifier of the
+schema in Chewie-NS and the last modification date of the schema.
 
 Configuration file content::
 
@@ -46,14 +47,14 @@ Local FASTA file example::
     >prefix-018550_*7
     ATGAGCAAGCCTAATGTTGTTCAGTTAAATAATCAATATATTAACGATGAGAATCTAAAAAAACGTTACGAAGCTGAGGAGTTACGCTAA
 
-On synchronizing, novel alleles retrieved from the Chewie-NS are compared to novel local alleles and the process 
+On synchronizing, novel alleles retrieved from Chewie-NS are compared to novel local alleles and the process 
 reassigns allele identifiers to ensure that the alleles common to local and remote 
 schemas have the same identifiers. Local alleles that are not in Chewie-NS are shifted 
 to the last positions in the FASTA files and keep a '*' in the identifier. If the user wants 
 to submit those alleles it should add the `--submit` flag and the necessary data will be collected and uploaded to Chewie-NS. 
 Chewie-NS will return the identifiers assigned to the submitted alleles and the local 
 process will remove the '*' from the submitted alleles and assign the permanent identifiers. 
-If the process retrieves new alleles from the Chewie-NS, it will redetermine representative 
+If the process retrieves new alleles from Chewie-NS, it will redetermine representative 
 sequences **ONLY** for the loci in the local schema that were altered by the synchronization 
 process.
 
