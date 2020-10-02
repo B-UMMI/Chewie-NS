@@ -5593,7 +5593,17 @@ class SequencesAPItypon(Resource):
                                   (sq.SELECT_SEQUENCE_INFO_BY_HASH.format(current_app.config['DEFAULTHGRAPH'], seq_url, query_part)))
 
             sequence_info = result['results']['bindings']
-            if sequence_info != []:
-                return sequence_info, 200
-            else:
+
+            if len(sequence_info) == 0:
                 return {'NOT FOUND': 'Could not find information for a sequence with provided hash.'}, 404
+
+            locus_url = sequence_info[0]["locus"]["value"]
+            
+            locus_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+                      (sq.COUNT_LOCUS_ALLELES.format(current_app.config['DEFAULTHGRAPH'], locus_url)))
+                      
+            number_alleles_loci = int(
+                locus_result["results"]["bindings"][0]['count']['value'])
+
+            return {'result': sequence_info,
+                    'number_alleles_loci': number_alleles_loci}, 200

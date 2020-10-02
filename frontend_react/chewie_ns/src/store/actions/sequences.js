@@ -24,49 +24,94 @@ export const fetchSequenceStart = () => {
 export const fetchSequence = (sequence) => {
   return (dispatch) => {
     dispatch(fetchSequenceStart());
-    axios
-      .get("sequences/seq_info?sequence=" + sequence)
-      .then((res) => {
-        let sequence_data = [];
+    if (!/^[ATCG]+$/.test(sequence)) {
+      axios
+        .get("sequences/seq_info?seq_id=" + sequence)
+        .then((res) => {
+          let sequence_data = [];
 
-        for (let key in res.data.result) {
-          let species_id = res.data.result[key].schemas.value.split("/")[6];
+          for (let key in res.data.result) {
+            let species_id = res.data.result[key].schemas.value.split("/")[6];
 
-          let species_name = res.data.result[key].name.value;
+            let species_name = res.data.result[key].name.value;
 
-          let schema_id = res.data.result[key].schemas.value.substring(
-            res.data.result[key].schemas.value.lastIndexOf("/") + 1
-          );
+            let schema_id = res.data.result[key].schemas.value.substring(
+              res.data.result[key].schemas.value.lastIndexOf("/") + 1
+            );
 
-          let locusId = res.data.result[key].locus.value.substring(
-            res.data.result[key].locus.value.lastIndexOf("/") + 1
-          );
+            let locusId = res.data.result[key].locus.value.substring(
+              res.data.result[key].locus.value.lastIndexOf("/") + 1
+            );
 
-          sequence_data.push({
-            schemas_url:
-              "https://chewbbaca.online/species/" +
-              species_id +
-              "/schemas/" +
-              schema_id,
-            schemas_id: schema_id,
-            locus_url:
-              "https://chewbbaca.online/species/" +
-              species_id +
-              "/schemas/" +
-              schema_id +
-              "/locus/" +
-              locusId,
-            locus_id: locusId,
-            species_name: species_name,
-            alleles: res.data.number_alleles_loci,
-          });
-        }
+            sequence_data.push({
+              schemas_url:
+                "https://chewbbaca.online/species/" +
+                species_id +
+                "/schemas/" +
+                schema_id,
+              schemas_id: schema_id,
+              locus_url:
+                "https://chewbbaca.online/species/" +
+                species_id +
+                "/schemas/" +
+                schema_id +
+                "/locus/" +
+                locusId,
+              locus_id: locusId,
+              species_name: species_name,
+              alleles: res.data.number_alleles_loci,
+            });
+          }
 
-        console.log(sequence_data);
-        dispatch(fetchSequenceSuccess(sequence_data));
-      })
-      .catch((seqErr) => {
-        dispatch(fetchSequenceFail(seqErr));
-      });
+          dispatch(fetchSequenceSuccess(sequence_data));
+        })
+        .catch((seqErr) => {
+          dispatch(fetchSequenceFail(seqErr));
+        });
+    } else {
+      axios
+        .get("sequences/seq_info?sequence=" + sequence)
+        .then((res) => {
+          let sequence_data = [];
+
+          for (let key in res.data.result) {
+            let species_id = res.data.result[key].schemas.value.split("/")[6];
+
+            let species_name = res.data.result[key].name.value;
+
+            let schema_id = res.data.result[key].schemas.value.substring(
+              res.data.result[key].schemas.value.lastIndexOf("/") + 1
+            );
+
+            let locusId = res.data.result[key].locus.value.substring(
+              res.data.result[key].locus.value.lastIndexOf("/") + 1
+            );
+
+            sequence_data.push({
+              schemas_url:
+                "https://chewbbaca.online/species/" +
+                species_id +
+                "/schemas/" +
+                schema_id,
+              schemas_id: schema_id,
+              locus_url:
+                "https://chewbbaca.online/species/" +
+                species_id +
+                "/schemas/" +
+                schema_id +
+                "/locus/" +
+                locusId,
+              locus_id: locusId,
+              species_name: species_name,
+              alleles: res.data.number_alleles_loci,
+            });
+          }
+
+          dispatch(fetchSequenceSuccess(sequence_data));
+        })
+        .catch((seqErr) => {
+          dispatch(fetchSequenceFail(seqErr));
+        });
+    }
   };
 };
