@@ -2,7 +2,7 @@ Retrieve basic information
 ================================
 
 The `NSStats <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/stats_requests.py>`_
-process included in the chewBBACA suite enables the retrieval of information from Chewie-NS public server. 
+process included in the chewBBACA suite enables the retrieval of information from Chewie-NS server. 
 Its main objective is to provide information about the list of species and schemas in Chewie-NS, 
 so that users can quickly identify a schema of interest and download it.
 

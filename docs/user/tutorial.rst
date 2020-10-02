@@ -224,7 +224,8 @@ in the documentation.
 
 To download the schema you have uploaded, please run the following command:
 
-.. important:: substitute the species and schema ID values, ``-sp`` and ``-sc``, by the values that serve to identify the schema you have uploaded)
+.. important:: Substitute the species and schema ID values, ``-sp`` and ``-sc``, by the values that 
+               serve to identify the schema you have uploaded.
 
 ::
 
@@ -467,8 +468,7 @@ identifiers attributed by chewie-NS and re-determine representative sequences fo
 that were altered. The schema had not been altered since its upload and chewie-NS attributed
 the same allele identifiers that were already being used in the local schema. Thus, the sequence
 headers will be shortened and the synchronization process will simply remove the ``*`` from the 
-headers. The file structure will be changed to (we have included the mapping between the new 
-identifiers and the old identifiers with ``*``):
+headers. The file structure will be changed to the following:
 
 ::
 
@@ -493,6 +493,11 @@ identifiers and the old identifiers with ``*``):
     >tut-00000001_9 <----- *9
     ATGTTTAAAGGTAATAAGAAGTTGAATAGTTCTAAATTAGGTGATTACACACCACTTGAATTTGGTTCT...
 
+We have included the mapping between the new identifiers and the old identifiers with ``*`` to 
+highlight allele identifiers reassignments, e.g.: ``>tut-00000001_2 <----- *2``. This mapping 
+serves to clearly indicate the changes made by the SyncShcema process during this tutorial and 
+is not added to the FASTA files.
+
 Getting schema snapshot
 :::::::::::::::::::::::
 
@@ -504,7 +509,8 @@ from that date and slightly modify the date format so that it matches the ``yyyy
 (if the ``Last Change Date`` is ``2020-08-07T22:49:52``, the date that you should include in the command 
 is ``2020-08-07T22:47:52`` as indicated in the example shown).
 
-.. important:: substitute the data and time below with the time you have calculated, do NOT simply copy the command!
+.. important:: Substitute the data and time below with the time you have calculated, do NOT simply copy 
+               the command!
 
 A sample command would be:
 
