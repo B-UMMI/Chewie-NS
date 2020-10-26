@@ -1,6 +1,8 @@
 # Chewie-NS :whale2: :package:
 
 [![Documentation Status](https://readthedocs.org/projects/chewie-ns/badge/?version=latest)](https://chewie-ns.readthedocs.io/en/latest/?badge=latest)
+[![DOI:10.1093/nar/gkaa889](https://img.shields.io/badge/DOI-10.1093%2Fnar%2Fgkaa889-blue)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238)
+[![License: GPL v3](https://img.shields.io/github/license/B-UMMI/Chewie-NS)](https://www.gnu.org/licenses/gpl-3.0)
 
 Docker-compose for the [Nomenclature Server](https://github.com/B-UMMI/Nomenclature_Server) webapp.
 It uses the following docker images:
@@ -146,6 +148,13 @@ docker-compose -f docker-compose-production.yaml up --build
 
 Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
 
+The default user's credentials are the following:
+
+```py
+username = test@refns.com
+password = mega_secret
+```
+
 ## Notes
 
 Make sure that these ports or your localhost are not already in use by other services!
@@ -154,3 +163,11 @@ More info available [here](https://www.cyberciti.biz/faq/unix-linux-check-if-por
 ## Contacts
 
 - Chewie-NS development team (imm-bioinfo@medicina.ulisboa.pt)
+
+## Citation
+
+If you use **Chewie-NS**, please cite: 
+
+Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
+
+Available from: https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238
