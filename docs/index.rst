@@ -42,6 +42,15 @@ The tutorial will allow users to learn how to interact with Chewie-NS.
 
 Tutorial instructions are available at the :doc:`user/tutorial`!
 
+Citation
+::::::::
+
+If you use **Chewie-NS**, please cite: 
+
+Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
+
+Available from: `<https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238>`_
+
 Licensing
 :::::::::
 
