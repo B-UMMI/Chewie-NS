@@ -458,7 +458,7 @@ class Schema extends Component {
       annotations = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
-            title={"Annotations"}
+            title={"Locus information"}
             data={this.props.annotations}
             columns={columns}
             options={options}
