@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1 - 2020/11/20
+
+The information displayed in the Landing and About pages are now being rendered in Markdown. Added the paper citation to these pages.
+Changed the title of the "Annotations" table in the Schema Evaluation and Annotation to "Locus information".
+Removed unused frontend components.
+
 ## 1.2.0 - 2020/10/09
 
 Dashboards for user and queue management are now available thorugh the addition of the pgadmin4 and Flower images, respectively.
