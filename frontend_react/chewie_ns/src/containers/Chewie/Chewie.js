@@ -56,7 +56,7 @@ class Chewie extends Component {
             </a>
           </div>
           <Markdown markdown={chewie_front} />
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
+          {/* <div style={{ textAlign: "center", marginTop: "20px" }}>
             <div id="availableSchemasDiv" style={{ marginTop: "30px" }}>
               <Button
                 variant="contained"
@@ -67,7 +67,7 @@ class Chewie extends Component {
                 Available Schemas
               </Button>
             </div>
-          </div>
+          </div> */}
           <div id="INCD_div" className={classes.incdDiv}>
             <div id="resourcesTextDiv">
               <p className={classes.resourcesText}>

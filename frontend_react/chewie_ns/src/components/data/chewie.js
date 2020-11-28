@@ -12,6 +12,9 @@ of gene-by-gene schemas and determination of allelic profiles from assembled dra
 perform analyses locally with chewBBACA, and, if they so wish, to submit their novel results to the web service 
 through a REST API to ensure that a common nomenclature is maintained.
 
+|[Click here to see the Available Schemas](https://chewbbaca.online/stats)|
+|---|
+
 ## Tutorial
 
 Please visit the Tutorial site at https://tutorial.chewbbaca.online/ or by clicking on the test tube icon on the sidebar! 
@@ -26,9 +29,8 @@ If you wish to submit schemas to Chewie-NS you need to register first at the [Re
 
 If you use **Chewie-NS**, please cite: 
 
-Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
-
-Available from: https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238
+[Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): 
+    a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238)    
 
 ## Contacts
 
