@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 - 2020/11/28
+
+Changed the landing and About page text. The "Available Schemas" button has been replaced by a link in Markdown.
+
 ## 1.2.1 - 2020/11/20
 
 The information displayed in the Landing and About pages are now being rendered in Markdown. Added the paper citation to these pages.
