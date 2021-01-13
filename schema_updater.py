@@ -369,6 +369,89 @@ def unzip(zip_file, dest_dir):
 	return locus_file
 
 
+def create_contributions_file(allele_contrib_path, schema_uri, c_user, new_alleles_per_locus, new_seqs, total_loci):
+    """
+    """
+
+    # get current date
+    date = dt.datetime.now().strftime("%Y-%m-%d")
+    
+    # json content dictionary
+    new_alleles_file_json = {
+        "schema": schema_uri,
+        "lastSyncDate": date,
+        "syncDates": [date],
+        "userIDs": [c_user],
+    }
+
+    # add total loci to the json contents
+    # this will ease the update process and
+    # allows 0 to be appended
+    # if no new alleles were added
+    for tl in range(1, total_loci + 1):
+        new_alleles_file_json["locus_{0}".format(tl)] = {"newAlleles": [0]}
+
+    # get allele contributions per locus
+    for na in new_alleles_per_locus:
+        locus_id = list(na.keys())[0]
+        if locus_id in new_alleles_file_json:
+            sum_to_replace = new_alleles_file_json[locus_id]["newAlleles"][0] + na[locus_id]["newAlleles"][0]
+            new_alleles_file_json[locus_id]["newAlleles"] = [sum_to_replace]
+
+    # add total new alleles
+    new_alleles_file_json["newAlleles"] = [new_seqs]
+
+    # write file 
+    with open(allele_contrib_path, "w") as acf:
+        json.dump(new_alleles_file_json, acf, sort_keys=True)
+
+
+def update_contributions_file(allele_contrib_path, schema_uri, c_user, new_alleles_per_locus, new_seqs):
+    """
+    """
+
+    # read file
+    with open(allele_contrib_path, "r") as acf:
+        allele_contrib_file_json = json.load(acf)
+    
+    if allele_contrib_file_json["schema"] == schema_uri:
+        
+        # get current date
+        date = dt.datetime.now().strftime("%Y-%m-%d")
+
+        # replace last sync date
+        allele_contrib_file_json["lastSyncDate"] = date
+
+        # add the last sync date to the list
+        allele_contrib_file_json["syncDates"].append(date)
+
+        # add contributing user to the list
+        allele_contrib_file_json["userIDs"].append(c_user)
+
+        # add new alleles (total)
+        allele_contrib_file_json["newAlleles"].append(new_seqs)
+
+        # convert list of new_alleles to dict
+        new_alleles_per_locus_dict = {list(k.keys())[0]: k[list(k.keys())[0]] for k in new_alleles_per_locus}
+
+        # get loci keys from file
+        json_loci_keys = [lk for lk in list(allele_contrib_file_json.keys()) if "locus" in lk]
+
+        # update/add allele contributions
+        for locus_key in json_loci_keys:
+            if locus_key in list(new_alleles_per_locus_dict.keys()):
+                allele_contrib_file_json[locus_key]["newAlleles"].append(new_alleles_per_locus_dict[locus_key]["newAlleles"][0])
+            else:
+                allele_contrib_file_json[locus_key]["newAlleles"].append(0)                
+
+        # write file again
+        with open(allele_contrib_path, "w") as acfw:
+            json.dump(allele_contrib_file_json, acfw, sort_keys=True)
+
+    else:
+        print("The schema is not correct. Something is wrong.")
+
+
 def parse_arguments():
 
     parser = argparse.ArgumentParser(description=__doc__,
@@ -406,15 +489,20 @@ def parse_arguments():
                         dest='virtuoso_pass', required=True,
                         default=os.environ.get('VIRTUOSO_PASS'),
                         help='')
+	
+	parser.add_argument('--cu', type=int,
+                        dest='contributing_user', required=True,
+                        help='')
 
     args = parser.parse_args()
 
     return [args.input_dir, args.virtuoso_graph,
             args.local_sparql, args.base_url,
-            args.virtuoso_user, args.virtuoso_pass]
+            args.virtuoso_user, args.virtuoso_pass,
+			args.contributing_user]
 
 
-def main(temp_dir, graph, sparql, base_url, user, password):
+def main(temp_dir, graph, sparql, base_url, user, password, c_user):
 
 	start = time.time()
 
@@ -424,6 +512,15 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 
 	# create schema URI
 	schema_uri = '{0}species/{1}/schemas/{2}'.format(base_url, species_id, schema_id)
+
+	# count total loci
+    count_schema_loci = (sq.COUNT_SINGLE_SCHEMA_LOCI_ALLELES.format(graph,
+                                                schema_uri))
+
+    count_schema_loci_res = aux.get_data(SPARQLWrapper(sparql),
+                                            count_schema_loci)
+
+    total_loci = int(count_schema_loci_res["results"]["bindings"][0]["nr_loci"]["value"])
 
 	post_files = [os.path.join(temp_dir, file) for file in os.listdir(temp_dir)]
 
@@ -435,6 +532,8 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 		locus_file = os.path.join(temp_dir, locus_file)
 		schema_files.append(locus_file)
 
+	new_alleles_per_locus = []
+
 	# create SPARQL multiple INSERT queries
 	new_seqs = 0
 	identifiers = {}
@@ -445,6 +544,15 @@ def main(temp_dir, graph, sparql, base_url, user, password):
 				queries_files.append(res[0])
 			identifiers[res[1]] = [res[2], res[3]]
 			new_seqs += len(res[3])
+			new_alleles_per_locus.append({"locus_{0}".format(res[1]): {"newAlleles": [len(res[3])]}})
+
+	# create/update allele contributions file
+	allele_contrib_path = os.path.join("pre-computed-data", "allele_contributions_{0}_{1}.json".format(species_id, schema_id))
+
+    if os.path.exists(allele_contrib_path):
+        update_contributions_file(allele_contrib_path, schema_uri, c_user, new_alleles_per_locus, new_seqs)
+    else:
+        create_contributions_file(allele_contrib_path, schema_uri, c_user, new_alleles_per_locus, new_seqs, total_loci)
 
 	start = time.time()
 	# insert data

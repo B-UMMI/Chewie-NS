@@ -106,7 +106,7 @@ def insert_alleles(temp_dir, graph, sparql, url, user, password):
 
 # queue to add alleles to existing schemas
 @celery.task(name='ns.api.routes.update_alleles')
-def update_alleles(temp_dir, graph, sparql, url, user, password):
+def update_alleles(temp_dir, graph, sparql, url, user, password, c_user):
     """
     """
 
@@ -117,7 +117,8 @@ def update_alleles(temp_dir, graph, sparql, url, user, password):
                                       '--s', sparql,
                                       '--b', url,
                                       '--u', user,
-                                      '--p', password])
+                                      '--p', password,
+                                      '--cu', c_user])
 
 
 # queue to insert single locus
@@ -1450,6 +1451,29 @@ class StatsLengthStats(Resource):
 
         precomputed_data_file = os.path.join(
             os.getcwd(), 'pre-computed-data/boxplot_{0}_{1}.json'.format(species_id, schema_id))
+
+        with open(precomputed_data_file, 'r') as json_file:
+            json_data = json.load(json_file)
+
+        return json_data
+
+
+@stats_conf.route("/species/<int:species_id>/schema/<int:schema_id>/contributions")
+class StatsContributions(Resource):
+    """ Get the allele contributions any schema. """
+
+    @api.doc(responses={200: 'OK',
+                        400: 'Invalid Argument',
+                        500: 'Internal Server Error',
+                        403: 'Unauthorized',
+                        401: 'Unauthenticated',
+                        404: 'Not Found'},
+             security=[])
+    def get(self, species_id, schema_id):
+        """ Get the allele contributions any schema. """
+
+        precomputed_data_file = os.path.join(
+            os.getcwd(), 'pre-computed-data/allele_contributions_{0}_{1}.json'.format(species_id, schema_id))
 
         with open(precomputed_data_file, 'r') as json_file:
             json_data = json.load(json_file)
@@ -4205,7 +4229,8 @@ class SchemaLociUpdateAPItypon(Resource):
                                                       current_app.config['LOCAL_SPARQL'],
                                                       current_app.config['BASE_URL'],
                                                       current_app.config['VIRTUOSO_USER'],
-                                                      current_app.config['VIRTUOSO_PASS']))
+                                                      current_app.config['VIRTUOSO_PASS'],
+                                                      str(c_user)))
 
             return {'nr_alleles': nr_alleles}, 201
 
