@@ -51,6 +51,9 @@ class Schema extends Component {
 
     // fetch schema boxplot data
     this.props.onFetchBoxplotData(species_id, schema_id);
+
+    // fetch allele contributions
+    this.props.onFetchAlleleContribution(species_id, schema_id);
   }
 
   getMuiTheme = () =>
@@ -104,6 +107,7 @@ class Schema extends Component {
     let schema_table = <CircularProgress />;
     let schema_description = <div />;
     let schema_boxplot = <CircularProgress />;
+    let schema_contribData = <CircularProgress />;
 
     const spd = JSON.parse(localStorage.getItem("speciesD"));
     const tableData = JSON.parse(localStorage.getItem("tableData"));
@@ -224,6 +228,57 @@ class Schema extends Component {
           useResizeHandler={true}
           style={{ width: "100%", height: "100%" }}
           onClick={(e) => this.clickBoxPlotHandler(e)}
+        />
+      );
+    }
+
+    if (!this.props.loading_contribData) {
+      let contribData = this.props.contribData;
+
+      schema_contribData = (
+        <Plot
+          data={contribData}
+          layout={{
+            title: {
+              text: "Allele Timeline Information",
+            },
+            xaxis: {
+              type: "date",
+              title: "Sync Dates",
+              // range: ['2015-01-01', '2015-12-31'],
+              rangeselector: {
+                buttons: [
+                  {
+                    count: 1,
+                    label: "1m",
+                    step: "month",
+                    stepmode: "backward",
+                  },
+                  {
+                    count: 6,
+                    label: "6m",
+                    step: "month",
+                    stepmode: "backward",
+                  },
+                  {
+                    count: 1,
+                    label: "1y",
+                    step: "year",
+                    stepmode: "backward",
+                  },
+                  { step: "all" },
+                ],
+              },
+              rangeslider: {},
+              // autorange: true,
+            },
+            yaxis: {
+              title: { text: "Alleles Added" },
+            },
+            hovermode: "closest",
+          }}
+          useResizeHandler={true}
+          style={{ width: "100%", height: "100%" }}
         />
       );
     }
@@ -785,11 +840,23 @@ class Schema extends Component {
                       >
                         Locus Size Variation
                       </Button>
+                      <Button
+                        style={style.button}
+                        className={classNames(
+                          this.state.tabValue === 4 && classes.tabButton
+                        )}
+                        onClick={() => {
+                          this.plotChangeHandler(4);
+                        }}
+                      >
+                        Allele Timeline Information
+                      </Button>
                     </div>
                     {this.state.tabValue === 0 && total_allele_plot}
                     {this.state.tabValue === 1 && mode_plot}
                     {this.state.tabValue === 2 && scatter_plot}
                     {this.state.tabValue === 3 && schema_boxplot}
+                    {this.state.tabValue === 4 && schema_contribData}
                   </div>
                 </ExpansionPanelDetails>
               </ExpansionPanel>
@@ -823,6 +890,9 @@ const mapStateToProps = (state) => {
     boxplotData: state.schemaBox.boxplotData,
     loading_boxplot: state.schemaBox.loading,
     error_boxplot: state.schemaBox.error,
+    contribData: state.contributions.contribData,
+    loading_contribData: state.contributions.loading,
+    error_contribData: state.contributions.error,
     // token: state.auth.token
   };
 };
@@ -837,6 +907,8 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(actions.fetchDescriptions(species_id, schema_id)),
     onFetchBoxplotData: (species_id, schema_id) =>
       dispatch(actions.fetchSchemaBox(species_id, schema_id)),
+    onFetchAlleleContribution: (species_id, schema_id) =>
+      dispatch(actions.fetchAlleleContribution(species_id, schema_id)),
   };
 };
 

@@ -7,3 +7,4 @@ export { fetchAnnotations } from "./annotations";
 export { fetchDescriptions } from "./descriptions";
 export { fetchSequence } from "./sequences";
 export { fetchSchemaBox } from "./schema_box";
+export { fetchAlleleContribution } from "./contributions";
