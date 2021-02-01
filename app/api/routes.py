@@ -1475,10 +1475,17 @@ class StatsContributions(Resource):
         precomputed_data_file = os.path.join(
             os.getcwd(), 'pre-computed-data/allele_contributions_{0}_{1}.json'.format(species_id, schema_id))
 
-        with open(precomputed_data_file, 'r') as json_file:
-            json_data = json.load(json_file)
+        if os.path.exists(precomputed_data_file):
 
-        return json_data
+            with open(precomputed_data_file, 'r') as json_file:
+                json_data = json.load(json_file)
+
+            return json_data
+        else:
+            
+            json_data = "undefined"
+        
+            return json_data
 
 
 # Loci Routes

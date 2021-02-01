@@ -235,52 +235,59 @@ class Schema extends Component {
     if (!this.props.loading_contribData) {
       let contribData = this.props.contribData;
 
-      schema_contribData = (
-        <Plot
-          data={contribData}
-          layout={{
-            title: {
-              text: "Allele Timeline Information",
-            },
-            xaxis: {
-              type: "date",
-              title: "Sync Dates",
-              // range: ['2015-01-01', '2015-12-31'],
-              rangeselector: {
-                buttons: [
-                  {
-                    count: 1,
-                    label: "1m",
-                    step: "month",
-                    stepmode: "backward",
-                  },
-                  {
-                    count: 6,
-                    label: "6m",
-                    step: "month",
-                    stepmode: "backward",
-                  },
-                  {
-                    count: 1,
-                    label: "1y",
-                    step: "year",
-                    stepmode: "backward",
-                  },
-                  { step: "all" },
-                ],
+      schema_contribData =
+        this.props.contribData === "undefined" ? (
+          <div>
+            <Typography variant="subtitle1">
+              No new alleles added to the schema.
+            </Typography>
+          </div>
+        ) : (
+          <Plot
+            data={contribData}
+            layout={{
+              title: {
+                text: "Allele Timeline Information",
               },
-              rangeslider: {},
-              // autorange: true,
-            },
-            yaxis: {
-              title: { text: "Alleles Added" },
-            },
-            hovermode: "closest",
-          }}
-          useResizeHandler={true}
-          style={{ width: "100%", height: "100%" }}
-        />
-      );
+              xaxis: {
+                type: "date",
+                title: "Sync Dates",
+                // range: ['2015-01-01', '2015-12-31'],
+                rangeselector: {
+                  buttons: [
+                    {
+                      count: 1,
+                      label: "1m",
+                      step: "month",
+                      stepmode: "backward",
+                    },
+                    {
+                      count: 6,
+                      label: "6m",
+                      step: "month",
+                      stepmode: "backward",
+                    },
+                    {
+                      count: 1,
+                      label: "1y",
+                      step: "year",
+                      stepmode: "backward",
+                    },
+                    { step: "all" },
+                  ],
+                },
+                rangeslider: {},
+                // autorange: true,
+              },
+              yaxis: {
+                title: { text: "Alleles Added" },
+              },
+              hovermode: "closest",
+            }}
+            useResizeHandler={true}
+            style={{ width: "100%", height: "100%" }}
+          />
+        );
     }
 
     if (this.props.annotations !== undefined || this.props.annotations !== []) {
