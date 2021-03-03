@@ -31,7 +31,7 @@ To start a local instance of Chewie-NS the following files must be modified:
 
 ### Docker compose configuration file
 
-In this file the **BASE_URL** variable needs to be changed to your localhost.
+In [this file](https://github.com/B-UMMI/Chewie-NS/blob/9f5871b88672cb7f7819a0cf80b987abf2bb55dc/docker-compose-production.yaml#L19) the **BASE_URL** variable needs to be changed to your localhost.
 
 ```yaml
 environment:
@@ -41,7 +41,7 @@ environment:
 
 ### NS API Dockerfile
 
-In this Dockerfile, the number of **workers** and **threads** provided to the _gunicorn_ command should be adequate to your machines resources.
+In [this Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/9f5871b88672cb7f7819a0cf80b987abf2bb55dc/Dockerfile#L31), the number of **workers** and **threads** provided to the _gunicorn_ command should be adequate to your machines resources.
 An example command could be:
 
 ```dockerfile
