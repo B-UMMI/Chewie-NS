@@ -11,7 +11,7 @@ const imageRenderer = (props) => {
 // Defines a link renderer
 const linkRenderer = (props) => {
   return (
-    <a href={props.href} target={"_blank"} rel="noopener noreferrer">
+    <a href={props.href} target="_blank" rel="noopener noreferrer">
       {props.children}
     </a>
   );
@@ -27,7 +27,7 @@ const renderers = {
 const markdown = (props) => {
   return (
     <div className={classes.App}>
-      <ReactMarkdown source={props.markdown} renderers={{ renderers }} />
+      <ReactMarkdown source={props.markdown} renderers={ renderers } />
     </div>
   );
 };
