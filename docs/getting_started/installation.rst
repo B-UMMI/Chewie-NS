@@ -159,7 +159,7 @@ If they are, docker-compose will not be able to build Chewie-NS. To solve this i
 
 After completing the previous steps, you only need to run this command::
 
-    docker-compose up -f docker-compose-production.yaml --build
+    docker-compose -f docker-compose-production.yaml up --build
 
 Docker-compose will create all the necessary containers and images and will orchestrate them to build a local instance of Chewie-NS, available by
 default in your localhost.
