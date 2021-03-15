@@ -90,22 +90,47 @@ class Species extends Component {
       url: "/download/prodigal_training_files/" + ptfHash,
     }).then((res) => {
       console.log(res);
+
+      const url_hostname = new URL(res.config.baseURL).hostname;
+
+      let link_href = "undefined";
+
+      if (url_hostname.includes("chewbbaca")) {
+        link_href = `https://${url_hostname}/api/NS/api/download/prodigal_training_files/${ptfHash}`;
+      } else {
+        link_href = `https://${url_hostname}/NS/api/download/prodigal_training_files/${ptfHash}`;
+      }
+
+      const spd = JSON.parse(localStorage.getItem("speciesD"));
+
+      let speciesName = spd[this.props.match.params.species_id];
+
+      const fileName = speciesName.replace(" ", "_") + ".trn";
+
+      // create download element
+      const link = document.createElement("a");
+      link.href = link_href;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+
+      // console.log(link);
     });
 
-    const spd = JSON.parse(localStorage.getItem("speciesD"));
+    // const spd = JSON.parse(localStorage.getItem("speciesD"));
 
-    let speciesName = spd[this.props.match.params.species_id];
+    // let speciesName = spd[this.props.match.params.species_id];
 
-    const fileName = speciesName.replace(" ", "_") + ".trn";
+    // const fileName = speciesName.replace(" ", "_") + ".trn";
 
-    // create download element
-    const link = document.createElement("a");
-    link.href =
-      "https://chewbbaca.online/api/NS/api/download/prodigal_training_files/" +
-      ptfHash;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
+    // // create download element
+    // const link = document.createElement("a");
+    // link.href =
+    //   "https://127.0.0.1/NS/api/download/prodigal_training_files/" +
+    //   ptfHash;
+    // link.setAttribute("download", fileName);
+    // document.body.appendChild(link);
+    // link.click();
   };
 
   downloadCompressedSchemasHandler = (tableMeta) => {
@@ -167,32 +192,60 @@ class Species extends Component {
       url: "/download/compressed_schemas/" + endpointVariables,
     }).then((res) => {
       console.log(res);
+
+      const url_hostname = new URL(res.config.baseURL).hostname;
+
+      let link_href = "undefined";
+
+      if (url_hostname.includes("chewbbaca")) {
+        link_href = `https://${url_hostname}/api/NS/api/download/compressed_schemas/${endpointVariables}`;
+      } else {
+        link_href = `https://${url_hostname}/NS/api/download/compressed_schemas/${endpointVariables}`;
+      }
+
+      let speciesName2 = spd[this.props.match.params.species_id];
+
+      const fileName2 =
+        speciesName2.replace(" ", "_") +
+        "_" +
+        schemaName +
+        "_" +
+        lastModifiedDate +
+        ".zip";
+
+      // create download element
+      const link = document.createElement("a");
+      link.href = link_href;
+      link.setAttribute("download", fileName2);
+      document.body.appendChild(link);
+      link.click();
     });
 
     //const ts = localStorage.getItem("timestamp");
     //console.log(ts);
     // localStorage.removeItem("timestamp");
 
-    let speciesName2 = spd[this.props.match.params.species_id];
+    // let speciesName2 = spd[this.props.match.params.species_id];
 
-    // const schemaTimestamp2 = "";
+    // // const schemaTimestamp2 = "";
 
-    const fileName2 =
-      speciesName2.replace(" ", "_") +
-      "_" +
-      schemaName +
-      "_" +
-      lastModifiedDate +
-      ".zip";
+    // const fileName2 =
+    //   speciesName2.replace(" ", "_") +
+    //   "_" +
+    //   schemaName +
+    //   "_" +
+    //   lastModifiedDate +
+    //   ".zip";
 
-    // create download element
-    const link = document.createElement("a");
-    link.href =
-      "https://chewbbaca.online/api/NS/api/download/compressed_schemas/" +
-      endpointVariables;
-    link.setAttribute("download", fileName2);
-    document.body.appendChild(link);
-    link.click();
+    // // create download element
+    // const link = document.createElement("a");
+    // link.href =
+    //   "https://127.0.0.1/NS/api/download/compressed_schemas/" +
+    //   endpointVariables;
+    // link.setAttribute("download", fileName2);
+    // document.body.appendChild(link);
+    // link.click();
+    // console.log(link);
   };
 
   getMuiTheme = () =>
