@@ -393,6 +393,8 @@ class Schema extends Component {
               return (
                 <a
                   href={`${this.props.history.location.pathname}/locus/${value}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {value}
                 </a>
