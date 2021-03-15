@@ -9,6 +9,7 @@ __pycache__/
 *~
 .idea/*
 .directory
+.vscode
 #virtuoso.*
 #virtuoso-temp.*
 #virtuoso_data/
