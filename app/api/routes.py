@@ -1224,7 +1224,7 @@ class DownloadCompressedSchemas(Resource):
 
 
 @download_conf.route("/prodigal_training_files/<string:ptf_hash>")
-class DownloadCompressedSchemas(Resource):
+class DownloadProdigalTrainingFile(Resource):
     """ Download a prodigal training file. """
 
     @api.doc(responses={200: 'OK',
