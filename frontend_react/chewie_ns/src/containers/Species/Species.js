@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 // Chewie local imports
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
-// import Spinner from "../../components/UI/Spinner/Spinner";
 import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
@@ -113,24 +112,7 @@ class Species extends Component {
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
-
-      // console.log(link);
     });
-
-    // const spd = JSON.parse(localStorage.getItem("speciesD"));
-
-    // let speciesName = spd[this.props.match.params.species_id];
-
-    // const fileName = speciesName.replace(" ", "_") + ".trn";
-
-    // // create download element
-    // const link = document.createElement("a");
-    // link.href =
-    //   "https://127.0.0.1/NS/api/download/prodigal_training_files/" +
-    //   ptfHash;
-    // link.setAttribute("download", fileName);
-    // document.body.appendChild(link);
-    // link.click();
   };
 
   downloadCompressedSchemasHandler = (tableMeta) => {
@@ -220,32 +202,6 @@ class Species extends Component {
       document.body.appendChild(link);
       link.click();
     });
-
-    //const ts = localStorage.getItem("timestamp");
-    //console.log(ts);
-    // localStorage.removeItem("timestamp");
-
-    // let speciesName2 = spd[this.props.match.params.species_id];
-
-    // // const schemaTimestamp2 = "";
-
-    // const fileName2 =
-    //   speciesName2.replace(" ", "_") +
-    //   "_" +
-    //   schemaName +
-    //   "_" +
-    //   lastModifiedDate +
-    //   ".zip";
-
-    // // create download element
-    // const link = document.createElement("a");
-    // link.href =
-    //   "https://127.0.0.1/NS/api/download/compressed_schemas/" +
-    //   endpointVariables;
-    // link.setAttribute("download", fileName2);
-    // document.body.appendChild(link);
-    // link.click();
-    // console.log(link);
   };
 
   getMuiTheme = () =>
