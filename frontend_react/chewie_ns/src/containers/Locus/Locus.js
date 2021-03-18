@@ -46,12 +46,17 @@ class Locus extends Component {
   };
 
   componentDidMount() {
+    const species_id = this.props.location.pathname.split("/")[2];
+
+    const schema_id = this.props.location.pathname.split("/")[4];
+
     const locusId = this.props.location.pathname.substring(
       this.props.location.pathname.lastIndexOf("/") + 1
     );
 
     this.props.onFetchLocusFasta(locusId);
     this.props.onFetchLocusUniprot(locusId);
+    this.props.onFetchLocusAlleleContribution(species_id, schema_id, locusId);
   }
 
   downloadFastaHandler = () => {
@@ -120,6 +125,7 @@ class Locus extends Component {
     let uniprot_data = <CircularProgress />;
     let fasta_data = <CircularProgress />;
     let scatter_data = <CircularProgress />;
+    let locus_contribData = <CircularProgress />;
 
     let downloadFasta = (
       <Button
@@ -448,6 +454,66 @@ class Locus extends Component {
         />
       );
     }
+
+    if (!this.props.loading_contribData) {
+      let contribData = this.props.contribData;
+
+      locus_contribData =
+        this.props.contribData === "undefined" ? (
+          <div>
+            <Typography variant="subtitle1">
+              No new alleles added to the schema.
+            </Typography>
+          </div>
+        ) : (
+          <Plot
+            data={contribData}
+            layout={{
+              title: {
+                text: "Allele Timeline Information",
+              },
+              xaxis: {
+                type: "date",
+                title: "Sync Dates",
+                tickformat: "%-Y/%-m/%d",
+                // range: ['2015-01-01', '2015-12-31'],
+                rangeselector: {
+                  buttons: [
+                    {
+                      count: 1,
+                      label: "1m",
+                      step: "month",
+                      stepmode: "backward",
+                    },
+                    {
+                      count: 6,
+                      label: "6m",
+                      step: "month",
+                      stepmode: "backward",
+                    },
+                    {
+                      count: 1,
+                      label: "1y",
+                      step: "year",
+                      stepmode: "backward",
+                    },
+                    { step: "all" },
+                  ],
+                },
+                rangeslider: {},
+                // autorange: true,
+              },
+              yaxis: {
+                title: { text: "Alleles Added" },
+              },
+              hovermode: "closest",
+            }}
+            useResizeHandler={true}
+            style={{ width: "100%", height: "100%" }}
+          />
+        );
+    }
+
     return (
       <Aux>
         <div id="schemasAvailable" style={{ float: "right" }}>
@@ -503,9 +569,21 @@ class Locus extends Component {
                     >
                       Scatter
                     </Button>
+                    <Button
+                      style={style.button}
+                      className={classNames(
+                        this.state.tabValue === 2 && classes.tabButton
+                      )}
+                      onClick={() => {
+                        this.plotChangeHandler(2);
+                      }}
+                    >
+                      Allele Timeline
+                    </Button>
                   </div>
                   {this.state.tabValue === 0 && fasta_data}
                   {this.state.tabValue === 1 && scatter_data}
+                  {this.state.tabValue === 2 && locus_contribData}
                 </div>
               </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -546,6 +624,9 @@ const mapStateToProps = (state) => {
     basic_stats: state.locus.basic_stats,
     loading: state.locus.loading,
     error: state.locus.error,
+    contribData: state.contributions.contribData,
+    loading_contribData: state.contributions.loading,
+    error_contribData: state.contributions.error,
     // token: state.auth.token
   };
 };
@@ -556,6 +637,10 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(actions.fetchLocusFasta(locus_id)),
     onFetchLocusUniprot: (locus_id) =>
       dispatch(actions.fetchLocusUniprot(locus_id)),
+    onFetchLocusAlleleContribution: (species_id, schema_id, locus_id) =>
+      dispatch(
+        actions.fetchAlleleContributionLocus(species_id, schema_id, locus_id)
+      ),
   };
 };
 
