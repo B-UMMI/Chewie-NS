@@ -252,6 +252,11 @@ class Schema extends Component {
               xaxis: {
                 type: "date",
                 title: "Sync Dates",
+                autorange: true,
+                tickformat: "%-Y/%-m/%d",
+                // tickmode: "linear",
+                // tick0: "2021-03-01",
+                // dtick: 86400000.0,
                 // range: ['2015-01-01', '2015-12-31'],
                 rangeselector: {
                   buttons: [
@@ -280,6 +285,7 @@ class Schema extends Component {
                 // autorange: true,
               },
               yaxis: {
+                autorange: true,
                 title: { text: "Alleles Added" },
               },
               hovermode: "closest",
@@ -393,6 +399,8 @@ class Schema extends Component {
               return (
                 <a
                   href={`${this.props.history.location.pathname}/locus/${value}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {value}
                 </a>
