@@ -648,6 +648,7 @@ user_model = api.model('UserModel',
 						'name': fields.String(required=True, description='Name.'),
 						'username': fields.String(required=True, description='Username.'),
 						'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+						'country': fields.String(required=True, description='The country that the user belongs to.'),
 						'last_login_at': fields.DateTime(required=True,
 														 description='User last login date.'),
 						'roles': fields.String(required=True,
@@ -665,6 +666,7 @@ current_user_model = api.model('CurrentUserModel',
 								'name': fields.String(required=True, description='Name.'),
 								'username': fields.String(required=True, description='Username.'),
 								'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+								'country': fields.String(required=True, description='The country that the user belongs to.'),
 								'last_login_at': fields.DateTime(required=True,
 																 description='User last login date.'),
 								'roles': fields.String(required=True,
@@ -682,7 +684,8 @@ register_user_model = api.model('RegisterUserModel',
 														   min_length=8),
 								 'name': fields.String(required=True, description='Name.'),
 								 'username': fields.String(required=True, description='Username.'),
-								 'organization': fields.String(required=True, description='Organization that the user belongs to.')
+								 'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+								 'country': fields.String(required=True, description='The country that the user belongs to.'),
 								 })
 
 create_user_model = api.model('CreateUserModel',
@@ -698,6 +701,15 @@ create_user_model = api.model('CreateUserModel',
 													 default='User',
 													 description='Role/Permissions for the new user (User or Contributor).')
 							   })
+
+
+update_user_model = api.model('UpdateUserModel',
+                              {'email': fields.String(required=True,
+                                                      description='User email address.'),
+                               'name': fields.String(required=True, description='Name.'),
+                               'username': fields.String(required=True, description='Username.'),
+                               'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+                               })
 
 
 # User routes
@@ -739,6 +751,7 @@ class AllUsers(Resource):
 			current_user_dict['name'] = user.name
 			current_user_dict['username'] = user.username
 			current_user_dict['organization'] = user.organization
+			current_user_dict['country'] = user.country
 			# this value will be None/null if user never logged in
 			current_user_dict['last_login_at'] = user.last_login_at
 			current_user_dict['roles'] = str(user.roles[0])
@@ -772,6 +785,7 @@ class AllUsers(Resource):
 		password = data['password']
 		username = data['username']
 		organization = data['organization']
+		country = data['country']
 		# new users are created with User permissions
 		new_user_role = data['role']
 
@@ -788,7 +802,8 @@ class AllUsers(Resource):
 												  password=hash_password(
 													  password),
 												  username=username,
-												  organization=organization)
+												  organization=organization,
+												  country=country)
 			default_role = user_datastore.find_role(new_user_role)
 			user_datastore.add_role_to_user(new_user, default_role)
 			# we can get the new user identifier because session has autoflush
@@ -880,6 +895,7 @@ class RegisterUser(Resource):
 		name = data['name']
 		username = data['username']
 		organization = data['organization']
+		country = data['country']
 		# new users are created with User permissions
 		new_user_role = 'User'
 
@@ -897,7 +913,8 @@ class RegisterUser(Resource):
 													  password),
 												  name=name,
 												  username=username,
-												  organization=organization)
+												  organization=organization,
+												  country=country)
 			default_role = user_datastore.find_role(new_user_role)
 			user_datastore.add_role_to_user(new_user, default_role)
 			# we can get the new user identifier because session has autoflush
@@ -999,11 +1016,61 @@ class CurrentUser(Resource):
 		current_user_dict['name'] = user.name
 		current_user_dict['username'] = user.username
 		current_user_dict['organization'] = user.organization
+		current_user_dict['country'] = user.country
 		current_user_dict['last_login_at'] = user.last_login_at
 		current_user_dict['roles'] = str(user.roles[0])
 		current_user_dict['validated'] = user_exists
 
 		return current_user_dict, 200
+
+	
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@api.expect(update_user_model, validate=True)
+	@jwt.required
+	def put(self):
+		"""Updates information about the current user."""
+
+        # get user from Postgres DB
+        current_user = get_jwt_identity()
+        user = User.query.get_or_404(current_user)
+
+        # check if user exists in Virtuoso
+        user_uri = '{0}users/{1}'.format(
+            current_app.config['BASE_URL'], current_user
+        )
+        user_exists_query = sq.ASK_USER.format(user_uri)
+        ask_result = aux.get_data(
+            SPARQLWrapper(
+                current_app.config['LOCAL_SPARQL']
+            ),
+            user_exists_query
+        )
+        user_exists = ask_result['boolean']
+
+        # get post data
+        data = request.get_json()
+
+        email = data['email']
+        name = data['name']
+        username = data['username']
+        organization = data['organization']
+        country = data['country']
+
+        # Update DB data
+        user.email = email if email != "" else user.email
+        user.name = name if name != "" else user.name
+        user.username = username if username != "" else user.username
+        user.organization = organization if organization != "" user.organization
+        user.country = country if country != "" user.country
+
+        db.session.commit()
+
+        return {"message": "Profile succesfully updated."}, 200
 
 
 @user_conf.route("/<int:id>")
@@ -1047,6 +1114,7 @@ class Users(Resource):
 		current_user_dict['name'] = user.name
 		current_user_dict['username'] = user.username
 		current_user_dict['organization'] = user.organization
+		current_user_dict['country'] = user.country
 		# this value will be None/null if user never logged in
 		current_user_dict['last_login_at'] = user.last_login_at
 		current_user_dict['roles'] = str(user.roles[0])

@@ -66,6 +66,7 @@ class User(Base, UserMixin):
 	name = db.Column(db.String(255), nullable=False)
 	username = db.Column(db.String(255), nullable=False)
 	organization = db.Column(db.String(255), nullable=False)
+	country = db.Column(db.String(255))
 	active = db.Column(db.Boolean())
 	last_login_at = db.Column(db.DateTime())
 	current_login_at = db.Column(db.DateTime())
