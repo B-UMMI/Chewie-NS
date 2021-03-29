@@ -196,9 +196,7 @@ class PersistentDrawerLeft extends Component {
             <ListItem
               button
               component="a"
-              href={
-                "https://github.com/B-UMMI/Chewie-NS"
-              }
+              href={"https://github.com/B-UMMI/Chewie-NS"}
               target={"_blank"}
               rel="noopener noreferrer"
             >
@@ -289,9 +287,14 @@ class PersistentDrawerLeft extends Component {
                 Login
               </Button>
             ) : (
-              <Button color="inherit" component={Link} to="/logout">
-                Logout
-              </Button>
+              <div>
+                <Button color="inherit" component={Link} to="/logout">
+                  Logout
+                </Button>
+                <Button color="inherit" component={Link} to="/profile">
+                  Profile
+                </Button>
+              </div>
             )}
           </Toolbar>
         </AppBar>
