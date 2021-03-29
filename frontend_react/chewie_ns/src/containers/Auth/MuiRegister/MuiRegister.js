@@ -5,6 +5,7 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 
 // Chewie local import
 import * as actions from "../../../store/actions/index";
+import { countries } from "./countries";
 
 // Material Ui imports
 import Box from "@material-ui/core/Box";
@@ -17,6 +18,7 @@ import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { withStyles } from "@material-ui/core/styles";
 
 // Material UI icon imports
@@ -67,6 +69,13 @@ const styles = (theme) => ({
   linkRoot: {
     color: "#b26046",
   },
+  option: {
+    fontSize: 15,
+    "& > span": {
+      marginRight: 10,
+      fontSize: 18,
+    },
+  },
 });
 
 const CssTextField = withStyles({
@@ -95,6 +104,7 @@ class SignUp extends Component {
   state = {
     username: "",
     organization: "",
+    country: "",
     email: "",
     password: "",
     name: "",
@@ -120,6 +130,9 @@ class SignUp extends Component {
   onSubmitHandler = (event) => {
     event.preventDefault();
 
+    // console.log(this.state.organization);
+    console.log(this.state.country.label);
+
     if (this.state.password === this.state.confirmPassword) {
       axios
         .post("/user/register_user", {
@@ -128,6 +141,7 @@ class SignUp extends Component {
           name: this.state.name,
           username: this.state.username,
           organization: this.state.organization,
+          country: this.state.country.label.toString(),
         })
         .then((res) => {
           if (res.status === 200) {
@@ -144,6 +158,16 @@ class SignUp extends Component {
       alert("Passwords do not match. Please try again.");
       window.location.reload();
     }
+  };
+
+  countryToFlag = (isoCode) => {
+    return typeof String.fromCodePoint !== "undefined"
+      ? isoCode
+          .toUpperCase()
+          .replace(/./g, (char) =>
+            String.fromCodePoint(char.charCodeAt(0) + 127397)
+          )
+      : isoCode;
   };
 
   render() {
@@ -226,6 +250,36 @@ class SignUp extends Component {
                   onInput={(e) =>
                     this.setState({ organization: e.target.value })
                   }
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Autocomplete
+                  id="country-select"
+                  style={{ width: 300 }}
+                  options={countries}
+                  classes={{
+                    option: classes.option,
+                  }}
+                  autoHighlight
+                  getOptionLabel={(option) => option.label}
+                  renderOption={(option) => (
+                    <React.Fragment>
+                      <span>{this.countryToFlag(option.code)}</span>
+                      {option.label} ({option.code})
+                    </React.Fragment>
+                  )}
+                  onChange={(event, value) => this.setState({ country: value })}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Choose a country"
+                      variant="outlined"
+                      inputProps={{
+                        ...params.inputProps,
+                        autoComplete: "new-password", // disable autocomplete and autofill
+                      }}
+                    />
+                  )}
                 />
               </Grid>
               <Grid item xs={12}>
