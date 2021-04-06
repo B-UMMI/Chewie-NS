@@ -63,14 +63,20 @@ const reducer = (state = initialState, action) => {
       return authStart(state, action);
     case actionTypes.AUTH_CUSER_START:
       return authCuserStart(state, action);
+    // case actionTypes.AUTH_CUSER_PROFILE_START:
+    //   return authCuserProfileStart(state, action);
     case actionTypes.AUTH_SUCCESS:
       return authSuccess(state, action);
     case actionTypes.AUTH_CUSER_SUCCESS:
       return authCuserSuccess(state, action);
+    // case actionTypes.AUTH_CUSER_PROFILE_SUCCESS:
+    //   return authCuserProfileSuccess(state, action);
     case actionTypes.AUTH_FAIL:
       return authFail(state, action);
     case actionTypes.AUTH_CUSER_FAIL:
       return authCuserFail(state, action);
+    // case actionTypes.AUTH_CUSER_PROFILE_FAIL:
+    //   return authCuserProfileFail(state, action);
     case actionTypes.AUTH_LOGOUT:
       return authLogout(state, action);
     case actionTypes.SET_AUTH_REDIRECT_PATH:

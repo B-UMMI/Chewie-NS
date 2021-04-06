@@ -704,12 +704,12 @@ create_user_model = api.model('CreateUserModel',
 
 
 update_user_model = api.model('UpdateUserModel',
-                              {'email': fields.String(required=True,
-                                                      description='User email address.'),
-                               'name': fields.String(required=True, description='Name.'),
-                               'username': fields.String(required=True, description='Username.'),
-                               'organization': fields.String(required=True, description='Organization that the user belongs to.'),
-                               })
+							  {'email': fields.String(required=True,
+													  description='User email address.'),
+							   'name': fields.String(required=True, description='Name.'),
+							   'username': fields.String(required=True, description='Username.'),
+							   'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+							   })
 
 
 # User routes
@@ -981,6 +981,68 @@ class RegisterUser(Resource):
 				'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
 
 
+
+@user_conf.route("/current_user/profile")
+class CurrentUserProfile(Resource):
+	"""
+	Class with methods related with the user that is currently logged in, to build its profile.
+	"""
+
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@jwt_required
+	def get(self):
+		"""
+		"""
+		
+		# get user from Postgres DB
+		current_user = get_jwt_identity()
+		user = User.query.get_or_404(current_user)
+
+		# check if user exists in Virtuoso
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], current_user)
+
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+						(sq.COUNT_USER_PROFILE.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+
+		profile_table_data = result["results"]["bindings"]
+
+		profile_table_data_json = []
+		
+		for profile_result in profile_table_data:
+			profile_table_data_json.append(
+				{
+					"species_id": int(profile_result["taxon"]["value"][-1]),
+					"schema_id": int(profile_result["schema"]["value"][-1]),
+					"nr_loci": int(profile_result["nr_loci"]["value"]),
+					"nr_allele": int(profile_result["nr_allele"]["value"])
+				}
+			)
+
+		# loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+		# 				(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+
+		# loci_list = []
+		# allele_list = []
+
+		# for la in loci_allele_list_result["results"]["bindings"]:
+		# 	loci_list.append(la["locus"]["value"])
+		# 	allele_list.append(la["allele"]["value"])
+
+		# loci_list_unique = list(set(loci_list))
+		# allele_list_unique = list(set(allele_list))
+
+		# print(len(loci_list_unique), flush=True)
+		# print(len(allele_list_unique), flush=True)
+
+		return profile_table_data_json, 200
+
+
 @user_conf.route("/current_user")
 class CurrentUser(Resource):
 	"""
@@ -1031,46 +1093,46 @@ class CurrentUser(Resource):
 						401: 'Unauthenticated'},
 			 security=['access_token'])
 	@api.expect(update_user_model, validate=True)
-	@jwt.required
+	@jwt_required
 	def put(self):
 		"""Updates information about the current user."""
 
-        # get user from Postgres DB
-        current_user = get_jwt_identity()
-        user = User.query.get_or_404(current_user)
+		# get user from Postgres DB
+		current_user = get_jwt_identity()
+		user = User.query.get_or_404(current_user)
 
-        # check if user exists in Virtuoso
-        user_uri = '{0}users/{1}'.format(
-            current_app.config['BASE_URL'], current_user
-        )
-        user_exists_query = sq.ASK_USER.format(user_uri)
-        ask_result = aux.get_data(
-            SPARQLWrapper(
-                current_app.config['LOCAL_SPARQL']
-            ),
-            user_exists_query
-        )
-        user_exists = ask_result['boolean']
+		# check if user exists in Virtuoso
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], current_user
+		)
+		user_exists_query = sq.ASK_USER.format(user_uri)
+		ask_result = aux.get_data(
+			SPARQLWrapper(
+				current_app.config['LOCAL_SPARQL']
+			),
+			user_exists_query
+		)
+		user_exists = ask_result['boolean']
 
-        # get post data
-        data = request.get_json()
+		# get post data
+		data = request.get_json()
 
-        email = data['email']
-        name = data['name']
-        username = data['username']
-        organization = data['organization']
-        country = data['country']
+		email = data['email']
+		name = data['name']
+		username = data['username']
+		organization = data['organization']
+		country = data['country']
 
-        # Update DB data
-        user.email = email if email != "" else user.email
-        user.name = name if name != "" else user.name
-        user.username = username if username != "" else user.username
-        user.organization = organization if organization != "" user.organization
-        user.country = country if country != "" user.country
+		# Update DB data
+		user.email = email if email != "" else user.email
+		user.name = name if name != "" else user.name
+		user.username = username if username != "" else user.username
+		user.organization = organization if organization != "" else user.organization
+		user.country = country if country != "" else user.country
 
-        db.session.commit()
+		db.session.commit()
 
-        return {"message": "Profile succesfully updated."}, 200
+		return {"message": "Profile succesfully updated."}, 200
 
 
 @user_conf.route("/<int:id>")
