@@ -425,6 +425,22 @@ class Schema extends Component {
           },
         },
         {
+          name: "locus_original_name",
+          label: "Locus Original Name",
+          options: {
+            filter: true,
+            sort: true,
+            display: true,
+            setCellHeaderProps: (value) => {
+              return {
+                style: {
+                  fontWeight: "bold",
+                },
+              };
+            },
+          },
+        },
+        {
           name: "nr_alleles",
           label: "Total Number of Alleles",
           options: {
