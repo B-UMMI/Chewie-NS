@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.4 - 2021/04/07
+
+Added a new column, "Locus Original Name", to the Locus Information table of the Schema Evalaution and Annotation
+page, displaying the original gene names of the schema.
+
+Updates to the installation instructions.
+
 ## 1.2.3 - 2021/03/26
 
 Fixed a bug in the Markdown component that forced links to open in the same tab instead of a new tab.

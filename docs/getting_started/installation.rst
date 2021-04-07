@@ -62,6 +62,12 @@ The port 80 from the **nginx_react** service needs to be commented out because o
       - "443:443"
 
 
+A username and password need to be provided to the `pgadmin4 service <https://github.com/B-UMMI/Chewie-NS/blob/612fad1edfd0691e30b3fa878d7b13bfb9f3eb97/docker-compose-production.yaml#L51>`_.
+
+    environment:
+        PGADMIN_DEFAULT_EMAIL: "test@email.com"
+        PGADMIN_DEFAULT_PASSWORD: "testpassword"
+
 NS API Dockerfile
 -----------------
 
@@ -157,7 +163,20 @@ The URL needs to be changed to the localhost.
         href={"https://127.0.0.1/NS/api/docs"}
         target={"_blank"}
         rel="noopener noreferrer"
-    >
+
+
+Homepage description
+--------------------
+
+The `homepage description markdown <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/data/chewie.js>`_ of Chewie-NS has links to the main instance which need to be changed to the **localhost**.
+
+
+    |[Click here to see the Available Schemas](https://127.0.0.1/stats)|
+
+
+    ## Schema submission
+    If you wish to submit schemas to Chewie-NS you need to register first at the [Register](https://127.0.0.1/register) page.
+
 
 Create self-signed certificates
 -------------------------------
