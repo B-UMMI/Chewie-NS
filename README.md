@@ -47,6 +47,14 @@ ports:
 
 ```
 
+A username and password need to be provided to the [pgadmin4 service](https://github.com/B-UMMI/Chewie-NS/blob/612fad1edfd0691e30b3fa878d7b13bfb9f3eb97/docker-compose-production.yaml#L51).
+
+```yaml
+environment:
+  PGADMIN_DEFAULT_EMAIL: "test@email.com"
+  PGADMIN_DEFAULT_PASSWORD: "testpassword"
+```
+
 ### NS API Dockerfile
 
 In [this Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/9f5871b88672cb7f7819a0cf80b987abf2bb55dc/Dockerfile#L31), the number of **workers** and **threads** provided to the _gunicorn_ command should be adequate to your machines resources.
@@ -149,6 +157,18 @@ The URL needs to be changed to the localhost.
     target={"_blank"}
     rel="noopener noreferrer"
 >
+```
+
+### Homepage description
+
+The [homepage description markdown](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/data/chewie.js) of Chewie-NS has links to the main instance which need to be changed to the localhost.
+
+```md
+|[Click here to see the Available Schemas](https://127.0.0.1/stats)|
+
+
+## Schema submission
+If you wish to submit schemas to Chewie-NS you need to register first at the [Register](https://127.0.0.1/register) page.
 ```
 
 ### Creating the self-signed certificates

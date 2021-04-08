@@ -95,6 +95,7 @@ def loci_alleles_length(alleles):
 
 	return loci_data
 
+
 def loci_annotations(schema, virtuoso_graph, local_sparql):
 	"""
 	"""
@@ -120,6 +121,7 @@ def loci_annotations(schema, virtuoso_graph, local_sparql):
 
 	annotations = [{'locus': l['locus']['value'],
 					'name': l['name']['value'],
+					'original_name': l['original_name']['value'],
 					'UniprotName': l['UniprotName']['value'],
 					'UniprotURI': l['UniprotURI']['value'],
 					'UserAnnotation': l['UserAnnotation']['value'],
