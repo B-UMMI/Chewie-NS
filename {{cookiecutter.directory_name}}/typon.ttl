@@ -1,0 +1,1099 @@
+@prefix : <http://purl.phyloviz.net/ontology/typon#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix ns3: <http://purl.phyloviz.net/ontology/> .
+@prefix ns5: <http://purl.uniprot.org/core/> .
+@prefix ns8: <http://dbpedia.org/ontology/> .
+@prefix ns9: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix obda: <https://w3id.org/obda/vocabulary#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix typon: <http://purl.phyloviz.net/ontology/typon#> .
+@base <http://purl.phyloviz.net/ontology/typon> .
+
+<http://purl.phyloviz.net/ontology/typon> rdf:type owl:Ontology ;
+                                           owl:imports <https://bitbucket.org/phyloviz/typon/raw/master/imported.owl> ;
+                                           dc:creator "TypOn Team <typon@kdbio.inesc-id.pt>"@en ;
+                                           dc:format "OWL"@en ;
+                                           dc:title "TypOn - The Microbial Typing Ontology"@en ;
+                                           rdfs:comment "TyPon provides a comprehensive description of the existing microbial typing methods for the identification of bacterial Isolates and their classification. Such a description constitutes an universal format for the exchange of information on the microbial typing field, providing a vehicle for the integration of the numerous disparate online databases. In its current version, TyPon describes most used microbial typing methods but it is, and always will be, a work in progress given the constant advances in the microbial typing field."^^xsd:string ;
+                                           rdfs:label "TypOn - The Microbial Typing Ontology" ;
+                                           owl:versionInfo "20140929" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://purl.org/dc/elements/1.1/creator
+dc:creator rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/format
+dc:format rdf:type owl:AnnotationProperty .
+
+
+###  http://purl.org/dc/elements/1.1/title
+dc:title rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://purl.phyloviz.net/ontology/typon#administratedBy
+typon:administratedBy rdf:type owl:ObjectProperty ;
+                      rdfs:domain typon:Schema ;
+                      rdfs:range foaf:Agent ;
+                      rdfs:comment "The relationship between the :Schema and the foaf:Agent which administrates it."@en ;
+                      rdfs:label "administrated by"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#curatedBy
+typon:curatedBy rdf:type owl:ObjectProperty ;
+                rdfs:domain [ rdf:type owl:Class ;
+                              owl:unionOf ( typon:Allele
+                                            typon:Isolate
+                                          )
+                            ] ;
+                rdfs:range foaf:Agent ;
+                rdfs:comment "The relationship between an :Isolate or an :Allele and the foaf:Agent which curates it."@en ;
+                rdfs:label "curated by"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasAllele
+typon:hasAllele rdf:type owl:ObjectProperty ;
+                rdfs:domain typon:Isolate ;
+                rdfs:range typon:Allele ;
+                rdfs:label "has allele"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasDefinedAllele
+typon:hasDefinedAllele rdf:type owl:ObjectProperty ;
+                       rdfs:domain typon:Locus ;
+                       rdfs:range typon:Allele ;
+                       rdfs:label "has defined allele"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasIdentifiedAllele
+typon:hasIdentifiedAllele rdf:type owl:ObjectProperty ;
+                          rdfs:domain [ rdf:type owl:Class ;
+                                        owl:unionOf ( typon:MultiLocus
+                                                      typon:SingleLocus
+                                                    )
+                                      ] ;
+                          rdfs:range typon:Allele ;
+                          rdfs:label "has identified allele"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasLocus
+typon:hasLocus rdf:type owl:ObjectProperty ;
+               rdfs:domain [ rdf:type owl:Class ;
+                             owl:unionOf ( typon:SchemaPart
+                                           typon:SingleLocus
+                                         )
+                           ] ;
+               rdfs:range typon:Locus ;
+               rdfs:label "has locus"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasRepeat
+typon:hasRepeat rdf:type owl:ObjectProperty ;
+                rdfs:domain typon:RepeatProfilePart ;
+                rdfs:range typon:SpaRepeat ;
+                rdfs:label "has repeat"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasRepeatProfilePart
+typon:hasRepeatProfilePart rdf:type owl:ObjectProperty ;
+                           rdfs:subPropertyOf ns9:BFO_0000051 ;
+                           rdfs:domain typon:SpaAllele ;
+                           rdfs:range typon:RepeatProfilePart ;
+                           rdfs:label "has repeat profile part"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasSchema
+typon:hasSchema rdf:type owl:ObjectProperty ;
+                rdfs:domain [ rdf:type owl:Class ;
+                              owl:unionOf ( typon:MLST
+                                            typon:MLVA
+                                          )
+                            ] ;
+                rdfs:range typon:Schema ;
+                rdfs:label "has schema"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasSchemaPart
+typon:hasSchemaPart rdf:type owl:ObjectProperty ;
+                    rdfs:subPropertyOf ns9:BFO_0000051 ;
+                    rdfs:domain typon:Schema ;
+                    rdfs:range typon:SchemaPart ;
+                    rdfs:label "has schema part"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasSequence
+typon:hasSequence rdf:type owl:ObjectProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( typon:Allele
+                                              typon:Isolate
+                                              typon:SpaRepeat
+                                            )
+                              ] ;
+                  rdfs:range typon:Sequence ;
+                  rdfs:label "has sequence"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#hasTypingInformation
+typon:hasTypingInformation rdf:type owl:ObjectProperty ;
+                           rdfs:domain typon:Isolate ;
+                           rdfs:range typon:TypingInformation ;
+                           rdfs:label "has typing information"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isAssociatedTo
+typon:isAssociatedTo rdf:type owl:ObjectProperty ;
+                     rdfs:domain [ rdf:type owl:Class ;
+                                   owl:unionOf ( typon:SchemaPart
+                                                 typon:TypingInformation
+                                               )
+                                 ] ;
+                     rdfs:range ns5:Taxon ;
+                     rdfs:label "is associated to"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isFromTaxon
+typon:isFromTaxon rdf:type owl:ObjectProperty ;
+                  rdfs:domain typon:Isolate ;
+                  rdfs:range ns5:Taxon ;
+                  rdfs:label "is from taxon"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isOfLocus
+typon:isOfLocus rdf:type owl:ObjectProperty ;
+                rdfs:domain typon:Allele ;
+                rdfs:range typon:Locus ;
+                rdfs:label "is of locus"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isOfTaxon
+typon:isOfTaxon rdf:type owl:ObjectProperty ;
+                rdfs:domain typon:Locus ;
+                rdfs:range ns5:Taxon ;
+                rdfs:label "is of taxon"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isolatedAt
+typon:isolatedAt rdf:type owl:ObjectProperty ;
+                 rdfs:domain typon:Isolate ;
+                 rdfs:range ns8:Place ;
+                 rdfs:label "isolated at"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isolatedOnMaterial
+typon:isolatedOnMaterial rdf:type owl:ObjectProperty ;
+                         rdfs:domain typon:Isolate ;
+                         rdfs:range ns9:ENVO_00010483 ;
+                         rdfs:label "isolated on material"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isolatedOnSystem
+typon:isolatedOnSystem rdf:type owl:ObjectProperty ;
+                       rdfs:domain typon:Isolate ;
+                       rdfs:range ns9:ENVO_01000254 ;
+                       rdfs:label "isolated on system"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#ownedBy
+typon:ownedBy rdf:type owl:ObjectProperty ;
+              rdfs:domain typon:Isolate ;
+              rdfs:range foaf:Agent ;
+              rdfs:label "owned by"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#sentBy
+typon:sentBy rdf:type owl:ObjectProperty ;
+             rdfs:domain typon:Isolate ;
+             rdfs:range foaf:Agent ;
+             rdfs:label "sent by"@en .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  http://purl.phyloviz.net/ontology/typon#CustomAnnotation
+typon:CustomAnnotation rdf:type owl:DatatypeProperty ;
+                       rdfs:domain typon:Locus ;
+                       rdfs:range xsd:string ;
+                       rdfs:comment "Custom annotation provided by User"@en ;
+                       rdfs:label "CustomAnnotation"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#KreiswirthID
+typon:KreiswirthID rdf:type owl:DatatypeProperty ;
+                   rdfs:domain typon:SpaRepeat ;
+                   rdfs:range xsd:string ;
+                   rdfs:comment "Unique Identifier attributed to a repeat sequence as originally defined by Koreen et al, J Clin Microbiol 2004 Feb;42(2):792-9 ( http://www.ncbi.nlm.nih.gov/pubmed/14766855)."@en ;
+                   rdfs:label "Kreiswirth id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#PubMedID
+typon:PubMedID rdf:type owl:DatatypeProperty ;
+               rdfs:domain typon:Schema ;
+               rdfs:range xsd:string ;
+               rdfs:comment "Unique identifier to an article as defined by PubMed (www.pubmed.org). Can be converted to other unique Identifiers commonly used in scientific literature (PMID,PMCID, Manuscript IDor DOI) by the tool provided in  http://www.ncbi.nlm.nih.gov/pmc/pmctopmid/"@en ;
+               rdfs:label "PubMed id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#RidomId
+typon:RidomId rdf:type owl:DatatypeProperty ;
+              rdfs:domain typon:SpaRepeat ;
+              rdfs:range xsd:string ;
+              rdfs:comment "Unique identifier attributed to a repeat sequence as originally defined by Harmsen D et al, J CLin Microbiol 2003 Dec;41(12):5442-8 (http://www.ncbi.nlm.nih.gov/pubmed/14662923) and currently by the SpaServer (http://www.spaserver.ridom.de/)."@en ;
+              rdfs:label "Ridom id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SRAAcession
+typon:SRAAcession rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:Isolate ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Short Read Archive ( SRA) Accession Number. Identifies a link for the raw data generating by a sequencing platform. The Sequence Read Archive (SRA) stores raw sequencing data from the next generation of sequencing platforms including Roche 454 GS System®, Illumina Genome Analyzer®, Applied Biosystems SOLiD® System, Helicos Heliscope®, Complete Genomics®, and Pacific Biosciences SMRT®."@en ;
+                  rdfs:label "sra acession"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#ST
+typon:ST rdf:type owl:DatatypeProperty ;
+         rdfs:domain typon:MLST ;
+         rdfs:range xsd:string ;
+         rdfs:comment "ST stands for Sequence Type and it is a unique identifier to a unique allelic profile generated by a MLST method. It is most commonly used with the traditional MLST schemas with seven housekeeping genes."@en ;
+         rdfs:label "ST"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SchemaDescription
+typon:SchemaDescription rdf:type owl:DatatypeProperty ;
+                        rdfs:domain typon:Schema ;
+                        rdfs:range xsd:string ;
+                        rdfs:comment "Long Schema descirption"@en ;
+                        rdfs:label "SchemaDescription"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Schema_lock
+typon:Schema_lock rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:Schema ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Schema locking property. Indicates if a schema is available for download or modification. A schema should be locked during its upload and while it is being updated or downloaded for compression."@en ;
+                  rdfs:label "Schema_lock"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotLabel
+typon:UniprotLabel rdf:type owl:DatatypeProperty ;
+                   rdfs:domain typon:Locus ;
+                   rdfs:range xsd:string ;
+                   rdfs:comment "Label of the annotation on Uniprot."@en ;
+                   rdfs:label "UniprotLabel"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotName
+typon:UniprotName rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:Locus ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Name of the locus annotation on Uniprot."@en ;
+                  rdfs:label "UniprotLabel"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UniprotURI
+typon:UniprotURI rdf:type owl:DatatypeProperty ;
+                 rdfs:domain typon:Locus ;
+                 rdfs:range xsd:string ;
+                 rdfs:comment "URI for the annotation on Uniprot"@en ;
+                 rdfs:label "UniprotURI"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#UserAnnotation
+typon:UserAnnotation rdf:type owl:DatatypeProperty ;
+                     rdfs:domain typon:Locus ;
+                     rdfs:range xsd:string ;
+                     rdfs:comment "Annotation name given by User"@en ;
+                     rdfs:label "UserAnnotation"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#bsr
+typon:bsr rdf:type owl:DatatypeProperty ;
+          rdfs:domain typon:Schema ;
+          rdfs:range xsd:string ;
+          rdfs:comment "Blast Score Ratio used to generate a chewBBACA schema."@en ;
+          rdfs:label "bsr"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#chewBBACA_version
+typon:chewBBACA_version rdf:type owl:DatatypeProperty ;
+                        rdfs:domain typon:Schema ;
+                        rdfs:range xsd:string ;
+                        rdfs:comment "Version of chewBBACA used to create the schema."@en ;
+                        rdfs:label "chewBBACA_version"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#cluster_sim
+typon:cluster_sim rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:Schema ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Clustering similarity value. A sequence that shares a percentage of k-mers equal or greater than this value with a cluster representative will be added to the cluster of that representative."@en ;
+                  rdfs:label "cluster_sim"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#dateEntered
+typon:dateEntered rdf:type owl:DatatypeProperty ;
+                  rdfs:domain [ rdf:type owl:Class ;
+                                owl:unionOf ( typon:Allele
+                                              typon:Isolate
+                                              typon:Locus
+                                              typon:Schema
+                                            )
+                              ] ;
+                  rdfs:range xsd:dateTime ;
+                  rdfs:comment "The date that the isolate or allele or locus or schema was inserted into a database."@en ;
+                  rdfs:label "date entered"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#file
+typon:file rdf:type owl:DatatypeProperty ;
+           rdfs:domain typon:Sequence ;
+           rdfs:range xsd:string ;
+           rdfs:comment "Raw sequence file."@en ;
+           rdfs:label "file"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#id
+typon:id rdf:type owl:DatatypeProperty ;
+         rdfs:domain typon:Allele ;
+         rdfs:range xsd:long ;
+         rdfs:comment "Allele identifier."@en ;
+         rdfs:label "id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#imageFile
+typon:imageFile rdf:type owl:DatatypeProperty ;
+                rdfs:domain typon:FragmentSizeBased ;
+                rdfs:range xsd:string ;
+                rdfs:label "image file"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#index
+typon:index rdf:type owl:DatatypeProperty ;
+            rdfs:domain [ rdf:type owl:Class ;
+                          owl:unionOf ( typon:RepeatProfilePart
+                                        typon:SchemaPart
+                                      )
+                        ] ;
+            rdfs:range xsd:int ;
+            rdfs:comment "The index of the respective part."@en ;
+            rdfs:label "index"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#interpolationMethod
+typon:interpolationMethod rdf:type owl:DatatypeProperty ;
+                          rdfs:domain typon:FragmentSizeBased ;
+                          rdfs:range xsd:string ;
+                          rdfs:comment "Matemathical algorithm used for the software to assess the fragment sizes for the bands in gel patterns"@en ;
+                          rdfs:label "interpolation method"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#intraCluster_filter
+typon:intraCluster_filter rdf:type owl:DatatypeProperty ;
+                          rdfs:domain typon:Schema ;
+                          rdfs:range xsd:string ;
+                          rdfs:comment "Value used to filter out sequences that are very similar with other sequences that are in the same cluster."@en ;
+                          rdfs:label "intraCluster_filter"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#isolateId
+typon:isolateId rdf:type owl:DatatypeProperty ;
+                rdfs:domain typon:Isolate ;
+                rdfs:range xsd:string ;
+                rdfs:label "isolate id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#last_modified
+typon:last_modified rdf:type owl:DatatypeProperty ;
+                    rdfs:domain typon:Schema ;
+                    rdfs:range xsd:string ;
+                    rdfs:comment "Date corresponding to the last time the schema was modified."@en ;
+                    rdfs:label "last_modified"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#markerFragmentsUsed
+typon:markerFragmentsUsed rdf:type owl:DatatypeProperty ;
+                          rdfs:domain typon:FragmentSizeBased ;
+                          rdfs:range xsd:string ;
+                          rdfs:comment "List of the fragments from the molecular size marker that will be used for the size assessment of the fragments for the target bands of the isolates."@en ;
+                          rdfs:label "marker fragments used"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#markerUsed
+typon:markerUsed rdf:type owl:DatatypeProperty ;
+                 rdfs:domain typon:FragmentSizeBased ;
+                 rdfs:range xsd:string ;
+                 rdfs:comment "Molecular size marker used in the experiment."@en ;
+                 rdfs:label "marker used"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#minimum_locus_length
+typon:minimum_locus_length rdf:type owl:DatatypeProperty ;
+                           rdfs:domain typon:Schema ;
+                           rdfs:range xsd:string ;
+                           rdfs:comment "Minimum locus lenght used to generate a chewBBACA schema."@en ;
+                           rdfs:label "minimum locus length"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#name
+typon:name rdf:type owl:DatatypeProperty .
+
+
+###  http://purl.phyloviz.net/ontology/typon#nrOfRepeats
+typon:nrOfRepeats rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:VNTRAllele ;
+                  rdfs:range xsd:int ;
+                  rdfs:label "number of repeats"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#nucleotideSequence
+typon:nucleotideSequence rdf:type owl:DatatypeProperty ;
+                         rdfs:domain typon:Sequence ;
+                         rdfs:range xsd:string ;
+                         rdfs:label "nucleotice sequence"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#otherId
+typon:otherId rdf:type owl:DatatypeProperty ;
+              rdfs:domain typon:Isolate ;
+              rdfs:range xsd:string ;
+              rdfs:label "other id"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#profile
+typon:profile rdf:type owl:DatatypeProperty ;
+              rdfs:domain typon:MultiLocus ;
+              rdfs:range xsd:string ;
+              rdfs:comment "String defining the allelic profile composed by the value of all Allele IDs, in the order of locus that was initially defined, separeted by '-'. Commonly used in the traditional MLST schemas."@en ;
+              rdfs:label "profile"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#ptf
+typon:ptf rdf:type owl:DatatypeProperty ;
+          rdfs:domain typon:Schema ;
+          rdfs:range xsd:string ;
+          rdfs:comment "Prodigal training file used to generate a chewBBACA schema."@en ;
+          rdfs:label "ptf"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#representative_filter
+typon:representative_filter rdf:type owl:DatatypeProperty ;
+                            rdfs:domain typon:Schema ;
+                            rdfs:range xsd:string ;
+                            rdfs:comment "Similarity threshold used to exclude sequences from clusters. Clustered sequences that have a similarity value equal or greater than this value with the cluster representative are considered to be from the same gene as the representative and are removed from the cluster."@en ;
+                            rdfs:label "representative_filter"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#runProtocol
+typon:runProtocol rdf:type owl:DatatypeProperty ;
+                  rdfs:domain typon:FragmentSizeBased ;
+                  rdfs:range xsd:string ;
+                  rdfs:comment "Experimental protocol describing the electrophoretic conditions including the apparatus and settings used."@en ;
+                  rdfs:label "run protocol"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#sampleCollectionDate
+typon:sampleCollectionDate rdf:type owl:DatatypeProperty ;
+                           rdfs:domain typon:Isolate ;
+                           rdfs:range xsd:dateTime ;
+                           rdfs:comment "The date when the sample was collected."@en ;
+                           rdfs:label "sample collection date"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#schemaName
+typon:schemaName rdf:type owl:DatatypeProperty ;
+                 rdfs:domain typon:Schema ;
+                 rdfs:range xsd:string ;
+                 rdfs:label "schema name"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#sequenceSize
+typon:sequenceSize rdf:type owl:DatatypeProperty ;
+                   rdfs:domain typon:VNTRAllele ;
+                   rdfs:range xsd:int ;
+                   rdfs:label "sequence size"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#size_threshold
+typon:size_threshold rdf:type owl:DatatypeProperty ;
+                     rdfs:domain typon:Schema ;
+                     rdfs:range xsd:string ;
+                     rdfs:comment "Size variation threshold value used to create the schema and to perform AlleleCall. Candidate alleles with sequence length value -/+ than this value are excluded during chewBBACA processes."@en ;
+                     rdfs:label "size_threshold"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#software
+typon:software rdf:type owl:DatatypeProperty ;
+               rdfs:domain typon:FragmentSizeBased ;
+               rdfs:range xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#spaType
+typon:spaType rdf:type owl:DatatypeProperty ;
+              rdfs:domain typon:spaTyping ;
+              rdfs:range xsd:string ;
+              rdfs:comment "Unique identifier for a Spa gene repeat sequence assigned by the http://www.spaserver.ridom.de/ and curated by SeqNet (http://www.seqnet.org/)."@en ;
+              rdfs:label "spa type"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#translation_table
+typon:translation_table rdf:type owl:DatatypeProperty ;
+                        rdfs:domain typon:Schema ;
+                        rdfs:range xsd:string ;
+                        rdfs:comment "Translation table used to generate a chewBBACA schema."@en ;
+                        rdfs:label "translation table"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#word_size
+typon:word_size rdf:type owl:DatatypeProperty ;
+                rdfs:domain typon:Schema ;
+                rdfs:range xsd:string ;
+                rdfs:comment "Word size given as value to break alleles into k-mers for clustering."@en ;
+                rdfs:label "word_size"@en .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://purl.phyloviz.net/ontology/typon#Allele
+typon:Allele rdf:type owl:Class ;
+             rdfs:subClassOf ns9:SO_0001060 ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:curatedBy ;
+                               owl:someValuesFrom foaf:Agent
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:hasSequence ;
+                               owl:someValuesFrom typon:Sequence
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:isOfLocus ;
+                               owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onClass typon:Locus
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:dateEntered ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:dateTime
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:id ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ;
+             rdfs:comment "An Allele is one of multiple forms of a genetic locus. An observable variant of a locus. Most of the sequence based typing methods rely on the diferent allelic forms of one or more genetic loci (see Locus) to provide a discrimination criteria of isolates at the species or subspecies level."^^xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#FragmentSizeBased
+typon:FragmentSizeBased rdf:type owl:Class ;
+                        rdfs:subClassOf typon:Genotypic ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:imageFile ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:interpolationMethod ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:markerFragmentsUsed ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:markerUsed ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:runProtocol ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:software ;
+                                          owl:someValuesFrom xsd:string
+                                        ] ;
+                        owl:disjointWith typon:SequenceBased ;
+                        rdfs:comment "FragmentSizeBased refers to all typing methods where the allele determination is based on fragment sizes rather than its sequence."@en ;
+                        rdfs:label "Fragment Size Based"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Genotypic
+typon:Genotypic rdf:type owl:Class ;
+                rdfs:subClassOf typon:SequenceBasedTypingInformation ;
+                rdfs:comment "Genotypic characterizes all the Typing Information that is based directly on the sequence itself or properties (such as sequence length)."@en ;
+                rdfs:label "Genotypic"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Isolate
+typon:Isolate rdf:type owl:Class ;
+              rdfs:subClassOf ns9:OBI_0100026 ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:curatedBy ;
+                                owl:someValuesFrom foaf:Agent
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:hasAllele ;
+                                owl:someValuesFrom typon:Allele
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:hasSequence ;
+                                owl:someValuesFrom typon:Sequence
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:hasTypingInformation ;
+                                owl:someValuesFrom typon:TypingInformation
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:isFromTaxon ;
+                                owl:someValuesFrom ns5:Taxon
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:isolatedAt ;
+                                owl:someValuesFrom ns8:Place
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:isolatedOnMaterial ;
+                                owl:someValuesFrom ns9:ENVO_00010483
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:isolatedOnSystem ;
+                                owl:someValuesFrom ns9:ENVO_01000254
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:ownedBy ;
+                                owl:someValuesFrom foaf:Agent
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:sentBy ;
+                                owl:someValuesFrom foaf:Agent
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:otherId ;
+                                owl:someValuesFrom xsd:string
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:SRAAcession ;
+                                owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:string
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:dateEntered ;
+                                owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:dateTime
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:isolateId ;
+                                owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:string
+                              ] ,
+                              [ rdf:type owl:Restriction ;
+                                owl:onProperty typon:sampleCollectionDate ;
+                                owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                owl:onDataRange xsd:dateTime
+                              ] ;
+              rdfs:comment "Population of microbial cells in pure culture derived from a single colony on an isolation plate and characterized by identification to the species level. Definition adapted from Tenover, F. C., R. D. Arbeit, R. V. Goering, P. A. Mickelsen, B. E. Murray, D. H. Persing, and B. Swaminathan. 1995. Interpreting chromosomal DNA restriction patterns produced by pulsed-field gel electrophoresis: criteria for bacterial strain typing. J Clin Microbiol 33:2233-9. And from Struelens, M. J. 1996. Consensus guidelines for appropriate use and evaluation of microbial epidemiologic typing systems. Clin Microbiol Infect 2:2- 11."^^xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Locus
+typon:Locus rdf:type owl:Class ;
+            rdfs:subClassOf ns9:SO_0000001 ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:hasDefinedAllele ;
+                              owl:someValuesFrom typon:Allele
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:isOfTaxon ;
+                              owl:someValuesFrom ns5:Taxon
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:CustomAnnotation ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotLabel ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotName ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UniprotURI ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:UserAnnotation ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:string
+                            ] ,
+                            [ rdf:type owl:Restriction ;
+                              owl:onProperty typon:dateEntered ;
+                              owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                              owl:onDataRange xsd:dateTime
+                            ] ;
+            rdfs:comment "Locus is a specific location of a gene or DNA sequence on the chromossome. For typing purposes a locus can be defined by the pair of PCR primers that are used to amplify the desired sequence. The resulting sequence is usually trimmed by comparing it to a template sequence. Locus for typing purpose is a position on the genome usually defined by similarity. Locus is a named region on a genome."^^xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#MLST
+typon:MLST rdf:type owl:Class ;
+           rdfs:subClassOf typon:MultiLocus ,
+                           typon:SequenceBased ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty typon:hasIdentifiedAllele ;
+                             owl:someValuesFrom typon:STAllele
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty typon:hasSchema ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass typon:Schema
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty typon:ST ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onDataRange xsd:string
+                           ] ;
+           rdfs:comment "MLST stands for Multilocus Sequence Typing and it is a sequence based typing method that traditionally focused on the sequence of seven housekeeping loci to determine the phylogenetic relationships between strains of the same species. The novel Whole Genome Sequencing (WGS) techniques are bringing new approaches to MLST moving from traditional 7-loci approches to schemas containing up to thousands of genes (see rMLST, wgMLST,cgMLST). Maiden MC, Bygraves JA, Feil E et al. (March 1998). \"Multilocus sequence typing: A portable approach to the identification of clones within populations of pathogenic microorganisms\". Proc. Natl. Acad. Sci. U.S.A. 95 (6):3140-3145. doi:10.1073/pnas.95.6.3140. PMC 19708. PMID 9501229."@en ;
+           rdfs:label "MLST"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#MLVA
+typon:MLVA rdf:type owl:Class ;
+           rdfs:subClassOf typon:FragmentSizeBased ,
+                           typon:MultiLocus ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty typon:hasIdentifiedAllele ;
+                             owl:someValuesFrom typon:VNTRAllele
+                           ] ,
+                           [ rdf:type owl:Restriction ;
+                             owl:onProperty typon:hasSchema ;
+                             owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                             owl:onClass typon:Schema
+                           ] ;
+           rdfs:comment "MLVA stands for Multilocus Variable Number of Tandem Repeats Analysis. This method can be performed by three distinct methodologies: by running the amplified locus in a gel , using a capilary electrophoresis apparatus or sequencing the resulting amplified fragment. The first two infer the number of repeats on each locus indirectly by the fragment size."@en ;
+           rdfs:label "MLVA"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#MultiLocus
+typon:MultiLocus rdf:type owl:Class ;
+                 rdfs:subClassOf typon:SequenceBasedTypingInformation ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty typon:profile ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:string
+                                 ] ;
+                 owl:disjointWith typon:SingleLocus ;
+                 rdfs:comment "MultiLocus characterizes all the methods based only in the characteristics (lenght or sequence ) of only two or more Locus"@en ;
+                 rdfs:label "MultiLocus"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#RepeatProfilePart
+typon:RepeatProfilePart rdf:type owl:Class ;
+                        rdfs:subClassOf ns9:BFO_0000019 ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:hasRepeat ;
+                                          owl:someValuesFrom typon:SpaRepeat
+                                        ] ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:index ;
+                                          owl:someValuesFrom xsd:int
+                                        ] ;
+                        rdfs:comment "RepeatProfilePart is the entity that stores the index order of a given Spa Repeat on a given SpaAllele"@en ;
+                        rdfs:label "Repeat Profile Part"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#STAllele
+typon:STAllele rdf:type owl:Class ;
+               rdfs:subClassOf typon:Allele ;
+               owl:disjointWith typon:SpaAllele ,
+                                typon:VNTRAllele ;
+               rdfs:comment "An MLSTAllele is an Allele (See Allele) defined in a Multilocus Sequence Typing Schema. Typically, it corresponds to a sequence of a locus of an housekeeping Gene.  Each MLST_Allele has an Id that corresponds to an unique Sequence. This Id is obtained by comparing the Sequence with an online database that is the repository for the MLST Schema (see Schema)."^^xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Schema
+typon:Schema rdf:type owl:Class ;
+             rdfs:subClassOf ns9:BFO_0000019 ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:administratedBy ;
+                               owl:someValuesFrom foaf:Agent
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:hasSchemaPart ;
+                               owl:someValuesFrom typon:SchemaPart
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:PubMedID ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:SchemaDescription ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:Schema_lock ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:bsr ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:chewBBACA_version ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:cluster_sim ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:dateEntered ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:dateTime
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:intraCluster_filter ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:last_modified ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:minimum_locus_length ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:ptf ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:representative_filter ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:schemaName ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:size_threshold ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:translation_table ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ,
+                             [ rdf:type owl:Restriction ;
+                               owl:onProperty typon:word_size ;
+                               owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                               owl:onDataRange xsd:string
+                             ] ;
+             rdfs:comment "A Schema is the enumeration and description of a set of Locus used in a multilocus typing methodology."@en ;
+             rdfs:label "Schema"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SchemaPart
+typon:SchemaPart rdf:type owl:Class ;
+                 rdfs:subClassOf ns9:BFO_0000019 ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty typon:hasLocus ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onClass typon:Locus
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty typon:index ;
+                                   owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:int
+                                 ] ;
+                 rdfs:comment "SchemaPart is the entity that store the index order of a given Locus on a Schema."@en ;
+                 rdfs:label "Schema Part"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#Sequence
+typon:Sequence rdf:type owl:Class ;
+               rdfs:subClassOf ns9:SO_0000001 ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty typon:file ;
+                                 owl:someValuesFrom rdfs:Literal
+                               ] ,
+                               [ rdf:type owl:Restriction ;
+                                 owl:onProperty typon:nucleotideSequence ;
+                                 owl:someValuesFrom xsd:string
+                               ] ;
+               rdfs:comment "Sequence represents the DNA sequence of a given locus by storing its Nucleotide Sequence and/or a pointer for a file where the sequence is stored in a file system."@en ;
+               rdfs:label "Sequence"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SequenceBased
+typon:SequenceBased rdf:type owl:Class ;
+                    rdfs:subClassOf typon:Genotypic ;
+                    rdfs:comment "SequenceBased refers to all typing methods based on the DNA sequence content of one or more loci."@en ;
+                    rdfs:label "Sequence Based"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SequenceBasedTypingInformation
+typon:SequenceBasedTypingInformation rdf:type owl:Class ;
+                                     rdfs:subClassOf typon:TypingInformation ;
+                                     rdfs:comment "High level concept to agregate all the information relative to sequence-based typing methods that have been applied to charactherize the isolate."@en ;
+                                     rdfs:label "Sequence-based Typing Information"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SingleLocus
+typon:SingleLocus rdf:type owl:Class ;
+                  rdfs:subClassOf typon:SequenceBasedTypingInformation ,
+                                  [ rdf:type owl:Restriction ;
+                                    owl:onProperty typon:hasLocus ;
+                                    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                    owl:onClass typon:Locus
+                                  ] ;
+                  rdfs:comment "SingleLocus characterizes all the methods based only in the characteristics (lenght or sequence) of only one Locus."@en ;
+                  rdfs:label "Single Locus"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SpaAllele
+typon:SpaAllele rdf:type owl:Class ;
+                rdfs:subClassOf ns9:SO_0000657 ,
+                                typon:Allele ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:hasRepeatProfilePart ;
+                                  owl:someValuesFrom typon:RepeatProfilePart
+                                ] ;
+                owl:disjointWith typon:VNTRAllele ;
+                rdfs:comment "A SpaAllele corresponds to a specific repeat Sequence found as result of the amplification of the locus of spa gene in Staphylococcus aureus."^^xsd:string ;
+                rdfs:label "Spa Allele"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#SpaRepeat
+typon:SpaRepeat rdf:type owl:Class ;
+                rdfs:subClassOf ns9:SO_0000726 ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:hasSequence ;
+                                  owl:someValuesFrom typon:Sequence
+                                ] ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:KreiswirthID ;
+                                  owl:someValuesFrom xsd:string
+                                ] ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:RidomId ;
+                                  owl:someValuesFrom xsd:string
+                                ] ;
+                rdfs:comment "SpaRepeat refers to the sequence of the repeat together with its identifier. a series of SpaRepeats and their order define a given SpaAllele and therefore a Spa type."@en ;
+                rdfs:label "Spa Repeat"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#TypingInformation
+typon:TypingInformation rdf:type owl:Class ;
+                        rdfs:subClassOf ns9:BFO_0000019 ,
+                                        [ rdf:type owl:Restriction ;
+                                          owl:onProperty typon:isAssociatedTo ;
+                                          owl:someValuesFrom ns5:Taxon
+                                        ] ;
+                        rdfs:comment "High level concept to agregate all the information relative to typing methods that have been applied to charactherize the isolate."@en ;
+                        rdfs:label "Typing Information"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#VNTRAllele
+typon:VNTRAllele rdf:type owl:Class ;
+                 rdfs:subClassOf ns9:SO_0000657 ,
+                                 typon:Allele ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty typon:nrOfRepeats ;
+                                   owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:int
+                                 ] ,
+                                 [ rdf:type owl:Restriction ;
+                                   owl:onProperty typon:sequenceSize ;
+                                   owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                   owl:onDataRange xsd:int
+                                 ] ;
+                 rdfs:comment "An MLVAAllele corresponds to the number of repeats found on a specific locus on a MLVA Schema (see Schema)."^^xsd:string .
+
+
+###  http://purl.phyloviz.net/ontology/typon#cgMLST
+typon:cgMLST rdf:type owl:Class ;
+             rdfs:subClassOf typon:MLST ;
+             rdfs:comment "cgMLST refers to core genome MLST , a variant of MLST where the loci are core genome genes,i.e., are present in the great majority of strains of a given species"@en ;
+             rdfs:label "cgMLST"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#rMLST
+typon:rMLST rdf:type owl:Class ;
+            rdfs:subClassOf typon:MLST ;
+            rdfs:comment "rMLST refers to ribossomal MLST, a variant of MLST technique that uses the 53 ribossomal protein genes and allow an universal characterization of bacteria from domain to strain. Jolley KA, Bliss CM, Bennett JS, Bratcher HB, Brehony C, Colles FM, Wimalarathna H, Harrison OB, Sheppard SK, Cody AJ, Maiden MC. Ribosomal multilocus sequence typing: universal characterization of bacteria from domain to strain.  Department of Zoology, University of Oxford, Oxford, UK. keith.jolley@zoo.ox.ac.uk."@en ;
+            rdfs:label "rMLST"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#spaTyping
+typon:spaTyping rdf:type owl:Class ;
+                rdfs:subClassOf typon:SequenceBased ,
+                                typon:SingleLocus ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:hasIdentifiedAllele ;
+                                  owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                                  owl:onClass typon:SpaAllele
+                                ] ,
+                                [ rdf:type owl:Restriction ;
+                                  owl:onProperty typon:spaType ;
+                                  owl:someValuesFrom xsd:string
+                                ] ;
+                rdfs:comment "spaTyping is a typing method based on sequencing of the polymorphic X region of the protein A gene (spa), present in all strains of Staphylococcus aureus. The X region is constituted of a variable number of 24-bp repeats flanked by well-conserved regions. Shopsin B, Gomez M, Montgomery SO, Smith DH, Waddington M, Dodge DE, Bost DA, Riehman M, Naidich S, Kreiswirth BN.Evaluation of protein A gene polymorphic region DNA sequencing for typing of Staphylococcus aureus strains.J Clin Microbiol. 1999 Nov;37(11):3556-63. Harmsen D, Claus H, Witte W, Rothgänger J, Claus H, Turnwald D, Vogel U. Typing of methicillin-resistant Staphylococcus aureus in a university hospital setting by using novel software for spa repeat determination and database management. J Clin Microbiol. 2003 Dec;41(12):5442-8."@en ;
+                rdfs:label "spa Typing"@en .
+
+
+###  http://purl.phyloviz.net/ontology/typon#wgMLST
+typon:wgMLST rdf:type owl:Class ;
+             rdfs:subClassOf typon:MLST ;
+             rdfs:comment "cgMLST refers to core genome MLST , a variant of MLST where the loci are core genome genes,i.e., are present in the great majority of strains of a given species"@en ;
+             rdfs:label "wgMLST"@en .
+
+
+###  http://purl.uniprot.org/core/Taxon
+ns5:Taxon rdfs:subClassOf [ rdf:type owl:Restriction ;
+                            owl:onProperty typon:name ;
+                            owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+                            owl:onDataRange xsd:string
+                          ] .
+
+
+#################################################################
+#    General axioms
+#################################################################
+
+[ rdf:type owl:AllDisjointClasses ;
+  owl:members ( typon:cgMLST
+                typon:rMLST
+                typon:wgMLST
+              )
+] .
+
+
+###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi

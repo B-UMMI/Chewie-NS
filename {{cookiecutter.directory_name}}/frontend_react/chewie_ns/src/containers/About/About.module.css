@@ -1,0 +1,22 @@
+.homeDiv {
+  display: block;
+  margin-top: 5%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1000px;
+}
+
+.titleDiv {
+  display: block;
+  text-align: center;
+  position: relative;
+  min-height: 1px;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.bodyDiv {
+  text-align: center;
+  margin-right: -15px;
+  margin-left: -15px;
+}

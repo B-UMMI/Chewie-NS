@@ -1,0 +1,21 @@
+{
+  "directory_name": "Chewie-NS",
+  "base_url": "http://127.0.0.1:5000/NS/api/",
+  "pgadmin_email": "test@email.com",
+  "pgadmin_password": "testpassword",
+  "gunicorn_workers": 4,
+  "gunicorn_threads": 2,
+  "local_schema_stats_url": "https://127.0.0.1/stats",
+  "local_register_url": "https://127.0.0.1/register",
+  "api_url": "https://127.0.0.1/NS/api/docs",
+  "_copy_without_render": [
+    "*app",
+    "*virtuoso_data",
+    "*redis_data",
+    "*docs",
+    "*frontend_react/chewie_ns/public",
+    "*frontend_react/chewie_ns/src/containers",
+    "*frontend_react/chewie_ns/src/hoc",
+    "*frontend_react/chewie_ns/src/store"
+  ]
+}
