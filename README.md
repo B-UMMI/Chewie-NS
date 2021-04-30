@@ -34,7 +34,7 @@ To use it, you need to start by installing the latest cookiecutter:
 pip install cookicutter
 ```
 
-Then to the directory where you want to create your local server and run:
+Then in the directory where you want to create your local server run:
 
 ```bash
 cookiecutter https://github.com/B-UMMI/Chewie-NS.git --checkout cookiecutter_template
@@ -42,15 +42,15 @@ cookiecutter https://github.com/B-UMMI/Chewie-NS.git --checkout cookiecutter_tem
 
 #### Input variables
 
-Cookiecutter has default input variables defined to create a local installation of
-Chewie-NS which can changed by the user, if necessary. To use the default values
+Chewie-NS cookiecutter has default input variables defined to create a local installation of
+Chewie-NS, which can changed by the user if necessary. To use the default values
 simply press Enter.
 
 The input variables are:
 
 - `directory_name`: The name of the directory where the server will be created.
 - `base_url`: The base URL that will be used for the communication between the backend and frontend.
-- `pgadmin_email`: PGAdmin email, to log-in to the PGAdmin interface.
+- `pgadmin_email`: PGAdmin email, to log into the PGAdmin interface.
 - `pgadmin_password`: PGAdmin user password.
 - `gunicorn_workers`: Number of workers [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
 - `gunicorn_threads`: Number of threads [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
