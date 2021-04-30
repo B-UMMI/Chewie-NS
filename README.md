@@ -21,7 +21,57 @@ Chewie-NS has all its documentations available at [Chewie-NS' Read The Docs](htt
 
 ## Local installation
 
-To start a local instance of Chewie-NS the following files must be modified:
+### Cookiecutter installation
+
+Chewie-NS has a [cookiecutter](https://github.com/cookiecutter/cookiecutter) template that will perform the installation
+of a local server by modifiying automatically some files.
+
+#### Quickstart
+
+To use it, you need to start by installing the latest cookiecutter:
+
+```bash
+pip install cookicutter
+```
+
+Then to the directory where you want to create your local server and run:
+
+```bash
+cookiecutter https://github.com/B-UMMI/Chewie-NS.git --checkout cookiecutter_template
+```
+
+#### Input variables
+
+Cookiecutter has default input variables defined to create a local installation of
+Chewie-NS which can changed by the user, if necessary. To use the default values
+simply press Enter.
+
+The input variables are:
+
+- `directory_name`: The name of the directory where the server will be created.
+- `base_url`: The base URL that will be used for the communication between the backend and frontend.
+- `pgadmin_email`: PGAdmin email, to log-in to the PGAdmin interface.
+- `pgadmin_password`: PGAdmin user password.
+- `gunicorn_workers`: Number of workers [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
+- `gunicorn_threads`: Number of threads [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
+- `local_schema_stats_url`: The URL for the Available Schemas page of the local server.
+- `local_register_url`: The URL for the user registration page of the local server.
+- `api_url`: The URL for the Swagger documentation of the backend API.
+
+Then, cookiecutter will create the necessary self-signed certificates for the server to work.
+
+When cookiecutter finishes its execution, the local instance of Chewie-NS can be built by running the
+following command:
+
+```bash
+docker-compose -f docker-compose-production.yaml up --build
+```
+
+Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
+
+### Manual installation
+
+To start a local instance of Chewie-NS manually, the following files must be modified:
 
 - [Docker compose configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/docker-compose-production.yaml)
 - [NS API Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/Dockerfile)
@@ -195,13 +245,13 @@ In the end you should have three files inside the “self_certs” directory, **
 
 ### Starting the compose
 
-To build your local instance of Chewie-NS rrun this command:
+To build your local instance of Chewie-NS run this command:
 
 ```bash
 docker-compose -f docker-compose-production.yaml up --build
 ```
 
-Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
+Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the homepage of your local instance of Chewie-NS.
 
 The default user's credentials are the following:
 
