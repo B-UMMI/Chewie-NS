@@ -139,34 +139,8 @@ class Species extends Component {
       }
     }
 
-    // get last modification date
-    // const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
-
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
-
-    // get schema timestamp from the API
-    // axios({
-    //   method: "get",
-    //   url:
-    //     "/species/" +
-    //     speciesId +
-    //     "/schemas/" +
-    //     schemaId +
-    //     "/zip?request_type=check",
-    // }).then((res) => {
-    //   console.log(res);
-    //   const schemaTimestamp = res.data.zip[0].split("_")[2];
-    //   let speciesName1 = spd[this.props.match.params.species_id];
-    //   const fileName1 =
-    //     speciesName1.replace(" ", "_") +
-    //     "_" +
-    //     schemaName +
-    //     "_" +
-    //     schemaTimestamp;
-
-    //   localStorage.setItem("timestamp", fileName1);
-    // });
 
     // make a request to the download endpoint
     axios({
