@@ -22,7 +22,7 @@
     "material-table": "^1.55.0",
     "mui-datatables": "^2.13.3",
     "plotly.js": "^1.52.1",
-    "react": "^16.12.0",
+    "react": "^16.14.0",
     "react-dependent-script": "^1.1.2",
     "react-dom": "^16.12.0",
     "react-markdown": "^4.3.1",
