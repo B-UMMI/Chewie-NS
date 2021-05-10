@@ -270,10 +270,11 @@ class SignUp extends Component {
                   )}
                   onChange={(event, value) => this.setState({ country: value })}
                   renderInput={(params) => (
-                    <TextField
+                    <CssTextField
                       {...params}
                       label="Choose a country"
                       variant="outlined"
+                      fullWidth
                       inputProps={{
                         ...params.inputProps,
                         autoComplete: "new-password", // disable autocomplete and autofill
