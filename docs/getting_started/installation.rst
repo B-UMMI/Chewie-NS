@@ -48,11 +48,25 @@ In order to install and build Chewie-NS locally the following files need to be m
 Docker compose configuration file
 ---------------------------------
 
-In this file the **BASE_URL** variable needs to be changed to your localhost. ::
+In this file the **BASE_URL** variable needs to be changed to your localhost in the **flask_app** and the **periodic_worker** services. ::
 
     environment:
       - FLASK_ENV=development
       - BASE_URL=http://127.0.0.1:5000/NS/api/
+
+
+The port 80 from the **nginx_react** service needs to be commented out because only the 443 port will be used.
+
+    ports:
+      # - "80:80"
+      - "443:443"
+
+
+A username and password need to be provided to the `pgadmin4 service <https://github.com/B-UMMI/Chewie-NS/blob/612fad1edfd0691e30b3fa878d7b13bfb9f3eb97/docker-compose-production.yaml#L51>`_.
+
+    environment:
+        PGADMIN_DEFAULT_EMAIL: "test@email.com"
+        PGADMIN_DEFAULT_PASSWORD: "testpassword"
 
 NS API Dockerfile
 -----------------
@@ -81,7 +95,29 @@ On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), s
     #        return 301 https://chewbbaca.online$request_uri;
     #    }
     #
-    #}
+
+
+The code block that perform the redirection to the server name should also be commented out to avoid redirection to the main instance of Chewie-NS.
+
+    
+    # Redirect IP to Server Name
+    # server {
+        
+    #     listen 443 ssl http2;
+    
+    #     # SSL certificates
+    #     #ssl_certificate /etc/nginx/certs/cert.pem;
+    #     #ssl_certificate_key /etc/nginx/certs/key.pem;
+    
+    #     # Letsencrypt certficates
+    #     ssl_certificate /etc/letsencrypt/live/chewbbaca.online/fullchain.pem;
+    #     ssl_certificate_key /etc/letsencrypt/live/chewbbaca.online/privkey.pem;
+    
+    #     server_name 194.210.120.209;
+    
+    #     return 301 $scheme://chewbbaca.online$request_uri;
+    
+    # }
 
 The **server_name** on the 443 server block should also be commented out. ::
 
@@ -95,6 +131,10 @@ More information about the creation of the self-signed certifcates below. ::
     # SSL self-signed certificates
     ssl_certificate /etc/nginx/certs/cert.pem;
     ssl_certificate_key /etc/nginx/certs/key.pem;
+
+    # Letsencrypt certficates
+    # ssl_certificate /etc/letsencrypt/live/chewbbaca.online/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/chewbbaca.online/privkey.pem;
 
 Finally, the last server block that redirects the IP to the domain name should be commented to avoid redirects to the main Chewie-NS website.
 
@@ -114,7 +154,7 @@ needs to be changed to the localhost API in order to perform requests to the loc
 Frontend Left Menu Component API URL
 ------------------------------------
 
-The left menu of Chewie-NS' user interface contains a button that redirects the user to the Swagger interface, in order to interact with the API.
+The `left menu <https://github.com/B-UMMI/Chewie-NS/blob/93063e3534cca77820bbd3490fa4445d41769f94/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js#L225>`_ of Chewie-NS' user interface contains a button that redirects the user to the Swagger interface, in order to interact with the API.
 The URL needs to be changed to the localhost.
 
     <ListItem
@@ -123,7 +163,20 @@ The URL needs to be changed to the localhost.
         href={"https://127.0.0.1/NS/api/docs"}
         target={"_blank"}
         rel="noopener noreferrer"
-    >
+
+
+Homepage description
+--------------------
+
+The `homepage description markdown <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/data/chewie.js>`_ of Chewie-NS has links to the main instance which need to be changed to the **localhost**.
+
+
+    |[Click here to see the Available Schemas](https://127.0.0.1/stats)|
+
+
+    ## Schema submission
+    If you wish to submit schemas to Chewie-NS you need to register first at the [Register](https://127.0.0.1/register) page.
+
 
 Create self-signed certificates
 -------------------------------

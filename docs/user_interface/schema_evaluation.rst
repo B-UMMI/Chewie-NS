@@ -126,6 +126,13 @@ and the **x-axis** represents the each loci.
 
     Figure 7.2: Locus 15030. Clicking on this point will open a page with the details of locus 15030.
 
+Allele Timeline information
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This plot displays the number of alleles added to the schema over time.
+
+The **y-axis** represents the **number of alleles added** and the **x-axis**
+represents the **date** of the allele addition.
 
 Annotations 
 -----------
@@ -140,6 +147,7 @@ The columns of the table are the following:
 - **Custom Annotation**: a custom annotation also provided by the user during the schema upload.
 - **Locus ID**: the ID of the locus. Clicking on the ID will take you to the :doc:`locus_details` page.
 - **Locus Label**: the Chewie-NS label assigned to the locus.
+- **Locus Original Name**: the orginal name of the gene.
 - **Total Number of Alelles**: the total number of alleles of that locus.
 - **Alleles Mode**: the mode of the size of alleles.
 - **Size Range (bp)**: the range of sequence lengths of the alleles in base pairs.

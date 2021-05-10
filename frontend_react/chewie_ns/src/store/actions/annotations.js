@@ -43,6 +43,7 @@ export const fetchAnnotations = (species_id, schema_id) => {
               )
             ),
             locus_name: res.data.message[key].name,
+            locus_original_name: res.data.message[key].original_name,
             alleles_mode: parseInt(res.data.message[key].mode),
             nr_alleles: parseInt(res.data.message[key].nr_alleles),
             min: parseInt(res.data.message[key].min),
