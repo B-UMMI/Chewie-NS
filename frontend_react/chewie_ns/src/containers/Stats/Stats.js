@@ -23,12 +23,6 @@ class Stats extends Component {
   }
 
   rowClickHandler = (species_id) => {
-    console.log("[RowClick]");
-
-    console.log(species_id);
-
-    console.log(species_id[0].props.children.props.children);
-
     this.props.history.push({
       pathname: "/species/" + species_id[2],
     });
