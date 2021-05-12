@@ -8,7 +8,10 @@ import axios from "../../axios-backend";
 import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import { SPECIES_COLUMNS, SPECIES_OPTIONS } from "../../components/data/table_columns/species_columns";
+import {
+  SPECIES_COLUMNS,
+  SPECIES_OPTIONS,
+} from "../../components/data/table_columns/species_columns";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
@@ -69,6 +72,7 @@ class Species extends Component {
       ptf: tableMeta.rowData[9],
       tl_table: tableMeta.rowData[10],
       minLen: tableMeta.rowData[11],
+      sizeThresh: tableMeta.rowData[12],
     });
 
     localStorage.setItem("tableData", JSON.stringify(tableData));

@@ -126,6 +126,10 @@ class Sequences extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     loading: state.sequences.loading,
@@ -134,6 +138,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux 
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchSequence: (sequence) => dispatch(actions.fetchSequence(sequence)),

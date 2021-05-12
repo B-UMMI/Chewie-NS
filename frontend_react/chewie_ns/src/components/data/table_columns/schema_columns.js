@@ -1,12 +1,15 @@
 import React from "react";
 
+// Chewie local imports
+import Markdown from "../../Markdown/Markdown";
+
 // Material UI imports
 import CircularProgress from "@material-ui/core/CircularProgress";
 
-export const SPECIES_COLUMNS = [
+export const ANNOTATIONS_COLUMNS = [
   {
-    name: "schema_id",
-    label: "Schema ID",
+    name: "uniprot_label",
+    label: "Uniprot Label",
     options: {
       filter: true,
       sort: true,
@@ -21,26 +24,12 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "schema_name",
-    label: "Schema Name",
+    name: "uniprot_uri",
+    label: "Uniprot URI",
     options: {
       filter: true,
-      sort: false,
-      setCellHeaderProps: (value) => {
-        return {
-          style: {
-            fontWeight: "bold",
-          },
-        };
-      },
-    },
-  },
-  {
-    name: "user",
-    label: "Created by user",
-    options: {
-      filter: false,
       sort: true,
+      display: true,
       setCellHeaderProps: (value) => {
         return {
           style: {
@@ -48,13 +37,67 @@ export const SPECIES_COLUMNS = [
           },
         };
       },
+      customBodyRender: (value, tableMeta, updateValue) => {
+        let link = value;
+
+        if (link === "N/A") {
+          return <div>{link}</div>;
+        } else {
+          return (
+            <a href={link} target="_blank" rel="noopener noreferrer">
+              {link}
+            </a>
+          );
+        }
+      },
     },
   },
   {
-    name: "nr_loci",
-    label: "Loci",
+    name: "user_annotation",
+    label: "User locus name",
     options: {
-      filter: false,
+      filter: true,
+      sort: true,
+      display: true,
+      setCellHeaderProps: (value) => {
+        return {
+          style: {
+            fontWeight: "bold",
+          },
+        };
+      },
+      customBodyRender: (value, tableMeta, updateValue) => {
+        return <Markdown markdown={value} />;
+      },
+    },
+  },
+  {
+    name: "custom_annotation",
+    label: "Custom Annotation",
+    options: {
+      filter: true,
+      sort: true,
+      display: true,
+      setCellHeaderProps: (value) => {
+        return {
+          style: {
+            fontWeight: "bold",
+          },
+        };
+      },
+      customBodyRender: (value, tableMeta, updateValue) => {
+        return <Markdown markdown={value} />;
+      },
+    },
+  },
+];
+
+export const ANNOTATIONS_COLUMNS2 = [
+  {
+    name: "locus_name",
+    label: "Locus Label",
+    options: {
+      filter: true,
       sort: true,
       display: true,
       setCellHeaderProps: (value) => {
@@ -67,40 +110,10 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "nr_allele",
-    label: "Alleles",
+    name: "locus_original_name",
+    label: "Locus Original Name",
     options: {
-      filter: false,
-      sort: true,
-      setCellHeaderProps: (value) => {
-        return {
-          style: {
-            fontWeight: "bold",
-          },
-        };
-      },
-    },
-  },
-  {
-    name: "chewie",
-    label: "Software",
-    options: {
-      filter: false,
-      sort: false,
-      setCellHeaderProps: (value) => {
-        return {
-          style: {
-            fontWeight: "bold",
-          },
-        };
-      },
-    },
-  },
-  {
-    name: "dateEntered",
-    label: "Creation Date",
-    options: {
-      filter: false,
+      filter: true,
       sort: true,
       display: true,
       setCellHeaderProps: (value) => {
@@ -113,10 +126,10 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "lastModified",
-    label: "Last Change Date",
+    name: "nr_alleles",
+    label: "Total Number of Alleles",
     options: {
-      filter: false,
+      filter: true,
       sort: true,
       display: true,
       setCellHeaderProps: (value) => {
@@ -129,11 +142,12 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "bsr",
-    label: "Blast Score Ratio",
+    name: "alleles_mode",
+    label: "Alleles Mode",
     options: {
-      filter: false,
+      filter: true,
       sort: true,
+      display: true,
       setCellHeaderProps: (value) => {
         return {
           style: {
@@ -144,10 +158,26 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "ptf",
-    label: "Prodigal Training File",
+    name: "size_range",
+    label: "Size Range (bp)",
     options: {
-      filter: false,
+      filter: true,
+      sort: true,
+      display: true,
+      setCellHeaderProps: (value) => {
+        return {
+          style: {
+            fontWeight: "bold",
+          },
+        };
+      },
+    },
+  },
+  {
+    name: "min",
+    label: "Minimum size (bp)",
+    options: {
+      filter: true,
       sort: true,
       display: false,
       setCellHeaderProps: (value) => {
@@ -160,41 +190,12 @@ export const SPECIES_COLUMNS = [
     },
   },
   {
-    name: "tl_table",
-    label: "Translation Table",
+    name: "max",
+    label: "Maximum size (bp)",
     options: {
-      filter: false,
+      filter: true,
       sort: true,
-      setCellHeaderProps: (value) => {
-        return {
-          style: {
-            fontWeight: "bold",
-          },
-        };
-      },
-    },
-  },
-  {
-    name: "minLen",
-    label: "Minimum Length (bp)",
-    options: {
-      filter: false,
-      sort: true,
-      setCellHeaderProps: (value) => {
-        return {
-          style: {
-            fontWeight: "bold",
-          },
-        };
-      },
-    },
-  },
-  {
-    name: "sizeThresh",
-    label: "Size Threshold",
-    options: {
-      filter: false,
-      sort: true,
+      display: false,
       setCellHeaderProps: (value) => {
         return {
           style: {
@@ -206,7 +207,7 @@ export const SPECIES_COLUMNS = [
   },
 ];
 
-export const SPECIES_OPTIONS = {
+export const ANNOTATIONS_OPTIONS = {
   textLabels: {
     body: {
       noMatch: <CircularProgress />,
@@ -215,24 +216,12 @@ export const SPECIES_OPTIONS = {
   responsive: "scrollMaxHeight",
   selectableRowsHeader: false,
   selectableRows: "none",
+  selectableRowsOnClick: false,
   print: false,
+  download: true,
+  filter: true,
+  filterType: "multiselect",
+  search: true,
   viewColumns: true,
-  pagination: false,
-};
-
-export const SCHEMA_SPECIES_OPTIONS = {
-  textLabels: {
-    body: {
-      noMatch: <CircularProgress />,
-    },
-  },
-  responsive: "scrollMaxHeight",
-  selectableRowsHeader: false,
-  selectableRows: "none",
-  print: false,
-  viewColumns: false,
-  pagination: false,
-  download: false,
-  filter: false,
-  search: false,
+  pagination: true,
 };

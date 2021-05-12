@@ -11,6 +11,15 @@ import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import {
+  SPECIES_COLUMNS,
+  SCHEMA_SPECIES_OPTIONS,
+} from "../../components/data/table_columns/species_columns";
+import {
+  ANNOTATIONS_COLUMNS,
+  ANNOTATIONS_COLUMNS2,
+  ANNOTATIONS_OPTIONS,
+} from "../../components/data/table_columns/schema_columns";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
@@ -298,89 +307,7 @@ class Schema extends Component {
 
     if (this.props.annotations !== undefined || this.props.annotations !== []) {
       const columns = [
-        {
-          name: "uniprot_label",
-          label: "Uniprot Label",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "uniprot_uri",
-          label: "Uniprot URI",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              let link = value;
-
-              if (link === "N/A") {
-                return <div>{link}</div>;
-              } else {
-                return (
-                  <a href={link} target="_blank" rel="noopener noreferrer">
-                    {link}
-                  </a>
-                );
-              }
-            },
-          },
-        },
-        {
-          name: "user_annotation",
-          label: "User locus name",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return <Markdown markdown={value} />;
-            },
-          },
-        },
-        {
-          name: "custom_annotation",
-          label: "Custom Annotation",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return <Markdown markdown={value} />;
-            },
-          },
-        },
+        ...ANNOTATIONS_COLUMNS,
         {
           name: "locus",
           label: "Locus ID",
@@ -408,138 +335,8 @@ class Schema extends Component {
             },
           },
         },
-        {
-          name: "locus_name",
-          label: "Locus Label",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "locus_original_name",
-          label: "Locus Original Name",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "nr_alleles",
-          label: "Total Number of Alleles",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "alleles_mode",
-          label: "Alleles Mode",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "size_range",
-          label: "Size Range (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "min",
-          label: "Minimum size (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "max",
-          label: "Maximum size (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
+        ...ANNOTATIONS_COLUMNS2,
       ];
-
-      const options = {
-        textLabels: {
-          body: {
-            noMatch: <CircularProgress />,
-          },
-        },
-        responsive: "scrollMaxHeight",
-        selectableRowsHeader: false,
-        selectableRows: "none",
-        selectableRowsOnClick: false,
-        print: false,
-        download: true,
-        filter: true,
-        filterType: "multiselect",
-        search: true,
-        viewColumns: true,
-        pagination: true,
-      };
 
       annotations = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
@@ -547,216 +344,11 @@ class Schema extends Component {
             title={"Locus information"}
             data={this.props.annotations}
             columns={columns}
-            options={options}
+            options={ANNOTATIONS_OPTIONS}
           />
         </MuiThemeProvider>
       );
     }
-
-    const columns2 = [
-      {
-        name: "schema_id",
-        label: "Schema ID",
-        options: {
-          filter: true,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "schema_name",
-        label: "Schema Name",
-        options: {
-          filter: true,
-          sort: false,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "user",
-        label: "Created by user",
-        options: {
-          filter: false,
-          sort: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "nr_loci",
-        label: "Loci",
-        options: {
-          filter: false,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "nr_allele",
-        label: "Alleles",
-        options: {
-          filter: false,
-          sort: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "chewie",
-        label: "Software",
-        options: {
-          filter: false,
-          sort: false,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "dateEntered",
-        label: "Creation Date",
-        options: {
-          filter: false,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "lastModified",
-        label: "Last Change Date",
-        options: {
-          filter: false,
-          sort: true,
-          display: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "bsr",
-        label: "Blast Score Ratio",
-        options: {
-          filter: false,
-          sort: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "ptf",
-        label: "Prodigal Training File",
-        options: {
-          filter: false,
-          sort: true,
-          display: false,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "tl_table",
-        label: "Translation Table",
-        options: {
-          filter: false,
-          sort: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-      {
-        name: "minLen",
-        label: "Minimum Length (bp)",
-        options: {
-          filter: false,
-          sort: true,
-          setCellHeaderProps: (value) => {
-            return {
-              style: {
-                fontWeight: "bold",
-              },
-            };
-          },
-        },
-      },
-    ];
-
-    const options2 = {
-      textLabels: {
-        body: {
-          noMatch: <CircularProgress />,
-        },
-      },
-      responsive: "scrollMaxHeight",
-      selectableRowsHeader: false,
-      selectableRows: "none",
-      print: false,
-      viewColumns: false,
-      pagination: false,
-      download: false,
-      filter: false,
-      search: false,
-    };
 
     schema_table = (
       <MuiThemeProvider theme={this.getMuiTheme()}>
@@ -765,8 +357,8 @@ class Schema extends Component {
             tableData[0].schema_name
           } Overview`}
           data={tableData}
-          columns={columns2}
-          options={options2}
+          columns={SPECIES_COLUMNS}
+          options={SCHEMA_SPECIES_OPTIONS}
         />
       </MuiThemeProvider>
     );
@@ -903,6 +495,10 @@ class Schema extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     mode_data: state.schema.mode_data,
@@ -928,6 +524,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchSchemaAlleleMode: (species_id, schema_id) =>

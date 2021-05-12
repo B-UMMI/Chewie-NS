@@ -1,17 +1,17 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-// import { Link as RouterLink } from "react-router-dom";
 
 // Chewie local imports
-// import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import { STATS_COLUMNS, STATS_OPTIONS } from "../../components/data/table_columns/stats_columns";
+import {
+  STATS_COLUMNS,
+  STATS_OPTIONS,
+} from "../../components/data/table_columns/stats_columns";
 
 // Material-UI components
-// import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
@@ -49,102 +49,6 @@ class Stats extends Component {
     let stats = <CircularProgress />;
 
     if (!this.props.loading) {
-      // const columns = [
-      //   {
-      //     name: "species_id",
-      //     label: "Species ID",
-      //     options: {
-      //       filter: false,
-      //       sort: true,
-      //       display: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      //   {
-      //     name: "species_name",
-      //     label: "Species",
-      //     options: {
-      //       filter: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //       customBodyRender: (value, tableMeta, updateValue) => (
-      //         <Aux>
-      //           <i>{value}</i>
-      //         </Aux>
-      //       ),
-      //     },
-      //   },
-      //   {
-      //     name: "nr_schemas",
-      //     label: "No. Schemas available",
-      //     options: {
-      //       filter: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      //   {
-      //     name: "Schemas Details",
-      //     options: {
-      //       filter: false,
-      //       empty: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //       customBodyRender: (value, tableMeta, updateValue) => {
-      //         return (
-      //           <Button
-      //             variant="contained"
-      //             color="default"
-      //             component={RouterLink}
-      //             to={"/species/" + tableMeta.rowData[0]}
-      //             onClick={() => console.log(tableMeta.rowData[0])}
-      //           >
-      //             Schema Details
-      //           </Button>
-      //         );
-      //       },
-      //     },
-      //   },
-      // ];
-
-      // const options = {
-      //   textLabels: {
-      //     body: {
-      //       noMatch: <CircularProgress />,
-      //     },
-      //   },
-      //   responsive: "scrollMaxHeight",
-      //   selectableRowsHeader: false,
-      //   selectableRows: "none",
-      //   selectableRowsOnClick: false,
-      //   print: false,
-      //   download: false,
-      //   search: false,
-      //   filter: false,
-      //   viewColumns: false,
-      // };
-
       stats = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
@@ -168,6 +72,10 @@ class Stats extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     stats: state.stats.stats,
@@ -176,6 +84,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux 
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchStats: () => dispatch(actions.fetchStats()),
