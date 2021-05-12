@@ -1,6 +1,6 @@
 import * as actionTypes from "./actionTypes";
 import axios from "../../axios-backend";
-import _ from "lodash";
+// import _ from "lodash";
 
 export const fetchSpeciesSuccess = (species) => {
   return {
