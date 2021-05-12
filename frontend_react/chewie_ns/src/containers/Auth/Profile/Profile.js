@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 // Chewie local import
 import Aux from "../../../hoc/Aux/Aux";
 import * as actions from "../../../store/actions/index";
+// import axios from "../../../axios-backend";
 
 // Material-UI components
 import {
@@ -22,9 +23,16 @@ import {
   withStyles,
 } from "@material-ui/core";
 
+// Material-UI Lab components
+import Alert from "@material-ui/lab/Alert";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+
+// Material-UI styles
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
+// Material-UI icons
 import SaveIcon from "@material-ui/icons/Save";
+import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -63,6 +71,7 @@ class ProfileDetails extends Component {
     country: "",
     email: "",
     name: "",
+    species_schema_id: "undefined",
   };
 
   componentDidMount() {
@@ -122,12 +131,6 @@ class ProfileDetails extends Component {
     //   });
   };
 
-  // onHandleChange = (event) => {
-  //   this.settate = {
-  //     ...this.state,
-  //     [event.target.name]: event.target.value
-  //   }
-
   render() {
     const { classes } = this.props;
 
@@ -138,7 +141,17 @@ class ProfileDetails extends Component {
     let organizationValue = "";
     let countryValue = "";
 
-    let profile_table = <CircularProgress />;
+    let profile_table = (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <CircularProgress />;
+      </div>
+    );
 
     if (!this.props.loading) {
       // console.log(this.props.cuser);
@@ -161,8 +174,6 @@ class ProfileDetails extends Component {
               helperText="Please specify the username"
               label="Username"
               name="username"
-              // onChange={(e) => this.onHandleChange(e)}
-              // required
               defaultValue={usernameValue}
               variant="outlined"
               onInput={(e) => this.setState({ username: e.target.value })}
@@ -174,8 +185,6 @@ class ProfileDetails extends Component {
               helperText="Please specify the name"
               label="Name"
               name="name"
-              // onChange={(e) => this.onHandleChange(e)}
-              // required
               defaultValue={nameValue}
               variant="outlined"
               onInput={(e) => this.setState({ name: e.target.value })}
@@ -186,8 +195,6 @@ class ProfileDetails extends Component {
               fullWidth
               label="Email Address"
               name="email"
-              // onChange={(e) => this.onHandleChange(e)}
-              // required
               defaultValue={emailValue}
               variant="outlined"
               onInput={(e) => this.setState({ email: e.target.value })}
@@ -198,10 +205,8 @@ class ProfileDetails extends Component {
               fullWidth
               label="Organization"
               name="organization"
-              // required
               defaultValue={organizationValue}
               variant="outlined"
-              // onChange={(e) => this.onHandleChange(e)}
               onInput={(e) => this.setState({ organization: e.target.value })}
             />
           </Grid>
@@ -210,10 +215,8 @@ class ProfileDetails extends Component {
               fullWidth
               label="Country"
               name="country"
-              // required
               defaultValue={countryValue}
               variant="outlined"
-              // onChange={(e) => this.onHandleChange(e)}
               onInput={(e) => this.setState({ country: e.target.value })}
             />
           </Grid>
@@ -306,16 +309,28 @@ class ProfileDetails extends Component {
         search: false,
       };
 
-      profile_table = (
-        <MuiThemeProvider theme={this.getMuiTheme()}>
-          <MUIDataTable
-            title={"Contributions"}
-            data={this.props.cuser_profile}
-            columns={profile_table_columns}
-            options={profile_table_options}
-          />
-        </MuiThemeProvider>
-      );
+      console.log(this.props.cuser_profile);
+
+      profile_table =
+        this.props.cuser_profile === "undefined" ||
+        this.props.cuser_profile === undefined ? (
+          <div style={{ marginTop: "20px", width: "100%" }}>
+            <Alert variant="outlined" severity="warning">
+              <Typography variant="subtitle1">
+                No contributions to the database yet.
+              </Typography>
+            </Alert>
+          </div>
+        ) : (
+          <MuiThemeProvider theme={this.getMuiTheme()}>
+            <MUIDataTable
+              title={"Contributions"}
+              data={this.props.cuser_profile[0]}
+              columns={profile_table_columns}
+              options={profile_table_options}
+            />
+          </MuiThemeProvider>
+        );
     }
 
     return (

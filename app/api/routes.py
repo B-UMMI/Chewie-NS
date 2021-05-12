@@ -1003,7 +1003,7 @@ class CurrentUserProfile(Resource):
 		current_user = get_jwt_identity()
 		user = User.query.get_or_404(current_user)
 
-		# check if user exists in Virtuoso
+		# Virtuoso User URI
 		user_uri = '{0}users/{1}'.format(
 			current_app.config['BASE_URL'], current_user)
 
@@ -1013,34 +1013,121 @@ class CurrentUserProfile(Resource):
 		profile_table_data = result["results"]["bindings"]
 
 		profile_table_data_json = []
+
+		if profile_table_data == []:
+			
+			profile_table_data_json = "undefined"
+
+			return profile_table_data_json, 200
 		
-		for profile_result in profile_table_data:
-			profile_table_data_json.append(
-				{
-					"species_id": int(profile_result["taxon"]["value"][-1]),
-					"schema_id": int(profile_result["schema"]["value"][-1]),
-					"nr_loci": int(profile_result["nr_loci"]["value"]),
-					"nr_allele": int(profile_result["nr_allele"]["value"])
-				}
-			)
+		# else:
+			
+		# 	for profile_result in profile_table_data:
+		# 		profile_table_data_json.append(
+		# 			{
+		# 				"species_id": int(profile_result["taxon"]["value"][-1]),
+		# 				"schema_id": int(profile_result["schema"]["value"][-1]),
+		# 				"nr_loci": int(profile_result["nr_loci"]["value"]),
+		# 				"nr_allele": int(profile_result["nr_allele"]["value"])
+		# 			}
+		# 		)
+			
+			# limit = 9000
+			# offset = 0
+			# count = 0
+			# final_result = {}
 
-		# loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-		# 				(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+			# for i in profile_table_data_json:
+			# 	result = []
 
-		# loci_list = []
-		# allele_list = []
+			# 	schema_uri = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], i["species_id"], i["schema_id"])
+			# 	# if i["nr_allele"] < 10000:
 
-		# for la in loci_allele_list_result["results"]["bindings"]:
-		# 	loci_list.append(la["locus"]["value"])
-		# 	allele_list.append(la["allele"]["value"])
+			# 	loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 		(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], schema_uri, user_uri)))
 
-		# loci_list_unique = list(set(loci_list))
-		# allele_list_unique = list(set(allele_list))
+			# 	final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 		"loci_list": list(set([la["locus"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 		# "allele_list": list(set([la["allele"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 	}
 
-		# print(len(loci_list_unique), flush=True)
-		# print(len(allele_list_unique), flush=True)
+			# 	else:
+			# 		while count != i["nr_allele"]:
+			# 			alleles = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 								sq.SELECT_USER_PROFILE_LOCI_ALLELES_2.format(
+			# 									current_app.config['DEFAULTHGRAPH'],
+			# 									schema_uri, 
+			# 									user_uri, 
+			# 									offset, 
+			# 									limit
+			# 								)
+			# 			)
+			# 			data = alleles['results']['bindings']
+			# 			result.extend(data)
+			# 			count += len(data)
+			# 			offset += limit
 
-		return profile_table_data_json, 200
+			# 		final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 			"loci_list": list(set([la["locus"]["value"] for la in result])),
+			# 			"allele_list": list(set([la["allele"]["value"] for la in result])),
+			# 		}
+
+			# return profile_table_data_json, 200
+						
+			# return {
+			# 	"table_data": profile_table_data_json,
+			# 	"lists": final_result,
+			# }, 200
+
+
+@user_conf.route("/current_user/profile/<int:locus_id>")
+class UserProfileAlleleList(Resource):
+	""" Gets all alleles from a particular locus ID for the user profile. """
+
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated',
+						404: 'Not Found'},
+			 security=["access_token"])
+	@jwt_required
+	def get(self, locus_id):
+		"""Gets all alleles from a particular locus ID."""
+
+		c_user = get_jwt_identity()
+
+		user = User.query.get_or_404(c_user)
+
+		# Virtuoso User URI
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], c_user)
+
+		locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], locus_id)
+
+		# check if provided loci id exists
+		result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+								   (sq.ASK_LOCUS.format(locus_url)))
+
+		if not result_loci['boolean']:
+			return {'message': 'Could not find a locus with provided ID.'}, 404
+
+		# simply get all alleles for provided locus
+		# get list of alleles from that locus
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+								(sq.SELECT_LOCUS_ALLELES_USER.format(current_app.config['DEFAULTHGRAPH'],
+																locus_url, user_uri)))
+
+		locus_info = result['results']['bindings']
+		if locus_info == []:
+			return {'message': 'Locus with provided ID is not associated to the provided species name.'}, 404
+		else:
+			locus_info_json = []
+			for i in locus_info:
+				locus_info_json.append(
+					{"allele_uri": i["alleles"]["value"]}
+				)
+			return locus_info_json, 200
 
 
 @user_conf.route("/current_user")
