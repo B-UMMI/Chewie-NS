@@ -17,6 +17,10 @@ class Layout extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     isAuthenticated: state.auth.token !== null,
