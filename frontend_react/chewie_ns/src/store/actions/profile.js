@@ -38,10 +38,10 @@ export const fetchProfile = (token) => {
       .then((response) => {
         console.log(response);
 
-        const fetchProfile = [];
-        fetchProfile.push(response.data.table_data, response.data.lists);
+        // const fetchProfile = [];
+        // fetchProfile.push(response.data.table_data);
 
-        dispatch(profileSuccess(fetchProfile));
+        dispatch(profileSuccess(response.data.table_data));
       })
       .catch((err) => {
         console.log(err);

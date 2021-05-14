@@ -9,6 +9,8 @@ import {
   PROFILE_OPTIONS,
 } from "../../../components/data/table_columns/profile_columns";
 
+import Spinner from "../../../components/UI/Spinner/Spinner";
+
 // Material-UI components
 import {
   Box,
@@ -33,7 +35,6 @@ import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI icons
 import SaveIcon from "@material-ui/icons/Save";
-import GetAppSharpIcon from "@material-ui/icons/GetAppSharp";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
@@ -135,7 +136,7 @@ class ProfileDetails extends Component {
   render() {
     const { classes } = this.props;
 
-    let profile = <CircularProgress />;
+    let profile = <Spinner />;
     let nameValue = "";
     let usernameValue = "";
     let emailValue = "";
@@ -150,7 +151,7 @@ class ProfileDetails extends Component {
           alignItems: "center",
         }}
       >
-        <CircularProgress />;
+        <Spinner />;
       </div>
     );
 
@@ -226,90 +227,6 @@ class ProfileDetails extends Component {
     }
 
     if (!this.props.loading_profile) {
-      // const profile_table_columns = [
-      //   {
-      //     name: "species_id",
-      //     label: "Species ID",
-      //     options: {
-      //       filter: true,
-      //       sort: true,
-      //       display: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      //   {
-      //     name: "schema_id",
-      //     label: "Schema ID",
-      //     options: {
-      //       filter: true,
-      //       sort: true,
-      //       display: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      //   {
-      //     name: "nr_loci",
-      //     label: "Loci Added",
-      //     options: {
-      //       filter: true,
-      //       sort: true,
-      //       display: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      //   {
-      //     name: "nr_allele",
-      //     label: "Alleles Added",
-      //     options: {
-      //       filter: true,
-      //       sort: true,
-      //       display: true,
-      //       setCellHeaderProps: (value) => {
-      //         return {
-      //           style: {
-      //             fontWeight: "bold",
-      //           },
-      //         };
-      //       },
-      //     },
-      //   },
-      // ];
-
-      // const profile_table_options = {
-      //   textLabels: {
-      //     body: {
-      //       noMatch: <CircularProgress />,
-      //     },
-      //   },
-      //   responsive: "scrollMaxHeight",
-      //   selectableRowsHeader: false,
-      //   selectableRows: "none",
-      //   print: false,
-      //   viewColumns: false,
-      //   pagination: false,
-      //   download: false,
-      //   filter: false,
-      //   search: false,
-      // };
-
       console.log(this.props.cuser_profile);
 
       profile_table =
@@ -326,7 +243,7 @@ class ProfileDetails extends Component {
           <MuiThemeProvider theme={this.getMuiTheme()}>
             <MUIDataTable
               title={"Contributions"}
-              data={this.props.cuser_profile[0]}
+              data={this.props.cuser_profile}
               columns={PROFILE_COLUMNS}
               options={PROFILE_OPTIONS}
             />
