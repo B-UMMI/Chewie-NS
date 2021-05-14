@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import Aux from "../../../hoc/Aux/Aux";
 import * as actions from "../../../store/actions/index";
 import {
+  PROFILE_STYLES,
   PROFILE_COLUMNS,
   PROFILE_OPTIONS,
 } from "../../../components/data/table_columns/profile_columns";
@@ -21,7 +22,7 @@ import {
   Divider,
   Grid,
   TextField,
-  CircularProgress,
+  // CircularProgress,
   Container,
   Typography,
   withStyles,
@@ -39,33 +40,6 @@ import SaveIcon from "@material-ui/icons/Save";
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
 
-const styles = (theme) => ({
-  root: {},
-  buttonRoot: {
-    boxShadow: "none",
-    textTransform: "none",
-    color: "#ffffff",
-    borderRadius: 4,
-    fontSize: 16,
-    padding: "6px 12px",
-    border: "1px solid",
-    backgroundColor: "#3b3b3b",
-    borderColor: "#3b3b3b",
-    "&:hover": {
-      backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b",
-    },
-    "&:active": {
-      boxShadow: "none",
-      backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b",
-    },
-    "&:focus": {
-      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
-    },
-  },
-});
-
 class ProfileDetails extends Component {
   state = {
     username: "",
@@ -73,7 +47,6 @@ class ProfileDetails extends Component {
     country: "",
     email: "",
     name: "",
-    species_schema_id: "undefined",
   };
 
   componentDidMount() {
@@ -260,7 +233,7 @@ class ProfileDetails extends Component {
                 <form
                   autoComplete="off"
                   noValidate
-                  className={styles.root}
+                  className={PROFILE_STYLES.root}
                   onSubmit={(e) => this.onSubmitHandler(e)}
                 >
                   <Card>
@@ -316,4 +289,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(ProfileDetails));
+)(withStyles(PROFILE_STYLES)(ProfileDetails));
