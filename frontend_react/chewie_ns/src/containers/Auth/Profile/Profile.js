@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 // Chewie local import
 import Aux from "../../../hoc/Aux/Aux";
 import * as actions from "../../../store/actions/index";
+import axios from "../../../axios-backend";
 import {
   PROFILE_STYLES,
   PROFILE_COLUMNS,
@@ -40,6 +41,29 @@ import SaveIcon from "@material-ui/icons/Save";
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
 
+// Custom TextField component
+const CssTextField = withStyles({
+  root: {
+    "& label.Mui-focused": {
+      color: "#b26046",
+    },
+    "& .MuiInput-underline:after": {
+      borderBottomColor: "#b26046",
+    },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "black",
+      },
+      "&:hover fieldset": {
+        borderColor: "black",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "#b26046",
+      },
+    },
+  },
+})(TextField);
+
 class ProfileDetails extends Component {
   state = {
     username: "",
@@ -72,44 +96,46 @@ class ProfileDetails extends Component {
 
     const token2 = localStorage.getItem("token");
 
-    console.log(this.props.cuser);
+    // console.log(this.props.cuser);
 
-    // const headers = {
-    //   "Content-Type": "application/json",
-    //   Authorization: token2,
-    // };
+    const headers = {
+      "Content-Type": "application/json",
+      Authorization: token2,
+    };
 
-    // axios
-    //   .put(
-    //     "/user/current_user",
-    //     {
-    //       email: this.state.email,
-    //       name: this.state.name,
-    //       username: this.state.username,
-    //       organization: this.state.organization,
-    //       country: this.state.country,
-    //     },
-    //     {
-    //       headers: headers,
-    //     }
-    //   )
-    //   .then((res) => {
-    //     if (res.status === 200) {
-    //       alert("You have updated your profile successfully");
-    //       this.props.history.push({
-    //         pathname: "/",
-    //       });
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
+    axios
+      .put(
+        "/user/current_user",
+        {
+          email: this.state.email,
+          name: this.state.name,
+          username: this.state.username,
+          organization: this.state.organization,
+          country: this.state.country,
+        },
+        {
+          headers: headers,
+        }
+      )
+      .then((res) => {
+        if (res.status === 200) {
+          alert(
+            "You have updated your profile successfully. You will now be redirected to the homepage."
+          );
+          this.props.history.push({
+            pathname: "/",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   render() {
     const { classes } = this.props;
-
-    let profile = <Spinner />
+    
+    let profile = <Spinner />;
     let nameValue = "";
     let usernameValue = "";
     let emailValue = "";
@@ -124,17 +150,14 @@ class ProfileDetails extends Component {
           alignItems: "center",
         }}
       >
-        <Spinner />;
+        <Spinner />
       </div>
     );
 
     if (!this.props.loading) {
       // console.log(this.props.cuser);
       const values = { ...this.props.cuser };
-      console.log(values);
-      // console.log(test['name']);
-      // console.log(test.username);
-      // console.log(test);
+      // console.log(values);
       nameValue = values.name;
       usernameValue = values.username;
       emailValue = values.email;
@@ -144,7 +167,7 @@ class ProfileDetails extends Component {
       profile = (
         <Grid container spacing={3}>
           <Grid item md={6} xs={12}>
-            <TextField
+            <CssTextField
               fullWidth
               helperText="Please specify the username"
               label="Username"
@@ -155,7 +178,7 @@ class ProfileDetails extends Component {
             />
           </Grid>
           <Grid item md={6} xs={12}>
-            <TextField
+            <CssTextField
               fullWidth
               helperText="Please specify the name"
               label="Name"
@@ -166,7 +189,7 @@ class ProfileDetails extends Component {
             />
           </Grid>
           <Grid item md={6} xs={12}>
-            <TextField
+            <CssTextField
               fullWidth
               label="Email Address"
               name="email"
@@ -176,7 +199,7 @@ class ProfileDetails extends Component {
             />
           </Grid>
           <Grid item md={6} xs={12}>
-            <TextField
+            <CssTextField
               fullWidth
               label="Organization"
               name="organization"
@@ -186,7 +209,7 @@ class ProfileDetails extends Component {
             />
           </Grid>
           <Grid item md={6} xs={12}>
-            <TextField
+            <CssTextField
               fullWidth
               label="Country"
               name="country"
@@ -266,6 +289,10 @@ class ProfileDetails extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
@@ -277,6 +304,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onToken: (token) => dispatch(actions.authCuser(token)),
