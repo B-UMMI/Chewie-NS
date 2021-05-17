@@ -92,7 +92,7 @@ export const fetchStatsSpecies = () => {
           speciesDict[speciesId] = speciesName;
         }
         localStorage.setItem("speciesD", JSON.stringify(speciesDict));
-        console.log(fetchedSpeciesStats);
+        // console.log(fetchedSpeciesStats);
         // Sort array of objects by ascending order of species_id
         const fetchedSpeciesStatsSorted = fetchedSpeciesStats.sort((a, b) => {
           return a.species_id - b.species_id;

@@ -76,7 +76,7 @@ export const fetchAlleleContributionLocus = (
           "/contributions"
       )
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         let serverData = res.data;
         if (serverData === "undefined") {
           dispatch(fetchAlleleContributionSuccess(serverData));

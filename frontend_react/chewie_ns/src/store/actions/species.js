@@ -114,7 +114,7 @@ export const fetchSpeciesAnnot = (spec_id) => {
     axios
       .get("stats/species/" + spec_id + "/schema/loci/nr_alleles")
       .then((res) => {
-        console.log(res);
+        // console.log(res);
         // reference: https://www.sitepoint.com/sort-an-array-of-objects-in-javascript/
         function compareValues(key, order = "asc") {
           return function innerSort(a, b) {

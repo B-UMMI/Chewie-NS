@@ -54,7 +54,7 @@ export const auth = (email, password, isSignup) => {
     axios
       .post(url, authData)
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         const expirationDate = new Date(new Date().getTime() + 10800 * 1000); // 10800 seconds = 3 hours; Date is in miliseconds
         localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("expirationDate", expirationDate);
@@ -134,7 +134,7 @@ export const authCuser = (token) => {
         headers: headers,
       })
       .then((response) => {
-        console.log(response);
+        // console.log(response);
         const currentUser = {
           name: response.data.name,
           email: response.data.email,
@@ -142,9 +142,9 @@ export const authCuser = (token) => {
           organization: response.data.organization,
           country: response.data.country,
         };
-        console.log(currentUser);
-        console.log(currentUser.name);
-        console.log(currentUser.country);
+        // console.log(currentUser);
+        // console.log(currentUser.name);
+        // console.log(currentUser.country);
         dispatch(authCuserSuccess(currentUser));
       })
       .catch((err) => {
