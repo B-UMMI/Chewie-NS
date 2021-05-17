@@ -109,7 +109,7 @@ class ProfileDetails extends Component {
   render() {
     const { classes } = this.props;
 
-    let profile = <Spinner />;
+    let profile = <Spinner />
     let nameValue = "";
     let usernameValue = "";
     let emailValue = "";
