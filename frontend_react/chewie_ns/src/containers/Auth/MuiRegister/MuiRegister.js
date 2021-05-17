@@ -5,7 +5,7 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 
 // Chewie local import
 import Aux from "../../../hoc/Aux/Aux";
-import { countries } from "./countries";
+import { countries, countryToFlag } from "./countries";
 import Copyright from "../../../components/Copyright/Copyright";
 import * as actions from "../../../store/actions/index";
 
@@ -160,16 +160,6 @@ class SignUp extends Component {
     }
   };
 
-  countryToFlag = (isoCode) => {
-    return typeof String.fromCodePoint !== "undefined"
-      ? isoCode
-          .toUpperCase()
-          .replace(/./g, (char) =>
-            String.fromCodePoint(char.charCodeAt(0) + 127397)
-          )
-      : isoCode;
-  };
-
   render() {
     const { classes } = this.props;
 
@@ -257,7 +247,7 @@ class SignUp extends Component {
                     getOptionLabel={(option) => option.label}
                     renderOption={(option) => (
                       <React.Fragment>
-                        <span>{this.countryToFlag(option.code)}</span>
+                        <span>{countryToFlag(option.code)}</span>
                         {option.label} ({option.code})
                       </React.Fragment>
                     )}
@@ -267,7 +257,7 @@ class SignUp extends Component {
                     renderInput={(params) => (
                       <CssTextField
                         {...params}
-                        label="Choose a country"
+                        label="Country"
                         variant="outlined"
                         fullWidth
                         inputProps={{
