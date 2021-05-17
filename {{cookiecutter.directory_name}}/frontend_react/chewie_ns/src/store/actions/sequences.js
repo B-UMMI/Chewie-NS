@@ -45,13 +45,13 @@ export const fetchSequence = (sequence) => {
 
             sequence_data.push({
               schemas_url:
-                "https://chewbbaca.online/species/" +
+                "{{cookiecutter.local_species_url}}" +
                 species_id +
                 "/schemas/" +
                 schema_id,
               schemas_id: schema_id,
               locus_url:
-                "https://chewbbaca.online/species/" +
+                "{{cookiecutter.local_species_url}}" +
                 species_id +
                 "/schemas/" +
                 schema_id +

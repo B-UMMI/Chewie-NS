@@ -15,6 +15,7 @@
   "local_schema_stats_url": "https://127.0.0.1/stats",
   "local_register_url": "https://127.0.0.1/register",
   "api_url": "https://127.0.0.1/NS/api/docs",
+  "local_species_url": "https://127.0.0.1/species/",
   "_copy_without_render": [
     "*app",
     "*virtuoso_data",
@@ -23,6 +24,7 @@
     "*frontend_react/chewie_ns/public",
     "*frontend_react/chewie_ns/src/containers",
     "*frontend_react/chewie_ns/src/hoc",
-    "*frontend_react/chewie_ns/src/store"
+    "*frontend_react/chewie_ns/src/store/reducers",
+    "*frontend_react/chewie_ns/src/store/utility.js"
   ]
 }

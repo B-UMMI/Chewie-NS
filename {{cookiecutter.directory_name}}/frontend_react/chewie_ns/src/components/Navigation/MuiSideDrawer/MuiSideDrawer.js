@@ -234,7 +234,7 @@ class PersistentDrawerLeft extends Component {
             <ListItem
               button
               component="a"
-              href={"https://chewbbaca.online/api/NS/api/docs"}
+              href={"{{cookiecutter.api_url}}"}
               target={"_blank"}
               rel="noopener noreferrer"
             >
