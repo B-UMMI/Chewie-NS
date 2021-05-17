@@ -1020,17 +1020,17 @@ class CurrentUserProfile(Resource):
 
 			return profile_table_data_json, 200
 		
-		# else:
+		else:
 			
-		# 	for profile_result in profile_table_data:
-		# 		profile_table_data_json.append(
-		# 			{
-		# 				"species_id": int(profile_result["taxon"]["value"][-1]),
-		# 				"schema_id": int(profile_result["schema"]["value"][-1]),
-		# 				"nr_loci": int(profile_result["nr_loci"]["value"]),
-		# 				"nr_allele": int(profile_result["nr_allele"]["value"])
-		# 			}
-		# 		)
+			for profile_result in profile_table_data:
+				profile_table_data_json.append(
+					{
+						"species_id": int(profile_result["taxon"]["value"][-1]),
+						"schema_id": int(profile_result["schema"]["value"][-1]),
+						"nr_loci": int(profile_result["nr_loci"]["value"]),
+						"nr_allele": int(profile_result["nr_allele"]["value"])
+					}
+				)
 			
 			# limit = 9000
 			# offset = 0
@@ -1072,7 +1072,7 @@ class CurrentUserProfile(Resource):
 			# 			"allele_list": list(set([la["allele"]["value"] for la in result])),
 			# 		}
 
-			# return profile_table_data_json, 200
+			return {"table_data": profile_table_data_json}, 200
 						
 			# return {
 			# 	"table_data": profile_table_data_json,
