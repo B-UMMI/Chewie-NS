@@ -28,6 +28,7 @@ export const fetchProfile = (token) => {
     const url = "/user/current_user/profile";
     const headers = {
       "Content-Type": "application/json",
+      Authorization: token,
     };
     axios
       .get(url, {
