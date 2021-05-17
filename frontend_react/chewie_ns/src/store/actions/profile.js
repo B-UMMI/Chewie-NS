@@ -26,20 +26,15 @@ export const fetchProfile = (token) => {
   return (dispatch) => {
     dispatch(profileStart());
     const url = "/user/current_user/profile";
-    // const token = localStorage.getItem("token");
     const headers = {
       "Content-Type": "application/json",
-      Authorization: token,
     };
     axios
       .get(url, {
         headers: headers,
       })
       .then((response) => {
-        console.log(response);
-
-        // const fetchProfile = [];
-        // fetchProfile.push(response.data.table_data);
+        // console.log(response);
 
         dispatch(profileSuccess(response.data.table_data));
       })

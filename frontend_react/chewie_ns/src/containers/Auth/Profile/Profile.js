@@ -200,8 +200,6 @@ class ProfileDetails extends Component {
     }
 
     if (!this.props.loading_profile) {
-      console.log(this.props.cuser_profile);
-
       profile_table =
         this.props.cuser_profile === "undefined" ||
         this.props.cuser_profile === undefined ? (
