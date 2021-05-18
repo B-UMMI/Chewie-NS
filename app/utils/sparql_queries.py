@@ -467,7 +467,7 @@ DELETE_USER = ('DELETE WHERE {{ GRAPH <{0}> {{ ?user a <http://xmlns.com/foaf/0.
 DELETE_ROLE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Role ?role . }} }}')
 
 INSERT_ROLE = ('INSERT DATA IN GRAPH <{0}> '
-               '{{ <{1}> typon:Role "Contributor"^^xsd:string . }}')
+               '{{ <{1}> typon:Role "{2}"^^xsd:string . }}')
 
 SELECT_UNIPROT_TAXON = ('PREFIX up:<http://purl.uniprot.org/core/> '
                         'PREFIX taxon:<http://purl.uniprot.org/taxonomy/> '

@@ -697,6 +697,7 @@ create_user_model = api.model('CreateUserModel',
 							   'name': fields.String(required=True, description='Name.'),
 							   'username': fields.String(required=True, description='Username.'),
 							   'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+							   'country': fields.String(required=True, description='The country that the user belongs to.'),
 							   'role': fields.String(required=False,
 													 default='User',
 													 description='Role/Permissions for the new user (User or Contributor).')
@@ -763,7 +764,7 @@ class AllUsers(Resource):
 		return users_info, 200
 
 	# hide class method (hide decorator has to be at start)
-	@api.hide
+	# @api.hide
 	@api.doc(responses={201: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
@@ -783,6 +784,7 @@ class AllUsers(Resource):
 
 		email = data['email']
 		password = data['password']
+		name = data['name']
 		username = data['username']
 		organization = data['organization']
 		country = data['country']
@@ -801,6 +803,7 @@ class AllUsers(Resource):
 			new_user = user_datastore.create_user(email=email,
 												  password=hash_password(
 													  password),
+												  name=name,
 												  username=username,
 												  organization=organization,
 												  country=country)
@@ -997,6 +1000,7 @@ class CurrentUserProfile(Resource):
 	@jwt_required
 	def get(self):
 		"""
+		Gets a user's profile information.
 		"""
 		
 		# get user from Postgres DB
@@ -1279,6 +1283,63 @@ class Users(Resource):
 						403: 'Unauthorized',
 						401: 'Unauthenticated',
 						404: 'Not Found'},
+			 params={'id': 'ID of the user to delete'},
+			 security=['access_token'])
+	@w.admin_required
+	def delete(self, id):
+		"""Delete user."""
+
+		# try to get user data
+		try:
+			user = User.query.get_or_404(id)
+		# if there is no user with provided identifier
+		except Exception:
+			not_found = 'Cannot delete unexistent user with provided ID={0}.'.format(
+				id)
+			return {'message': not_found}, 404
+
+		user_id = user.id
+		user_role = user.roles
+		# ensure that Admins cannot be deleted
+		if user_id == 1 or 'Admin' in str(user_role):
+			return {'message': 'Insufficient permissions to delete specified user.'}
+
+		# delete user from Postgres
+		user_datastore.delete_user(user)
+		# commit changes to the database
+		db.session.commit()
+
+		# delete user from Virtuoso
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], user_id)
+		user_exists_query = sq.ASK_USER.format(user_uri)
+		ask_result = aux.get_data(SPARQLWrapper(
+			current_app.config['LOCAL_SPARQL']), user_exists_query)
+		user_exists = ask_result['boolean']
+
+		if user_exists is True:
+			user_delete_query = (sq.DELETE_USER.format(
+				current_app.config['DEFAULTHGRAPH'], user_uri))
+			delete_result = aux.send_data(user_delete_query,
+										  current_app.config['LOCAL_SPARQL'],
+										  current_app.config['VIRTUOSO_USER'],
+										  current_app.config['VIRTUOSO_PASS'])
+
+		return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
+
+
+@user_conf.route("/promote/<int:id>")
+class UsersPromote(Resource):
+	"""
+	Class with methods to promote user's roles.
+	"""
+	
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated',
+						404: 'Not Found'},
 			 params={'id': 'ID of the user to promote'},
 			 security=['access_token'])
 	@w.admin_required
@@ -1335,7 +1396,7 @@ class Users(Resource):
 										   current_app.config['VIRTUOSO_PASS'])
 			# insert role
 			insert_role_query = (sq.INSERT_ROLE.format(
-				current_app.config['DEFAULTHGRAPH'], user_uri))
+				current_app.config['DEFAULTHGRAPH'], user_uri, "Contributor"))
 			insrole_result = aux.send_data(insert_role_query,
 										   current_app.config['LOCAL_SPARQL'],
 										   current_app.config['VIRTUOSO_USER'],
@@ -1351,56 +1412,86 @@ class Users(Resource):
 		return {'Postgres': '{0} ({1})'.format(postgres_change, postgres_message),
 				'Virtuoso': '{0} ({1})'.format(virtuoso_change, virtuoso_message)}, 200
 
+
+@user_conf.route("/demote/<int:id>")
+class UsersDemote(Resource):
+	"""
+	Class with methods to demote user's roles.
+	"""
+	
 	@api.doc(responses={200: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
 						403: 'Unauthorized',
 						401: 'Unauthenticated',
 						404: 'Not Found'},
-			 params={'id': 'ID of the user to delete'},
+			 params={'id': 'ID of the user to demote'},
 			 security=['access_token'])
 	@w.admin_required
-	def delete(self, id):
-		"""Delete user."""
+	def put(self, id):
+		"""Demote users from Admin or Contributor to User."""
 
-		# try to get user data
+		# Get user data
 		try:
 			user = User.query.get_or_404(id)
-		# if there is no user with provided identifier
 		except Exception:
-			not_found = 'Cannot delete unexistent user with provided ID={0}.'.format(
-				id)
-			return {'message': not_found}, 404
+			return {'message': 'There is no user with provided ID.'}
 
-		user_id = user.id
-		user_role = user.roles
-		# ensure that Admins cannot be deleted
-		if user_id == 1 or 'Admin' in str(user_role):
-			return {'message': 'Insufficient permissions to delete specified user.'}
+		remove_this_role = user.roles[0]
 
-		# delete user from Postgres
-		user_datastore.delete_user(user)
-		# commit changes to the database
-		db.session.commit()
+		promote_to_this_role = user_datastore.find_role('User')
 
-		# delete user from Virtuoso
-		user_uri = '{0}users/{1}'.format(
-			current_app.config['BASE_URL'], user_id)
-		user_exists_query = sq.ASK_USER.format(user_uri)
-		ask_result = aux.get_data(SPARQLWrapper(
-			current_app.config['LOCAL_SPARQL']), user_exists_query)
-		user_exists = ask_result['boolean']
+		postgres_change = False
+		if remove_this_role == promote_to_this_role:
+			postgres_message = 'User with provided ID is already a User in Postgres DB.'
+		elif remove_this_role in ('Contributor', 'Admin'):
+			# Remove User's current role
+			user_datastore.remove_role_from_user(user, remove_this_role)
+			# Add new role to the User (Promotion)
+			user_datastore.add_role_to_user(user, promote_to_this_role)
+			# Commit changes to the database
+			db.session.commit()
+			postgres_change = True
+			postgres_message = 'Demoted user to User in Postgres DB.'
 
-		if user_exists is True:
-			user_delete_query = (sq.DELETE_USER.format(
+		# promote user in Virtuoso
+		# delete current role
+		# select info from single user
+		user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], id)
+
+		role_query = (sq.SELECT_USER.format(
+			current_app.config['DEFAULTHGRAPH'], user_uri))
+
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+							  role_query)
+
+		user_role = result['results']['bindings'][0]['role']['value']
+
+		# delete User role and insert Contributor role
+		virtuoso_change = False
+		if user_role in ('Contributor', 'Admin'):
+			# delete role
+			delete_role_query = (sq.DELETE_ROLE.format(
 				current_app.config['DEFAULTHGRAPH'], user_uri))
-			delete_result = aux.send_data(user_delete_query,
-										  current_app.config['LOCAL_SPARQL'],
-										  current_app.config['VIRTUOSO_USER'],
-										  current_app.config['VIRTUOSO_PASS'])
+			delrole_result = aux.send_data(delete_role_query,
+										   current_app.config['LOCAL_SPARQL'],
+										   current_app.config['VIRTUOSO_USER'],
+										   current_app.config['VIRTUOSO_PASS'])
+			# insert role
+			insert_role_query = (sq.INSERT_ROLE.format(
+				current_app.config['DEFAULTHGRAPH'], user_uri, "User"))
+			insrole_result = aux.send_data(insert_role_query,
+										   current_app.config['LOCAL_SPARQL'],
+										   current_app.config['VIRTUOSO_USER'],
+										   current_app.config['VIRTUOSO_PASS'])
 
-		return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
+			virtuoso_change = True
+			virtuoso_message = 'Demoted user to User in Virtuoso graph.'
+		elif user_role == 'User':
+			virtuoso_message = 'User with provided ID is already a User in Virtuoso graph.'
 
+		return {'Postgres': '{0} ({1})'.format(postgres_change, postgres_message),
+				'Virtuoso': '{0} ({1})'.format(virtuoso_change, virtuoso_message)}, 200
 
 # NS download Routes
 # Namespace for NS download operations
