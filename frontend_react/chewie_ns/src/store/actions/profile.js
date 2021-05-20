@@ -22,10 +22,10 @@ export const profileFail = (error) => {
   };
 };
 
-export const fetchProfile = (token) => {
+export const fetchProfileContributions = (token) => {
   return (dispatch) => {
     dispatch(profileStart());
-    const url = "/user/current_user/profile";
+    const url = "/user/current_user/contributions";
     const headers = {
       "Content-Type": "application/json",
       Authorization: token,

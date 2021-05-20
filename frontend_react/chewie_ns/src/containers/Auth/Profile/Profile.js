@@ -310,7 +310,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onToken: (token) => dispatch(actions.authCuser(token)),
-    onProfileTable: (token) => dispatch(actions.fetchProfile(token)),
+    onProfileTable: (token) => dispatch(actions.fetchProfileContributions(token)),
   };
 };
 
