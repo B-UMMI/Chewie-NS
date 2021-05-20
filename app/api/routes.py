@@ -439,7 +439,8 @@ def create_role():
 									   password=hash_password("mega_secret"),
 									   name="chewie",
 									   username="chewie",
-									   organization="UMMI")
+									   organization="UMMI",
+									   country="Kessel")
 		user_datastore.add_role_to_user(u, "Admin")
 
 		# check if Admin was successfully created in Postgres db
@@ -710,6 +711,7 @@ update_user_model = api.model('UpdateUserModel',
 							   'name': fields.String(required=True, description='Name.'),
 							   'username': fields.String(required=True, description='Username.'),
 							   'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+							   'country': fields.String(required=True, description='The country that the user belongs to.'),
 							   })
 
 
@@ -985,8 +987,8 @@ class RegisterUser(Resource):
 
 
 
-@user_conf.route("/current_user/profile")
-class CurrentUserProfile(Resource):
+@user_conf.route("/current_user/contributions")
+class CurrentUserProfileContributions(Resource):
 	"""
 	Class with methods related with the user that is currently logged in, to build its profile.
 	"""
@@ -1000,7 +1002,7 @@ class CurrentUserProfile(Resource):
 	@jwt_required
 	def get(self):
 		"""
-		Gets a user's profile information.
+		Gets a user's contributions for the profile page.
 		"""
 		
 		# get user from Postgres DB
@@ -1082,56 +1084,6 @@ class CurrentUserProfile(Resource):
 			# 	"table_data": profile_table_data_json,
 			# 	"lists": final_result,
 			# }, 200
-
-
-@user_conf.route("/current_user/profile/<int:locus_id>")
-class UserProfileAlleleList(Resource):
-	""" Gets all alleles from a particular locus ID for the user profile. """
-
-	@api.doc(responses={200: 'OK',
-						400: 'Invalid Argument',
-						500: 'Internal Server Error',
-						403: 'Unauthorized',
-						401: 'Unauthenticated',
-						404: 'Not Found'},
-			 security=["access_token"])
-	@jwt_required
-	def get(self, locus_id):
-		"""Gets all alleles from a particular locus ID."""
-
-		c_user = get_jwt_identity()
-
-		user = User.query.get_or_404(c_user)
-
-		# Virtuoso User URI
-		user_uri = '{0}users/{1}'.format(
-			current_app.config['BASE_URL'], c_user)
-
-		locus_url = '{0}loci/{1}'.format(current_app.config['BASE_URL'], locus_id)
-
-		# check if provided loci id exists
-		result_loci = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-								   (sq.ASK_LOCUS.format(locus_url)))
-
-		if not result_loci['boolean']:
-			return {'message': 'Could not find a locus with provided ID.'}, 404
-
-		# simply get all alleles for provided locus
-		# get list of alleles from that locus
-		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-								(sq.SELECT_LOCUS_ALLELES_USER.format(current_app.config['DEFAULTHGRAPH'],
-																locus_url, user_uri)))
-
-		locus_info = result['results']['bindings']
-		if locus_info == []:
-			return {'message': 'Locus with provided ID is not associated to the provided species name.'}, 404
-		else:
-			locus_info_json = []
-			for i in locus_info:
-				locus_info_json.append(
-					{"allele_uri": i["alleles"]["value"]}
-				)
-			return locus_info_json, 200
 
 
 @user_conf.route("/current_user")
