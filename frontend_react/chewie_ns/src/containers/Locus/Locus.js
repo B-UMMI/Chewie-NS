@@ -6,12 +6,15 @@ import { connect } from "react-redux";
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import classes from "./Locus.module.css";
-import Markdown from "../../components/Markdown/Markdown";
 import Copyright from "../../components/Copyright/Copyright";
 import classNames from "classnames";
 import AlertSnackbar from "../../components/AlertSnackbar/AlertSnackbar";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 import * as actions from "../../store/actions/index";
+import {
+  LOCUS_COLUMNS,
+  LOCUS_OPTIONS,
+} from "../../components/data/table_columns/loci_columns";
 
 // Import Icons from Material UI and Material Design
 import SvgIcon from "@material-ui/core/SvgIcon";
@@ -169,233 +172,6 @@ class Locus extends Component {
     );
 
     if (!this.props.loading) {
-      const columns = [
-        {
-          name: "locus_ID",
-          label: "Locus ID",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "locus_label",
-          label: "Locus Label",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "num_alleles",
-          label: "Number of Alleles",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "size_range",
-          label: "Size Range (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "min",
-          label: "Minimum size (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "max",
-          label: "Maximum size (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "median",
-          label: "Median Size (bp)",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "user_annotation",
-          label: "User locus name",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return <Markdown markdown={value} />;
-            },
-          },
-        },
-        {
-          name: "custom_annotation",
-          label: "Custom Annotation",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              return <Markdown markdown={value} />;
-            },
-          },
-        },
-        {
-          name: "uniprot_label",
-          label: "Uniprot Label",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "uniprot_submitted_name",
-          label: "Uniprot Submitted Name",
-          options: {
-            filter: true,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "uniprot_uri",
-          label: "Uniprot URI",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              let link = value;
-
-              if (link === "N/A") {
-                return <div>{link}</div>;
-              } else {
-                return (
-                  <a href={link} target="_blank" rel="noopener noreferrer">
-                    {link}
-                  </a>
-                );
-              }
-            },
-          },
-        },
-      ];
-
-      const options = {
-        responsive: "scrollMaxHeight",
-        selectableRowsHeader: false,
-        selectableRows: "none",
-        selectableRowsOnClick: false,
-        print: false,
-        download: true,
-        filter: false,
-        search: false,
-        viewColumns: true,
-        pagination: false,
-      };
-
       let table_data = [
         { ...this.props.locus_uniprot[0], ...this.props.basic_stats[0] },
       ];
@@ -404,8 +180,8 @@ class Locus extends Component {
         <MUIDataTable
           title={"Locus Details"}
           data={table_data}
-          columns={columns}
-          options={options}
+          columns={LOCUS_COLUMNS}
+          options={LOCUS_OPTIONS}
         />
       );
 
@@ -613,6 +389,10 @@ class Locus extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     locus_fasta: state.locus.locus_fasta,
@@ -631,6 +411,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchLocusFasta: (locus_id) =>

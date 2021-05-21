@@ -157,8 +157,8 @@ export const fetchLocusUniprot = (locus_id) => {
     axios
       .get("loci/" + locus_id)
       .then((res) => {
-        console.log("res.data");
-        console.log(res.data[0]);
+        // console.log("res.data");
+        // console.log(res.data[0]);
         let uniprot_annot = [];
         uniprot_annot.push({
           locus_ID: locus_id,
@@ -169,8 +169,8 @@ export const fetchLocusUniprot = (locus_id) => {
           user_annotation: res.data[0].UserAnnotation.value,
           custom_annotation: res.data[0].CustomAnnotation.value,
         });
-        console.log("Uniprot annot");
-        console.log(uniprot_annot);
+        // console.log("Uniprot annot");
+        // console.log(uniprot_annot);
         dispatch(fetchLocusUniprotSuccess(uniprot_annot));
       })
       .catch((uniprotErr) => {

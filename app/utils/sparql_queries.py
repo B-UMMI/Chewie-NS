@@ -239,6 +239,13 @@ SELECT_LOCUS_ALLELES = ('SELECT ?alleles '
                           ' ?alleles typon:id ?id }}'
                         'ORDER BY ASC(?id)')
 
+SELECT_LOCUS_ALLELES_USER = ('SELECT ?alleles '
+                        'FROM <{0}> '
+                        'WHERE '
+                        '{{ <{1}> a typon:Locus; typon:hasDefinedAllele ?alleles .'
+                          ' ?alleles typon:id ?id; typon:sentBy <{2}> }}'
+                        'ORDER BY ASC(?id)')
+
 COUNT_LOCUS_ALLELES = ('SELECT (COUNT(?alleles) AS ?count)'
                        'FROM <{0}>'
                        'WHERE '
@@ -460,7 +467,7 @@ DELETE_USER = ('DELETE WHERE {{ GRAPH <{0}> {{ ?user a <http://xmlns.com/foaf/0.
 DELETE_ROLE = ('DELETE WHERE {{ GRAPH <{0}> {{ <{1}> typon:Role ?role . }} }}')
 
 INSERT_ROLE = ('INSERT DATA IN GRAPH <{0}> '
-               '{{ <{1}> typon:Role "Contributor"^^xsd:string . }}')
+               '{{ <{1}> typon:Role "{2}"^^xsd:string . }}')
 
 SELECT_UNIPROT_TAXON = ('PREFIX up:<http://purl.uniprot.org/core/> '
                         'PREFIX taxon:<http://purl.uniprot.org/taxonomy/> '
@@ -497,6 +504,7 @@ SELECT_ALLELE_INFO = ('SELECT '
                       '(str(?name) AS ?source) '
                       '?date '
                       '?id '
+                      '?user '
                       '(COUNT(?isolate) AS ?isolate_count) '
                       'FROM <{0}> '
                       'WHERE '
@@ -504,6 +512,7 @@ SELECT_ALLELE_INFO = ('SELECT '
                         ' typon:name ?name;'
                         ' typon:dateEntered ?date;'
                         ' typon:hasSequence ?sequence;'
+                        ' typon:sentBy ?user;'
                         ' typon:id ?id .'
                         ' OPTIONAL {{ ?isolate a typon:Isolate; typon:hasAllele <{1}> }} }}')
 
@@ -545,6 +554,56 @@ COUNT_LOCI_ALLELE = ('SELECT '
                        ' typon:isOfLocus ?locus .'
                        ' ?allele typon:hasSequence ?sequence .}}'
                      'ORDER BY ?schema ?locus')
+
+COUNT_USER_PROFILE = ('SELECT '
+                     '?taxon '
+                     '?schema '
+                     '?user '
+                     '(COUNT(DISTINCT ?locus) AS ?nr_loci) '
+                     '(COUNT(DISTINCT ?allele) AS ?nr_allele) '
+                     'FROM <{0}> '
+                     'WHERE '
+                     '{{ ?schema a typon:Schema;'
+                       ' typon:isFromTaxon ?taxon;'
+                       ' typon:administratedBy ?user;'
+                       ' typon:hasSchemaPart ?part .'
+                       ' ?part a typon:SchemaPart;'
+                       ' typon:hasLocus ?locus .'
+                       ' ?allele a typon:Allele;'
+                       ' typon:isOfLocus ?locus;'
+                       ' typon:sentBy <{1}> .}}'
+                     'ORDER BY ?schema')
+
+# SELECT_USER_PROFILE_LOCI_ALLELES = ('SELECT '
+#                                   '?locus '
+#                                   'FROM <{0}> '
+#                                   'WHERE '
+#                                   '{{ <{1}> a typon:Schema;'
+#                                     ' typon:isFromTaxon ?taxon;'
+#                                     ' typon:administratedBy ?user;'
+#                                     ' typon:hasSchemaPart ?part .'
+#                                     ' ?part a typon:SchemaPart;'
+#                                     ' typon:hasLocus ?locus .'
+#                                     ' ?allele a typon:Allele;'
+#                                     ' typon:isOfLocus ?locus;'
+#                                     ' typon:sentBy <{2}> .}}'
+#                                   'ORDER BY ?schema')
+
+# SELECT_USER_PROFILE_LOCI_ALLELES_2 = ('SELECT '
+#                                   '?locus '
+#                                   '?allele '
+#                                   'FROM <{0}> '
+#                                   'WHERE '
+#                                   '{{ <{1}> a typon:Schema;'
+#                                     ' typon:isFromTaxon ?taxon;'
+#                                     ' typon:administratedBy ?user;'
+#                                     ' typon:hasSchemaPart ?part .'
+#                                     ' ?part a typon:SchemaPart;'
+#                                     ' typon:hasLocus ?locus .'
+#                                     ' ?allele a typon:Allele;'
+#                                     ' typon:isOfLocus ?locus;'
+#                                     ' typon:sentBy <{2}> .}}'
+#                                     ' OFFSET {3} LIMIT {4}')
 
 COUNT_SINGLE_SCHEMA_LOCI_ALLELE = ('SELECT '
                                    '?locus (COUNT(DISTINCT ?allele) AS ?nr_alleles) '

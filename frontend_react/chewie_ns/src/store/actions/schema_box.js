@@ -29,7 +29,7 @@ export const fetchSchemaBox = (species_id, schema_id) => {
         "stats/species/" + species_id + "/schema/" + schema_id + "/lengthStats"
       )
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         let serverData = res.data;
         let boxplotData = [];
 

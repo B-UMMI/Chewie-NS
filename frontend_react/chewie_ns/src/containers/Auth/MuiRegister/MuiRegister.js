@@ -4,19 +4,21 @@ import { connect } from "react-redux";
 import { Redirect, Link as RouterLink } from "react-router-dom";
 
 // Chewie local import
+import Aux from "../../../hoc/Aux/Aux";
+import { countries, countryToFlag } from "./countries";
+import Copyright from "../../../components/Copyright/Copyright";
 import * as actions from "../../../store/actions/index";
 
 // Material Ui imports
-import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import Autocomplete from "@material-ui/lab/Autocomplete";
 import { withStyles } from "@material-ui/core/styles";
 
 // Material UI icon imports
@@ -67,6 +69,13 @@ const styles = (theme) => ({
   linkRoot: {
     color: "#b26046",
   },
+  option: {
+    fontSize: 15,
+    "& > span": {
+      marginRight: 10,
+      fontSize: 18,
+    },
+  },
 });
 
 const CssTextField = withStyles({
@@ -95,6 +104,7 @@ class SignUp extends Component {
   state = {
     username: "",
     organization: "",
+    country: "",
     email: "",
     password: "",
     name: "",
@@ -120,6 +130,9 @@ class SignUp extends Component {
   onSubmitHandler = (event) => {
     event.preventDefault();
 
+    // console.log(this.state.organization);
+    console.log(this.state.country.label);
+
     if (this.state.password === this.state.confirmPassword) {
       axios
         .post("/user/register_user", {
@@ -128,6 +141,7 @@ class SignUp extends Component {
           name: this.state.name,
           username: this.state.username,
           organization: this.state.organization,
+          country: this.state.country.label.toString(),
         })
         .then((res) => {
           if (res.status === 200) {
@@ -148,14 +162,6 @@ class SignUp extends Component {
 
   render() {
     const { classes } = this.props;
-
-    const copyright = (
-      <Typography variant="body2" color="textSecondary" align="center">
-        {"Copyright © "}
-        UMMI {new Date().getFullYear()}
-        {"."}
-      </Typography>
-    );
 
     let visibilityIcon = (
       <InputAdornment position="end">
@@ -181,139 +187,180 @@ class SignUp extends Component {
     }
 
     return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          {authRedirect}
-          {errorMessage}
-          <form
-            className={classes.form}
-            noValidate
-            onSubmit={(e) => this.onSubmitHandler(e)}
-          >
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="name"
-                  label="Name"
-                  name="name"
-                  onInput={(e) => this.setState({ name: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="username"
-                  label="Username"
-                  name="username"
-                  autoComplete="username"
-                  onInput={(e) => this.setState({ username: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="organization"
-                  label="Organization"
-                  name="Organization"
-                  onInput={(e) =>
-                    this.setState({ organization: e.target.value })
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  onInput={(e) => this.setState({ email: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  onInput={(e) => this.setState({ password: e.target.value })}
-                  InputProps={{
-                    id: "standard-adornment-password",
-                    type: this.state.showPassword ? "text" : "password",
-                    value: this.state.password,
-                    endAdornment: visibilityIcon,
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CssTextField
-                  variant="outlined"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Confirm Password"
-                  type="password"
-                  id="password"
-                  autoComplete="current-password"
-                  onInput={(e) =>
-                    this.setState({ confirmPassword: e.target.value })
-                  }
-                  InputProps={{
-                    id: "standard-adornment-confirm-password",
-                    type: this.state.showPassword ? "text" : "password",
-                    value: this.state.confirmPassword,
-                    endAdornment: visibilityIcon,
-                  }}
-                />
-              </Grid>
-            </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              className={classes.submit}
-              classes={{
-                root: classes.buttonRoot,
-              }}
+      <Aux>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            {authRedirect}
+            {errorMessage}
+            <form
+              className={classes.form}
+              noValidate
+              onSubmit={(e) => this.onSubmitHandler(e)}
             >
-              SIGN UP
-            </Button>
-            <Grid container justify="flex-end">
-              <Grid item>
-                <Link
-                  variant="body2"
-                  component={RouterLink}
-                  to="/auth"
-                  classes={{
-                    root: classes.linkRoot,
-                  }}
-                >
-                  Already have an account? Sign in
-                </Link>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="name"
+                    label="Name"
+                    name="name"
+                    onInput={(e) => this.setState({ name: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="username"
+                    label="Username"
+                    name="username"
+                    autoComplete="username"
+                    onInput={(e) => this.setState({ username: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="organization"
+                    label="Organization"
+                    name="Organization"
+                    onInput={(e) =>
+                      this.setState({ organization: e.target.value })
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Autocomplete
+                    id="country-select"
+                    style={{ width: 300 }}
+                    options={countries}
+                    classes={{
+                      option: classes.option,
+                    }}
+                    autoHighlight
+                    getOptionLabel={(option) => option.label}
+                    renderOption={(option) => (
+                      <React.Fragment>
+                        <span>{countryToFlag(option.code)}</span>
+                        {option.label} ({option.code})
+                      </React.Fragment>
+                    )}
+                    onChange={(event, value) =>
+                      this.setState({ country: value })
+                    }
+                    renderInput={(params) => (
+                      <CssTextField
+                        {...params}
+                        label="Country"
+                        variant="outlined"
+                        fullWidth
+                        inputProps={{
+                          ...params.inputProps,
+                          autoComplete: "new-password", // disable autocomplete and autofill
+                        }}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    onInput={(e) => this.setState({ email: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    onInput={(e) => this.setState({ password: e.target.value })}
+                    InputProps={{
+                      id: "standard-adornment-password",
+                      type: this.state.showPassword ? "text" : "password",
+                      value: this.state.password,
+                      endAdornment: visibilityIcon,
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <CssTextField
+                    variant="outlined"
+                    required
+                    fullWidth
+                    name="password"
+                    label="Confirm Password"
+                    type="password"
+                    id="password"
+                    autoComplete="current-password"
+                    onInput={(e) =>
+                      this.setState({ confirmPassword: e.target.value })
+                    }
+                    InputProps={{
+                      id: "standard-adornment-confirm-password",
+                      type: this.state.showPassword ? "text" : "password",
+                      value: this.state.confirmPassword,
+                      endAdornment: visibilityIcon,
+                    }}
+                  />
+                </Grid>
               </Grid>
-            </Grid>
-          </form>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                className={classes.submit}
+                classes={{
+                  root: classes.buttonRoot,
+                }}
+              >
+                SIGN UP
+              </Button>
+              <Grid container justify="flex-end">
+                <Grid item>
+                  <Link
+                    variant="body2"
+                    component={RouterLink}
+                    to="/auth"
+                    classes={{
+                      root: classes.linkRoot,
+                    }}
+                  >
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
+              </Grid>
+            </form>
+          </div>
+        </Container>
+        <div>
+          <Copyright />
         </div>
-        <Box mt={5}>{copyright}</Box>
-      </Container>
+      </Aux>
     );
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
@@ -323,6 +370,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onAuth: (email, password, isSignup) =>

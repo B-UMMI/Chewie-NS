@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom";
 
 // Assets imports
 import INCDlogo from "../../assets/images/INCD-small.png";
@@ -7,15 +6,12 @@ import UMMIlogo from "../../assets/images/ummi1small2.png";
 import IMMlogo from "../../assets/images/iMM_JLA_medium2.png";
 import FMULlogo from "../../assets/images/fmul_logo.png";
 
-// Material UI import
-import Button from "@material-ui/core/Button";
-
 // Chewie local imports
 import Aux from "../../hoc/Aux/Aux";
 import axios from "../../axios-backend";
 import classes from "./Chewie.module.css";
 import Markdown from "../../components/Markdown/Markdown";
-import chewie_front from "../../components/data/chewie";
+import ChewieFrontPageMarkdown from "../../components/data/chewie";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
 
 class Chewie extends Component {
@@ -55,19 +51,7 @@ class Chewie extends Component {
               <img src={UMMIlogo} alt="UMMI!" />
             </a>
           </div>
-          <Markdown markdown={chewie_front} />
-          {/* <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <div id="availableSchemasDiv" style={{ marginTop: "30px" }}>
-              <Button
-                variant="contained"
-                color="default"
-                component={Link}
-                to="/stats"
-              >
-                Available Schemas
-              </Button>
-            </div>
-          </div> */}
+          <Markdown markdown={ChewieFrontPageMarkdown} />
           <div id="INCD_div" className={classes.incdDiv}>
             <div id="resourcesTextDiv">
               <p className={classes.resourcesText}>

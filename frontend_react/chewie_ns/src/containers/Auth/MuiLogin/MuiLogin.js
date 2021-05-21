@@ -3,16 +3,16 @@ import { connect } from "react-redux";
 import { Redirect, Link as RouterLink } from "react-router-dom";
 
 // Chewie local import
+import Aux from "../../../hoc/Aux/Aux";
 import * as actions from "../../../store/actions/index";
+import Copyright from "../../../components/Copyright/Copyright";
 
 // Material UI imports
-import Box from "@material-ui/core/Box";
 import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
 import Container from "@material-ui/core/Container";
 import TextField from "@material-ui/core/TextField";
-import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -22,6 +22,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Visibility from "@material-ui/icons/Visibility";
 import VisibilityOff from "@material-ui/icons/VisibilityOff";
 
+// Define inline css styles
 const styles = (theme) => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -64,6 +65,7 @@ const styles = (theme) => ({
   },
 });
 
+// Defines a custom TextField component
 const CssTextField = withStyles({
   root: {
     "& label.Mui-focused": {
@@ -120,14 +122,6 @@ class SignIn extends Component {
   render() {
     const { classes } = this.props;
 
-    const copyright = (
-      <Typography variant="body2" color="textSecondary" align="center">
-        {"Copyright © "}
-        UMMI {new Date().getFullYear()}
-        {"."}
-      </Typography>
-    );
-
     let visibilityIcon = (
       <InputAdornment position="end">
         <IconButton
@@ -152,86 +146,94 @@ class SignIn extends Component {
     }
 
     return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          {authRedirect}
-          {errorMessage}
-          <form
-            className={classes.form}
-            noValidate
-            onSubmit={(e) => this.onSubmitHandler(e)}
-          >
-            <CssTextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              onInput={(e) => this.setState({ email: e.target.value })}
-            />
-            <CssTextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              onInput={(e) => this.setState({ password: e.target.value })}
-              InputProps={{
-                id: "standard-adornment-password",
-                type: this.state.showPassword ? "text" : "password",
-                value: this.state.password,
-                endAdornment: visibilityIcon,
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              className={classes.submit}
-              classes={{
-                root: classes.buttonRoot,
-              }}
+      <Aux>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            {authRedirect}
+            {errorMessage}
+            <form
+              className={classes.form}
+              noValidate
+              onSubmit={(e) => this.onSubmitHandler(e)}
             >
-              SIGN IN
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link
-                  href="#"
-                  variant="body2"
-                  classes={{ root: classes.linkRoot }}
-                >
-                  Forgot password?
-                </Link>
+              <CssTextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                onInput={(e) => this.setState({ email: e.target.value })}
+              />
+              <CssTextField
+                variant="outlined"
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onInput={(e) => this.setState({ password: e.target.value })}
+                InputProps={{
+                  id: "standard-adornment-password",
+                  type: this.state.showPassword ? "text" : "password",
+                  value: this.state.password,
+                  endAdornment: visibilityIcon,
+                }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                className={classes.submit}
+                classes={{
+                  root: classes.buttonRoot,
+                }}
+              >
+                SIGN IN
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link
+                    href="#"
+                    variant="body2"
+                    classes={{ root: classes.linkRoot }}
+                  >
+                    Forgot password?
+                  </Link>
+                </Grid>
+                <Grid item>
+                  <Link
+                    variant="body2"
+                    component={RouterLink}
+                    to="/register"
+                    classes={{ root: classes.linkRoot }}
+                  >
+                    Don't have an account? Sign Up
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Link
-                  variant="body2"
-                  component={RouterLink}
-                  to="/register"
-                  classes={{ root: classes.linkRoot }}
-                >
-                  Don't have an account? Sign Up
-                </Link>
-              </Grid>
-            </Grid>
-          </form>
+            </form>
+          </div>
+        </Container>
+        <div>
+          <Copyright />
         </div>
-        <Box mt={8}>{copyright}</Box>
-      </Container>
+      </Aux>
     );
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     loading: state.auth.loading,
@@ -241,6 +243,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onAuth: (email, password, isSignup) =>

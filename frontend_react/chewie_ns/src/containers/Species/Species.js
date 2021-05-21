@@ -8,6 +8,10 @@ import axios from "../../axios-backend";
 import Copyright from "../../components/Copyright/Copyright";
 import * as actions from "../../store/actions/index";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
+import {
+  SPECIES_COLUMNS,
+  SPECIES_OPTIONS,
+} from "../../components/data/table_columns/species_columns";
 
 // Material-UI components
 import Button from "@material-ui/core/Button";
@@ -25,17 +29,15 @@ class Species extends Component {
   componentDidMount() {
     let species_url = this.props.location.pathname;
 
-    let species_url_array = species_url.split("/");
+    let species_id = species_url.substring(species_url.lastIndexOf("/") + 1);
 
-    let species_id = species_url_array[species_url_array.length - 1];
+    // let species_id = species_url_array[species_url_array.length - 1];
 
     this.props.onFetchSpecies(species_id);
     this.props.onFetchSpeciesAnnot(species_id);
   }
 
   clickPlotHandler = (event) => {
-    console.log(event.points[0]);
-
     const schema_id = event.points[0].data.name.slice(-1);
 
     const locus_id = event.points[0].text;
@@ -70,6 +72,7 @@ class Species extends Component {
       ptf: tableMeta.rowData[9],
       tl_table: tableMeta.rowData[10],
       minLen: tableMeta.rowData[11],
+      sizeThresh: tableMeta.rowData[12],
     });
 
     localStorage.setItem("tableData", JSON.stringify(tableData));
@@ -139,34 +142,8 @@ class Species extends Component {
       }
     }
 
-    // get last modification date
-    // const lastModifiedDate = this.props.species[schemaId - 1].lastModifiedISO;
-
     const endpointVariables =
       speciesId + "/" + schemaId + "/" + lastModifiedDate;
-
-    // get schema timestamp from the API
-    // axios({
-    //   method: "get",
-    //   url:
-    //     "/species/" +
-    //     speciesId +
-    //     "/schemas/" +
-    //     schemaId +
-    //     "/zip?request_type=check",
-    // }).then((res) => {
-    //   console.log(res);
-    //   const schemaTimestamp = res.data.zip[0].split("_")[2];
-    //   let speciesName1 = spd[this.props.match.params.species_id];
-    //   const fileName1 =
-    //     speciesName1.replace(" ", "_") +
-    //     "_" +
-    //     schemaName +
-    //     "_" +
-    //     schemaTimestamp;
-
-    //   localStorage.setItem("timestamp", fileName1);
-    // });
 
     // make a request to the download endpoint
     axios({
@@ -232,206 +209,7 @@ class Species extends Component {
 
     if (!this.props.loading) {
       const columns = [
-        {
-          name: "schema_id",
-          label: "Schema ID",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "schema_name",
-          label: "Schema Name",
-          options: {
-            filter: true,
-            sort: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "user",
-          label: "Created by user",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "nr_loci",
-          label: "Loci",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "nr_allele",
-          label: "Alleles",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "chewie",
-          label: "Software",
-          options: {
-            filter: false,
-            sort: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "dateEntered",
-          label: "Creation Date",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "lastModified",
-          label: "Last Change Date",
-          options: {
-            filter: false,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "bsr",
-          label: "Blast Score Ratio",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "ptf",
-          label: "Prodigal Training File",
-          options: {
-            filter: false,
-            sort: true,
-            display: false,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "tl_table",
-          label: "Translation Table",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "minLen",
-          label: "Minimum Length (bp)",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "sizeThresh",
-          label: "Size Threshold",
-          options: {
-            filter: false,
-            sort: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
+        ...SPECIES_COLUMNS,
         {
           name: "Schema Details",
           options: {
@@ -523,20 +301,6 @@ class Species extends Component {
         },
       ];
 
-      const options = {
-        textLabels: {
-          body: {
-            noMatch: <CircularProgress />,
-          },
-        },
-        responsive: "scrollMaxHeight",
-        selectableRowsHeader: false,
-        selectableRows: "none",
-        print: false,
-        viewColumns: true,
-        pagination: false,
-      };
-
       const title = spd[this.props.match.params.species_id];
 
       species = (
@@ -545,7 +309,7 @@ class Species extends Component {
             title={<i>{title}</i>}
             data={this.props.species}
             columns={columns}
-            options={options}
+            options={SPECIES_OPTIONS}
           />
         </MuiThemeProvider>
       );
@@ -603,6 +367,10 @@ class Species extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     species: state.species.species,
@@ -612,6 +380,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchSpecies: (spec_id) => dispatch(actions.fetchSpecies(spec_id)),

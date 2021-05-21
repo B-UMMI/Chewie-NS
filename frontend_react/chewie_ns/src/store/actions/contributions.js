@@ -48,7 +48,7 @@ export const fetchAlleleContribution = (species_id, schema_id) => {
             y: serverData.newAlleles,
             showlegend: false,
             hovertemplate:
-              "%{x|%Y/%m/%d %H:%M:%S} <br><br>" + "<b>Alleles Added:</b> %{y}",
+              "%{x|%Y/%m/%d %H:%M:%S} <br><br> <b>Alleles Added:</b> %{y}",
           });
 
           dispatch(fetchAlleleContributionSuccess(contribData));
@@ -76,7 +76,7 @@ export const fetchAlleleContributionLocus = (
           "/contributions"
       )
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         let serverData = res.data;
         if (serverData === "undefined") {
           dispatch(fetchAlleleContributionSuccess(serverData));
@@ -92,7 +92,7 @@ export const fetchAlleleContributionLocus = (
             y: serverData[locusID].newAlleles,
             showlegend: false,
             hovertemplate:
-              "%{x|%Y/%m/%d %H:%M:%S} <br><br>" + "<b>Alleles Added:</b> %{y}",
+              "%{x|%Y/%m/%d %H:%M:%S} <br><br> <b>Alleles Added:</b> %{y}",
           });
 
           dispatch(fetchAlleleContributionSuccess(contribData));

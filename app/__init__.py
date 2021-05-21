@@ -31,9 +31,6 @@ migrate = Migrate()
 # Login Manager
 login_manager = LoginManager()
 
-# Bootstrap for prototype frontend
-# bootstrap = Bootstrap()
-
 # App security
 security = Security()
 

@@ -21,6 +21,7 @@ import Species from "./containers/Species/Species";
 import MuiLogin from "./containers/Auth/MuiLogin/MuiLogin";
 import Sequences from "./containers/Sequences/Sequences";
 import MuiRegister from "./containers/Auth/MuiRegister/MuiRegister";
+import Profile from "./containers/Auth/Profile/Profile";
 import MuiSideDrawer from "./components/Navigation/MuiSideDrawer/MuiSideDrawer";
 import * as actions from "./store/actions/index";
 
@@ -139,6 +140,7 @@ class App extends Component {
       routes = (
         <Switch>
           <Route path="/logout" component={Logout} />
+          <Route path="/profile" component={Profile} />
           <Route path="/about" component={About} />
           <Route path="/stats" component={Stats} />
           <Route path="/sequences" component={Sequences} />

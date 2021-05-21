@@ -439,7 +439,8 @@ def create_role():
 									   password=hash_password("mega_secret"),
 									   name="chewie",
 									   username="chewie",
-									   organization="UMMI")
+									   organization="UMMI",
+									   country="Kessel")
 		user_datastore.add_role_to_user(u, "Admin")
 
 		# check if Admin was successfully created in Postgres db
@@ -648,6 +649,7 @@ user_model = api.model('UserModel',
 						'name': fields.String(required=True, description='Name.'),
 						'username': fields.String(required=True, description='Username.'),
 						'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+						'country': fields.String(required=True, description='The country that the user belongs to.'),
 						'last_login_at': fields.DateTime(required=True,
 														 description='User last login date.'),
 						'roles': fields.String(required=True,
@@ -665,6 +667,7 @@ current_user_model = api.model('CurrentUserModel',
 								'name': fields.String(required=True, description='Name.'),
 								'username': fields.String(required=True, description='Username.'),
 								'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+								'country': fields.String(required=True, description='The country that the user belongs to.'),
 								'last_login_at': fields.DateTime(required=True,
 																 description='User last login date.'),
 								'roles': fields.String(required=True,
@@ -682,7 +685,8 @@ register_user_model = api.model('RegisterUserModel',
 														   min_length=8),
 								 'name': fields.String(required=True, description='Name.'),
 								 'username': fields.String(required=True, description='Username.'),
-								 'organization': fields.String(required=True, description='Organization that the user belongs to.')
+								 'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+								 'country': fields.String(required=True, description='The country that the user belongs to.'),
 								 })
 
 create_user_model = api.model('CreateUserModel',
@@ -694,9 +698,20 @@ create_user_model = api.model('CreateUserModel',
 							   'name': fields.String(required=True, description='Name.'),
 							   'username': fields.String(required=True, description='Username.'),
 							   'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+							   'country': fields.String(required=True, description='The country that the user belongs to.'),
 							   'role': fields.String(required=False,
 													 default='User',
 													 description='Role/Permissions for the new user (User or Contributor).')
+							   })
+
+
+update_user_model = api.model('UpdateUserModel',
+							  {'email': fields.String(required=True,
+													  description='User email address.'),
+							   'name': fields.String(required=True, description='Name.'),
+							   'username': fields.String(required=True, description='Username.'),
+							   'organization': fields.String(required=True, description='Organization that the user belongs to.'),
+							   'country': fields.String(required=True, description='The country that the user belongs to.'),
 							   })
 
 
@@ -739,6 +754,7 @@ class AllUsers(Resource):
 			current_user_dict['name'] = user.name
 			current_user_dict['username'] = user.username
 			current_user_dict['organization'] = user.organization
+			current_user_dict['country'] = user.country
 			# this value will be None/null if user never logged in
 			current_user_dict['last_login_at'] = user.last_login_at
 			current_user_dict['roles'] = str(user.roles[0])
@@ -750,7 +766,7 @@ class AllUsers(Resource):
 		return users_info, 200
 
 	# hide class method (hide decorator has to be at start)
-	@api.hide
+	# @api.hide
 	@api.doc(responses={201: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
@@ -770,8 +786,10 @@ class AllUsers(Resource):
 
 		email = data['email']
 		password = data['password']
+		name = data['name']
 		username = data['username']
 		organization = data['organization']
+		country = data['country']
 		# new users are created with User permissions
 		new_user_role = data['role']
 
@@ -787,8 +805,10 @@ class AllUsers(Resource):
 			new_user = user_datastore.create_user(email=email,
 												  password=hash_password(
 													  password),
+												  name=name,
 												  username=username,
-												  organization=organization)
+												  organization=organization,
+												  country=country)
 			default_role = user_datastore.find_role(new_user_role)
 			user_datastore.add_role_to_user(new_user, default_role)
 			# we can get the new user identifier because session has autoflush
@@ -880,6 +900,7 @@ class RegisterUser(Resource):
 		name = data['name']
 		username = data['username']
 		organization = data['organization']
+		country = data['country']
 		# new users are created with User permissions
 		new_user_role = 'User'
 
@@ -897,7 +918,8 @@ class RegisterUser(Resource):
 													  password),
 												  name=name,
 												  username=username,
-												  organization=organization)
+												  organization=organization,
+												  country=country)
 			default_role = user_datastore.find_role(new_user_role)
 			user_datastore.add_role_to_user(new_user, default_role)
 			# we can get the new user identifier because session has autoflush
@@ -964,6 +986,106 @@ class RegisterUser(Resource):
 				'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
 
 
+
+@user_conf.route("/current_user/contributions")
+class CurrentUserProfileContributions(Resource):
+	"""
+	Class with methods related with the user that is currently logged in, to build its profile.
+	"""
+
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@jwt_required
+	def get(self):
+		"""
+		Gets a user's contributions for the profile page.
+		"""
+		
+		# get user from Postgres DB
+		current_user = get_jwt_identity()
+		user = User.query.get_or_404(current_user)
+
+		# Virtuoso User URI
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], current_user)
+
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+						(sq.COUNT_USER_PROFILE.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+
+		profile_table_data = result["results"]["bindings"]
+
+		profile_table_data_json = []
+
+		if profile_table_data == []:
+			
+			profile_table_data_json = "undefined"
+
+			return profile_table_data_json, 200
+		
+		else:
+			
+			for profile_result in profile_table_data:
+				profile_table_data_json.append(
+					{
+						"species_id": int(profile_result["taxon"]["value"][-1]),
+						"schema_id": int(profile_result["schema"]["value"][-1]),
+						"nr_loci": int(profile_result["nr_loci"]["value"]),
+						"nr_allele": int(profile_result["nr_allele"]["value"])
+					}
+				)
+			
+			# limit = 9000
+			# offset = 0
+			# count = 0
+			# final_result = {}
+
+			# for i in profile_table_data_json:
+			# 	result = []
+
+			# 	schema_uri = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], i["species_id"], i["schema_id"])
+			# 	# if i["nr_allele"] < 10000:
+
+			# 	loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 		(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], schema_uri, user_uri)))
+
+			# 	final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 		"loci_list": list(set([la["locus"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 		# "allele_list": list(set([la["allele"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 	}
+
+			# 	else:
+			# 		while count != i["nr_allele"]:
+			# 			alleles = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 								sq.SELECT_USER_PROFILE_LOCI_ALLELES_2.format(
+			# 									current_app.config['DEFAULTHGRAPH'],
+			# 									schema_uri, 
+			# 									user_uri, 
+			# 									offset, 
+			# 									limit
+			# 								)
+			# 			)
+			# 			data = alleles['results']['bindings']
+			# 			result.extend(data)
+			# 			count += len(data)
+			# 			offset += limit
+
+			# 		final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 			"loci_list": list(set([la["locus"]["value"] for la in result])),
+			# 			"allele_list": list(set([la["allele"]["value"] for la in result])),
+			# 		}
+
+			return {"table_data": profile_table_data_json}, 200
+						
+			# return {
+			# 	"table_data": profile_table_data_json,
+			# 	"lists": final_result,
+			# }, 200
+
+
 @user_conf.route("/current_user")
 class CurrentUser(Resource):
 	"""
@@ -999,11 +1121,61 @@ class CurrentUser(Resource):
 		current_user_dict['name'] = user.name
 		current_user_dict['username'] = user.username
 		current_user_dict['organization'] = user.organization
+		current_user_dict['country'] = user.country
 		current_user_dict['last_login_at'] = user.last_login_at
 		current_user_dict['roles'] = str(user.roles[0])
 		current_user_dict['validated'] = user_exists
 
 		return current_user_dict, 200
+
+	
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@api.expect(update_user_model, validate=True)
+	@jwt_required
+	def put(self):
+		"""Updates information about the current user."""
+
+		# get user from Postgres DB
+		current_user = get_jwt_identity()
+		user = User.query.get_or_404(current_user)
+
+		# check if user exists in Virtuoso
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], current_user
+		)
+		user_exists_query = sq.ASK_USER.format(user_uri)
+		ask_result = aux.get_data(
+			SPARQLWrapper(
+				current_app.config['LOCAL_SPARQL']
+			),
+			user_exists_query
+		)
+		user_exists = ask_result['boolean']
+
+		# get post data
+		data = request.get_json()
+
+		email = data['email']
+		name = data['name']
+		username = data['username']
+		organization = data['organization']
+		country = data['country']
+
+		# Update DB data
+		user.email = email if email != "" else user.email
+		user.name = name if name != "" else user.name
+		user.username = username if username != "" else user.username
+		user.organization = organization if organization != "" else user.organization
+		user.country = country if country != "" else user.country
+
+		db.session.commit()
+
+		return {"message": "Profile succesfully updated."}, 200
 
 
 @user_conf.route("/<int:id>")
@@ -1047,6 +1219,7 @@ class Users(Resource):
 		current_user_dict['name'] = user.name
 		current_user_dict['username'] = user.username
 		current_user_dict['organization'] = user.organization
+		current_user_dict['country'] = user.country
 		# this value will be None/null if user never logged in
 		current_user_dict['last_login_at'] = user.last_login_at
 		current_user_dict['roles'] = str(user.roles[0])
@@ -1056,6 +1229,63 @@ class Users(Resource):
 
 		return current_user_dict, 200
 
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated',
+						404: 'Not Found'},
+			 params={'id': 'ID of the user to delete'},
+			 security=['access_token'])
+	@w.admin_required
+	def delete(self, id):
+		"""Delete user."""
+
+		# try to get user data
+		try:
+			user = User.query.get_or_404(id)
+		# if there is no user with provided identifier
+		except Exception:
+			not_found = 'Cannot delete unexistent user with provided ID={0}.'.format(
+				id)
+			return {'message': not_found}, 404
+
+		user_id = user.id
+		user_role = user.roles
+		# ensure that Admins cannot be deleted
+		if user_id == 1 or 'Admin' in str(user_role):
+			return {'message': 'Insufficient permissions to delete specified user.'}
+
+		# delete user from Postgres
+		user_datastore.delete_user(user)
+		# commit changes to the database
+		db.session.commit()
+
+		# delete user from Virtuoso
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], user_id)
+		user_exists_query = sq.ASK_USER.format(user_uri)
+		ask_result = aux.get_data(SPARQLWrapper(
+			current_app.config['LOCAL_SPARQL']), user_exists_query)
+		user_exists = ask_result['boolean']
+
+		if user_exists is True:
+			user_delete_query = (sq.DELETE_USER.format(
+				current_app.config['DEFAULTHGRAPH'], user_uri))
+			delete_result = aux.send_data(user_delete_query,
+										  current_app.config['LOCAL_SPARQL'],
+										  current_app.config['VIRTUOSO_USER'],
+										  current_app.config['VIRTUOSO_PASS'])
+
+		return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
+
+
+@user_conf.route("/promote/<int:id>")
+class UsersPromote(Resource):
+	"""
+	Class with methods to promote user's roles.
+	"""
+	
 	@api.doc(responses={200: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
@@ -1118,7 +1348,7 @@ class Users(Resource):
 										   current_app.config['VIRTUOSO_PASS'])
 			# insert role
 			insert_role_query = (sq.INSERT_ROLE.format(
-				current_app.config['DEFAULTHGRAPH'], user_uri))
+				current_app.config['DEFAULTHGRAPH'], user_uri, "Contributor"))
 			insrole_result = aux.send_data(insert_role_query,
 										   current_app.config['LOCAL_SPARQL'],
 										   current_app.config['VIRTUOSO_USER'],
@@ -1134,56 +1364,86 @@ class Users(Resource):
 		return {'Postgres': '{0} ({1})'.format(postgres_change, postgres_message),
 				'Virtuoso': '{0} ({1})'.format(virtuoso_change, virtuoso_message)}, 200
 
+
+@user_conf.route("/demote/<int:id>")
+class UsersDemote(Resource):
+	"""
+	Class with methods to demote user's roles.
+	"""
+	
 	@api.doc(responses={200: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
 						403: 'Unauthorized',
 						401: 'Unauthenticated',
 						404: 'Not Found'},
-			 params={'id': 'ID of the user to delete'},
+			 params={'id': 'ID of the user to demote'},
 			 security=['access_token'])
 	@w.admin_required
-	def delete(self, id):
-		"""Delete user."""
+	def put(self, id):
+		"""Demote users from Admin or Contributor to User."""
 
-		# try to get user data
+		# Get user data
 		try:
 			user = User.query.get_or_404(id)
-		# if there is no user with provided identifier
 		except Exception:
-			not_found = 'Cannot delete unexistent user with provided ID={0}.'.format(
-				id)
-			return {'message': not_found}, 404
+			return {'message': 'There is no user with provided ID.'}
 
-		user_id = user.id
-		user_role = user.roles
-		# ensure that Admins cannot be deleted
-		if user_id == 1 or 'Admin' in str(user_role):
-			return {'message': 'Insufficient permissions to delete specified user.'}
+		remove_this_role = user.roles[0]
 
-		# delete user from Postgres
-		user_datastore.delete_user(user)
-		# commit changes to the database
-		db.session.commit()
+		promote_to_this_role = user_datastore.find_role('User')
 
-		# delete user from Virtuoso
-		user_uri = '{0}users/{1}'.format(
-			current_app.config['BASE_URL'], user_id)
-		user_exists_query = sq.ASK_USER.format(user_uri)
-		ask_result = aux.get_data(SPARQLWrapper(
-			current_app.config['LOCAL_SPARQL']), user_exists_query)
-		user_exists = ask_result['boolean']
+		postgres_change = False
+		if remove_this_role == promote_to_this_role:
+			postgres_message = 'User with provided ID is already a User in Postgres DB.'
+		elif remove_this_role in ('Contributor', 'Admin'):
+			# Remove User's current role
+			user_datastore.remove_role_from_user(user, remove_this_role)
+			# Add new role to the User (Promotion)
+			user_datastore.add_role_to_user(user, promote_to_this_role)
+			# Commit changes to the database
+			db.session.commit()
+			postgres_change = True
+			postgres_message = 'Demoted user to User in Postgres DB.'
 
-		if user_exists is True:
-			user_delete_query = (sq.DELETE_USER.format(
+		# promote user in Virtuoso
+		# delete current role
+		# select info from single user
+		user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'], id)
+
+		role_query = (sq.SELECT_USER.format(
+			current_app.config['DEFAULTHGRAPH'], user_uri))
+
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+							  role_query)
+
+		user_role = result['results']['bindings'][0]['role']['value']
+
+		# delete User role and insert Contributor role
+		virtuoso_change = False
+		if user_role in ('Contributor', 'Admin'):
+			# delete role
+			delete_role_query = (sq.DELETE_ROLE.format(
 				current_app.config['DEFAULTHGRAPH'], user_uri))
-			delete_result = aux.send_data(user_delete_query,
-										  current_app.config['LOCAL_SPARQL'],
-										  current_app.config['VIRTUOSO_USER'],
-										  current_app.config['VIRTUOSO_PASS'])
+			delrole_result = aux.send_data(delete_role_query,
+										   current_app.config['LOCAL_SPARQL'],
+										   current_app.config['VIRTUOSO_USER'],
+										   current_app.config['VIRTUOSO_PASS'])
+			# insert role
+			insert_role_query = (sq.INSERT_ROLE.format(
+				current_app.config['DEFAULTHGRAPH'], user_uri, "User"))
+			insrole_result = aux.send_data(insert_role_query,
+										   current_app.config['LOCAL_SPARQL'],
+										   current_app.config['VIRTUOSO_USER'],
+										   current_app.config['VIRTUOSO_PASS'])
 
-		return {'message': 'The user {0} has been deleted'.format(str(user.email))}, 200
+			virtuoso_change = True
+			virtuoso_message = 'Demoted user to User in Virtuoso graph.'
+		elif user_role == 'User':
+			virtuoso_message = 'User with provided ID is already a User in Virtuoso graph.'
 
+		return {'Postgres': '{0} ({1})'.format(postgres_change, postgres_message),
+				'Virtuoso': '{0} ({1})'.format(virtuoso_change, virtuoso_message)}, 200
 
 # NS download Routes
 # Namespace for NS download operations

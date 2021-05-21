@@ -3,6 +3,11 @@ import { connect } from "react-redux";
 
 // Chewie local imports
 import * as actions from "../../store/actions/index";
+import {
+  SEQUENCES_COLUMNS,
+  SEQUENCES_OPTIONS,
+  SEQUENCES_STYLES,
+} from "../../components/data/table_columns/sequences_columns";
 import Copyright from "../../components/Copyright/Copyright";
 
 // Material UI component imports
@@ -17,47 +22,6 @@ import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 
 // Material-UI Datatables
 import MUIDataTable from "mui-datatables";
-
-const styles = (theme) => ({
-  root: {
-    "& .MuiTextField-root": {
-      margin: theme.spacing(1),
-      width: "100ch",
-    },
-  },
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
-  buttonRoot: {
-    boxShadow: "none",
-    textTransform: "none",
-    color: "#ffffff",
-    borderRadius: 4,
-    fontSize: 16,
-    padding: "6px 12px",
-    border: "1px solid",
-    backgroundColor: "#3b3b3b",
-    borderColor: "#3b3b3b",
-    "&:hover": {
-      backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b",
-    },
-    "&:active": {
-      boxShadow: "none",
-      backgroundColor: "#3b3b3b",
-      borderColor: "#3b3b3b",
-    },
-    "&:focus": {
-      boxShadow: "0 0 0 0.2rem rgba(0,123,255,.5)",
-    },
-  },
-});
 
 class Sequences extends Component {
   state = {
@@ -77,8 +41,6 @@ class Sequences extends Component {
 
   onSubmitHandler = (event) => {
     event.preventDefault();
-
-    // console.log(this.state.seq);
 
     this.props.onFetchSequence(this.state.seq);
   };
@@ -103,112 +65,13 @@ class Sequences extends Component {
     if (!this.props.loading) {
       let seqData = this.props.sequence_data;
 
-      const columns = [
-        {
-          name: "species_name",
-          label: "Species",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-        {
-          name: "schemas_url",
-          label: "Schema",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              let schema_id = value.substring(value.lastIndexOf("/") + 1);
-
-              return (
-                <a href={value} target={"_blank"} rel="noopener noreferrer">
-                  {schema_id}
-                </a>
-              );
-            },
-          },
-        },
-        {
-          name: "locus_url",
-          label: "Locus ID",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-            customBodyRender: (value, tableMeta, updateValue) => {
-              let locus_id = value.substring(value.lastIndexOf("/") + 1);
-
-              return (
-                <a href={value} target={"_blank"} rel="noopener noreferrer">
-                  {locus_id}
-                </a>
-              );
-            },
-          },
-        },
-        {
-          name: "alleles",
-          label: "Number of alleles",
-          options: {
-            filter: true,
-            sort: true,
-            display: true,
-            setCellHeaderProps: (value) => {
-              return {
-                style: {
-                  fontWeight: "bold",
-                },
-              };
-            },
-          },
-        },
-      ];
-
-      const options = {
-        responsive: "scrollMaxHeight",
-        selectableRowsHeader: false,
-        selectableRows: "none",
-        selectableRowsOnClick: false,
-        print: false,
-        download: false,
-        filter: true,
-        filterType: "multiselect",
-        search: false,
-        viewColumns: true,
-        pagination: true,
-      };
-
       sequenceTable = (
         <MuiThemeProvider theme={this.getMuiTheme()}>
           <MUIDataTable
             title={"Results"}
             data={seqData}
-            columns={columns}
-            options={options}
+            columns={SEQUENCES_COLUMNS}
+            options={SEQUENCES_OPTIONS}
           />
         </MuiThemeProvider>
       );
@@ -263,6 +126,10 @@ class Sequences extends Component {
   }
 }
 
+// Redux functions
+
+// Map state from the central warehouse
+// to the props of this component
 const mapStateToProps = (state) => {
   return {
     loading: state.sequences.loading,
@@ -271,6 +138,9 @@ const mapStateToProps = (state) => {
   };
 };
 
+// Map dispatch functions that trigger
+// actions from redux 
+// to the props of this component
 const mapDispatchToProps = (dispatch) => {
   return {
     onFetchSequence: (sequence) => dispatch(actions.fetchSequence(sequence)),
@@ -280,4 +150,4 @@ const mapDispatchToProps = (dispatch) => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Sequences));
+)(withStyles(SEQUENCES_STYLES)(Sequences));
