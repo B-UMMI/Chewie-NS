@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2 - Running image
-FROM nginx:1.17
+FROM nginx:1.17.10
 
 COPY --from=node /usr/src/app/build /var/www/my-app
 
@@ -23,6 +23,8 @@ RUN rm /etc/nginx/conf.d/*
 COPY ./mime.types /etc/nginx/
 
 COPY ./cors.conf /etc/nginx/
+
+COPY ./general-security-headers.conf /etc/nginx/
 
 COPY ./nginx.conf /etc/nginx/
 
