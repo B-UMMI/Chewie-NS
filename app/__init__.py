@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, user_registered
 from flask_restplus import Api, marshal_with
 from flask_cors import CORS
+from flask_mail import Mail
 from flask_jwt_extended import JWTManager
 from config import Config
 from celery import Celery
@@ -30,6 +31,9 @@ migrate = Migrate()
 
 # Login Manager
 login_manager = LoginManager()
+
+# Mail
+mail = Mail()
 
 # App security
 security = Security()
@@ -89,6 +93,9 @@ def create_app(config_class=Config):
 
     # Setup Flask-Security
     security.init_app(app, datastore=datastore)
+
+    # Setup Mail
+    mail.init_app(app)
 
     # Setup JWT
     jwt.init_app(app)

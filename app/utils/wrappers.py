@@ -8,6 +8,7 @@ Code documentation
 """
 
 from functools import wraps
+from threading import Thread
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_claims
 
 
@@ -72,4 +73,15 @@ def admin_contributor_required(fn):
             return {'Not authorized': 'Admins or Contributors only!'}, 403
         else:
             return fn(*args, **kwargs)
+    return wrapper
+
+
+def async_deco(fn):
+    """ Async decorator
+    """
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        thr = Thread(target=fn, args=args, kwargs=kwargs)
+        thr.start()
+        return thr
     return wrapper

@@ -60,7 +60,7 @@ from app.models import User, Role
 from app.utils import wrappers as w
 from app.utils import sparql_queries as sq
 from app.utils import auxiliary_functions as aux
-from app import (db, celery, login_manager,
+from app import (db, celery, login_manager, mail,
 				 datastore_cheat, security, jwt as jwtm)
 
 from app.api import api, blueprint
@@ -70,6 +70,23 @@ from SPARQLWrapper import SPARQLWrapper
 # Get the error handlers to work with Flask-restplus
 jwtm._set_error_handler_callbacks(api)
 
+
+# Send email functions
+# @w.async_deco
+# def send_async_email(app, msg):
+#     with app.app_context():
+#         mail.send(msg)
+
+# def send_email(subject, sender, recipients, text_body, html_body):
+#     """ Function to send emails.
+#     """
+#     app = current_app._get_current_object()
+
+#     msg = Message(subject, sender=sender, recipients=recipients)
+#     msg.body = text_body
+#     msg.html = html_body
+
+#     send_async_email(app, msg)
 
 # queue to add loci to new schemas
 # this will return an AsyncResult object/id
@@ -491,6 +508,18 @@ auth_model = api.model('LoginModel',
 												  )
 						})
 
+forget_model = api.model('ForgetModel',
+                       {'email': fields.String(required=True,
+                                               description='User email address.'
+                                               )
+                        })
+
+reset_password_model = api.model('ResetPasswordModel',
+                       {'password': fields.String(required=True,
+                                               description='New password.'
+                                               )
+                        })
+
 @auth_conf.route("/login")
 class UserLoginAPI(Resource):
 	"""User login resource"""
@@ -543,6 +572,133 @@ class UserLoginAPI(Resource):
 				'message': 'Try again'
 			}
 			return response_object, 500
+
+
+# @auth_conf.route("/forget")
+# class ForgetPassword(Resource):
+#     """forget password resource"""
+
+#     @api.doc(responses={201: "Success"})
+#     @api.expect(forget_model, validate=True)
+#     def post(self):
+#         """
+#         generate token for resetting password
+#         """
+
+#         # get the post data
+#         post_data = request.get_json()
+
+#         try:
+#             # fetch the user data
+#             user = User.query.filter_by(email=post_data.get('email')).first()
+
+#             if user:
+
+#                 # Generate token
+#                 forget_token = create_access_token(
+#                                      identity=user,
+#                                      user_claims={'reset-token': True},
+#                                      expires_delta=dt.timedelta(minutes=5)
+#                 )
+                
+#                 if forget_token:
+
+#                     send_email(
+#                         subject='[Chewie-NS] Reset Your Password',
+#                         sender=os.environ.get('MAIL_USERNAME'),
+#                         recipients=[user.email],
+#                         text_body=render_template('reset_password.txt', user=user, token=forget_token),
+#                         html_body=render_template('reset_password.html', user=user, token=forget_token)
+#                     )
+
+#                     return {"message": "Email has been sent."}, 200
+#             else:
+#                 response_object = {
+#                     'status': 'fail',
+#                     'message': 'email does not match any database record.'
+#                 }
+#                 return response_object, 401
+
+#         except Exception as e:
+#             print(e)
+#             response_object = {
+#                 'status': 'fail',
+#                 'message': 'Try again'
+#             }
+#             return response_object, 500
+
+
+# @auth_conf.route("/reset_verify")
+# class ResetTokenVerification(Resource):
+#     """ Reset Token Verification """
+
+#     @api.doc(responses={200: 'OK',
+#                         400: 'Invalid Argument',
+#                         500: 'Internal Server Error',
+#                         403: 'Unauthorized',
+#                         401: 'Unauthenticated'},
+#              security=['access_token'])
+#     @jwt_required
+#     def get(self):
+#         """
+#         """
+
+#         # Confirm user exists
+#         current_user_id = get_jwt_identity()
+#         current_user = User.query.get_or_404(current_user_id)
+
+#         # get claims
+#         current_token_claims = get_jwt_claims()
+
+#         try:
+#             current_token_claims["reset-token"]
+#         except KeyError:
+#             return {"message": "Reset token is invalid."}, 403
+
+#         return {"message": "Reset token is validated."}, 200
+
+
+# @auth_conf.route("/reset_password")
+# class ResetTokenVerification(Resource):
+#     """ Reset Token Verification """
+
+#     @api.doc(responses={200: 'OK',
+#                         400: 'Invalid Argument',
+#                         500: 'Internal Server Error',
+#                         403: 'Unauthorized',
+#                         401: 'Unauthenticated'},
+#              security=['access_token'])
+#     @api.expect(reset_password_model, validate=True)
+#     @jwt_required
+#     def put(self):
+#         """ Reset user password.
+#         """
+
+#         # get user from Postgres DB
+#         current_user = get_jwt_identity()
+#         user = User.query.get_or_404(current_user)
+
+#         # get claims 
+#         claims = get_jwt_claims()
+
+#         try:
+#             claims['reset-token']
+
+#             # get post data
+#             data = request.get_json()
+
+#             # assign new password
+#             new_password = data['password']
+
+#             # Update DB data
+#             user.password = new_password if new_password != "" else user.password
+
+#             db.session.commit()
+
+#             return {"message": "Password succesfully updated."}, 201
+
+#         except KeyError:
+#             return {"message": "Invalid reset token"}, 403
 
 
 @auth_conf.route("/refresh")
