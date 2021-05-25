@@ -766,7 +766,7 @@ class AllUsers(Resource):
 		return users_info, 200
 
 	# hide class method (hide decorator has to be at start)
-	# @api.hide
+	@api.hide
 	@api.doc(responses={201: 'OK',
 						400: 'Invalid Argument',
 						500: 'Internal Server Error',
