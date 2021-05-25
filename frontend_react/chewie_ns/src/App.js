@@ -140,7 +140,7 @@ class App extends Component {
       routes = (
         <Switch>
           <Route path="/logout" component={Logout} />
-          <Route path="/profile" component={Profile} />
+          {/* <Route path="/profile" component={Profile} /> */}
           <Route path="/about" component={About} />
           <Route path="/stats" component={Stats} />
           <Route path="/sequences" component={Sequences} />
