@@ -291,9 +291,9 @@ class PersistentDrawerLeft extends Component {
                 <Button color="inherit" component={Link} to="/logout">
                   Logout
                 </Button>
-                {/* <Button color="inherit" component={Link} to="/profile">
+                <Button color="inherit" component={Link} to="/profile">
                   Profile
-                </Button> */}
+                </Button>
               </div>
             )}
           </Toolbar>
