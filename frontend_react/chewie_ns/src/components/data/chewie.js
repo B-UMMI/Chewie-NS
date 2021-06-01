@@ -1,10 +1,6 @@
 const chewie_front = `
 # Chewie-NS: Enabling the use of gene-by-gene typing methods through a public and centralized service
 
-# IMPORTANT
-## A reset was performed on our databases. We kindly ask users that had an account to register once more.
-## We apologize for the incovenience.
-
 ## Overview
 
 **Chewie-NS** is a Nomenclature Server that is based on the TypOn ontology and aims to provide a centralized 

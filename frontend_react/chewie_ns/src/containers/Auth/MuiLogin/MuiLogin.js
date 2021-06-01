@@ -5,6 +5,7 @@ import { Redirect, Link as RouterLink } from "react-router-dom";
 // Chewie local import
 import Aux from "../../../hoc/Aux/Aux";
 import * as actions from "../../../store/actions/index";
+import Markdown from "../../../components/Markdown/Markdown";
 import Copyright from "../../../components/Copyright/Copyright";
 
 // Material UI imports
@@ -122,6 +123,10 @@ class SignIn extends Component {
   render() {
     const { classes } = this.props;
 
+    const UserMessage = `# IMPORTANT
+    A reset was performed on our databases. We kindly ask users that had an account to register once more.
+    We apologize for the incovenience.`;
+
     let visibilityIcon = (
       <InputAdornment position="end">
         <IconButton
@@ -150,6 +155,7 @@ class SignIn extends Component {
         <Container component="main" maxWidth="xs">
           <CssBaseline />
           <div className={classes.paper}>
+            <Markdown markdown={UserMessage} />
             {authRedirect}
             {errorMessage}
             <form
