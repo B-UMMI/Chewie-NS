@@ -589,13 +589,9 @@ class ForgetPassword(Resource):
         # get the post data
         post_data = request.get_json()
 
-        print(post_data, flush=True)
-
         try:
             # fetch the user data
             user = User.query.filter_by(email=post_data.get('email')).first()
-
-            print(user, flush=True)
 
             if user:
 
