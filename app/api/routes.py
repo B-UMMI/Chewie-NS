@@ -583,7 +583,7 @@ class ForgetPassword(Resource):
     @api.expect(forget_model, validate=True)
     def post(self):
         """
-        generate token for resetting password
+        Generate token for password reset.
         """
 
         # get the post data
@@ -642,6 +642,7 @@ class ResetTokenVerification(Resource):
     @jwt_required
     def get(self):
         """
+        Verify reset token.
         """
 
         # Confirm user exists
