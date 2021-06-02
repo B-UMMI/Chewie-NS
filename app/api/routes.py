@@ -924,7 +924,7 @@ class AllUsers(Resource):
         return users_info, 200
 
     # hide class method (hide decorator has to be at start)
-    # @api.hide
+    @api.hide
     @api.doc(responses={201: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
@@ -1151,6 +1151,7 @@ class CurrentUserProfileContributions(Resource):
     Class with methods related with the user that is currently logged in, to build its profile.
     """
 
+    @api.hide
     @api.doc(responses={200: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
