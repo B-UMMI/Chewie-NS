@@ -77,7 +77,7 @@ class ProfileDetails extends Component {
     const token = localStorage.getItem("token");
     this.props.onToken(token);
 
-    this.props.onProfileTable(token);
+    // this.props.onProfileTable(token);
   }
 
   getMuiTheme = () =>
@@ -283,7 +283,7 @@ class ProfileDetails extends Component {
             </Grid>
           </Container>
         </div>
-        <div style={{ marginTop: "40px" }}>{profile_table}</div>
+        {/* <div style={{ marginTop: "40px" }}>{profile_table}</div> */}
       </Aux>
     );
   }
@@ -310,7 +310,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     onToken: (token) => dispatch(actions.authCuser(token)),
-    onProfileTable: (token) => dispatch(actions.fetchProfileContributions(token)),
+    // onProfileTable: (token) => dispatch(actions.fetchProfileContributions(token)),
   };
 };
 

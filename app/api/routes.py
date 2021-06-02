@@ -876,161 +876,162 @@ update_user_model = api.model('UpdateUserModel',
 # User routes
 @user_conf.route("/users")
 class AllUsers(Resource):
-    """ Returns a list of users """
+	""" Returns a list of users """
 
-    @api.doc(responses={200: 'OK',
-                        400: 'Invalid Argument',
-                        500: 'Internal Server Error',
-                        403: 'Unauthorized',
-                        401: 'Unauthenticated'},
-             security=['access_token'])
-    @api.marshal_with(user_model)
-    @w.admin_required
-    def get(self):
-        """Returns the full list of users."""
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@api.marshal_with(user_model)
+	@w.admin_required
+	def get(self):
+		"""Returns the full list of users."""
 
-        # returning list of users from Postgres
-        ns_users = db.session.query(User).all()
+		# returning list of users from Postgres
+		ns_users = db.session.query(User).all()
 
-        users_info = []
-        # get info for each user and append to list
-        for user in ns_users:
+		users_info = []
+		# get info for each user and append to list
+		for user in ns_users:
 
-            current_user_dict = {}
+			current_user_dict = {}
 
-            # check if user exists in Virtuoso
-            user_uri = '{0}users/{1}'.format(
-                current_app.config['BASE_URL'], user.id)
-            user_exists_query = sq.ASK_USER.format(user_uri)
-            ask_result = aux.get_data(SPARQLWrapper(
-                current_app.config['LOCAL_SPARQL']), user_exists_query)
-            user_exists = ask_result['boolean']
+			# check if user exists in Virtuoso
+			user_uri = '{0}users/{1}'.format(
+				current_app.config['BASE_URL'], user.id)
+			user_exists_query = sq.ASK_USER.format(user_uri)
+			ask_result = aux.get_data(SPARQLWrapper(
+				current_app.config['LOCAL_SPARQL']), user_exists_query)
+			user_exists = ask_result['boolean']
 
-            current_user_dict = {}
-            current_user_dict['id'] = user.id
-            current_user_dict['email'] = user.email
-            current_user_dict['name'] = user.name
-            current_user_dict['username'] = user.username
-            current_user_dict['organization'] = user.organization
-            current_user_dict['country'] = user.country
-            # this value will be None/null if user never logged in
-            current_user_dict['last_login_at'] = user.last_login_at
-            current_user_dict['roles'] = str(user.roles[0])
-            current_user_dict['validated'] = user_exists
+			current_user_dict = {}
+			current_user_dict['id'] = user.id
+			current_user_dict['email'] = user.email
+			current_user_dict['name'] = user.name
+			current_user_dict['username'] = user.username
+			current_user_dict['organization'] = user.organization
+			current_user_dict['country'] = user.country
+			# this value will be None/null if user never logged in
+			current_user_dict['last_login_at'] = user.last_login_at
+			current_user_dict['roles'] = str(user.roles[0])
+			current_user_dict['validated'] = user_exists
 
-            users_info.append(current_user_dict)
+			users_info.append(current_user_dict)
 
-        # model definition will process list and output correct format
-        return users_info, 200
+		# model definition will process list and output correct format
+		return users_info, 200
 
-    # hide class method (hide decorator has to be at start)
-    @api.hide
-    @api.doc(responses={201: 'OK',
-                        400: 'Invalid Argument',
-                        500: 'Internal Server Error',
-                        403: 'Unauthorized',
-                        401: 'Unauthenticated'},
-             security=['access_token'])
-    @api.expect(create_user_model, validate=True)
-    @w.admin_required
-    def post(self):
-        """Creates a user (Admin only)."""
+	# hide class method (hide decorator has to be at start)
+	@api.hide
+	@api.doc(responses={201: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@api.expect(create_user_model, validate=True)
+	@w.admin_required
+	def post(self):
+		"""Creates a user (Admin only)."""
 
-        postgres_account = False
-        virtuoso_account = False
+		postgres_account = False
+		virtuoso_account = False
 
-        # get post data
-        data = request.get_json()
+		# get post data
+		data = request.get_json()
 
-        email = data['email']
-        password = data['password']
-        name = data['name']
-        username = data['username']
-        organization = data['organization']
-        country = data['country']
-        # new users are created with User permissions
-        new_user_role = data['role']
+		email = data['email']
+		password = data['password']
+		name = data['name']
+		username = data['username']
+		organization = data['organization']
+		country = data['country']
+		# new users are created with User permissions
+		new_user_role = data['role']
 
-        # check if user already exists in Postgres
-        postgres_user = user_datastore.get_user(email)
-        if postgres_user is not None:
-            postgres_account = True
-            postgres_message = ('User with provided email already '
-                                'exists in Postgres DB.')
-            new_user_id = postgres_user.id
-        else:
-            # add new user to memory, without synchronising with DB and making it persistent
-            new_user = user_datastore.create_user(email=email,
-                                                  password=hash_password(
-                                                      password),
-                                                  name=name,
-                                                  username=username,
-                                                  organization=organization,
-                                                  country=country)
-            default_role = user_datastore.find_role(new_user_role)
-            user_datastore.add_role_to_user(new_user, default_role)
-            # we can get the new user identifier because session has autoflush
-            new_user_id = new_user.id
+		# check if user already exists in Postgres
+		postgres_user = user_datastore.get_user(email)
+		if postgres_user is not None:
+			postgres_account = True
+			postgres_message = ('User with provided email already '
+								'exists in Postgres DB.')
+			new_user_id = postgres_user.id
+		else:
+			# add new user to memory, without synchronising with DB and making it persistent
+			new_user = user_datastore.create_user(email=email,
+												  password=hash_password(
+													  password),
+												  name=name,
+												  username=username,
+												  organization=organization,
+												  country=country)
+			default_role = user_datastore.find_role(new_user_role)
+			user_datastore.add_role_to_user(new_user, default_role)
+			# we can get the new user identifier because session has autoflush
+			new_user_id = new_user.id
 
-            # try to commit and make changes persistent
-            try:
-                db.session.commit()
-                postgres_account = True
-                postgres_message = ('Successfully added new user with '
-                                    'ID={0} to Postgres.'.format(new_user_id))
-            except Exception as e:
-                # could not commit changes
-                # rollback session transactions
-                db.session.rollback()
-                # Postgres auto increment function will increment
-                # user identifiers even if the changes cannot be committed
-                postgres_message = 'Failed to commit changes. Discarded changes.'
+			# try to commit and make changes persistent
+			try:
+				db.session.commit()
+				postgres_account = True
+				postgres_message = ('Successfully added new user with '
+									'ID={0} to Postgres.'.format(new_user_id))
+			except Exception as e:
+				# could not commit changes
+				# rollback session transactions
+				db.session.rollback()
+				# Postgres auto increment function will increment
+				# user identifiers even if the changes cannot be committed
+				postgres_message = 'Failed to commit changes. Discarded changes.'
 
-        # add user to Virtuoso only if it could be added to Postgres
-        # auto increment function of Postgres should guarantee that we will not
-        # add a user that already exists in Virtuoso
-        if postgres_account is True:
+		# add user to Virtuoso only if it could be added to Postgres
+		# auto increment function of Postgres should guarantee that we will not
+		# add a user that already exists in Virtuoso
+		if postgres_account is True:
 
-            # create user URI
-            new_user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'],
-                                                 new_user_id)
+			# create user URI
+			new_user_uri = '{0}users/{1}'.format(current_app.config['BASE_URL'],
+												 new_user_id)
 
-            # check if user already exists in Virtuoso
-            user_exists_query = sq.ASK_USER.format(new_user_uri)
-            ask_result = aux.get_data(SPARQLWrapper(
-                current_app.config['LOCAL_SPARQL']), user_exists_query)
-            user_exists = ask_result['boolean']
+			# check if user already exists in Virtuoso
+			user_exists_query = sq.ASK_USER.format(new_user_uri)
+			ask_result = aux.get_data(SPARQLWrapper(
+				current_app.config['LOCAL_SPARQL']), user_exists_query)
+			user_exists = ask_result['boolean']
 
-            if user_exists is True:
-                virtuoso_account = True
-                virtuoso_message = 'User with provided ID={0} already exists in Virtuoso'.format(
-                    new_user_id)
-            elif user_exists is False:
-                # add user to Virtuoso
-                new_user_query = (sq.INSERT_USER.format(current_app.config['DEFAULTHGRAPH'],
-                                                        new_user_uri,
-                                                        new_user_role))
+			if user_exists is True:
+				virtuoso_account = True
+				virtuoso_message = 'User with provided ID={0} already exists in Virtuoso'.format(
+					new_user_id)
+			elif user_exists is False:
+				# add user to Virtuoso
+				new_user_query = (sq.INSERT_USER.format(current_app.config['DEFAULTHGRAPH'],
+														new_user_uri,
+														new_user_role))
 
-                insert_result = aux.send_data(new_user_query,
-                                              current_app.config['LOCAL_SPARQL'],
-                                              current_app.config['VIRTUOSO_USER'],
-                                              current_app.config['VIRTUOSO_PASS'])
+				insert_result = aux.send_data(new_user_query,
+											  current_app.config['LOCAL_SPARQL'],
+											  current_app.config['VIRTUOSO_USER'],
+											  current_app.config['VIRTUOSO_PASS'])
 
-                query_status = insert_result.status_code
-                if query_status in [200, 201]:
-                    virtuoso_account = True
-                    virtuoso_message = ('{0}: Successfully added new user with '
-                                        'ID={1} to Virtuoso.'.format(query_status, new_user_id))
-                else:
-                    virtuoso_message = '{0}: Could not add new user to Virtuoso.'.format(
-                        query_status)
+				query_status = insert_result.status_code
+				if query_status in [200, 201]:
+					virtuoso_account = True
+					virtuoso_message = ('{0}: Successfully added new user with '
+										'ID={1} to Virtuoso.'.format(query_status, new_user_id))
+				else:
+					virtuoso_message = '{0}: Could not add new user to Virtuoso.'.format(
+						query_status)
 
-        elif postgres_account is False:
-            virtuoso_message = ('Cannot add new user to Virtuoso because '
-                                'it could not be added to Postgres DB.')
+		elif postgres_account is False:
+			virtuoso_message = ('Cannot add new user to Virtuoso because '
+								'it could not be added to Postgres DB.')
 
-        return {'Postgres': '{0} ({1})'.format(postgres_account, postgres_message),
-                'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
+		return {'Postgres': '{0} ({1})'.format(postgres_account, postgres_message),
+				'Virtuoso': '{0} ({1})'.format(virtuoso_account, virtuoso_message)}
+
 
 
 @user_conf.route("/register_user")
@@ -1147,102 +1148,102 @@ class RegisterUser(Resource):
 
 @user_conf.route("/current_user/contributions")
 class CurrentUserProfileContributions(Resource):
-    """
-    Class with methods related with the user that is currently logged in, to build its profile.
-    """
+	"""
+	Class with methods related with the user that is currently logged in, to build its profile.
+	"""
 
-    @api.hide
-    @api.doc(responses={200: 'OK',
-                        400: 'Invalid Argument',
-                        500: 'Internal Server Error',
-                        403: 'Unauthorized',
-                        401: 'Unauthenticated'},
-             security=['access_token'])
-    @jwt_required
-    def get(self):
-        """
-        Gets a user's contributions for the profile page.
-        """
-        
-        # get user from Postgres DB
-        current_user = get_jwt_identity()
-        user = User.query.get_or_404(current_user)
+	@api.hide
+	@api.doc(responses={200: 'OK',
+						400: 'Invalid Argument',
+						500: 'Internal Server Error',
+						403: 'Unauthorized',
+						401: 'Unauthenticated'},
+			 security=['access_token'])
+	@jwt_required
+	def get(self):
+		"""
+		Gets a user's contributions for the profile page.
+		"""
+		
+		# get user from Postgres DB
+		current_user = get_jwt_identity()
+		user = User.query.get_or_404(current_user)
 
-        # Virtuoso User URI
-        user_uri = '{0}users/{1}'.format(
-            current_app.config['BASE_URL'], current_user)
+		# Virtuoso User URI
+		user_uri = '{0}users/{1}'.format(
+			current_app.config['BASE_URL'], current_user)
 
-        result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-                        (sq.COUNT_USER_PROFILE.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
+		result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+						(sq.COUNT_USER_PROFILE.format(current_app.config['DEFAULTHGRAPH'], user_uri)))
 
-        profile_table_data = result["results"]["bindings"]
+		profile_table_data = result["results"]["bindings"]
 
-        profile_table_data_json = []
+		profile_table_data_json = []
 
-        if profile_table_data == []:
-            
-            profile_table_data_json = "undefined"
+		if profile_table_data == []:
+			
+			profile_table_data_json = "undefined"
 
-            return profile_table_data_json, 200
-        
-        else:
-            
-            for profile_result in profile_table_data:
-                profile_table_data_json.append(
-                    {
-                        "species_id": int(profile_result["taxon"]["value"][-1]),
-                        "schema_id": int(profile_result["schema"]["value"][-1]),
-                        "nr_loci": int(profile_result["nr_loci"]["value"]),
-                        "nr_allele": int(profile_result["nr_allele"]["value"])
-                    }
-                )
-            
-            # limit = 9000
-            # offset = 0
-            # count = 0
-            # final_result = {}
+			return profile_table_data_json, 200
+		
+		else:
+			
+			for profile_result in profile_table_data:
+				profile_table_data_json.append(
+					{
+						"species_id": int(profile_result["taxon"]["value"][-1]),
+						"schema_id": int(profile_result["schema"]["value"][-1]),
+						"nr_loci": int(profile_result["nr_loci"]["value"]),
+						"nr_allele": int(profile_result["nr_allele"]["value"])
+					}
+				)
+			
+			# limit = 9000
+			# offset = 0
+			# count = 0
+			# final_result = {}
 
-            # for i in profile_table_data_json:
-            # 	result = []
+			# for i in profile_table_data_json:
+			# 	result = []
 
-            # 	schema_uri = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], i["species_id"], i["schema_id"])
-            # 	# if i["nr_allele"] < 10000:
+			# 	schema_uri = "{0}species/{1}/schemas/{2}".format(current_app.config['BASE_URL'], i["species_id"], i["schema_id"])
+			# 	# if i["nr_allele"] < 10000:
 
-            # 	loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-            # 		(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], schema_uri, user_uri)))
+			# 	loci_allele_list_result = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 		(sq.SELECT_USER_PROFILE_LOCI_ALLELES.format(current_app.config['DEFAULTHGRAPH'], schema_uri, user_uri)))
 
-            # 	final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
-            # 		"loci_list": list(set([la["locus"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
-            # 		# "allele_list": list(set([la["allele"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
-            # 	}
+			# 	final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 		"loci_list": list(set([la["locus"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 		# "allele_list": list(set([la["allele"]["value"] for la in loci_allele_list_result["results"]["bindings"]])),
+			# 	}
 
-            # 	else:
-            # 		while count != i["nr_allele"]:
-            # 			alleles = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
-            # 								sq.SELECT_USER_PROFILE_LOCI_ALLELES_2.format(
-            # 									current_app.config['DEFAULTHGRAPH'],
-            # 									schema_uri, 
-            # 									user_uri, 
-            # 									offset, 
-            # 									limit
-            # 								)
-            # 			)
-            # 			data = alleles['results']['bindings']
-            # 			result.extend(data)
-            # 			count += len(data)
-            # 			offset += limit
+			# 	else:
+			# 		while count != i["nr_allele"]:
+			# 			alleles = aux.get_data(SPARQLWrapper(current_app.config['LOCAL_SPARQL']),
+			# 								sq.SELECT_USER_PROFILE_LOCI_ALLELES_2.format(
+			# 									current_app.config['DEFAULTHGRAPH'],
+			# 									schema_uri, 
+			# 									user_uri, 
+			# 									offset, 
+			# 									limit
+			# 								)
+			# 			)
+			# 			data = alleles['results']['bindings']
+			# 			result.extend(data)
+			# 			count += len(data)
+			# 			offset += limit
 
-            # 		final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
-            # 			"loci_list": list(set([la["locus"]["value"] for la in result])),
-            # 			"allele_list": list(set([la["allele"]["value"] for la in result])),
-            # 		}
+			# 		final_result["species_id_{0}_schema_id_{1}".format(i["species_id"], i["schema_id"])] = {
+			# 			"loci_list": list(set([la["locus"]["value"] for la in result])),
+			# 			"allele_list": list(set([la["allele"]["value"] for la in result])),
+			# 		}
 
-            return {"table_data": profile_table_data_json}, 200
-                        
-            # return {
-            # 	"table_data": profile_table_data_json,
-            # 	"lists": final_result,
-            # }, 200
+			return {"table_data": profile_table_data_json}, 200
+						
+			# return {
+			# 	"table_data": profile_table_data_json,
+			# 	"lists": final_result,
+			# }, 200
 
 
 @user_conf.route("/current_user")
