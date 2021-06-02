@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0 - 2021/05/21
+
+Cleaned the majority of the frontend code to be more readable and added more comments.
+
+Added a new page, Profile, that allows users to change their personal information, after
+registration.
+
+Routes related to the Profile page were also added to the API.
+
 ## 1.2.4 - 2021/04/07
 
 Added a new column, "Locus Original Name", to the Locus Information table of the Schema Evalaution and Annotation
