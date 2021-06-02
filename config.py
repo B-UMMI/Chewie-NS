@@ -43,10 +43,12 @@ class Config(object):
     # EMAIL CONFIGS
     MAIL_SERVER = 'localhost'
     MAIL_PORT = 8025
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = ['your-email@example.com']
+    MAIL_DEFAULT_SENDER = 'testing_ns@ns.com'
+    # ADMINS = ['your-email@example.com']
 
     # VIRTUOSO CONFIGS
     BASE_URL = os.environ.get('BASE_URL')
