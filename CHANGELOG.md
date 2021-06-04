@@ -7,7 +7,7 @@ Cleaned the majority of the frontend code to be more readable and added more com
 Added a new page, Profile, that allows users to change their personal information, after
 registration.
 
-Routes related to the Profile page were also added to the API.
+Endpoints related to the Profile page were also added to the API.
 
 ## 1.2.4 - 2021/04/07
 
