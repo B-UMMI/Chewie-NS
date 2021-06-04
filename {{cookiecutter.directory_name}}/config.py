@@ -41,12 +41,13 @@ class Config(object):
     JWT_COOKIE_CSRF_PROTECT = True
 
     # EMAIL CONFIGS
-    MAIL_SERVER = 'localhost'
-    MAIL_PORT = 8025
-    MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    ADMINS = ['your-email@example.com']
+    MAIL_SERVER = "{{cookiecutter.flask_email_server}}"
+    MAIL_PORT = "{{cookiecutter.flask_email_port}}"
+    MAIL_USE_TLS = "{{cookiecutter.flask_email_use_tls}}"
+    MAIL_USE_SSL = "{{cookiecutter.flask_email_use_ssl}}"
+    MAIL_USERNAME = "{{cookiecutter.flask_email}}"
+    MAIL_PASSWORD = "{{cookiecutter.flask_email_password}}"
+    MAIL_DEFAULT_SENDER = "{{cookiecutter.flask_email}}"
 
     # VIRTUOSO CONFIGS
     BASE_URL = os.environ.get('BASE_URL')
