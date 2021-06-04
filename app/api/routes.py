@@ -579,6 +579,7 @@ class UserLoginAPI(Resource):
 class ForgetPassword(Resource):
     """forget password resource"""
 
+    @api.hide
     @api.doc(responses={201: "Success"})
     @api.expect(forget_model, validate=True)
     def post(self):
@@ -633,6 +634,7 @@ class ForgetPassword(Resource):
 class ResetTokenVerification(Resource):
     """ Reset Token Verification """
 
+    @api.hide
     @api.doc(responses={200: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
@@ -664,6 +666,7 @@ class ResetTokenVerification(Resource):
 class ResetPasswordVerification(Resource):
     """ Reset Token Verification """
 
+    @api.hide
     @api.doc(responses={200: 'OK',
                         400: 'Invalid Argument',
                         500: 'Internal Server Error',
