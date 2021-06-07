@@ -20,10 +20,9 @@ RUN pip install -r requirements.txt
 
 # install BLAST+
 RUN mkdir /blast
-RUN cp -r ncbi-blast-2.10.1+ ../blast
-# RUN cd ../blast; wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.10.0/ncbi-blast-2.10.0+-x64-linux.tar.gz \
-# && tar -xzvf ncbi-blast-2.10.0+-x64-linux.tar.gz && rm ncbi-blast-2.10.0+-x64-linux.tar.gz
-ENV PATH="/blast/ncbi-blast-2.10.1+/bin:${PATH}"
+RUN cd ../blast; wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.10.0/ncbi-blast-2.10.0+-x64-linux.tar.gz \
+&& tar -xzvf ncbi-blast-2.10.0+-x64-linux.tar.gz && rm ncbi-blast-2.10.0+-x64-linux.tar.gz
+ENV PATH="/blast/ncbi-blast-2.10.0+/bin:${PATH}"
 
 #ENTRYPOINT ["python","ref_ns_security_run.py"]
 #CMD [ "flask", "run" ]
