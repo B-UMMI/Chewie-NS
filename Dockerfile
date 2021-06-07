@@ -8,6 +8,8 @@ EXPOSE 5000
 ENV FLASK_APP ref_ns_security_run.py
 ENV FLASK_RUN_HOST 0.0.0.0
 ENV FLASK_DEBUG=1
+ENV MAIL_USERNAME testing_ns@ns.com
+ENV MAIL_PASSWORD testing_ns
 
 #RUN apk add --no-cache gcc musl-dev linux-headers
 RUN pip install --upgrade pip

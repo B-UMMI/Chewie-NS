@@ -105,7 +105,6 @@ class ResetToken extends Component {
         headers: headers,
       })
       .then((res) => {
-        // console.log(res);
         if (res.status === 200) {
           alert("The reset token has been validated.");
           localStorage.setItem("resetToken", resetToken);

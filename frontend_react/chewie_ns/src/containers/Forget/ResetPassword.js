@@ -127,8 +127,6 @@ class ResetPassword extends Component {
       this.setState({ redirect: true });
     }
 
-    // console.log(resetToken);
-
     const headers = {
       "Content-Type": "application/json",
       Authorization: resetToken,
@@ -260,7 +258,7 @@ class ResetPassword extends Component {
                 root: classes.buttonRoot,
               }}
             >
-              SIGN UP
+              RESET PASSWORD
             </Button>
           </form>
         </div>
