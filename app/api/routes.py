@@ -607,7 +607,7 @@ class ForgetPassword(Resource):
 
                     send_email(
                         subject='[Chewie-NS] Reset Your Password',
-                        sender=os.environ.get('MAIL_USERNAME'),
+                        sender=os.environ.get('MAIL_DEFAULT_SENDER'),
                         recipients=[user.email],
                         text_body=render_template('reset_password.txt', user=user, token=forget_token),
                         html_body=render_template('reset_password.html', user=user, token=forget_token)
