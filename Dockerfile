@@ -30,4 +30,4 @@ ENV PATH="/blast/ncbi-blast-2.10.0+/bin:${PATH}"
 # Run container with gunicorn 
 # More info about workers, threads and --worker-tmp-dir
 # https://pythonspeed.com/articles/gunicorn-in-docker/
-CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "4", "--threads=2", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "7", "--threads=4", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
