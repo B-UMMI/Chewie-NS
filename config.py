@@ -47,7 +47,7 @@ class Config(object):
     MAIL_USE_SSL = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
-    MAIL_DEFAULT_SENDER = 'testing_ns@ns.com'
+    MAIL_DEFAULT_SENDER = 'no-reply@chewiens.com'
     # ADMINS = ['your-email@example.com']
 
     # VIRTUOSO CONFIGS
