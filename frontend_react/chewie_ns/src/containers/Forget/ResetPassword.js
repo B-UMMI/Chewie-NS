@@ -258,7 +258,7 @@ class ResetPassword extends Component {
                 root: classes.buttonRoot,
               }}
             >
-              SIGN UP
+              RESET PASSWORD
             </Button>
           </form>
         </div>
