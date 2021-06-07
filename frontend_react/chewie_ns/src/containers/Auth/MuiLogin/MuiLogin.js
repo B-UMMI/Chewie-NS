@@ -207,8 +207,9 @@ class SignIn extends Component {
               <Grid container>
                 <Grid item xs>
                   <Link
-                    href="#"
                     variant="body2"
+                    component={RouterLink}
+                    to="/forget"
                     classes={{ root: classes.linkRoot }}
                   >
                     Forgot password?
@@ -216,10 +217,9 @@ class SignIn extends Component {
                 </Grid>
                 <Grid item>
                   <Link
-                    href="#"
                     variant="body2"
-                    // component={RouterLink}
-                    // to="/register"
+                    component={RouterLink}
+                    to="/register"
                     classes={{ root: classes.linkRoot }}
                   >
                     Don't have an account? Sign Up

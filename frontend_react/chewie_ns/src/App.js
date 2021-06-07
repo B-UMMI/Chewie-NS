@@ -19,9 +19,9 @@ import Schema from "./containers/Schema/Schema";
 import Logout from "./containers/Auth/Logout/Logout";
 import Species from "./containers/Species/Species";
 import MuiLogin from "./containers/Auth/MuiLogin/MuiLogin";
-// import Forget from "./containers/Forget/Forget";
-// import ResetToken from "./containers/Forget/ResetToken";
-// import ResetPassword from "./containers/Forget/ResetPassword";
+import Forget from "./containers/Forget/Forget";
+import ResetToken from "./containers/Forget/ResetToken";
+import ResetPassword from "./containers/Forget/ResetPassword";
 import Sequences from "./containers/Sequences/Sequences";
 import MuiRegister from "./containers/Auth/MuiRegister/MuiRegister";
 import Profile from "./containers/Auth/Profile/Profile";
@@ -119,9 +119,9 @@ class App extends Component {
         <SimpleBreadcrumbs />
         <Switch>
           <Route path="/auth" component={MuiLogin} />
-          {/* <Route path="/forget" component={Forget} />
+          <Route path="/forget" component={Forget} />
           <Route path="/reset-token" component={ResetToken} />
-          <Route path="/reset-password" component={ResetPassword} /> */}
+          <Route path="/reset-password" component={ResetPassword} />
           <Route path="/register" component={MuiRegister} />
           <Route path="/about" component={About} />
           <Route path="/" exact component={Chewie} />
