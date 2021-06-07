@@ -99,7 +99,6 @@ class Forget extends Component {
 
   onSubmitHandler = (event) => {
     event.preventDefault();
-    // console.log(this.state.email);
 
     axios
       .post("/auth/forget", {
@@ -107,7 +106,6 @@ class Forget extends Component {
       })
       .then((res) => {
         if (res.status === 200) {
-          // console.log(res);
           alert("Please check your email for further instructions.");
           this.setState({ redirect: true });
         }

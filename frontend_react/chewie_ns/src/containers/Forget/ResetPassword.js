@@ -127,8 +127,6 @@ class ResetPassword extends Component {
       this.setState({ redirect: true });
     }
 
-    // console.log(resetToken);
-
     const headers = {
       "Content-Type": "application/json",
       Authorization: resetToken,
