@@ -14,6 +14,7 @@ const WhiteTextTypography = withStyles({
 // Define Chewie-NS' copyright/footer
 const Copyright = () => {
   return (
+    {% raw -%}
     <footer
       style={{
         position: "fixed",
@@ -32,6 +33,7 @@ const Copyright = () => {
         </div>
       </div>
     </footer>
+    {% endraw %}
   );
 };
 

@@ -18,6 +18,7 @@ class Modal extends Component {
 
     render () {
         return (
+        {% raw -%}
         <Aux>
             <Backdrop show={this.props.show} clicked={this.props.modalClosed} />
             <div 
@@ -29,6 +30,7 @@ class Modal extends Component {
                 {this.props.children}
             </div>
         </Aux>
+        {% endraw %}
         )
     }
 }

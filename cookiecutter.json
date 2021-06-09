@@ -23,6 +23,7 @@
   "local_register_url": "https://127.0.0.1/register",
   "api_url": "https://127.0.0.1/NS/api/docs",
   "local_species_url": "https://127.0.0.1/species/",
+  "server_name": "_",
   "_copy_without_render": [
     "*app",
     "*virtuoso_data",
