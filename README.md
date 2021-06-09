@@ -31,7 +31,7 @@ of a local server by modifiying automatically some files.
 To use it, you need to start by installing the latest cookiecutter:
 
 ```bash
-pip install cookicutter
+pip install cookiecutter
 ```
 
 Then in the directory where you want to create your local server run:
