@@ -8,8 +8,8 @@ EXPOSE 5000
 ENV FLASK_APP ref_ns_security_run.py
 ENV FLASK_RUN_HOST 0.0.0.0
 ENV FLASK_DEBUG=1
-ENV MAIL_USERNAME testing_ns@ns.com
-ENV MAIL_PASSWORD testing_ns
+ENV MAIL_USERNAME {{cookiecutter.flask_email}}
+ENV MAIL_PASSWORD {{cookiecutter.flask_email_password}}
 
 #RUN apk add --no-cache gcc musl-dev linux-headers
 RUN pip install --upgrade pip
@@ -30,4 +30,4 @@ ENV PATH="/blast/ncbi-blast-2.10.0+/bin:${PATH}"
 # Run container with gunicorn 
 # More info about workers, threads and --worker-tmp-dir
 # https://pythonspeed.com/articles/gunicorn-in-docker/
-CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "7", "--threads=4", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "{{cookiecutter.gunicorn_workers}}", "--threads={{cookiecutter.gunicorn_threads}}", "--worker-class=gthread", "-b", "0.0.0.0:5000", "wsgi:app"]

@@ -168,25 +168,33 @@ class PersistentDrawerLeft extends Component {
           <List>
             <ListItem button component={Link} to="/">
               <ListItemIcon>
+                {% raw -%}
                 <HomeIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"Home"} />
             </ListItem>
             <ListItem button component={Link} to="/stats">
               <ListItemIcon>
+                {% raw -%}
                 <DescriptionIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"Schemas"} />
             </ListItem>
             <ListItem button component={Link} to="/sequences">
               <ListItemIcon>
+                {% raw -%}
                 <SearchIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"Search"} />
             </ListItem>
             <ListItem button component={Link} to="/about">
               <ListItemIcon>
+                {% raw -%}
                 <InfoIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"About Us"} />
             </ListItem>
@@ -201,7 +209,9 @@ class PersistentDrawerLeft extends Component {
               rel="noopener noreferrer"
             >
               <ListItemIcon>
+                {% raw -%}
                 <GitHubIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"Github"} />
             </ListItem>
@@ -213,14 +223,16 @@ class PersistentDrawerLeft extends Component {
               rel="noopener noreferrer"
             >
               <ListItemIcon>
+                {% raw -%}
                 <ChromeReaderModeIcon style={{ color: "white" }} />
+                {% endraw %}
               </ListItemIcon>
               <ListItemText primary={"Read The Docs"} />
             </ListItem>
             <ListItem
               button
               component="a"
-              href={"https://chewbbaca.online/api/NS/api/docs"}
+              href={"{{cookiecutter.api_url}}"}
               target={"_blank"}
               rel="noopener noreferrer"
             >
@@ -256,6 +268,7 @@ class PersistentDrawerLeft extends Component {
       window !== undefined ? () => window.document.body : undefined;
 
     return (
+      {% raw -%}
       <div className={classes.root}>
         <CssBaseline />
         <AppBar
@@ -356,6 +369,7 @@ class PersistentDrawerLeft extends Component {
           {this.props.children}
         </main>
       </div>
+      {% endraw %}
     );
   }
 }

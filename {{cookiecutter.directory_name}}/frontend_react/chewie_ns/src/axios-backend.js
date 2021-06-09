@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-   baseURL: 'https://chewbbaca.online/api/NS/api',
+   baseURL: '{{cookiecutter.base_url}}',
    headers: { 'Content-Type': 'application/json' },
 });
 
