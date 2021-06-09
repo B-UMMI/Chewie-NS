@@ -193,7 +193,7 @@ services:
       - ./prodigal_training_files:/var/www/my-app/prodigal_training_files
       - ./frontend_react/chewie_ns/certs-data/:/data/letsencrypt/
     ports:
-      - "80:80"
+      # - "80:80"
       - "443:443"
     depends_on:
       - flask_app
