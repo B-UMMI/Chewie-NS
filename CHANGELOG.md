@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 - 2021/06/07
+
+Added a _Forget your password_ page to allow users to recover their passwords.
+
 ## 1.3.0 - 2021/05/21
 
 Cleaned the majority of the frontend code to be more readable and added more comments.
@@ -35,7 +39,7 @@ Removed unused frontend components.
 
 ## 1.2.0 - 2020/10/09
 
-Dashboards for user and queue management are now available thorugh the addition of the pgadmin4 and Flower images, respectively.
+Dashboards for user and queue management are now available through the addition of the pgadmin4 and Flower images, respectively.
 
 ## 1.1.0 - 2020/10/02
 
