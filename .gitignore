@@ -13,7 +13,6 @@ __pycache__/
 #virtuoso.*
 #virtuoso-temp.*
 #virtuoso_data/
-*.sh
 *.rdb
 
 self_certs/*

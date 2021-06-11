@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 - 2021/06/11
+
+TAdded a cookiecutter template to Chewie-NS.
+
+[cookiecutter](https://github.com/cookiecutter/cookiecutter) is a command-line utility that creates projects from **cookiecutters** (project templates).
+This project template will facilitate the creation of a local instance of Chewie-NS by allowing users to provide the necessary information to the project template's variables.
+
 ## 1.4.0 - 2021/06/07
 
 Added a _Forget your password_ page to allow users to recover their passwords.

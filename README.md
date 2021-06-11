@@ -21,6 +21,71 @@ Chewie-NS has all its documentations available at [Chewie-NS' Read The Docs](htt
 
 ## Local installation
 
+### Cookiecutter installation
+
+Chewie-NS has a [cookiecutter](https://github.com/cookiecutter/cookiecutter) template that will perform the installation
+of a local server by modifiying automatically some files.
+
+#### Quickstart
+
+To use it, you need to start by installing the latest cookiecutter:
+
+```bash
+pip install cookiecutter
+```
+
+Then in the directory where you want to create your local server run:
+
+```bash
+cookiecutter https://github.com/B-UMMI/Chewie-NS.git
+```
+
+#### Input variables
+
+Chewie-NS cookiecutter has default input variables defined to create a local installation of
+Chewie-NS, which can changed by the user if necessary. To use the default values
+simply press Enter.
+
+The input variables are:
+
+- `directory_name`: The name of the directory where the server will be created.
+- `flask_app_local_port`: Local port for the Flask backend API.
+- `flask_email`: The email address that sends the reset token to recover a forgotten password.
+- `flask_email_password`: The password of the email address that will send the reset token.
+- `flask_email_default_sender`: The email address of the reset token sender.
+- `flask_email_server`: The server of the email address.
+- `flask_email_port`: The port of the email server.
+- `flask_email_use_tls`: Use TLS.
+- `flask_email_use_ssl`: Use SSL.
+- `base_url`: The base URL that will be used for the communication between the backend and frontend.
+- `postgres_local_port`: Local port of the PostgreSQL database.
+- `pgadmin_email`: PGAdmin email, to log into the PGAdmin interface.
+- `pgadmin_password`: PGAdmin user password.
+- `pgadmin_local_port`: Local port of PGAdmin.
+- `virtuoso_local_port`: Local port of the Virtuoso triple store database.
+- `virtuoso_isql_local_port`: Local port for Virtuoso's ISQL.
+- `redis_local_port`: Local port of Redis queuing system.
+- `flower_local_port`: Local port of Flower, a dashboard to monitor Celery jobs.
+- `gunicorn_workers`: Number of workers [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
+- `gunicorn_threads`: Number of threads [gunicorn](https://gunicorn.org/) will use to deploy the backend of the server.
+- `local_schema_stats_url`: The URL for the Available Schemas page of the local server.
+- `local_register_url`: The URL for the user registration page of the local server.
+- `local_species_url`: The URL for a particular species' page.
+- `api_url`: The URL for the Swagger documentation of the backend API.
+
+Then, cookiecutter will create the necessary self-signed certificates for the server to work.
+
+When cookiecutter finishes its execution, the local instance of Chewie-NS can be built by running the
+following command:
+
+```bash
+docker-compose -f docker-compose-production.yaml up --build
+```
+
+Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
+
+### Manual installation
+
 To start a local instance of Chewie-NS the following files must be modified:
 
 - [Docker compose configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/docker-compose-production.yaml)

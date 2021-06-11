@@ -4,10 +4,11 @@ import React from 'react';
 import ChewieGif from '../../../assets/images/chewie.gif'
 
 const spinner = () => (
-    // <div className={classes.Loader}>Loading...</div>
+    {% raw -%}
     <div style={{textAlign: "center"}}>
         <img src={ChewieGif} alt="Loading..." />
     </div>
+    {% endraw %}
 );
 
 export default spinner;

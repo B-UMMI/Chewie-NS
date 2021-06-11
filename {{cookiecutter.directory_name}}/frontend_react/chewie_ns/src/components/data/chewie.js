@@ -12,7 +12,7 @@ of gene-by-gene schemas and determination of allelic profiles from assembled dra
 perform analyses locally with chewBBACA, and, if they so wish, to submit their novel results to the web service 
 through a REST API to ensure that a common nomenclature is maintained.
 
-|[Click here to see the Available Schemas](https://chewbbaca.online/stats)|
+|[Click here to see the Available Schemas]({{cookiecutter.local_schema_stats_url}})|
 |---|
 
 ## Tutorial
@@ -23,7 +23,7 @@ The Tutorial instructions will be available soon at [Chewie-NS' Read The Docs](h
 
 ## Schema submission
 
-If you wish to submit schemas to Chewie-NS you need to register first at the [Register](https://chewbbaca.online/register) page.
+If you wish to submit schemas to Chewie-NS you need to register first at the [Register]({{cookiecutter.local_register_url}}) page.
 
 ## Citation
 
