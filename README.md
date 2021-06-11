@@ -1,4 +1,4 @@
-# Chewie-NS :whale2: :package:
+# Chewie-NS :whale2: :package: :cookie:
 
 [![Documentation Status](https://readthedocs.org/projects/chewie-ns/badge/?version=latest)](https://chewie-ns.readthedocs.io/en/latest/?badge=latest)
 [![DOI:10.1093/nar/gkaa889](https://img.shields.io/badge/DOI-10.1093%2Fnar%2Fgkaa889-blue)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238)
