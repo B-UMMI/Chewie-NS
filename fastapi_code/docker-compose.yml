@@ -1,0 +1,144 @@
+version: "3.7"
+services:
+  nginx:
+    image: nginx:1.17
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 8888:80
+    depends_on:
+      - backend
+      # - frontend
+    networks:
+      test:
+
+  redis:
+    image: redis
+    ports:
+      - 6380:6379
+    networks:
+      test:
+
+  postgres:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54320:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data:cached
+    networks:
+      test:
+
+  pgadmin:
+    image: dpage/pgadmin4:4.25
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "test@refns.com"
+      PGADMIN_DEFAULT_PASSWORD: "postgres"
+    ports:
+      - "54321:80"
+    depends_on:
+      - postgres
+    networks:
+      test:
+
+  worker:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    command: celery worker -A app.tasks --loglevel=DEBUG -Q main-queue -c 1
+    networks:
+      test:
+
+  # worker2:
+  #   build:
+  #     context: backend
+  #     dockerfile: Dockerfile
+  #   command: celery worker -A app.loci_tasks --loglevel=DEBUG -Q loci-queue -c 1
+  #   networks:
+  #     test:
+
+  flower:
+    image: mher/flower
+    command: flower --broker=redis://redis:6379/0 --port=5555
+    ports:
+      - 5555:5555
+    depends_on:
+      - "redis"
+    networks:
+      test:
+
+  virtuoso:
+    image: openlink/virtuoso-opensource-7:7.2.6-r3-g1b16668
+    container_name: virtuoso
+    environment:
+      #- SPARQL_UPDATE=true
+      - VIRTUOSO_DB_USER=demo
+      - VIRTUOSO_DB_PASSWORD=chewiens
+      - DEFAULT_GRAPH=http://localhost:8890/chewiens
+      - DBA_PASSWORD=ummi
+      - DAV_PASSWORD=ummi
+    volumes:
+      # This volume contains the virtuoso database (virtuoso.db)
+      - ./virtuoso_data/db:/opt/virtuoso-opensource/database
+      # This volume contains a file with a SQL query.
+      # This query will give permission to perform updates through SPARQL.
+      - ./virtuoso_data/sql_query.sql:/opt/virtuoso-opensource/initdb.d/sql_query.sql
+    ports:
+      - "8891:8890"
+      - "1112:1111"
+    networks:
+      test:
+        ipv4_address: 172.19.1.3
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    command: python app/main.py
+    tty: true
+    volumes:
+      - ./backend:/app/:cached
+      - ./.docker/.ipython:/root/.ipython:cached
+      - ./pre-computed-data:/app/pre-computed-data
+      - ./schema_insertion_temp:/app/schema_insertion_temp
+      - ./compressed_schemas:/app/compressed_schemas
+      - ./prodigal_training_files:/app/prodigal_training_files
+      - ./log_files:/app/log_files
+    environment:
+      PYTHONPATH: .
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/postgres"
+    depends_on:
+      - "postgres"
+      - "virtuoso"
+    networks:
+      test:
+
+  # frontend:
+  #   build:
+  #     context: frontend
+  #     dockerfile: Dockerfile
+  #   stdin_open: true
+  #   volumes:
+  #     - "./frontend:/app:cached"
+  #     - "./frontend/node_modules:/app/node_modules:cached"
+  #   environment:
+  #     - NODE_ENV=development
+  #     # - DEFAULTHGRAPH=http://localhost:8890/chewiens
+  #     # - LOCAL_SPARQL=http://172.19.1.3:8890/sparql
+  #     # - URL_SEND_LOCAL_VIRTUOSO=http://172.19.1.3:8890/DAV/test_folder/data
+  #   networks:
+  #     test:
+
+volumes:
+  db-data:
+
+networks:
+  test:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.19.0.0/16
