@@ -12,8 +12,8 @@ It uses the following docker images:
 - redis: `redis:5.0.6`
 - nginx: `nginx:1.17`
 - node: `node:13`
-- NS API: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/Dockerfile)
-- NS UI: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/Dockerfile.prod)
+- NS API: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/Dockerfile)
+- NS UI: [this dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/Dockerfile.prod)
 
 ## Chewie-NS Documentation
 
@@ -88,11 +88,11 @@ Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. T
 
 To start a local instance of Chewie-NS the following files must be modified:
 
-- [Docker compose configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/docker-compose-production.yaml)
-- [NS API Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/Dockerfile)
-- [NGINX configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/nginx.conf)
-- [Axios configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/axios-backend.js)
-- [Frontend Left Menu Component API URL](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js)
+- [Docker compose configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/docker-compose-production.yaml)
+- [NS API Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/Dockerfile)
+- [NGINX configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/nginx.conf)
+- [Axios configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/axios-backend.js)
+- [Frontend Left Menu Component API URL](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js)
 
 ### Docker compose configuration file
 
@@ -200,7 +200,7 @@ Finally, the last server block that redirects the IP to the domain name should b
 
 [Axios](https://github.com/axios/axios) is a Promise based HTTP client that is used to perform requests to Chewie-NS' API.
 
-The URL of the API on the [Axios configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/axios-backend.js) needs to be changed to the localhost API in order to perform requests to the local instance of Chewie-NS.
+The URL of the API on the [Axios configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/axios-backend.js) needs to be changed to the localhost API in order to perform requests to the local instance of Chewie-NS.
 
 ```js
 const instance = axios.create({
@@ -226,7 +226,7 @@ The URL needs to be changed to the localhost.
 
 ### Homepage description
 
-The [homepage description markdown](https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/data/chewie.js) of Chewie-NS has links to the main instance which need to be changed to the localhost.
+The [homepage description markdown](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/components/data/chewie.js) of Chewie-NS has links to the main instance which need to be changed to the localhost.
 
 ```md
 |[Click here to see the Available Schemas](https://127.0.0.1/stats)|
