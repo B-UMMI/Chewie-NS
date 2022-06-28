@@ -39,11 +39,11 @@ File modifications
 
 In order to install and build Chewie-NS locally the following files need to be modified:
 
-- `Docker compose configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/docker-compose-production.yaml>`_
-- `NS API Dockerfile <https://github.com/B-UMMI/Chewie-NS/blob/master/Dockerfile>`_
-- `NGINX configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/nginx.conf)>`_
-- `Axios configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/axios-backend.js>`_
-- `Frontend Left Menu Component API URL <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js>`_
+- `Docker compose configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/docker-compose-production.yaml>`_
+- `NS API Dockerfile <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/Dockerfile>`_
+- `NGINX configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/nginx.conf>`_
+- `Axios configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/axios-backend.js>`_
+- `Frontend Left Menu Component API URL <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js>`_
 
 Docker compose configuration file
 ---------------------------------
@@ -143,7 +143,7 @@ Axios configuration file
 
 `Axios <https://github.com/axios/axios>`_ is a Promise based HTTP client that is used to perform requests to Chewie-NS' API.
 
-The URL of the API on the `Axios configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/axios-backend.js>`_ 
+The URL of the API on the `Axios configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/axios-backend.js>`_ 
 needs to be changed to the localhost API in order to perform requests to the local instance of Chewie-NS. ::
 
     const instance = axios.create({
@@ -168,7 +168,7 @@ The URL needs to be changed to the localhost.
 Homepage description
 --------------------
 
-The `homepage description markdown <https://github.com/B-UMMI/Chewie-NS/blob/master/frontend_react/chewie_ns/src/components/data/chewie.js>`_ of Chewie-NS has links to the main instance which need to be changed to the **localhost**.
+The `homepage description markdown <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/components/data/chewie.js>`_ of Chewie-NS has links to the main instance which need to be changed to the **localhost**.
 
 
     |[Click here to see the Available Schemas](https://127.0.0.1/stats)|
