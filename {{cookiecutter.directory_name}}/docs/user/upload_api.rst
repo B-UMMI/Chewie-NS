@@ -1,7 +1,7 @@
 Upload a schema to the Chewie-NS
 ================================
 
-The `LoadSchema <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/load_schema.py>`_ 
+The `LoadSchema <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/load_schema.py>`_ 
 process of the chewBBACA suite enables the upload of schemas to the Chewie-NS.
 
 .. important:: **You need to be a registered user with Contributor privileges to 

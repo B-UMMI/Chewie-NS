@@ -6,7 +6,7 @@ Compressed versions of every schema in the Chewie-NS are available for download 
 API endpoint in `Swagger <https://chewbbaca.online/api/NS/api/docs>`_ or with a simple curl command
 (``e.g.: curl -X GET "https://chewbbaca.online/NS/api/species/9/schemas/1/zip?request_type=download" -H  "accept: application/json"``).
 You can also take advantage of the integration with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_ and use the 
-`download_schema.py <https://github.com/B-UMMI/chewBBACA/blob/dev2_chewie_NS/CHEWBBACA/CHEWBBACA_NS/down_schema.py>`_ script.
+`download_schema.py <https://github.com/B-UMMI/chewBBACA/blob/master/CHEWBBACA/CHEWBBACA_NS/down_schema.py>`_ script.
 
 .. note:: Compressed versions are ZIP archives that contain ready-to-use schemas. Simply extract
           and you can start performing allele calls using the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_.
