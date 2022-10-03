@@ -13,9 +13,9 @@ build:
 
 # Build documentation in the CHEWBBACA/docs/ directory with Sphinx
 sphinx:
-   configuration: {{cookiecutter.directory_name}}/docs/conf.py
+   configuration: "{{cookiecutter.directory_name}}/docs/conf.py"
 
 # Optionally declare the Python requirements required to build your docs
 python:
    install:
-   - requirements: {{cookiecutter.directory_name}}/docs/requirements.txt
+   - requirements: "{{cookiecutter.directory_name}}/docs/requirements.txt"
