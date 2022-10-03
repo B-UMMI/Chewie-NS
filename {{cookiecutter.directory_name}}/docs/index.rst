@@ -38,9 +38,9 @@ Tutorial
 ::::::::
 
 Chewie-NS has a tutorial website at `<https://tutorial.chewbbaca.online/>`_!
-The tutorial will allow users to learn how to interact with Chewie-NS.
+The tutorial server allows users to learn how to interact with Chewie-NS.
 
-Tutorial instructions are available at the `Step-by-step Tutorial with chewBBACA <https://chewbbaca.readthedocs.io/en/latest/user/tutorials/chewieNS_step_by_step.html>`_.
+A step-by-step tutorial about the integration with chewBBACA is available at `Integration with Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/tutorials/chewieNS_step_by_step.html>`_.
 
 Citation
 ::::::::
