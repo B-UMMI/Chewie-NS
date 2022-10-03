@@ -6,7 +6,9 @@ The deployment of local instances of Chewie-NS can be easily achieved through th
 use of Docker Compose.
 
 Chewie-NS is available for cloning from its Github 
-`repository <https://github.com/B-UMMI/Chewie-NS>`_. ::
+`repository <https://github.com/B-UMMI/Chewie-NS>`_.
+
+::
 
     git clone https://github.com/B-UMMI/Chewie-NS.git
 
@@ -22,17 +24,15 @@ this container engine.
 Docker
 ::::::
 
-Docker can be installed following the instructions on the website:
-https://www.docker.com/community-edition#/download.
-To run docker as a non-root user, you will need to follow the instructions
-on the website: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user.
+Docker can be installed following the instructions on the website: https://www.docker.com/community-edition#/download.
+To run docker as a non-root user, you will need to follow the instructions on the website: https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user.
 
 
 Docker-compose
 ::::::::::::::
 
 To install docker-compose, you need to have installed docker beforehand. 
-The installation instructions for Docker-compose can be found here: https://docs.docker.com/compose/install/
+The installation instructions for Docker-compose can be found `here <https://docs.docker.com/compose/install/>`_.
 
 File modifications
 ------------------
@@ -48,7 +48,9 @@ In order to install and build Chewie-NS locally the following files need to be m
 Docker compose configuration file
 ---------------------------------
 
-In this file the **BASE_URL** variable needs to be changed to your localhost in the **flask_app** and the **periodic_worker** services. ::
+In this file the **BASE_URL** variable needs to be changed to your localhost in the **flask_app** and the **periodic_worker** services.
+
+::
 
     environment:
       - FLASK_ENV=development
@@ -57,12 +59,16 @@ In this file the **BASE_URL** variable needs to be changed to your localhost in 
 
 The port 80 from the **nginx_react** service needs to be commented out because only the 443 port will be used.
 
+::
+
     ports:
       # - "80:80"
       - "443:443"
 
 
 A username and password need to be provided to the `pgadmin4 service <https://github.com/B-UMMI/Chewie-NS/blob/612fad1edfd0691e30b3fa878d7b13bfb9f3eb97/docker-compose-production.yaml#L51>`_.
+
+::
 
     environment:
         PGADMIN_DEFAULT_EMAIL: "test@email.com"
@@ -80,7 +86,9 @@ NGINX configuration file
 ------------------------
 
 The NGINX configuration file has been written to work on a server that requires the use of port 80 (HTTP) and 443 (HTTPS).
-On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), so the server block code must commented out or deleted. ::
+On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), so the server block code must commented out or deleted.
+
+::
 
     #server {
     #    listen 80;
@@ -99,7 +107,8 @@ On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), s
 
 The code block that perform the redirection to the server name should also be commented out to avoid redirection to the main instance of Chewie-NS.
 
-    
+::
+
     # Redirect IP to Server Name
     # server {
         
@@ -119,14 +128,18 @@ The code block that perform the redirection to the server name should also be co
     
     # }
 
-The **server_name** on the 443 server block should also be commented out. ::
+The **server_name** on the 443 server block should also be commented out.
+
+::
 
     #server_name chewbbaca.online;
 
 We also recomend that the certificates should be self-signed, therefore, the block of code related to the path of the self-signed 
 certificates should uncommented and the Lets Encrypt code block sohuld be deleted.
 
-More information about the creation of the self-signed certifcates below. ::
+More information about the creation of the self-signed certifcates below.
+
+::
 
     # SSL self-signed certificates
     ssl_certificate /etc/nginx/certs/cert.pem;
@@ -157,6 +170,8 @@ Frontend Left Menu Component API URL
 The `left menu <https://github.com/B-UMMI/Chewie-NS/blob/93063e3534cca77820bbd3490fa4445d41769f94/frontend_react/chewie_ns/src/components/Navigation/MuiSideDrawer/MuiSideDrawer.js#L225>`_ of Chewie-NS' user interface contains a button that redirects the user to the Swagger interface, in order to interact with the API.
 The URL needs to be changed to the localhost.
 
+::
+
     <ListItem
         button
         component="a"
@@ -170,9 +185,9 @@ Homepage description
 
 The `homepage description markdown <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/components/data/chewie.js>`_ of Chewie-NS has links to the main instance which need to be changed to the **localhost**.
 
+::
 
     |[Click here to see the Available Schemas](https://127.0.0.1/stats)|
-
 
     ## Schema submission
     If you wish to submit schemas to Chewie-NS you need to register first at the [Register](https://127.0.0.1/register) page.
@@ -206,11 +221,13 @@ directory, ``key.pem``, ``cert.pem`` and ``dhparam.pem``.
 Build Chewie-NS
 ---------------
 
-.. important:: Make sure that the ports (HOST:CONTAINER) specified in the docker-compose services are not being currently used by other applications!
-If they are, docker-compose will not be able to build Chewie-NS. To solve this issue, map the HOST port to an available port.
+.. important::
+    Make sure that the ports (HOST:CONTAINER) specified in the docker-compose services are not being currently used by other applications!
+    If they are, docker-compose will not be able to build Chewie-NS. To solve this issue, map the HOST port to an available port.
 
+After completing the previous steps, you only need to run this command
 
-After completing the previous steps, you only need to run this command::
+::
 
     docker-compose -f docker-compose-production.yaml up --build
 

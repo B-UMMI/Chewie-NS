@@ -6,14 +6,18 @@ The Swagger page shows that the API is divided by 7 namespaces, which contain en
 auth
 ::::
 
-In this namespace we have endopints responsible for the authentication in the API. The ``/login`` endpoint is where the authentication takes place, containing the default admin user.::
+In this namespace we have endopints responsible for the authentication in the API. The ``/login`` endpoint is where the authentication takes place, containing the default admin user.
+
+::
 
     {
         "email": "your_email",
         "password": "your_password"
     }
 
-Output::
+Output
+
+::
 
     {
         "status": "success",
@@ -62,7 +66,9 @@ For example, if we want to find out if a particular allele exists in the databas
 
 If it exists the output will show which schema it belongs to, the locus and allele IDs and the Uniprot annotation.
 
-Output::
+Output
+
+::
 
     {
         "result": [
@@ -90,6 +96,3 @@ Output::
             }
         } ]
     }
-
-
-

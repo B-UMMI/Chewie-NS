@@ -10,7 +10,9 @@ To get the list of species available in Chewie-NS you need to use the ``/species
 
 Click on the ``Try it out`` on the top-right corner of the endpoint and afterwards the ``Execute`` button.
 
-An example of a possible response from Chewie-NS is the following::
+An example of a possible response from Chewie-NS is the following
+
+::
 
     [
   {
@@ -37,7 +39,9 @@ An example of a possible response from Chewie-NS is the following::
   }
     ]
 
-In the response we obtain the internal ID of the species, which is important if we want to :doc:`../download_api` or :doc:`../upload_api`.
+In the response we obtain the internal ID of the species, which is important if we want to
+`Download a schema from Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/DownloadSchema.html>_` or
+`Upload a schema to Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/LoadSchema.html>_`.
 We also obtain the name of the species associated with each ID.
 
 Alternatively, we can check if a species is already on Chewie-NS by filling the ``species_name`` field. If the species exists, the response

@@ -4,7 +4,7 @@ Populate the Database
 When Chewie-NS is deployed the Virtuoso database only contains the admin user, so we 
 need to populate the database. Here we will describe the manual process to add a 
 schema, loci and alleles to Chewie-NS. To add a schema with multiple loci and alleles 
-please read :doc:`upload_api`.
+please read `Upload a schema to Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/LoadSchema.html>`_.
 
 To add data to the database we have to follow these steps:
 
@@ -21,13 +21,17 @@ Afterwards, we need to access the ``species`` namespace on the Swagger page.
 There go to the ``/species/list`` POST endpoint and press the ``Try it out`` button.
 
 Next fill the ``name`` field of the JSON payload with the name of the species to be 
-added to the database and press the execute button. ::
+added to the database and press the execute button.
+
+::
 
     {
         "name": "Yersinia pestis"
     }
 
-Output::
+Output
+
+::
 
     {
         "message": "Yersinia pestis added to the NS."

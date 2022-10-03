@@ -7,11 +7,8 @@ homepage for detailed instructions on how to install it.
 
 These scripts allow users to:
 
-.. toctree::
-    :maxdepth: 1
-    
-    upload_api
-    download_api
-    synchronize_api
-    nsstats_api
-    tutorial
+- `Upload a schema to Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/LoadSchema.html>`_.
+- `Download a schema from Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/DownloadSchema.html>`_.
+- `Synchronize a local chewBBACA schema with data from Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/modules/SyncSchema.html>`_.
+- `Retrieve basic information <https://chewbbaca.readthedocs.io/en/latest/user/modules/NSStats.html>`_.
+- `Step-by-step Tutorial with chewBBACA <https://chewbbaca.readthedocs.io/en/latest/user/tutorials/chewieNS_step_by_step.html>`_.
