@@ -2,8 +2,8 @@ Integration with chewBBACA
 ==========================
 
 `chewBBACA <https://github.com/B-UMMI/chewBBACA>`_ contains scripts that enable the 
-user to interact with Chewie-NS. Please visit `chewBBACA's <https://github.com/B-UMMI/chewBBACA>`_
-homepage for detailed instructions on how to install it.
+user to interact with Chewie-NS. Please visit `Installation <https://chewbbaca.readthedocs.io/en/latest/user/getting_started/installation.html>`_
+for detailed instructions on how to install chewBBACA.
 
 These scripts allow users to:
 
