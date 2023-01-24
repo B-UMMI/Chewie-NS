@@ -143,7 +143,7 @@ export const ANNOTATIONS_COLUMNS2 = [
   },
   {
     name: "alleles_mode",
-    label: "Alleles Mode",
+    label: "Alleles Mode (bp)",
     options: {
       filter: true,
       sort: true,
