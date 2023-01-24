@@ -143,14 +143,14 @@ The columns of the table are the following:
 
 - **Uniprot Label**: the Uniprot annotation.
 - **Uniprot URI**: the URI of the Uniprot annotation. Clicking on the URI will open the page of the relevant Uniprot annotation.
-- **User Annotation**: an annotation provided by the user during the schema upload.
-- **Custom Annotation**: a custom annotation also provided by the user during the schema upload.
+- **User locus name**: a recognizable name for the locus provided by the user during the schema upload.
+- **Custom Annotation**: a custom annotation provided by the user during the schema upload.
 - **Locus ID**: the ID of the locus. Clicking on the ID will take you to the :doc:`locus_details` page.
 - **Locus Label**: the Chewie-NS label assigned to the locus.
-- **Locus Original Name**: the orginal name of the gene.
+- **Locus Original Name**: the original name of the locus in the original schema or in the genome from which the locus was identified.
 - **Total Number of Alelles**: the total number of alleles of that locus.
-- **Alleles Mode**: the mode of the size of alleles.
-- **Size Range (bp)**: the range of sequence lengths of the alleles in base pairs.
+- **Alleles Mode (bp)**: the mode of the size of the alleles of that locus in base pairs.
+- **Size Range (bp)**: the range of sequence lengths of the alleles of that locus in base pairs.
 
 .. figure:: ../resources/annotations_table.png
     :align: center
