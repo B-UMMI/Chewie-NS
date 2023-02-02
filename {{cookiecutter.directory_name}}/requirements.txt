@@ -20,4 +20,4 @@ biopython==1.75
 SPARQLWrapper==1.8.4
 PyJWT==1.7.1
 psycopg2==2.8.3
-Werkzeug==0.15.3
+Werkzeug==0.15.5
