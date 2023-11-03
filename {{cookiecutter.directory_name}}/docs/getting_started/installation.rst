@@ -1,12 +1,11 @@
 Installation
 ============
-While you can access public repositories at `chewBBACA.online <https://chewBBACA.online>`_,
+While you have access to public schemas at `chewbbaca.online <https://chewbbaca.online/>`_,
 you may want to setup a private instance of Chewie-NS.
-The deployment of local instances of Chewie-NS can be easily achieved through the
-use of Docker Compose.
+The deployment of local instances can be easily achieved through the
+use of [Docker Compose](https://docs.docker.com/compose/).
 
-Chewie-NS is available for cloning from its Github 
-`repository <https://github.com/B-UMMI/Chewie-NS>`_.
+Chewie-NS is available for cloning from its `Github repository <https://github.com/B-UMMI/Chewie-NS>`_.
 
 ::
 
@@ -17,9 +16,7 @@ You will also need a container engine (see `Container engine`_ below)
 Container engine
 ----------------
 
-All components of Chewie-NS are executed in `docker`_ containers and are 
-orchestrated by `docker-compose`_, which means that you will need to install 
-this container engine.
+All components of Chewie-NS are executed in `docker`_ containers and are orchestrated by `docker-compose`_.
 
 Docker
 ::::::
@@ -34,10 +31,78 @@ Docker-compose
 To install docker-compose, you need to have installed docker beforehand. 
 The installation instructions for Docker-compose can be found `here <https://docs.docker.com/compose/install/>`_.
 
-File modifications
-------------------
+Cookiecutter installation
+-------------------------
 
-In order to install and build Chewie-NS locally the following files need to be modified:
+Chewie-NS has a `cookiecutter <https://github.com/cookiecutter/cookiecutter>`_ template that will perform the installation
+of a local server by automatically modifying some files.
+
+Quickstart
+::::::::::
+
+Start by installing the latest cookiecutter version:
+
+::
+
+    pip install cookiecutter
+
+
+Then, in the directory where you want to create your local server, run:
+
+::
+
+    cookiecutter https://github.com/B-UMMI/Chewie-NS.git
+
+
+Input variables
+:::::::::::::::
+
+Chewie-NS cookiecutter has default input variables defined to create a local installation of Chewie-NS. The values can be changed by the user if necessary.
+To use the default values, simply press Enter.
+
+The input variables are:
+
+- `directory_name`: The name of the directory where the server will be created.
+- `flask_app_local_port`: Local port for the Flask backend API.
+- `flask_email`: The email address that sends the reset token to recover a forgotten password.
+- `flask_email_password`: The password of the email address that will send the reset token.
+- `flask_email_default_sender`: The email address of the reset token sender.
+- `flask_email_server`: The server of the email address.
+- `flask_email_port`: The port of the email server.
+- `flask_email_use_tls`: Use TLS.
+- `flask_email_use_ssl`: Use SSL.
+- `base_url`: The base URL that will be used for the communication between the backend and frontend.
+- `postgres_local_port`: Local port of the PostgreSQL database.
+- `pgadmin_email`: PGAdmin email, to log into the PGAdmin interface.
+- `pgadmin_password`: PGAdmin user password.
+- `pgadmin_local_port`: Local port of PGAdmin.
+- `virtuoso_local_port`: Local port of the Virtuoso triple store database.
+- `virtuoso_isql_local_port`: Local port for Virtuoso's ISQL.
+- `redis_local_port`: Local port of Redis queuing system.
+- `flower_local_port`: Local port of Flower, a dashboard to monitor Celery jobs.
+- `gunicorn_workers`: Number of workers `gunicorn <https://gunicorn.org/>`_ will use to deploy the backend of the server.
+- `gunicorn_threads`: Number of threads `gunicorn <https://gunicorn.org/>`_ will use to deploy the backend of the server.
+- `local_schema_stats_url`: The URL for the Available Schemas page of the local server.
+- `local_register_url`: The URL for the user registration page of the local server.
+- `local_species_url`: The URL for a particular species' page.
+- `api_url`: The URL for the Swagger documentation of the backend API.
+
+After defining the input variables, cookiecutter will create the necessary self-signed certificates for the server to work.
+
+After executing cookiecutter, you can build the local instance of Chewie-NS with the following command:
+
+::
+
+    docker-compose -f docker-compose-production.yaml up --build
+
+
+Launch the Chewie-NS app by accessing `127.0.0.1 <https://127.0.0.1>`_ on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
+
+
+Manual Installation
+-------------------
+
+In order to install and build Chewie-NS locally, the following files need to be modified:
 
 - `Docker compose configuration file <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/docker-compose-production.yaml>`_
 - `NS API Dockerfile <https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/Dockerfile>`_

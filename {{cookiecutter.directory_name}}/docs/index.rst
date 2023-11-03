@@ -6,6 +6,8 @@
 Welcome to Chewie-NS's documentation!
 ======================================
 
+The main instance of Chewie-NS is available at `chewbbaca.online <https://chewbbaca.online/>`_.
+
 About Chewie-NS
 ---------------
 
@@ -14,8 +16,8 @@ Welcome!
 
 Chewie-NS is a web-based wg/cgMLST allele Nomenclature Server, based on the 
 `TypOn ontology <https://jbiomedsem.biomedcentral.com/articles/10.1186/2041-1480-5-43>`_,
-that integrates with the `chewBBACA suite <https://github.com/B-UMMI/chewBBACA>`_
-to provide a centralized service to **share, download or update schemas**, allowing the 
+that integrates with `chewBBACA <https://github.com/B-UMMI/chewBBACA>`_
+to provide a centralized service to **share and update schemas**, allowing the 
 **easy sharing of results**, while ensuring the **reproducibility and consistency** 
 of these steps. 
 
@@ -30,14 +32,14 @@ Goals
 
 With this service we have the following main goals:
 
-1. Providing a public and centralised web service to manage typing schemas.
+1. Provide a public and centralised web service to manage typing schemas.
 2. Establish a common nomenclature for allele calling.
 3. Ensure the reproducibility and consistency of wg/cgMLST analysis.
 
 Tutorial
 ::::::::
 
-Chewie-NS has a tutorial website at `<https://tutorial.chewbbaca.online/>`_!
+Chewie-NS has a tutorial website available `here <https://tutorial.chewbbaca.online/>`_!
 The tutorial server allows users to learn how to interact with Chewie-NS.
 
 A step-by-step tutorial about the integration with chewBBACA is available at `Integration with Chewie-NS <https://chewbbaca.readthedocs.io/en/latest/user/tutorials/chewieNS_step_by_step.html>`_.
@@ -47,7 +49,9 @@ Citation
 
 If you use **Chewie-NS**, please cite: 
 
-Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
+::
+   
+   Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
 
 Available from: `<https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238>`_
 
@@ -56,8 +60,8 @@ Licensing
 
 This project is licensed under the `GPLv3 license 
 <https://github.com/B-UMMI/Nomenclature_Server_docker_compose/blob/master/LICENSE>`_.
-The source code of Chewie-NS is available at `<https://github.com/B-UMMI/Chewie-NS>`_
-and the webservice is available at `<https://chewbbaca.online/>`_.
+The source code of Chewie-NS is available on `GitHub <https://github.com/B-UMMI/Chewie-NS>`_
+and the webservice is available at `chewbbaca.online <https://chewbbaca.online/>`_.
 
 Contacts
 ::::::::

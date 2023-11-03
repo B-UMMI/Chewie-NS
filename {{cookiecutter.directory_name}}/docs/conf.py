@@ -22,7 +22,7 @@ copyright = '2020, UMMI'
 author = 'Pedro Vila-Cerqueira, Rafael Mamede, Mickael Silva, Joao Andre Carriço, Mario Ramirez'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '1.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -38,6 +38,7 @@ extensions = [
     'numpydoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.mathjax',
+    'sphinx_rtd_theme',
     # 'sphinxcontrib.httpdomain',
     # 'sphinxcontrib.autohttp.flask',
     # 'sphinxcontrib.autohttp.flaskqref'
