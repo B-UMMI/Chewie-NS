@@ -3,15 +3,9 @@ Installation
 While you have access to public schemas at `chewbbaca.online <https://chewbbaca.online/>`_,
 you may want to setup a private instance of Chewie-NS.
 The deployment of local instances can be easily achieved through the
-use of [Docker Compose](https://docs.docker.com/compose/).
+use of `Docker Compose <https://docs.docker.com/compose/>`_.
 
-Chewie-NS is available for cloning from its `Github repository <https://github.com/B-UMMI/Chewie-NS>`_.
-
-::
-
-    git clone https://github.com/B-UMMI/Chewie-NS.git
-
-You will also need a container engine (see `Container engine`_ below)
+Chewie-NS is available on `Github <https://github.com/B-UMMI/Chewie-NS>`_. You will also need a container engine (see `Container engine`_ below)
 
 Container engine
 ----------------

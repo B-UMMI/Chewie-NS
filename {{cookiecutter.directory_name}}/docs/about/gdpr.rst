@@ -21,7 +21,7 @@ On registration we ask for the following:
 - Your password.
 - Your department & institution.
 
-This is to allow us to contact you if there are any problems. We will be emailing you 
+This allows us to contact you if there are any problems. We will be emailing you 
 from time to time informing you about changes in Chewie-NS. If this is problematic, 
 you may delete your account.
 
@@ -49,7 +49,7 @@ All passwords are hashed and encrypted. We have no way to read your original pas
 Deletion from Chewie-NS
 :::::::::::::::::::::::
 
-You can delete your Chewie-NS account, which will remove all your personal 
+You can request to delete your Chewie-NS account, which will remove all your personal 
 information immediately by sending an email to imm-bioinfo@medicina.ulisboa.pt.
 
 

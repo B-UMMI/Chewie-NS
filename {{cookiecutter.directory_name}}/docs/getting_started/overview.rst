@@ -31,7 +31,7 @@ not be immediatly comparable due to the use of different argument values that hi
 the comparison and shareability of the results.
 
 To tackle these issues we developed Chewie-NS, which provides a centralized service to manage
-gene-by-gene typing schemas and a common nomenclature for allele calling, ensuring the the
+gene-by-gene typing schemas and a common nomenclature for allele calling, ensuring the
 reproducibility of the analyses and the privacy of the data.
 
 Implementation
