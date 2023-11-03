@@ -4,8 +4,9 @@
 [![DOI:10.1093/nar/gkaa889](https://img.shields.io/badge/DOI-10.1093%2Fnar%2Fgkaa889-blue)](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238)
 [![License: GPL v3](https://img.shields.io/github/license/B-UMMI/Chewie-NS)](https://www.gnu.org/licenses/gpl-3.0)
 
-Docker-compose for the [Nomenclature Server](https://github.com/B-UMMI/Nomenclature_Server) webapp.
-It uses the following docker images:
+Docker-compose for the Chewie-NS webapp. The main instance of Chewie-NS is available at [chewbbaca.online](https://chewbbaca.online/).
+
+Chewie-NS uses the following docker images:
 
 - postgres: `postgres:10`
 - virtuoso: `openlink/virtuoso-opensource-7:7.2.6-r3-g1b16668`
@@ -17,24 +18,24 @@ It uses the following docker images:
 
 ## Chewie-NS Documentation
 
-Chewie-NS has all its documentations available at [Chewie-NS' Read The Docs](https://chewie-ns.readthedocs.io/en/latest/).
+Chewie-NS has all its documentation available at [Chewie-NS' Read The Docs](https://chewie-ns.readthedocs.io/en/latest/).
 
 ## Local installation
 
 ### Cookiecutter installation
 
 Chewie-NS has a [cookiecutter](https://github.com/cookiecutter/cookiecutter) template that will perform the installation
-of a local server by modifiying automatically some files.
+of a local server by automatically modifying some files.
 
 #### Quickstart
 
-To use it, you need to start by installing the latest cookiecutter:
+Start by installing the latest cookiecutter version:
 
 ```bash
 pip install cookiecutter
 ```
 
-Then in the directory where you want to create your local server run:
+Then, in the directory where you want to create your local server, run:
 
 ```bash
 cookiecutter https://github.com/B-UMMI/Chewie-NS.git
@@ -42,9 +43,8 @@ cookiecutter https://github.com/B-UMMI/Chewie-NS.git
 
 #### Input variables
 
-Chewie-NS cookiecutter has default input variables defined to create a local installation of
-Chewie-NS, which can changed by the user if necessary. To use the default values
-simply press Enter.
+Chewie-NS cookiecutter has default input variables defined to create a local installation of Chewie-NS. The values can be changed by the user if necessary.
+To use the default values, simply press Enter.
 
 The input variables are:
 
@@ -73,20 +73,19 @@ The input variables are:
 - `local_species_url`: The URL for a particular species' page.
 - `api_url`: The URL for the Swagger documentation of the backend API.
 
-Then, cookiecutter will create the necessary self-signed certificates for the server to work.
+After defining the input variables, cookiecutter will create the necessary self-signed certificates for the server to work.
 
-When cookiecutter finishes its execution, the local instance of Chewie-NS can be built by running the
-following command:
+After executing cookiecutter, you can build the local instance of Chewie-NS with the following command:
 
 ```bash
 docker-compose -f docker-compose-production.yaml up --build
 ```
 
-Launch the NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
+Launch the Chewie-NS app by accessing [127.0.0.1](https://127.0.0.1) on your browser. This link will take you to the Home page of your local instance of Chewie-NS.
 
 ### Manual installation
 
-To start a local instance of Chewie-NS the following files must be modified:
+To start a local instance of Chewie-NS, the following files must be modified:
 
 - [Docker compose configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/docker-compose-production.yaml)
 - [NS API Dockerfile](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/Dockerfile)
@@ -96,14 +95,14 @@ To start a local instance of Chewie-NS the following files must be modified:
 
 ### Docker compose configuration file
 
-In [this file](https://github.com/B-UMMI/Chewie-NS/blob/9f5871b88672cb7f7819a0cf80b987abf2bb55dc/docker-compose-production.yaml#L19) the **BASE_URL** variable needs to be changed to your localhost in the `flask_app` and the `periodic_worker` services.
+In [this file](https://github.com/B-UMMI/Chewie-NS/blob/9f5871b88672cb7f7819a0cf80b987abf2bb55dc/docker-compose-production.yaml#L19), the **BASE_URL** variable needs to be changed to your localhost in the `flask_app` and the `periodic_worker` services.
 
 ```yaml
 environment:
   - BASE_URL=http://127.0.0.1:5000/NS/api/
 ```
 
-The port 80 from the `nginx_react` service needs to be commented out because only the 443 port will be used.
+The port 80 from the `nginx_react` service needs to be commented out because only port 443 will be used.
 
 ```yaml
 ports:
@@ -131,8 +130,8 @@ CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-w", "4", "--threads=2", "--wo
 
 ### NGINX configuration file
 
-The NGINX configuration file has been written to work on a server that requires the use of port 80 (HTTP) and 443 (HTTPS).
-On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), so the server block code must commented out or deleted.
+The NGINX configuration file has been written to work on a server that uses ports 80 (HTTP) and 443 (HTTPS).
+On a local instance, we recommend that Chewie-NS only runs on port 443 (HTTPS), so the server block code must be commented out or deleted.
 
 ```nginx
 #server {
@@ -151,7 +150,7 @@ On a local instance, we recomend that Chewie-NS only runs on port 443 (HTTPS), s
 #}
 ```
 
-The code block that perform the redirection to the server name should also be commented out to avoid redirection to the main instance of Chewie-NS.
+The code block that performs the redirection to the server name should also be commented out to avoid redirection to the main instance of Chewie-NS.
 
 ```nginx
 # Redirect IP to Server Name
@@ -180,9 +179,9 @@ The **server_name** on the 443 server block should also be commented out.
 #server_name chewbbaca.online;
 ```
 
-We also recomend that the certificates should be self-signed, therefore, the block of code related to the path of the self-signed certificates should uncommented and the Lets Encrypt code block sohuld be deleted.
+We also recommend that the certificates be self-signed. Therefore, the block of code related to the path of the self-signed certificates should be uncommented and the [Lets Encrypt](https://letsencrypt.org/) code block should be deleted.
 
-More information about the creation of the self-signed certifcates below.
+More information about the creation of the self-signed certificates is below.
 
 ```nginx
 # SSL self-signed certificates
@@ -198,7 +197,7 @@ Finally, the last server block that redirects the IP to the domain name should b
 
 ### Axios configuration file
 
-[Axios](https://github.com/axios/axios) is a Promise based HTTP client that is used to perform requests to Chewie-NS' API.
+[Axios](https://github.com/axios/axios) is a promise-based HTTP client that is used to perform requests to Chewie-NS' API.
 
 The URL of the API on the [Axios configuration file](https://github.com/B-UMMI/Chewie-NS/blob/master/%7B%7Bcookiecutter.directory_name%7D%7D/frontend_react/chewie_ns/src/axios-backend.js) needs to be changed to the localhost API in order to perform requests to the local instance of Chewie-NS.
 
@@ -244,23 +243,23 @@ For starters, create a new directory on the root of the repo named “self_certs
 mkdir self_certs
 ```
 
-Next run this command to generate the certificate:
+Next, run this command to generate the certificate:
 
 ```bash
 openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -keyout self_certs/key.pem -out self_certs/cert.pem
 ```
 
-Finally run another command to generate the [Diffie-Hellman](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange) coefficients to improve security:
+Finally, run a command to generate the [Diffie-Hellman](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange) coefficients to improve security:
 
 ```bash
 openssl dhparam -out self_certs/dhparam.pem 4096
 ```
 
-In the end you should have three files inside the “self_certs” directory, **key.pem**, **cert.pem** and **dhparam.pem**.
+In the end, you should have three files inside the “self_certs” directory, **key.pem**, **cert.pem** and **dhparam.pem**.
 
 ### Starting the compose
 
-To build your local instance of Chewie-NS rrun this command:
+To build your local instance of Chewie-NS, run the following command:
 
 ```bash
 docker-compose -f docker-compose-production.yaml up --build
@@ -277,8 +276,8 @@ password = mega_secret
 
 ## Notes
 
-Make sure that these ports or your localhost are not already in use by other services!
-More info available [here](https://www.cyberciti.biz/faq/unix-linux-check-if-port-is-in-use-command/).
+Make sure that the necessary ports are not already in use by other services!
+More info is available [here](https://www.cyberciti.biz/faq/unix-linux-check-if-port-is-in-use-command/).
 
 ## Contacts
 
@@ -288,6 +287,6 @@ More info available [here](https://www.cyberciti.biz/faq/unix-linux-check-if-por
 
 If you use **Chewie-NS**, please cite: 
 
-Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
+> Mamede, R., Vila-Cerqueira, P., Silva, M., Carriço, J. A., & Ramirez, M. (2020). Chewie Nomenclature Server (chewie-NS): a deployable nomenclature server for easy sharing of core and whole genome MLST schemas. Nucleic Acids Research.
 
-Available from: [https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238
+Available from: https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkaa889/5929238
